@@ -5,17 +5,17 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 /**
  * @author xcs
- * @date 2023年11月22日 09时58分
+ * @date 2023-11-22 09:58
  **/
 public class RegisterBeanDefinitionApplication {
 
     public static void main(String[] args) {
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-        // 注册Bean
+        // Register the bean
         context.register(MyBean.class);
-        // 扫描包
+        // Scan the package
         context.scan("com.xcs.spring");
-        // 打印Bean定义
+        // Print the bean definitions
         for (String beanDefinitionName : context.getBeanDefinitionNames()) {
             System.out.println("beanDefinitionName = " + beanDefinitionName);
         }

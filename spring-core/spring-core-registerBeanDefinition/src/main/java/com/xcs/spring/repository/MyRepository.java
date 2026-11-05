@@ -4,7 +4,7 @@ import org.springframework.stereotype.Repository;
 
 /**
  * @author xcs
- * @date 2023年11月07日 17时46分
+ * @date 2023-11-07 17:46
  **/
 @Repository
 public class MyRepository {

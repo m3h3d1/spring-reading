@@ -1,85 +1,85 @@
 ## resolveDependency
 
 - [resolveDependency](#resolvedependency)
-  - [一、基本信息](#一基本信息)
-  - [二、方法描述](#二方法描述)
-  - [三、方法源码](#三方法源码)
-  - [四、主要功能](#四主要功能)
-  - [五、最佳实践](#五最佳实践)
-  - [六、时序图](#六时序图)
-    - [解析环境变量](#解析环境变量)
-    - [解析Bean依赖](#解析bean依赖)
-  - [七、源码分析](#七源码分析)
-    - [解析环境变量](#解析环境变量-1)
-    - [解析Bean依赖](#解析bean依赖-1)
-  - [八、注意事项](#八注意事项)
-  - [九、总结](#九总结)
-    - [最佳实践总结](#最佳实践总结)
-    - [源码分析总结](#源码分析总结)
+  - [1. Overview](#1-overview)
+  - [2. Method Description](#2-method-description)
+  - [3. Method Source](#3-method-source)
+  - [4. Main Features](#4-main-features)
+  - [5. Best Practices](#5-best-practices)
+  - [6. Sequence Diagram](#6-sequence-diagram)
+    - [Resolve Environment Variables](#resolve-environment-variables)
+    - [Resolve Bean Dependencies](#resolve-bean-dependencies)
+  - [7. Source Code Analysis](#7-source-code-analysis)
+    - [Resolve Environment Variables](#resolve-environment-variables-1)
+    - [Resolve Bean Dependencies](#resolve-bean-dependencies-1)
+  - [8. Notes](#8-notes)
+  - [9. Summary](#9-summary)
+    - [Best Practices Summary](#best-practices-summary)
+    - [Source Code Analysis Summary](#source-code-analysis-summary)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [CSDN](https://blog.csdn.net/duzhuang2399) | [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [GitHub](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、方法描述
+### 2. Method Description
 
-`resolveDependency` 是 Spring 框架中 `ConfigurableListableBeanFactory` 接口中定义的一个方法。这个方法的核心功能是解析并提供 bean 的依赖项。它主要在处理 `@Autowired` ， `@Inject` ，`@Value`这样的自动装配场景时起作用。
+`resolveDependency` is a method defined in the `ConfigurableListableBeanFactory` interface of Spring. Its main job is to resolve and provide the dependencies of a bean. It works mainly in autowiring cases such as `@Autowired`, `@Inject` and `@Value`.
 
-### 三、方法源码
+### 3. Method Source
 
-Spring IOC 容器中的一个核心方法，用于解析 bean 之间的依赖关系。当容器需要知道应该为特定的 bean、字段、构造函数或方法注入哪个其他 bean 时，就会调用这个方法。
+This is a core method of the Spring IoC container. It resolves the dependencies between beans. The container calls it when it needs to know which other bean to inject into a given bean, field, constructor or method.
 
 ```java
 /**
- * 在此工厂中定义的 beans 之间，解析指定的依赖项。
+ * Resolve the specified dependency against the beans defined in this factory.
  * 
- * 该方法尝试匹配和返回一个适当的 bean 实例来满足给定的依赖描述符。
- * 依赖描述符可以描述字段、方法或构造函数中的依赖。
+ * This method tries to find and return a suitable bean instance for the given dependency descriptor.
+ * The dependency descriptor can describe a dependency of a field, a method or a constructor.
  * 
- * @param descriptor 描述依赖的对象，提供有关依赖类型、限定符等的详细信息。
- * @param requestingBeanName 声明或请求依赖的 bean 的名称。这通常用于解决 bean 之间的循环依赖。
- * @return 对应的 bean 实例以满足该依赖，如果没有合适的匹配，则返回 null。
+ * @param descriptor the descriptor of the dependency. It gives details such as the dependency type and qualifiers.
+ * @param requestingBeanName the name of the bean that declares or requests the dependency. This is often used to handle circular dependencies between beans.
+ * @return the matching bean instance that satisfies the dependency, or null if there is no suitable match.
  * 
- * @throws NoSuchBeanDefinitionException 当没有找到匹配的 bean 时抛出。
- * @throws NoUniqueBeanDefinitionException 当存在多个可能的匹配并且没有明确的选择时抛出。
- * @throws BeansException 如果由于其他原因解析失败则抛出。
+ * @throws NoSuchBeanDefinitionException if no matching bean is found.
+ * @throws NoUniqueBeanDefinitionException if there are several possible matches and no clear choice.
+ * @throws BeansException if the resolution fails for any other reason.
  * 
  * @since 2.5
- * @see #resolveDependency(DependencyDescriptor, String, Set, TypeConverter) 用于更复杂的依赖解析场景，允许传递排除的 beans 和类型转换器。
+ * @see #resolveDependency(DependencyDescriptor, String, Set, TypeConverter) for more complex resolution cases. It allows passing excluded beans and a type converter.
  */
 @Nullable
 Object resolveDependency(DependencyDescriptor descriptor, @Nullable String requestingBeanName) throws BeansException;
 ```
 
-### 四、主要功能
+### 4. Main Features
 
-1. **依赖描述符**
-   + 该方法接收一个 `DependencyDescriptor` 参数，它描述了所需的依赖关系。这个描述符可以表示一个字段、方法参数或构造函数参数的依赖。
-2. **自动装配限定符**
-   + 如果存在多个匹配的 bean，并且所需的依赖有 `@Autowired` 和 `@Qualifier` 注解，那么 `resolveDependency` 会考虑这些注解来确定正确的 bean。
-3. **解决循环依赖**
-   + 该方法也会考虑循环依赖的问题。例如，如果 Bean A 依赖于 Bean B，而 Bean B 又依赖于 Bean A，那么这种情况会被处理。
-4. **返回匹配的 bean**
-   + 此方法尝试返回一个与描述符匹配的 bean 实例。如果找不到合适的 bean，它可能返回 null 或抛出一个异常，具体取决于描述符的设置。
-5. **异常处理**
-   + 如果没有找到合适的 bean 或找到了多个合适的 bean 且没有明确的选择，该方法会抛出相应的异常。
-6. **其他 Considerations**：
-   - 可以考虑其他因素，如 `@Primary` 注解。
-   - 对于基本类型或字符串类型的属性，可以解析 `@Value` 注解，从属性文件或环境变量中获取值。
+1. **Dependency descriptor**
+   + The method takes a `DependencyDescriptor` parameter that describes the required dependency. The descriptor can stand for the dependency of a field, a method parameter or a constructor parameter.
+2. **Autowiring qualifiers**
+   + If several beans match and the dependency has `@Autowired` and `@Qualifier` annotations, `resolveDependency` uses these annotations to pick the right bean.
+3. **Circular dependencies**
+   + The method also takes circular dependencies into account. For example, Bean A depends on Bean B, and Bean B depends on Bean A. This case is handled.
+4. **Return the matching bean**
+   + The method tries to return a bean instance that matches the descriptor. If no suitable bean is found, it may return null or throw an exception, depending on the descriptor settings.
+5. **Exception handling**
+   + If no suitable bean is found, or several suitable beans are found and there is no clear choice, the method throws the matching exception.
+6. **Other considerations**:
+   - Other factors can be considered, such as the `@Primary` annotation.
+   - For properties of primitive or String type, the `@Value` annotation can be resolved to get the value from a properties file or an environment variable.
 
-### 五、最佳实践
+### 5. Best Practices
 
-首先来看看启动类入口，上下文环境使用`AnnotationConfigApplicationContext`（此类是使用Java注解来配置Spring容器的方式），构造参数我们给定了一个`MyConfiguration`组件类。代码调用了两个方法（`methodResolveDependency` 和 `fieldResolveDependency`）来分别解析方法和字段的依赖。具体来说，它们会使用反射来获取目标方法或字段。创建一个描述这个方法或字段的 `DependencyDescriptor`。使用 `resolveDependency` 方法来从 Spring 容器中解析真正的依赖。使用反射来将解析得到的依赖注入到目标对象中。在解析方法和字段的依赖之后，代码通过格式化的字符串打印了相关信息。例如，它显示了方法或字段的完全限定名称和解析得到的依赖对象的值。
+First, look at the entry class. The context is `AnnotationConfigApplicationContext`, which configures the Spring container with Java annotations. We pass one component class, `MyConfiguration`, to the constructor. The code calls two methods (`methodResolveDependency` and `fieldResolveDependency`) to resolve the dependency of a method and of a field. In short, they use reflection to get the target method or field. They create a `DependencyDescriptor` that describes the method or field. They use `resolveDependency` to resolve the real dependency from the Spring container. They use reflection to inject the resolved dependency into the target object. After resolving, the code prints the result with formatted strings. For example, it shows the fully qualified name of the method or field and the value of the resolved dependency.
 
 ```java
 public class ResolveDependencyApplication {
 
     public static void main(String[] args) {
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(MyConfiguration.class);
-        // 获得Bean工厂
+        // Get the bean factory
         ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
-        // 被注入对象
+        // Target object to inject into
         MyServiceB injectTarget = new MyServiceB();
 
         System.out.println("Before MyServiceB = " + injectTarget + "\n");
@@ -92,32 +92,32 @@ public class ResolveDependencyApplication {
     }
 
     /**
-     * 解析方法依赖
+     * Resolve method dependency
      *
      * @param beanFactory
      * @param injectTarget
      */
     public static void methodResolveDependency(ConfigurableListableBeanFactory beanFactory, Object injectTarget, String name) {
         try {
-            // 1. 获取MyServiceB类中名为setMethodMyServiceA的方法的引用
+            // 1. Get the setMethodMyServiceA method of MyServiceB
             Method method = injectTarget.getClass().getMethod(name, MyServiceA.class);
 
-            // 2. 创建一个描述此方法参数的DependencyDescriptor
+            // 2. Create a DependencyDescriptor for the method parameter
             DependencyDescriptor desc = new DependencyDescriptor(new MethodParameter(method, 0), true);
 
-            // 3. 使用BeanFactory来解析这个方法参数的依赖
+            // 3. Use the BeanFactory to resolve the method parameter dependency
             Object value = beanFactory.resolveDependency(desc, null);
 
-            System.out.println("解析方法依赖结果:");
+            System.out.println("Method dependency result:");
             System.out.println("---------------------------------------------");
             System.out.println(String.format("Name:   %s.%s",method.getDeclaringClass().getName(),method.getName()));
             System.out.println(String.format("Value:  %s", value));
             System.out.println("---------------------------------------------\n");
 
-            // 4. 使方法可访问（特别是如果它是private的）
+            // 4. Make the method accessible (especially if it is private)
             ReflectionUtils.makeAccessible(method);
 
-            // 5. 使用反射调用这个方法，将解析得到的依赖注入到目标对象中
+            // 5. Call the method by reflection to inject the resolved dependency
             method.invoke(injectTarget, value);
         } catch (Exception e) {
             e.printStackTrace();
@@ -125,32 +125,32 @@ public class ResolveDependencyApplication {
     }
 
     /**
-     * 解析字段依赖
+     * Resolve field dependency
      *
      * @param beanFactory
      * @param injectTarget
      */
     public static void fieldResolveDependency(ConfigurableListableBeanFactory beanFactory, Object injectTarget, String name) {
         try {
-            // 1. 获取MyServiceB类中名为fieldMyServiceA的字段的引用
+            // 1. Get the fieldMyServiceA field of MyServiceB
             Field field = injectTarget.getClass().getDeclaredField(name);
 
-            // 2. 创建一个描述此字段的DependencyDescriptor
+            // 2. Create a DependencyDescriptor for the field
             DependencyDescriptor desc = new DependencyDescriptor(field, true);
 
-            // 3. 使用BeanFactory来解析这个字段的依赖
+            // 3. Use the BeanFactory to resolve the field dependency
             Object value = beanFactory.resolveDependency(desc, null);
 
-            System.out.println("解析字段依赖结果:");
+            System.out.println("Field dependency result:");
             System.out.println("---------------------------------------------");
             System.out.println(String.format("Name:   %s.%s", field.getDeclaringClass().getName(), field.getName()));
             System.out.println(String.format("Value:  %s", value));
             System.out.println("---------------------------------------------\n");
 
-            // 4. 使字段可访问（特别是如果它是private的）
+            // 4. Make the field accessible (especially if it is private)
             ReflectionUtils.makeAccessible(field);
 
-            // 5. 使用反射设置这个字段的值，将解析得到的依赖注入到目标对象中
+            // 5. Set the field value by reflection to inject the resolved dependency
             field.set(injectTarget, value);
         } catch (Exception e) {
             e.printStackTrace();
@@ -159,7 +159,7 @@ public class ResolveDependencyApplication {
 }
 ```
 
-在`MyConfiguration`类中，使用了`@ComponentScan("com.xcs.spring")`注解告诉 Spring 在指定的包（在这里是 "`com.xcs.spring`"）及其子包中搜索带有 `@Component`、`@Service`、`@Repository` 和 `@Controller` 等注解的类，并将它们自动注册为 beans。这样，spring就不必为每个组件明确写一个 bean 定义。Spring 会自动识别并注册它们。另外使用`@PropertySource`注解从类路径下的`application.properties`文件中加载属性。
+The `MyConfiguration` class uses the `@ComponentScan("com.xcs.spring")` annotation. It tells Spring to search the given package (here "`com.xcs.spring`") and its sub-packages for classes with annotations such as `@Component`, `@Service`, `@Repository` and `@Controller`, and to register them as beans automatically. So you do not need to write a bean definition for every component. Spring finds and registers them. The `@PropertySource` annotation loads properties from the `application.properties` file on the classpath.
 
 ```java
 @Configuration
@@ -170,13 +170,13 @@ public class MyConfiguration {
 }
 ```
 
-`application.properties`文件在`src/main/resources`目录中，并添加以下内容。
+Put the `application.properties` file in the `src/main/resources` directory and add the following content.
 
 ```properties
 my.property.value = Hello from Environment!
 ```
 
-`MyService` 是一个简单的服务类，但我们没有定义任何方法或功能。
+`MyService` is a simple service class. We did not define any methods or features in it.
 
 ```java
 @Service
@@ -185,32 +185,32 @@ public class MyServiceA {
 }
 ```
 
-首先 `MyServiceB` 没有被 Spring 托管，那么它在代码中的表现就与一个普通的 Java 类没有什么不同。虽然 `MyServiceB` 本身不是 Spring 托管的，但 `ResolveDependencyApplication` 类中，我给大家展示了如何使用 Spring 的底层 API 手动解析和注入依赖。
+`MyServiceB` is not managed by Spring, so in the code it behaves like a plain Java class. Although `MyServiceB` itself is not managed by Spring, the `ResolveDependencyApplication` class shows how to use the low-level Spring API to resolve and inject dependencies by hand.
 
-- **字段 `myPropertyValue`**
-  + 虽然它有一个 `@Value` 注解，但由于 `MyServiceB` 不是一个 Spring 管理的 bean，所以这个注解不会自动被解析。
-- **字段 `myServiceA` 和 `fieldMyServiceA`**
-  + 由于没有自动的 Spring 依赖注入，这两个字段默认为 `null`。
-- **方法 `setMyServiceA`**
-  + 这是一个普通的 setter 方法。但在 `MyServiceB` 不被 Spring 托管的情况下，它只是一个普通的 setter。
-- **方法 `toString`**
-  + 该方法为该类提供了一个自定义的字符串表示。这与 `MyServiceB` 是否被 Spring 托管无关。
+- **Field `myPropertyValue`**
+  + It has a `@Value` annotation. But `MyServiceB` is not a Spring-managed bean, so the annotation is not resolved automatically.
+- **Fields `myServiceA` and `fieldMyServiceA`**
+  + There is no automatic Spring dependency injection, so these two fields are `null` by default.
+- **Method `setMyServiceA`**
+  + This is a plain setter. Because `MyServiceB` is not managed by Spring, it is only a normal setter.
+- **Method `toString`**
+  + This method gives the class a custom string form. It has nothing to do with whether `MyServiceB` is managed by Spring.
 
 ```java
 public class MyServiceB {
 
     /**
-     * 方法注入
+     * Method injection
      */
     private MyServiceA methodMyServiceA;
 
     /**
-     * 字段注入
+     * Field injection
      */
     private MyServiceA fieldMyServiceA;
 
     /**
-     * 字段注入 (环境变量)
+     * Field injection (environment variable)
      */
     @Value("${my.property.value}")
     private String myPropertyValue;
@@ -230,24 +230,24 @@ public class MyServiceB {
 }
 ```
 
-运行结果发现，使用了 Spring 的底层 `resolveDependency` 方法来为 `MyServiceB` 类的字段和方法手动注入依赖。虽然在常规的 Spring 开发中我们通常不这样做（因为 Spring 提供了更高级的自动化工具进行依赖注入），但这主要目的是给大家展示 Spring 如何在底层工作原理，并提供了一种手动控制依赖注入的方法。
+The result shows that the low-level Spring `resolveDependency` method was used to inject dependencies into the fields and the method of `MyServiceB` by hand. In normal Spring development we usually do not do this, because Spring provides higher-level tools for dependency injection. The purpose here is to show how Spring works at a low level, and to show a way to control dependency injection manually.
 
 ```java
 Before MyServiceB = MyServiceB{myPropertyValue='null', myServiceA=null, fieldMyServiceA=null}
 
-解析方法依赖结果:
+Method dependency result:
 ---------------------------------------------
 Name:   com.xcs.spring.service.MyServiceB.setMyServiceA
 Value:  com.xcs.spring.service.MyServiceA@202b0582
 ---------------------------------------------
 
-解析字段依赖结果:
+Field dependency result:
 ---------------------------------------------
 Name:   com.xcs.spring.service.MyServiceB.fieldMyServiceA
 Value:  com.xcs.spring.service.MyServiceA@202b0582
 ---------------------------------------------
 
-解析字段依赖结果:
+Field dependency result:
 ---------------------------------------------
 Name:   com.xcs.spring.service.MyServiceB.myPropertyValue
 Value:  Hello from Environment!
@@ -257,131 +257,131 @@ After MyServiceB = MyServiceB{myPropertyValue='Hello from Environment!', myServi
 
 ```
 
-### 六、时序图
+### 6. Sequence Diagram
 
-#### 解析环境变量
+#### Resolve Environment Variables
 
-通过使用`@Value`注解，我们可以请求一个特定的环境属性或变量。例如，我们可能会这样请求一个名为`my.property.value`的属性。
+With the `@Value` annotation, we can ask for a specific environment property or variable. For example, we can ask for a property named `my.property.value`.
 
 ~~~mermaid
 sequenceDiagram
-Title: resolveDependency方法解析环境属性和变量时序图
+Title: Sequence Diagram of resolveDependency Resolving Environment Properties and Variables
 
 ResolveDependencyApplication-->>AbstractAutowireCapableBeanFactory:resolveDependency(descriptor,requestingBeanName)
-note over AbstractAutowireCapableBeanFactory: 请求解析依赖
+note over AbstractAutowireCapableBeanFactory: Request to resolve the dependency
 
 AbstractAutowireCapableBeanFactory->>DefaultListableBeanFactory:resolveDependency(descriptor, requestingBeanName, null, null)
-note over DefaultListableBeanFactory: 转到具体的Bean工厂进行解析
+note over DefaultListableBeanFactory: Go to the concrete bean factory to resolve it
 
 DefaultListableBeanFactory->>DefaultListableBeanFactory:doResolveDependency(descriptor, requestingBeanName, autowiredBeanNames, typeConverter)
-note over DefaultListableBeanFactory: 进行实际的依赖解析
+note over DefaultListableBeanFactory: Do the actual dependency resolution
 
 DefaultListableBeanFactory->>DefaultListableBeanFactory:getAutowireCandidateResolver()
-note over DefaultListableBeanFactory: 获取当前的依赖解析策略
+note over DefaultListableBeanFactory: Get the current dependency resolution strategy
 
 DefaultListableBeanFactory->>QualifierAnnotationAutowireCandidateResolver:getSuggestedValue(descriptor)
-note over QualifierAnnotationAutowireCandidateResolver: 基于给定的描述符查找建议的值
+note over QualifierAnnotationAutowireCandidateResolver: Find the suggested value for the given descriptor
 
 QualifierAnnotationAutowireCandidateResolver->>QualifierAnnotationAutowireCandidateResolver:findValue(annotationsToSearch)
-note over QualifierAnnotationAutowireCandidateResolver: 在指定的注解中寻找值
+note over QualifierAnnotationAutowireCandidateResolver: Look for the value in the given annotations
 
 QualifierAnnotationAutowireCandidateResolver->>QualifierAnnotationAutowireCandidateResolver:extractValue(attr)
-note over QualifierAnnotationAutowireCandidateResolver: 从注解属性中提取值
+note over QualifierAnnotationAutowireCandidateResolver: Extract the value from the annotation attributes
 
-QualifierAnnotationAutowireCandidateResolver->>DefaultListableBeanFactory:返回@Value注解的表达式
-note over DefaultListableBeanFactory: 解析注解中的表达式或值
+QualifierAnnotationAutowireCandidateResolver->>DefaultListableBeanFactory:Return the expression of the @Value annotation
+note over DefaultListableBeanFactory: Resolve the expression or value in the annotation
 
 DefaultListableBeanFactory->>AbstractBeanFactory:resolveEmbeddedValue(value)
-note over AbstractBeanFactory: 解析嵌入的值（如占位符或SpEL表达式）
+note over AbstractBeanFactory: Resolve embedded values (such as placeholders or SpEL expressions)
 
 DefaultListableBeanFactory->>AbstractBeanFactory:evaluateBeanDefinitionString(strVal, bd)
-note over AbstractBeanFactory: 对bean定义字符串进行评估（可能是一个表达式）
+note over AbstractBeanFactory: Evaluate the bean definition string (it may be an expression)
 
 DefaultListableBeanFactory->>AbstractBeanFactory:getTypeConverter()
-note over AbstractBeanFactory: 获取用于类型转换的转换器
+note over AbstractBeanFactory: Get the converter for type conversion
 
 DefaultListableBeanFactory->>TypeConverterSupport:convertIfNecessary(value, type, typeDescriptor())
-note over TypeConverterSupport: 根据需要将值转换为指定的类型
+note over TypeConverterSupport: Convert the value to the required type if needed
 
-TypeConverterSupport->>DefaultListableBeanFactory:返回类型转换的结果
-note over DefaultListableBeanFactory: 用转换后的值继续解析流程
+TypeConverterSupport->>DefaultListableBeanFactory:Return the type conversion result
+note over DefaultListableBeanFactory: Continue the resolution with the converted value
 
-DefaultListableBeanFactory->>AbstractAutowireCapableBeanFactory:返回环境属性
-AbstractAutowireCapableBeanFactory->>ResolveDependencyApplication:返回环境属性
+DefaultListableBeanFactory->>AbstractAutowireCapableBeanFactory:Return the environment property
+AbstractAutowireCapableBeanFactory->>ResolveDependencyApplication:Return the environment property
 ~~~
 
-#### 解析Bean依赖
+#### Resolve Bean Dependencies
 
-这是其主要的功能。当我们有一个bean，它需要另一个bean的实例时，`resolveDependency` 会为我们找到并提供所需的bean。例如，如果一个`MyServiceB`类需要一个`MyServiceA`类的实例，那么`resolveDependency` 可以为`MyServiceB`类提供一个`MyServiceA`的实例。
+This is its main feature. When a bean needs an instance of another bean, `resolveDependency` finds and provides the bean for us. For example, if a `MyServiceB` class needs an instance of `MyServiceA`, `resolveDependency` can provide a `MyServiceA` instance to `MyServiceB`.
 
 ~~~mermaid
 sequenceDiagram
-Title: resolveDependency方法解析Bean依赖时序图
+Title: Sequence Diagram of resolveDependency Resolving Bean Dependencies
 
 ResolveDependencyApplication-->>AbstractAutowireCapableBeanFactory:resolveDependency(descriptor,requestingBeanName)
-note right of AbstractAutowireCapableBeanFactory: 开始解析依赖请求
+note right of AbstractAutowireCapableBeanFactory: Start the dependency resolution request
 
 AbstractAutowireCapableBeanFactory->>DefaultListableBeanFactory:resolveDependency(descriptor, requestingBeanName, null, null)
-note right of DefaultListableBeanFactory: 委托给具体的Bean工厂进行依赖解析
+note right of DefaultListableBeanFactory: Delegate the dependency resolution to the concrete bean factory
 
 DefaultListableBeanFactory->>DefaultListableBeanFactory:doResolveDependency(descriptor, requestingBeanName, autowiredBeanNames, typeConverter)
-note right of DefaultListableBeanFactory: 执行具体的依赖解析逻辑
+note right of DefaultListableBeanFactory: Run the concrete dependency resolution logic
 
 DefaultListableBeanFactory->>DefaultListableBeanFactory:resolveMultipleBeans(descriptor, beanName, autowiredBeanNames, typeConverter)
-note right of DefaultListableBeanFactory: 解析满足条件的多个Beans
+note right of DefaultListableBeanFactory: Resolve multiple matching beans
 
 DefaultListableBeanFactory->>DefaultListableBeanFactory:findAutowireCandidates(beanName, type, descriptor)
-note right of DefaultListableBeanFactory: 查找适合自动装配的候选Beans
+note right of DefaultListableBeanFactory: Find candidate beans suitable for autowiring
 
 DefaultListableBeanFactory->>DefaultListableBeanFactory:isSelfReference(beanName, candidate)
-note right of DefaultListableBeanFactory: 检查bean是否引用了自身
+note right of DefaultListableBeanFactory: Check whether the bean refers to itself
 
 DefaultListableBeanFactory->>DefaultListableBeanFactory:isAutowireCandidate(candidate, descriptor)
-note right of DefaultListableBeanFactory: 检查bean是否是一个合适的自动装配候选
+note right of DefaultListableBeanFactory: Check whether the bean is a suitable autowire candidate
 
 DefaultListableBeanFactory->>DefaultListableBeanFactory:addCandidateEntry(result, candidate, descriptor, requiredType)
-note right of DefaultListableBeanFactory: 将找到的候选添加到结果集中
+note right of DefaultListableBeanFactory: Add the found candidate to the result
 
 DefaultListableBeanFactory->>DependencyDescriptor:resolveCandidate(candidateName, requiredType, beanFactory)
-note right of DependencyDescriptor: 尝试解析并返回候选Bean
+note right of DependencyDescriptor: Try to resolve and return the candidate bean
 
 DependencyDescriptor->>AbstractBeanFactory:getBean(String name)
-note right of AbstractBeanFactory: 请求获取指定名称的bean
+note right of AbstractBeanFactory: Request the bean with the given name
 
-AbstractBeanFactory->>DependencyDescriptor:返回候选的Bean对象
-note right of DependencyDescriptor: 返回找到的Bean实例
+AbstractBeanFactory->>DependencyDescriptor:Return the candidate bean object
+note right of DependencyDescriptor: Return the bean instance that was found
 
-DependencyDescriptor->>DefaultListableBeanFactory:返回候选的Bean对象
-note right of DefaultListableBeanFactory: 将Bean实例返回给Bean工厂
+DependencyDescriptor->>DefaultListableBeanFactory:Return the candidate bean object
+note right of DefaultListableBeanFactory: Return the bean instance to the bean factory
 
 DefaultListableBeanFactory->>DefaultListableBeanFactory:determineAutowireCandidate(matchingBeans, descriptor)
-note right of DefaultListableBeanFactory: 从匹配的Beans中确定自动装配的候选
+note right of DefaultListableBeanFactory: Choose the autowire candidate from the matching beans
 
-DefaultListableBeanFactory->>AbstractAutowireCapableBeanFactory:返回Bean
-note right of AbstractAutowireCapableBeanFactory: 将确定的Bean返回给上一级的Bean工厂
+DefaultListableBeanFactory->>AbstractAutowireCapableBeanFactory:Return the bean
+note right of AbstractAutowireCapableBeanFactory: Return the chosen bean to the upper bean factory
 
-AbstractAutowireCapableBeanFactory->>ResolveDependencyApplication:返回bean
-note right of ResolveDependencyApplication: 返回bean给依赖解析的请求者
+AbstractAutowireCapableBeanFactory->>ResolveDependencyApplication:Return the bean
+note right of ResolveDependencyApplication: Return the bean to the requester of the dependency resolution
 
 ~~~
 
-### 七、源码分析
+### 7. Source Code Analysis
 
-#### 解析环境变量
+#### Resolve Environment Variables
 
-在`org.springframework.beans.factory.support.DefaultListableBeanFactory#resolveDependency`方法中，此方法将尝试使用懒加载代理或直接解析依赖项，具体使用哪种方式取决于上下文及其他配置（本次研究环境属性）。
+The `org.springframework.beans.factory.support.DefaultListableBeanFactory#resolveDependency` method tries to resolve the dependency with a lazy-resolution proxy or directly. Which way it uses depends on the context and other settings (this time we study environment properties).
 
 ```java
 @Override
 @Nullable
 public Object resolveDependency(DependencyDescriptor descriptor, @Nullable String requestingBeanName,
                                 @Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter) throws BeansException {
-	// ... [代码部分省略以简化]
-    // 尝试为依赖获取懒加载代理
+	// ... [code omitted for brevity]
+    // Try to get a lazy-resolution proxy for the dependency
     Object result = getAutowireCandidateResolver().getLazyResolutionProxyIfNecessary(
         descriptor, requestingBeanName);
 
-    // 如果懒加载代理不可用，则执行实际的依赖解析
+    // If no lazy-resolution proxy is available, do the actual dependency resolution
     if (result == null) {
         result = doResolveDependency(descriptor, requestingBeanName, autowiredBeanNames, typeConverter);
     }
@@ -389,67 +389,67 @@ public Object resolveDependency(DependencyDescriptor descriptor, @Nullable Strin
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultListableBeanFactory#doResolveDependency`方法中，此代码段尝试解析一个依赖，先查找建议的值（`@Value`注解），然后进行必要的类型转换。
+In the `org.springframework.beans.factory.support.DefaultListableBeanFactory#doResolveDependency` method, this code tries to resolve a dependency. It first looks for a suggested value (the `@Value` annotation), and then does the needed type conversion.
 
 ```java
 @Nullable
 public Object doResolveDependency(DependencyDescriptor descriptor, @Nullable String beanName,
                                   @Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter) throws BeansException {
     try {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
         
-        // 获取依赖描述符中定义的依赖类型
+        // Get the dependency type defined in the dependency descriptor
         Class<?> type = descriptor.getDependencyType();
 
-        // 步骤1: 从自动装配候选解析器中获取建议的依赖值
+        // Step 1: Get the suggested value from the autowire candidate resolver
         Object value = getAutowireCandidateResolver().getSuggestedValue(descriptor);
 
         if (value != null) {
-            // 如果建议的值是一个字符串
+            // If the suggested value is a String
             if (value instanceof String) {
-                // 步骤2: 解析嵌入在字符串中的值（例如，从环境变量中查找）
+                // Step 2: Resolve values embedded in the string (for example, look up environment variables)
                 String strVal = resolveEmbeddedValue((String) value);
 
-                // 获取bean定义，如果beanName存在且已经在容器中，则获取与beanName相关的bean定义
+                // Get the bean definition. If beanName exists and is already in the container, get its bean definition
                 BeanDefinition bd = (beanName != null && containsBean(beanName) ? getMergedBeanDefinition(beanName) : null);
                 
-                // 步骤3: 对字符串值进行求值，可能会处理表达式之类的内容
+                // Step 3: Evaluate the string value, which may handle expressions
                 value = evaluateBeanDefinitionString(strVal, bd);
             }
 
-            // 获取类型转换器，如果传入了外部转换器则使用它，否则使用默认的转换器
+            // Get the type converter. Use the external one if given, otherwise the default one
             TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
 
             try {
-                // 步骤4: 尝试进行必要的类型转换
+                // Step 4: Try to do the needed type conversion
                 return converter.convertIfNecessary(value, type, descriptor.getTypeDescriptor());
             }
             catch (UnsupportedOperationException ex) {
-                // 处理不支持的操作异常（具体实现已省略）
+                // Handle the unsupported operation exception (implementation omitted)
             }
         }
 
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
 
     }
     finally {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
 }
 ```
 
-> `org.springframework.beans.factory.support.DefaultListableBeanFactory#doResolveDependency`方法步骤1。
+> Step 1 of the `org.springframework.beans.factory.support.DefaultListableBeanFactory#doResolveDependency` method.
 
-在`org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver#getSuggestedValue`方法中，主要目的是从一个`DependencyDescriptor`中提取建议的值。`DependencyDescriptor`可以描述一个bean的属性（可能是一个字段或者方法参数）。
+The main goal of the `org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver#getSuggestedValue` method is to get the suggested value from a `DependencyDescriptor`. A `DependencyDescriptor` can describe a bean property (a field or a method parameter).
 
 ```java
 @Override
 @Nullable
 public Object getSuggestedValue(DependencyDescriptor descriptor) {
-    // 从字段的注解中尝试找到建议的值
+    // Try to find the suggested value in the annotations of the field
     Object value = findValue(descriptor.getAnnotations());
     
-    // 如果在字段上没有找到，则从方法的注解中尝试找到
+    // If it is not found on the field, try the annotations of the method
     if (value == null) {
         MethodParameter methodParam = descriptor.getMethodParameter();
         if (methodParam != null) {
@@ -457,108 +457,108 @@ public Object getSuggestedValue(DependencyDescriptor descriptor) {
         }
     }
     
-    // 返回建议的值，如果没有找到则返回null
+    // Return the suggested value, or null if none is found
     return value;
 }
 ```
 
-在`org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver#findValue`方法中，主要目的是从提供的注解数组中寻找一个特定的注解（`@Value`）并提取其值。
+The main goal of the `org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver#findValue` method is to find a specific annotation (`@Value`) in the given annotation array and get its value.
 
 ```java
 @Nullable
 protected Object findValue(Annotation[] annotationsToSearch) {
-    // 如果注解数组非空，则进入检查逻辑
+    // If the annotation array is not empty, enter the check
     if (annotationsToSearch.length > 0) {   
-        // 从注解数组中获取合并后的特定注解属性（这里的特定注解可能是@Value）
+        // Get the merged attributes of the specific annotation from the array (here the annotation may be @Value)
         AnnotationAttributes attr = AnnotatedElementUtils.getMergedAnnotationAttributes(
             AnnotatedElementUtils.forAnnotations(annotationsToSearch), this.valueAnnotationType);
-        // 如果找到了相应的注解属性，则提取它的值
+        // If the annotation attributes are found, get their value
         if (attr != null) {
             return extractValue(attr);
         }
     }
-    // 没有找到相应的注解属性或值，返回null
+    // If no matching annotation attributes or value are found, return null
     return null;
 }
 ```
 
-在`org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver#extractValue`方法中，从`@Value`注解属性中，提取一个`value`属性值。
+The `org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver#extractValue` method gets the `value` attribute from the `@Value` annotation attributes.
 
 ```java
 protected Object extractValue(AnnotationAttributes attr) {
-    // 从注解属性中尝试获取'VALUE'（一般为"value"）的属性值
+    // Try to get the 'VALUE' attribute (usually "value") from the annotation attributes
     Object value = attr.get(AnnotationUtils.VALUE);
     
-    // 如果该属性值为空，那么抛出一个异常
+    // If the attribute value is null, throw an exception
     if (value == null) {
         throw new IllegalStateException("Value annotation must have a value attribute");
     }
     
-    // 返回提取的值
+    // Return the extracted value
     return value;
 }
 ```
 
-> `org.springframework.beans.factory.support.DefaultListableBeanFactory#doResolveDependency`方法步骤2。
+> Step 2 of the `org.springframework.beans.factory.support.DefaultListableBeanFactory#doResolveDependency` method.
 
-在`org.springframework.beans.factory.support.AbstractBeanFactory#resolveEmbeddedValue`方法中，主要接受一个字符串值，并利用`StringValueResolver`逐一对其进行解析`StringValueResolver`逐一对其进行解析，然后返回最终解析后的字符串值。
+The `org.springframework.beans.factory.support.AbstractBeanFactory#resolveEmbeddedValue` method takes a string value and resolves it with each `StringValueResolver` in turn. Then it returns the final resolved string.
 
 ```java
 @Override
 @Nullable
 public String resolveEmbeddedValue(@Nullable String value) {
-    // 如果传入的值为空，直接返回null
+    // If the given value is null, return null directly
     if (value == null) {
         return null;
     }
-    // 初始化结果为传入的值
+    // Start with the given value as the result
     String result = value; 
     
-    // 遍历当前对象中所有的字符串值解析器
+    // Loop over all string value resolvers of this object
     for (StringValueResolver resolver : this.embeddedValueResolvers) {
-        // 使用解析器解析当前的结果值
+        // Resolve the current result with the resolver
         result = resolver.resolveStringValue(result);
         
-        // 如果解析后的值为空，直接返回null
+        // If the resolved value is null, return null directly
         if (result == null) {
             return null;
         }
     }
     
-    // 返回最终解析后的字符串值
+    // Return the final resolved string
     return result;
 }
 ```
 
-> `org.springframework.beans.factory.support.DefaultListableBeanFactory#doResolveDependency`方法步骤3。
+> Step 3 of the `org.springframework.beans.factory.support.DefaultListableBeanFactory#doResolveDependency` method.
 
-在`org.springframework.beans.factory.support.AbstractBeanFactory#evaluateBeanDefinitionString`方法中，主要负责对一个Bean定义中的字符串值（可能是一个表达式`${my.property.value}`）进行求值。如果配置了`beanExpressionResolver`，则会使用它进行求值；如果没有，则直接返回原始值。
+The `org.springframework.beans.factory.support.AbstractBeanFactory#evaluateBeanDefinitionString` method evaluates a string value in a bean definition (it may be an expression such as `${my.property.value}`). If a `beanExpressionResolver` is configured, it is used for the evaluation. If not, the original value is returned.
 
 ```java
 @Nullable
 protected Object evaluateBeanDefinitionString(@Nullable String value, @Nullable BeanDefinition beanDefinition) {
-    // 如果没有设置beanExpressionResolver（即解析表达式的解析器），直接返回原始值
+    // If no beanExpressionResolver (the resolver for expressions) is set, return the original value
     if (this.beanExpressionResolver == null) {
         return value;
     }
 
-    Scope scope = null; // 定义作用域变量
+    Scope scope = null; // Scope variable
     if (beanDefinition != null) {
-        // 从Bean定义中获取作用域名称
+        // Get the scope name from the bean definition
         String scopeName = beanDefinition.getScope(); 
         if (scopeName != null) {
-            // 获取该作用域的具体实例
+            // Get the concrete instance of the scope
             scope = getRegisteredScope(scopeName);
         }
     }
-    // 使用beanExpressionResolver对字符串值进行求值，并返回结果
+    // Evaluate the string value with the beanExpressionResolver and return the result
     return this.beanExpressionResolver.evaluate(value, new BeanExpressionContext(this, scope));
 }
 ```
 
-> `org.springframework.beans.factory.support.DefaultListableBeanFactory#doResolveDependency`方法步骤4。
+> Step 4 of the `org.springframework.beans.factory.support.DefaultListableBeanFactory#doResolveDependency` method.
 
-在`org.springframework.beans.TypeConverterSupport#convertIfNecessary(value,requiredType,typeDescriptor)`方法中，首先确保有一个可用的`typeConverterDelegate`来进行实际的转换工作，然后尝试将给定值转换为指定的类型。
+The `org.springframework.beans.TypeConverterSupport#convertIfNecessary(value,requiredType,typeDescriptor)` method first makes sure a `typeConverterDelegate` is available to do the actual conversion. Then it tries to convert the given value to the required type.
 
 ```java
 @Nullable
@@ -566,72 +566,72 @@ protected Object evaluateBeanDefinitionString(@Nullable String value, @Nullable 
 public <T> T convertIfNecessary(@Nullable Object value, @Nullable Class<T> requiredType,
                                 @Nullable TypeDescriptor typeDescriptor) throws TypeMismatchException {
 
-    // 断言，确保typeConverterDelegate（类型转换代理）不为空
+    // Assert that typeConverterDelegate (the type conversion delegate) is not null
     Assert.state(this.typeConverterDelegate != null, "No TypeConverterDelegate");
     try {
-        // 通过typeConverterDelegate进行类型转换
+        // Convert the type through typeConverterDelegate
         return this.typeConverterDelegate.convertIfNecessary(null, null, value, requiredType, typeDescriptor);
     }
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-在`org.springframework.beans.TypeConverterDelegate#convertIfNecessary(propertyName,  oldValue, newValue,requiredType, typeDescriptor)`方法中，主要考虑了许多转换场景，使其能够处理各种类型和结构的数据。
+The `org.springframework.beans.TypeConverterDelegate#convertIfNecessary(propertyName,  oldValue, newValue,requiredType, typeDescriptor)` method covers many conversion cases, so it can handle data of many types and structures.
 
 ```java
 public <T> T convertIfNecessary(@Nullable String propertyName, @Nullable Object oldValue, @Nullable Object newValue,
 			@Nullable Class<T> requiredType, @Nullable TypeDescriptor typeDescriptor) throws IllegalArgumentException {
 
-    // 查找对于此类型的自定义编辑器
+    // Look for a custom editor for this type
     PropertyEditor editor = this.propertyEditorRegistry.findCustomEditor(requiredType, propertyName);
 
     ConversionFailedException conversionAttemptEx = null;
 
-    // 如果没有自定义编辑器但指定了自定义ConversionService，则尝试转换
+    // If there is no custom editor but a custom ConversionService is set, try to convert with it
     ConversionService conversionService = this.propertyEditorRegistry.getConversionService();
     if (editor == null && conversionService != null && newValue != null && typeDescriptor != null) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
 
     Object convertedValue = newValue;
 
-    // 如果值不是所需的类型，进行转换
+    // If the value is not of the required type, convert it
     if (editor != null || (requiredType != null && !ClassUtils.isAssignableValue(requiredType, convertedValue))) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
 
     boolean standardConversion = false;
 
-    // 尝试应用标准类型转换规则（如果适用）
+    // Try the standard type conversion rules (if they apply)
     if (requiredType != null) {
 		
-        // 对不同类型的专门转换逻辑
+        // Special conversion logic for different types
         if (convertedValue != null) {
             if (Object.class == requiredType) {
                 return (T) convertedValue;
             }
             
-            // 这里根据不同的requiredType类型进行了不同的转换处理，例如处理数组、集合、映射、枚举等不同类型的转换。
+            // Different conversions are done here depending on requiredType, for example arrays, collections, maps and enums.
             else if (requiredType.isArray()) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
             else if (convertedValue instanceof Collection) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
             else if (convertedValue instanceof Map) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
             if (convertedValue.getClass().isArray() && Array.getLength(convertedValue) == 1) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
             if (String.class == requiredType && ClassUtils.isPrimitiveOrWrapper(convertedValue.getClass())) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
             else if (convertedValue instanceof String && !requiredType.isInstance(convertedValue)) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
             else if (convertedValue instanceof Number && Number.class.isAssignableFrom(requiredType)) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
         }
         else {
@@ -642,33 +642,33 @@ public <T> T convertIfNecessary(@Nullable String propertyName, @Nullable Object 
         }
 
         if (!ClassUtils.isAssignableValue(requiredType, convertedValue)) {
-            // ... [代码部分省略以简化]
+            // ... [code omitted for brevity]
         }
     }
 
     if (conversionAttemptEx != null) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
 
     return (T) convertedValue;
 }
 ```
 
-#### 解析Bean依赖
+#### Resolve Bean Dependencies
 
-在`org.springframework.beans.factory.support.DefaultListableBeanFactory#resolveDependency`方法中，此方法将尝试使用懒加载代理或直接解析依赖项，具体使用哪种方式取决于上下文及其他配置（本次研究Bean依赖）。
+The `org.springframework.beans.factory.support.DefaultListableBeanFactory#resolveDependency` method tries to resolve the dependency with a lazy-resolution proxy or directly. Which way it uses depends on the context and other settings (this time we study bean dependencies).
 
 ```java
 @Override
 @Nullable
 public Object resolveDependency(DependencyDescriptor descriptor, @Nullable String requestingBeanName,
                                 @Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter) throws BeansException {
-	// ... [代码部分省略以简化]
-    // 尝试为依赖获取懒加载代理
+	// ... [code omitted for brevity]
+    // Try to get a lazy-resolution proxy for the dependency
     Object result = getAutowireCandidateResolver().getLazyResolutionProxyIfNecessary(
         descriptor, requestingBeanName);
 
-    // 如果懒加载代理不可用，则执行实际的依赖解析
+    // If no lazy-resolution proxy is available, do the actual dependency resolution
     if (result == null) {
         result = doResolveDependency(descriptor, requestingBeanName, autowiredBeanNames, typeConverter);
     }
@@ -676,23 +676,23 @@ public Object resolveDependency(DependencyDescriptor descriptor, @Nullable Strin
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultListableBeanFactory#doResolveDependency`方法中，主要是解析并注入依赖项。首先，它尝试解析多个Bean候选项（例如，当需要注入的是List或Map类型）。如果没有找到匹配的Bean，它可能会抛出异常。如果有多个匹配的Bean，它会尝试确定最合适的一个进行注入。如果只有一个匹配的Bean，则直接进行注入。
+The `org.springframework.beans.factory.support.DefaultListableBeanFactory#doResolveDependency` method resolves and injects the dependency. First, it tries to resolve multiple bean candidates (for example, when a List or Map must be injected). If no matching bean is found, it may throw an exception. If several beans match, it tries to find the best one to inject. If only one bean matches, it is injected directly.
 
 ```java
 @Nullable
 public Object doResolveDependency(DependencyDescriptor descriptor, @Nullable String beanName,
                                   @Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter) throws BeansException {
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     try {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
 
-        // 步骤1: 尝试解析多个Bean候选项。例如，当需要注入List或Map类型的时候
+        // Step 1: Try to resolve multiple bean candidates. For example, when a List or Map must be injected
         Object multipleBeans = resolveMultipleBeans(descriptor, beanName, autowiredBeanNames, typeConverter);
         if (multipleBeans != null) {
             return multipleBeans;
         }
 
-        // 步骤2: 寻找符合类型匹配的Bean候选项
+        // Step 2: Find bean candidates that match the type
         Map<String, Object> matchingBeans = findAutowireCandidates(beanName, type, descriptor);
         if (matchingBeans.isEmpty()) {
             if (isRequired(descriptor)) {
@@ -704,7 +704,7 @@ public Object doResolveDependency(DependencyDescriptor descriptor, @Nullable Str
         String autowiredBeanName;
         Object instanceCandidate;
 
-        // 步骤3: 如果有多个匹配的Bean，则尝试确定哪一个是最合适的
+        // Step 3: If several beans match, try to decide which one is the best
         if (matchingBeans.size() > 1) {
             autowiredBeanName = determineAutowireCandidate(matchingBeans, descriptor);
             if (autowiredBeanName == null) {
@@ -712,43 +712,43 @@ public Object doResolveDependency(DependencyDescriptor descriptor, @Nullable Str
                     return descriptor.resolveNotUnique(descriptor.getResolvableType(), matchingBeans);
                 }
                 else {
-                    // 对于非必需的Collection/Map，忽略非唯一的情况
+                    // For a non-required Collection/Map, ignore the non-unique case
                     return null;
                 }
             }
             instanceCandidate = matchingBeans.get(autowiredBeanName);
         }
         else {
-            // 只有一个匹配的Bean
+            // Only one matching bean
             Map.Entry<String, Object> entry = matchingBeans.entrySet().iterator().next();
             autowiredBeanName = entry.getKey();
             instanceCandidate = entry.getValue();
         }
 
-        // 记录已经自动装配的Bean名称
+        // Record the names of the beans that were autowired
         if (autowiredBeanNames != null) {
             autowiredBeanNames.add(autowiredBeanName);
         }
 
-        // 如果候选对象是一个类，则尝试解析为实际的Bean实例
+        // If the candidate is a class, try to resolve it to the actual bean instance
         if (instanceCandidate instanceof Class) {
             instanceCandidate = descriptor.resolveCandidate(autowiredBeanName, type, this);
         }
         Object result = instanceCandidate;
         
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
         
         return result;
     }
     finally {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
 }
 ```
 
-> `org.springframework.beans.factory.support.DefaultListableBeanFactory#doResolveDependency`方法步骤1。
+> Step 1 of the `org.springframework.beans.factory.support.DefaultListableBeanFactory#doResolveDependency` method.
 
-在`org.springframework.beans.factory.support.DefaultListableBeanFactory#resolveMultipleBeans`方法中，解决了当依赖是多值类型（如`Stream`、数组、`Collection`、`Map`）时如何自动注入对应的Bean。该方法首先判断依赖的类型，然后针对不同类型进行解析。对于每种类型，它都会查找所有匹配的Bean候选项，并按需要转换和排序它们。
+The `org.springframework.beans.factory.support.DefaultListableBeanFactory#resolveMultipleBeans` method handles automatic injection of beans when the dependency is a multi-value type (such as `Stream`, array, `Collection` or `Map`). It first checks the type of the dependency and then resolves it by type. For each type, it finds all matching bean candidates, and converts and sorts them as needed.
 
 ```java
 @Nullable
@@ -757,23 +757,23 @@ private Object resolveMultipleBeans(DependencyDescriptor descriptor, @Nullable S
 
     Class<?> type = descriptor.getDependencyType();
 
-    // 判断依赖是否为Java 8 Stream类型
+    // Check whether the dependency is a Java 8 Stream
     if (descriptor instanceof StreamDependencyDescriptor) {
-       // ... [代码部分省略以简化]
+       // ... [code omitted for brevity]
     } 
-    // 判断依赖是否为数组类型
+    // Check whether the dependency is an array
     else if (type.isArray()) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
         return result;
     }
-    // 判断依赖是否为集合接口类型
+    // Check whether the dependency is a Collection interface
     else if (Collection.class.isAssignableFrom(type) && type.isInterface()) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
         return result;
     }
-    // 判断依赖是否为Map类型
+    // Check whether the dependency is a Map
     else if (Map.class == type) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
         return matchingBeans;
     }
     else {
@@ -782,31 +782,31 @@ private Object resolveMultipleBeans(DependencyDescriptor descriptor, @Nullable S
 }
 ```
 
-> `org.springframework.beans.factory.support.DefaultListableBeanFactory#doResolveDependency`方法步骤2。
+> Step 2 of the `org.springframework.beans.factory.support.DefaultListableBeanFactory#doResolveDependency` method.
 
-在`org.springframework.beans.factory.support.DefaultListableBeanFactory#findAutowireCandidates`方法中，主要目的是确定哪些Bean适合自动注入给定的依赖。它首先从当前的`BeanFactory`及其祖先中获取所有可能的候选Bean，然后根据各种条件（如类型匹配、qualifiers等）过滤这些候选项。如果在首次查找中没有找到任何匹配的bean，它还会尝试回退匹配来找到适当的bean。
+The main goal of the `org.springframework.beans.factory.support.DefaultListableBeanFactory#findAutowireCandidates` method is to decide which beans are suitable to be autowired into the given dependency. It first gets all possible candidate beans from the current `BeanFactory` and its ancestors. Then it filters them by conditions such as type match and qualifiers. If the first search finds no matching bean, it also tries fallback matching to find a suitable bean.
 
 ```java
 protected Map<String, Object> findAutowireCandidates(
         @Nullable String beanName, Class<?> requiredType, DependencyDescriptor descriptor) {
 
-    // 1. 从BeanFactory及其祖先中获取所有可能的候选bean名称，这些bean的类型与所需的类型匹配。
+    // 1. Get the names of all possible candidate beans from the BeanFactory and its ancestors whose type matches the required type.
     String[] candidateNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
         this, requiredType, true, descriptor.isEager());
 
-    // 2. 初始化一个空的结果映射，用于保存候选bean。
+    // 2. Create an empty result map to hold the candidate beans.
     Map<String, Object> result = CollectionUtils.newLinkedHashMap(candidateNames.length);
 
-    // 3. 遍历预定义的可解析的依赖项。
+    // 3. Loop over the predefined resolvable dependencies.
     for (Map.Entry<Class<?>, Object> classObjectEntry : this.resolvableDependencies.entrySet()) {
         Class<?> autowiringType = classObjectEntry.getKey();
 
-        // 4. 检查当前的依赖项是否与所需的类型兼容。
+        // 4. Check whether the current dependency is compatible with the required type.
         if (autowiringType.isAssignableFrom(requiredType)) {
             Object autowiringValue = classObjectEntry.getValue();
-            // 5. 对当前的值进行自动装配的解析。
+            // 5. Resolve the autowiring of the current value.
             autowiringValue = AutowireUtils.resolveAutowiringValue(autowiringValue, requiredType);
-            // 6. 如果解析后的值与所需的类型相匹配，将其添加到结果映射中。
+            // 6. If the resolved value matches the required type, add it to the result map.
             if (requiredType.isInstance(autowiringValue)) {
                 result.put(ObjectUtils.identityToString(autowiringValue), autowiringValue);
                 break;
@@ -814,31 +814,31 @@ protected Map<String, Object> findAutowireCandidates(
         }
     }
 
-    // 7. 遍历所有可能的候选bean名称。
+    // 7. Loop over all possible candidate bean names.
     for (String candidate : candidateNames) {
-        // 8. 如果当前bean名称不是对自己的引用，并且它是一个有效的自动装配候选项，则将其添加到结果映射中。
+        // 8. If the bean name is not a self reference and it is a valid autowire candidate, add it to the result map.
         if (!isSelfReference(beanName, candidate) && isAutowireCandidate(candidate, descriptor)) {
             addCandidateEntry(result, candidate, descriptor, requiredType);
         }
     }
 
-    // 9. 如果没有找到任何匹配的候选bean。
+    // 9. If no matching candidate bean is found.
     if (result.isEmpty()) {
         boolean multiple = indicatesMultipleBeans(requiredType);
 
-        // 10. 为回退匹配创建一个新的描述符。
+        // 10. Create a new descriptor for the fallback match.
         DependencyDescriptor fallbackDescriptor = descriptor.forFallbackMatch();
 
-        // 11. 重新遍历所有候选bean名称。
+        // 11. Loop over all candidate bean names again.
         for (String candidate : candidateNames) {
-            // 12. 如果当前bean名称不是对自己的引用，并且它是一个有效的回退匹配的候选项，则将其添加到结果映射中。
+            // 12. If the bean name is not a self reference and it is a valid fallback candidate, add it to the result map.
             if (!isSelfReference(beanName, candidate) && isAutowireCandidate(candidate, fallbackDescriptor) &&
                 (!multiple || getAutowireCandidateResolver().hasQualifier(descriptor))) {
                 addCandidateEntry(result, candidate, descriptor, requiredType);
             }
         }
 
-        // 13. 如果还没有找到任何匹配的候选bean，考虑自引用的bean作为候选bean。
+        // 13. If still no matching candidate bean is found, consider self-referencing beans as candidates.
         if (result.isEmpty() && !multiple) {
             for (String candidate : candidateNames) {
                 if (isSelfReference(beanName, candidate) &&
@@ -849,155 +849,155 @@ protected Map<String, Object> findAutowireCandidates(
             }
         }
     }
-    // 14. 返回找到的候选bean的映射。
+    // 14. Return the map of the candidates that were found.
     return result;
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultListableBeanFactory#addCandidateEntry`方法中，根据不同的`DependencyDescriptor`类型和其他条件决定如何将候选Bean及其实例或类型添加到提供的映射中。对于需要多个元素的依赖项（如集合或数组），它会添加所有的Bean实例；对于单例或需要排序的流描述符，它会添加Bean实例；而对于其他情况，只会添加Bean的类型。
+The `org.springframework.beans.factory.support.DefaultListableBeanFactory#addCandidateEntry` method decides how to add a candidate bean, as an instance or as a type, to the given map. It depends on the `DependencyDescriptor` type and other conditions. For dependencies that need several elements (such as a collection or array), it adds all bean instances. For a singleton, or a stream descriptor that needs ordering, it adds the bean instance. In other cases it adds only the bean type.
 
 ```java
 private void addCandidateEntry(Map<String, Object> candidates, String candidateName,
 			DependencyDescriptor descriptor, Class<?> requiredType) {
 
-    // 如果DependencyDescriptor是一个MultiElementDescriptor（意味着描述的依赖可能有多个元素，例如集合或数组）
+    // If the DependencyDescriptor is a MultiElementDescriptor (the dependency may have several elements, such as a collection or array)
 	if (descriptor instanceof MultiElementDescriptor) {
-        // 解析候选Bean的实例
+        // Resolve the instance of the candidate bean
 		Object beanInstance = descriptor.resolveCandidate(candidateName, requiredType, this);
-		// 如果解析的实例不是NullBean（即一个占位符对象，代表null值），则将其添加到候选列表中
+		// If the resolved instance is not a NullBean (a placeholder object that stands for a null value), add it to the candidate list
 		if (!(beanInstance instanceof NullBean)) {
 			candidates.put(candidateName, beanInstance);
 		}
 	}
-	// 如果当前Bean是单例，或者DependencyDescriptor是一个StreamDependencyDescriptor并且有序
+	// If the current bean is a singleton, or the DependencyDescriptor is a StreamDependencyDescriptor and ordered
 	else if (containsSingleton(candidateName) || (descriptor instanceof StreamDependencyDescriptor &&
 			((StreamDependencyDescriptor) descriptor).isOrdered())) {
-        // 解析候选Bean的实例
+        // Resolve the instance of the candidate bean
 		Object beanInstance = descriptor.resolveCandidate(candidateName, requiredType, this);
-		// 如果解析的实例是NullBean，则将null添加到映射中，否则添加实际的Bean实例
+		// If the resolved instance is a NullBean, add null to the map. Otherwise add the real bean instance
 		candidates.put(candidateName, (beanInstance instanceof NullBean ? null : beanInstance));
 	}
-	// 其他情况下，只将Bean的类型而不是实例添加到映射中
+	// In other cases, add only the bean type, not the instance, to the map
 	else {
 		candidates.put(candidateName, getType(candidateName));
 	}
 }
 ```
 
-在`org.springframework.beans.factory.config.DependencyDescriptor#resolveCandidate`方法中，最后发现，在Spring的依赖注入过程中，当一个bean依赖于另一个bean时，底层的实现最终会通过`getBean`方法从容器中获取所依赖的bean实例。
+In the `org.springframework.beans.factory.config.DependencyDescriptor#resolveCandidate` method, we find that in Spring dependency injection, when one bean depends on another, the underlying implementation gets the dependent bean instance from the container with the `getBean` method.
 
 ```java
 public Object resolveCandidate(String beanName, Class<?> requiredType, BeanFactory beanFactory)
     	throws BeansException {
 
-    // 根据提供的bean名称从beanFactory中获取并返回bean的实例
+    // Get and return the bean instance from the beanFactory by the given bean name
     return beanFactory.getBean(beanName);
 }
 ```
 
-> `org.springframework.beans.factory.support.DefaultListableBeanFactory#doResolveDependency`方法步骤3。
+> Step 3 of the `org.springframework.beans.factory.support.DefaultListableBeanFactory#doResolveDependency` method.
 
-在`org.springframework.beans.factory.support.DefaultListableBeanFactory#determineAutowireCandidate`方法中，主要是存在多个候选bean时确定应该自动注入哪一个。它首先检查是否有被标记为"primary"的bean，然后检查是否有优先级最高的bean。如果这两种方法都无法确定，它会回退到查找与依赖描述符匹配的bean名字或是否该bean实例存在于可解析的依赖中。如果仍然没有找到匹配的bean，它会返回null。
+The `org.springframework.beans.factory.support.DefaultListableBeanFactory#determineAutowireCandidate` method decides which bean to inject when there are several candidates. It first checks whether a bean is marked "primary". Then it checks for the bean with the highest priority. If neither works, it falls back to finding a bean whose name matches the dependency descriptor, or whether the bean instance is in the resolvable dependencies. If it still finds no match, it returns null.
 
 ```java
 @Nullable
 protected String determineAutowireCandidate(Map<String, Object> candidates, DependencyDescriptor descriptor) {
-    // 获取依赖的类型
+    // Get the dependency type
     Class<?> requiredType = descriptor.getDependencyType();
     
-    // 确定是否有被标记为"primary"的候选bean
+    // Check whether a candidate bean is marked "primary"
     String primaryCandidate = determinePrimaryCandidate(candidates, requiredType);
     if (primaryCandidate != null) {
-        // 如果有主要的候选bean，则返回这个bean的名字
+        // If there is a primary candidate, return its name
         return primaryCandidate;
     }
     
-    // 检查是否有最高优先级的候选bean
+    // Check whether there is a candidate with the highest priority
     String priorityCandidate = determineHighestPriorityCandidate(candidates, requiredType);
     if (priorityCandidate != null) {
-        // 如果有优先级最高的候选bean，则返回这个bean的名字
+        // If there is a candidate with the highest priority, return its name
         return priorityCandidate;
     }
     
-    // 如果上述两种方法都无法确定一个bean，那么进行回退处理
+    // If neither works to pick a bean, use the fallback
     for (Map.Entry<String, Object> entry : candidates.entrySet()) {
         String candidateName = entry.getKey();
         Object beanInstance = entry.getValue();
         
-        // 如果候选bean实例存在于可解析的依赖中，或者候选bean的名字与描述符中的依赖名字匹配，则选择该候选bean
+        // If the candidate bean instance is in the resolvable dependencies, or the candidate bean name matches the dependency name in the descriptor, choose this candidate
         if ((beanInstance != null && this.resolvableDependencies.containsValue(beanInstance)) ||
                 matchesBeanName(candidateName, descriptor.getDependencyName())) {
             return candidateName;
         }
     }
     
-    // 如果没有匹配的bean，返回null
+    // If no bean matches, return null
     return null;
 }
 ```
 
-### 八、注意事项
+### 8. Notes
 
-1. **循环依赖**
-   + 确保不引入循环依赖，否则会导致 Bean 创建失败。Spring 有一些内置的检测机制，但在自定义逻辑时仍需格外注意。
-2. **候选 Bean 的选择**
-   + 在有多个候选 Bean 可用于注入时，该如何选择是一个重要问题。Spring 提供了 `@Primary`, `@Priority` 等注解来辅助决策，但你可能需要考虑其他因素。
-3. **自定义类型转换**
-   + 如果需要，应确保提供适当的类型转换逻辑，以将 Bean 转换为所需的类型。
-4. **性能考虑**
-   + 避免不必要的重复查找或计算。在可能的情况下，考虑缓存结果，特别是对于高频率的依赖查找。
-5. **生命周期和作用域**
-   + 确保考虑到目标 Bean 的生命周期和作用域。例如，一个 prototype 作用域的 Bean 不应该被注入到一个 singleton 作用域的 Bean 中，除非你明确知道这样做的后果。
-6. **考虑非常规的依赖源**
-   + `resolveDependency` 可能需要考虑来自非常规来源的依赖，如 `FactoryBeans`、`BeanFactory` 或其他特殊的依赖提供者。
+1. **Circular dependencies**
+   + Make sure you do not introduce circular dependencies. They make bean creation fail. Spring has some built-in detection, but you still need to be careful in custom logic.
+2. **Choosing the candidate bean**
+   + When several candidate beans can be injected, choosing one is an important question. Spring offers annotations such as `@Primary` and `@Priority` to help. But you may need to consider other factors.
+3. **Custom type conversion**
+   + If needed, provide the right type conversion logic to convert the bean to the required type.
+4. **Performance**
+   + Avoid unneeded repeated lookups or calculations. Where possible, cache the results, especially for frequent dependency lookups.
+5. **Lifecycle and scope**
+   + Consider the lifecycle and scope of the target bean. For example, do not inject a prototype-scoped bean into a singleton-scoped bean, unless you know the consequences.
+6. **Unusual dependency sources**
+   + `resolveDependency` may need to handle dependencies from unusual sources, such as `FactoryBeans`, `BeanFactory` or other special dependency providers.
 
-### 九、总结
+### 9. Summary
 
-#### 最佳实践总结
+#### Best Practices Summary
 
-1. **明确环境和配置**
-   + 在示例中，使用了 `AnnotationConfigApplicationContext` 作为 Spring 的应用上下文，它基于 Java 注解来配置和初始化 Spring 容器。指定了 `MyConfiguration` 类作为配置源，它用于引导整个应用程序的上下文环境。
+1. **Be clear about the environment and configuration**
+   + The example uses `AnnotationConfigApplicationContext` as the Spring application context. It configures and initializes the Spring container with Java annotations. The `MyConfiguration` class is the configuration source. It bootstraps the whole application context.
 
-2. **简化依赖解析**
-   + 通过将依赖解析过程封装到具体的方法中 (`methodResolveDependency` 和 `fieldResolveDependency`)，代码的逻辑变得清晰且可维护。
+2. **Simplify dependency resolution**
+   + The resolution is wrapped in specific methods (`methodResolveDependency` and `fieldResolveDependency`). This makes the code clear and easy to maintain.
 
-3. **利用Spring的底层API**
-   + 虽然大部分时间我们依赖于 Spring 的自动化特性进行依赖注入，但在这个实践中，我们深入地使用了 Spring 的底层 `resolveDependency` 方法来手动解析和注入依赖。这不仅展示了 Spring 的内部工作原理，还提供了当自动注入不适用时的替代解决方案。
+3. **Use the low-level Spring API**
+   + Most of the time we rely on Spring automatic features for dependency injection. In this practice, we used the low-level Spring `resolveDependency` method to resolve and inject dependencies by hand. This shows how Spring works inside. It also gives an alternative when automatic injection does not apply.
 
-4. **手动依赖注入的用例**
-   + 即使 `MyServiceB` 不是由 Spring 托管的 Bean，我们仍然能够使用 Spring 的机制为它解析和注入所需的依赖。这种能力在某些特定场景下可能非常有用，例如当我们需要将 Spring 与非 Spring 管理的代码集成时。
+4. **Use case for manual dependency injection**
+   + Even if `MyServiceB` is not a Spring-managed bean, we can still use the Spring mechanism to resolve and inject the dependencies it needs. This can be useful in some cases, for example when you integrate Spring with code that Spring does not manage.
 
-5. **使用反射增强灵活性**
-   + 通过反射API，我们能够动态地访问和操作目标对象的方法和字段，无论它们是否是公开的。这为我们提供了极大的灵活性，特别是当我们需要操作第三方库中的类时。
+5. **Use reflection for flexibility**
+   + With the reflection API, we can access and change the methods and fields of the target object at run time, whether or not they are public. This gives great flexibility, especially for classes in third-party libraries.
 
-6. **确保配置的完整性**
-   + 确保所需的所有配置资源，如 `application.properties` 文件，都在正确的位置并且被正确加载。在这个示例中，它被用来为 `MyServiceB` 提供一个属性值。
+6. **Keep the configuration complete**
+   + Make sure all needed configuration resources, such as the `application.properties` file, are in the right place and loaded correctly. In this example, it supplies a property value for `MyServiceB`.
 
-7. **验证和测试**
-   + 最后，通过打印方法，确保了所有依赖都已正确解析和注入。在实际应用中，我们应该有相应的单元测试来验证这些行为。
+7. **Verify and test**
+   + At the end, the print methods make sure all dependencies are resolved and injected correctly. In a real application, we should have unit tests to verify this behavior.
 
-#### 源码分析总结
+#### Source Code Analysis Summary
 
-**解析环境变量**
+**Resolve Environment Variables**
 
-1. **解析 `@Value` 注解**
-   + `doResolveDependency` 方法首先检查是否存在一个建议的值，通常来自 `@Value` 注解。如果找到这样的值，它会首先进行字符串替换（例如替换属性占位符），然后可能对该值进行求值（如果它是一个表达式），最后尝试将该值转换为目标类型。
-2. **类型转换**
-   + 如果找到了一个建议的值，或者已经解析了一个依赖项但其类型与所需的类型不匹配，系统会尝试进行类型转换。Spring有一个强大的类型转换系统，能够处理各种各样的转换场景。
-3. **深入的类型转换**
-   + 如果需要进行更复杂的类型转换（例如从集合到数组、从字符串到数字等），Spring提供了许多内置的转换规则来处理这些场景。
+1. **Resolve the `@Value` annotation**
+   + The `doResolveDependency` method first checks whether there is a suggested value, usually from the `@Value` annotation. If there is one, it first does string replacement (for example, replacing property placeholders). Then it may evaluate the value (if it is an expression). Finally it tries to convert the value to the target type.
+2. **Type conversion**
+   + If a suggested value is found, or a dependency was resolved but its type does not match the required type, the system tries a type conversion. Spring has a strong type conversion system that handles many cases.
+3. **Deep type conversion**
+   + If a more complex conversion is needed (for example collection to array, or string to number), Spring has many built-in conversion rules for these cases.
 
-**解析Bean依赖**
+**Resolve Bean Dependencies**
 
-1. **依赖解析的起点**
-   + `resolveDependency`是Spring的主要方法，用于解析bean的依赖关系。
-2. **懒加载代理判断**
-   + 首先，尝试使用懒加载代理满足依赖关系。如果不能使用懒加载代理，它会进一步尝试解析依赖。
-3. **解析具体的依赖**
-   + 在`doResolveDependency`中，根据依赖的类型，Spring可能尝试解析多个Bean候选项，如List或Map。它会搜索匹配的Bean，并根据条件（如类型、qualifiers等）选择合适的Bean进行注入。
-4. **多值依赖的处理**
-   + 如果依赖是多值类型（如集合或映射），Spring将在`resolveMultipleBeans`中进行处理。
-5. **确定注入的Bean**
-   + 如果有多个可能的Bean候选项，`determineAutowireCandidate`将帮助确定哪一个Bean是最佳的注入选择，这可能基于“primary”标记或Bean的优先级。
-6. **获取实际的Bean实例**
-   + 在所有这些决策之后，Spring最终会通过`getBean`方法获取并返回所依赖的Bean实例。
+1. **Starting point of dependency resolution**
+   + `resolveDependency` is the main Spring method that resolves the dependencies of beans.
+2. **Lazy-resolution proxy check**
+   + First, it tries to satisfy the dependency with a lazy-resolution proxy. If it cannot use one, it goes on to resolve the dependency.
+3. **Resolve the concrete dependency**
+   + In `doResolveDependency`, depending on the dependency type, Spring may try to resolve multiple bean candidates, such as a List or Map. It searches for matching beans and picks a suitable one to inject by conditions such as type and qualifiers.
+4. **Multi-value dependencies**
+   + If the dependency is a multi-value type (such as a collection or map), Spring handles it in `resolveMultipleBeans`.
+5. **Choose the bean to inject**
+   + If there are several possible bean candidates, `determineAutowireCandidate` helps decide which one is best to inject. This may be based on the "primary" mark or the priority of the bean.
+6. **Get the real bean instance**
+   + After all these decisions, Spring finally gets and returns the dependent bean instance with the `getBean` method.

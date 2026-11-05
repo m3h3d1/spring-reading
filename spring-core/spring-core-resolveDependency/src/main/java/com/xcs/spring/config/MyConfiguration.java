@@ -6,7 +6,7 @@ import org.springframework.context.annotation.PropertySource;
 
 /**
  * @author xcs
- * @date 2023年09月19日 16时35分
+ * @date 2023-09-19 16:35
  **/
 @Configuration
 @ComponentScan("com.xcs.spring")

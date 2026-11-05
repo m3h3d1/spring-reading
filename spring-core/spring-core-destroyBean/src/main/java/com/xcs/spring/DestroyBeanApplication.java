@@ -5,18 +5,18 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 /**
  * @author xcs
- * @date 2023年11月22日 14时27分
+ * @date 2023-11-22 14:27
  **/
 public class DestroyBeanApplication {
 
     public static void main(String[] args) {
-        // 创建一个基于注解的应用程序上下文对象
+        // Create an annotation-based application context
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-        // 注册配置类 MyBean，告诉 Spring 在容器中管理这个配置类所定义的 bean
+        // Register the MyBean configuration class so Spring manages the beans it defines
         context.register(MyBean.class);
-        // 刷新应用程序上下文，初始化并启动 Spring 容器
+        // Refresh the application context to initialize and start the Spring container
         context.refresh();
-        // 关闭应用程序上下文，销毁 Spring 容器并释放资源
+        // Close the application context to destroy the container and release resources
         context.close();
     }
 }

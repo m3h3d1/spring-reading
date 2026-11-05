@@ -4,22 +4,22 @@ import org.springframework.beans.factory.annotation.Value;
 
 /**
  * @author xcs
- * @date 2023年10月25日 10时37分
+ * @date 2023-10-25 10:37
  **/
 public class MyServiceB {
 
     /**
-     * 方法注入
+     * Method injection
      */
     private MyServiceA methodMyServiceA;
 
     /**
-     * 字段注入
+     * Field injection
      */
     private MyServiceA fieldMyServiceA;
 
     /**
-     * 字段注入 (环境变量)
+     * Field injection (environment variable)
      */
     @Value("${my.property.value}")
     private String myPropertyValue;

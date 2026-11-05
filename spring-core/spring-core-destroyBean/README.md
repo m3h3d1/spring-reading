@@ -1,220 +1,220 @@
-## Bean的销毁过程
+## Bean Destruction Process
 
-- [Bean的销毁过程](#bean的销毁过程)
-  - [一、基本信息](#一基本信息)
-  - [二、知识储备](#二知识储备)
-  - [三、基本描述](#三基本描述)
-  - [四、主要功能](#四主要功能)
-  - [五、最佳实践](#五最佳实践)
-  - [六、时序图](#六时序图)
-  - [七、源码分析](#七源码分析)
-    - [注册适配器](#注册适配器)
-    - [Bean销毁](#bean销毁)
-  - [八、注意事项](#八注意事项)
-  - [九、总结](#九总结)
-    - [最佳实践总结](#最佳实践总结)
-    - [源码分析总结](#源码分析总结)
+- [Bean Destruction Process](#bean-destruction-process)
+  - [1. Overview](#1-overview)
+  - [2. Background Knowledge](#2-background-knowledge)
+  - [3. Basic Description](#3-basic-description)
+  - [4. Main Features](#4-main-features)
+  - [5. Best Practices](#5-best-practices)
+  - [6. Sequence Diagram](#6-sequence-diagram)
+  - [7. Source Code Analysis](#7-source-code-analysis)
+    - [Register the Adapter](#register-the-adapter)
+    - [Bean Destruction](#bean-destruction)
+  - [8. Notes](#8-notes)
+  - [9. Summary](#9-summary)
+    - [Best Practices Summary](#best-practices-summary)
+    - [Source Code Analysis Summary](#source-code-analysis-summary)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、知识储备
+### 2. Background Knowledge
 
-1. [**Bean的定义注册过程**](https://github.com/xuchengsheng/spring-reading/tree/master/spring-core/spring-core-registerBeanDefinition)
+1. [**Bean Definition Registration**](https://github.com/xuchengsheng/spring-reading/tree/master/spring-core/spring-core-registerBeanDefinition)
 
-   + Bean的注册包括加载和解析配置文件，从中提取Bean定义。解析后的Bean信息，如类名、作用域、属性等，被注册到Spring容器。通过解析配置文件，容器获得Bean的元数据，进而创建Bean定义，包括类名、作用域（如singleton或prototype）、属性值等。这些定义通过唯一标识符与容器关联，以便后续通过ApplicationContext获取和管理。
+   + Bean registration loads and parses configuration files and extracts the bean definitions from them. The parsed bean information, such as class name, scope and properties, is registered in the Spring container. From the configuration, the container gets the bean metadata and creates bean definitions with the class name, scope (for example singleton or prototype), property values and so on. Each definition is linked to the container by a unique identifier, so the bean can be retrieved and managed later through the ApplicationContext.
 
-2. [**Bean的初始化过程**](https://github.com/xuchengsheng/spring-reading/blob/master/spring-core/spring-core-getBean/README.md)
+2. [**Bean Initialization Process**](https://github.com/xuchengsheng/spring-reading/blob/master/spring-core/spring-core-getBean/README.md)
 
-   + 通过构造函数实例化Bean，随后进行属性注入满足依赖关系。若Bean实现了Aware接口，容器通过相应回调方法注入上下文信息。注册的后置处理器在初始化前后对Bean进行额外处理。Bean实现InitializingBean接口时，容器调用afterPropertiesSet执行初始化逻辑。通过配置中的init-method属性也可指定自定义初始化方法。最终，Bean标记为已初始化状态，可被应用程序使用。
+   + The bean is instantiated through its constructor. Then properties are injected to satisfy its dependencies. If the bean implements an Aware interface, the container injects context information through the matching callback. The registered post-processors work on the bean before and after initialization. If the bean implements InitializingBean, the container calls afterPropertiesSet to run the initialization logic. You can also set a custom initialization method with the init-method attribute. At the end, the bean is marked as initialized and the application can use it.
 
-3. [**Bean的依赖解析过程**](https://github.com/xuchengsheng/spring-reading/blob/master/spring-core/spring-core-resolveDependency/README.md)
+3. [**Bean Dependency Resolution Process**](https://github.com/xuchengsheng/spring-reading/blob/master/spring-core/spring-core-resolveDependency/README.md)
 
-   + 通过声明依赖，Bean表达对其他Bean的需求。容器通过查找依赖，即在ApplicationContext中寻找所需的Bean定义。然后，容器进行依赖注入，将找到的Bean实例注入到相应的属性或构造函数参数中。在处理循环依赖时，Spring通过使用提前暴露的代理对象来解决循环引用问题。最后，容器支持延迟依赖解析，即在需要使用Bean时再进行实际的依赖解析和注入，以提高性能和减少启动时间。
+   + A bean declares what other beans it needs. The container looks up these dependencies, that is, it searches the ApplicationContext for the bean definitions it needs. Then the container injects the found bean instances into the matching properties or constructor parameters. For circular dependencies, Spring uses a proxy object that is exposed early. Finally, the container supports lazy dependency resolution. The dependency is resolved and injected only when the bean is needed. This improves performance and reduces startup time.
 
-### 三、基本描述
+### 3. Basic Description
 
-容器调用实现了`DisposableBean`接口的Bean的`destroy`方法执行自定义销毁逻辑。其次，如果Bean配置中通过`destroy-method`属性指定了自定义的销毁方法，容器也会调用。接着，对于实现了`DestructionAwareBeanPostProcessor`接口的后置处理器，容器分别调用其`postProcessBeforeDestruction`和`postProcessAfterDestruction`方法，允许进行额外的清理工作。通过`@PreDestroy`注解，我们可以在Bean方法上标记销毁前的清理操作。
+The container calls the `destroy` method of beans that implement the `DisposableBean` interface to run custom destruction logic. If the bean configuration sets a custom destroy method with the `destroy-method` attribute, the container calls it too. For post-processors that implement `DestructionAwareBeanPostProcessor`, the container calls their `postProcessBeforeDestruction` and `postProcessAfterDestruction` methods, which allows extra cleanup. With the `@PreDestroy` annotation, you can mark a bean method as a cleanup step before destruction.
 
-### 四、主要功能
+### 4. Main Features
 
-1. **执行自定义销毁逻辑**
+1. **Run custom destruction logic**
 
-   - 调用实现了`DisposableBean`接口的Bean的`destroy`方法，执行我们定义的自定义销毁逻辑，用于释放资源或执行必要的清理工作。
+   - Calls the `destroy` method of beans that implement `DisposableBean`. It runs your own destruction logic, such as releasing resources or doing needed cleanup.
 
-2. **调用自定义销毁方法**
+2. **Call a custom destroy method**
 
-   - 如果Bean配置中通过`destroy-method`属性指定了自定义的销毁方法，容器会调用这个方法，允许我们在销毁时执行特定的清理操作。
+   - If the bean configuration sets a custom destroy method with the `destroy-method` attribute, the container calls it. This lets you run specific cleanup when the bean is destroyed.
 
-3. **后置处理器清理工作**
+3. **Post-processor cleanup**
 
-   - 对于实现了`DestructionAwareBeanPostProcessor`接口的后置处理器，容器在销毁前后分别调用其`postProcessBeforeDestruction`和`postProcessAfterDestruction`方法，允许进行额外的清理工作。
+   - For post-processors that implement `DestructionAwareBeanPostProcessor`, the container calls `postProcessBeforeDestruction` and `postProcessAfterDestruction` before and after destruction. This allows extra cleanup.
 
-4. **执行`@PreDestroy`注解方法**
+4. **Run `@PreDestroy` methods**
 
-   - 通过`@PreDestroy`注解，我们可以在Bean的方法上标记销毁前的清理操作，确保在销毁时执行特定的业务逻辑。
+   - With the `@PreDestroy` annotation, you can mark a bean method as a cleanup step before destruction. This makes sure specific business logic runs on destruction.
 
-5. **触发销毁通知**
+5. **Trigger destruction notification**
 
-   - Spring容器会触发销毁通知，通知相关的监听器或观察者，允许应用程序在Bean销毁时执行特定的处理。
+   - The Spring container triggers a destruction notification to the related listeners or observers. This allows the application to run specific handling when a bean is destroyed.
 
-### 五、最佳实践
+### 5. Best Practices
 
-使用 Spring 的基于注解的配置方式，创建一个应用程序上下文，注册 bean，然后关闭应用程序上下文。
+This example uses Spring annotation-based configuration. It creates an application context, registers a bean, and then closes the application context.
 
 ```java
 public class DestroyBeanApplication {
 
     public static void main(String[] args) {
-        // 创建一个基于注解的应用程序上下文对象
+        // Create an annotation-based application context
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-        // 注册配置类 MyBean，告诉 Spring 在容器中管理这个配置类所定义的 bean
+        // Register the MyBean configuration class so Spring manages the beans it defines
         context.register(MyBean.class);
-        // 刷新应用程序上下文，初始化并启动 Spring 容器
+        // Refresh the application context to initialize and start the Spring container
         context.refresh();
-        // 关闭应用程序上下文，销毁 Spring 容器并释放资源
+        // Close the application context to destroy the container and release resources
         context.close();
     }
 }
 ```
 
-实现了 Spring 框架中 `DisposableBean` 接口的类，通过实现这个接口，我们可以在 bean 销毁时执行一些自定义的清理逻辑。
+This class implements the Spring `DisposableBean` interface. With this interface, we can run custom cleanup logic when the bean is destroyed.
 
 ```java
 public class MyBean implements DisposableBean {
 
     @Override
     public void destroy() throws Exception {
-        System.out.println("MyBean被销毁了");
+        System.out.println("MyBean was destroyed");
     }
 }
 ```
 
-运行结果发现，当 Spring 容器关闭时，会触发 bean 的销毁阶段，而实现了 `DisposableBean` 接口的 bean 就会调用其 `destroy` 方法。在我们的 `MyBean` 类中，`destroy` 方法中只有一行代码，即打印一条消息，因此我们在运行时看到的输出就是 `"MyBean被销毁了"`。
+The result shows that when the Spring container closes, the destruction phase of the bean is triggered. A bean that implements `DisposableBean` has its `destroy` method called. In our `MyBean` class, the `destroy` method has only one line. It prints a message, so the output we see at run time is `"MyBean was destroyed"`.
 
 ```java
-MyBean被销毁了
+MyBean was destroyed
 ```
 
-### 六、时序图
+### 6. Sequence Diagram
 
 ~~~mermaid
 sequenceDiagram
-Title: Bean的销毁过程时序图
+Title: Bean Destruction Process Sequence Diagram
 
-par 注册适配器阶段
+par Register adapter phase
 DestroyBeanApplication->>AbstractApplicationContext: refresh()
-Note over AbstractApplicationContext: 初始化应用程序上下文
+Note over AbstractApplicationContext: Initialize the application context
 
 AbstractApplicationContext->>AbstractApplicationContext: finishBeanFactoryInitialization(beanFactory)
-Note over AbstractApplicationContext: 完成bean工厂的初始化
+Note over AbstractApplicationContext: Finish initializing the bean factory
 
 AbstractApplicationContext->>DefaultListableBeanFactory: preInstantiateSingletons()
-Note over DefaultListableBeanFactory: 预实例化所有单例bean
+Note over DefaultListableBeanFactory: Pre-instantiate all singleton beans
 
 DefaultListableBeanFactory->>AbstractBeanFactory: getBean(name)
-Note over AbstractBeanFactory: 从bean工厂获取bean实例
+Note over AbstractBeanFactory: Get the bean instance from the bean factory
 
 AbstractBeanFactory->>AbstractBeanFactory: doGetBean(name, requiredType, args, typeCheckOnly)
-Note over AbstractBeanFactory: 实际获取bean的方法
+Note over AbstractBeanFactory: The method that actually gets the bean
 
 AbstractBeanFactory->>DefaultSingletonBeanRegistry: getSingleton(beanName, singletonFactory)
-Note over DefaultSingletonBeanRegistry: 从单例注册表获取单例bean
+Note over DefaultSingletonBeanRegistry: Get the singleton bean from the singleton registry
 
 DefaultSingletonBeanRegistry->>AbstractBeanFactory: getObject()
-Note over AbstractBeanFactory: 获取bean的实例对象
+Note over AbstractBeanFactory: Get the bean instance object
 
 AbstractBeanFactory->>AbstractAutowireCapableBeanFactory: createBean(beanName, mbd, args)
-Note over AbstractAutowireCapableBeanFactory: 创建bean实例
+Note over AbstractAutowireCapableBeanFactory: Create the bean instance
 
 AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory: doCreateBean(beanName, mbdToUse, args)
-Note over AbstractAutowireCapableBeanFactory: 实际创建bean实例的方法
+Note over AbstractAutowireCapableBeanFactory: The method that actually creates the bean instance
 
 AbstractAutowireCapableBeanFactory->>AbstractBeanFactory: registerDisposableBeanIfNecessary(beanName, bean, mbd)
-Note over AbstractBeanFactory: 注册bean的销毁适配器
+Note over AbstractBeanFactory: Register the destruction adapter of the bean
 
 AbstractBeanFactory->>DisposableBeanAdapter: new DisposableBeanAdapter(bean, beanName, beanDefinition, postProcessors, acc)
-Note over DisposableBeanAdapter: 创建bean的销毁适配器
+Note over DisposableBeanAdapter: Create the destruction adapter of the bean
 
-DisposableBeanAdapter->>AbstractBeanFactory: 返回销毁Bean适配器
-Note over AbstractBeanFactory: 返回销毁Bean适配器
+DisposableBeanAdapter->>AbstractBeanFactory: Return the destruction adapter
+Note over AbstractBeanFactory: Return the destruction adapter
 
 AbstractBeanFactory->>DefaultSingletonBeanRegistry: registerDisposableBean(beanName, bean)
-Note over DefaultSingletonBeanRegistry: 注册单例bean的销毁适配器
+Note over DefaultSingletonBeanRegistry: Register the destruction adapter of the singleton bean
 end
 
-par Bean销毁阶段
+par Bean destruction phase
 DestroyBeanApplication->>AbstractApplicationContext: close()
-Note over AbstractApplicationContext: 关闭应用程序上下文
+Note over AbstractApplicationContext: Close the application context
 
 AbstractApplicationContext->>AbstractApplicationContext: doClose()
-Note over AbstractApplicationContext: 执行关闭操作
+Note over AbstractApplicationContext: Run the close operation
 
 AbstractApplicationContext->>AbstractApplicationContext: destroyBeans()
-Note over AbstractApplicationContext: 销毁所有bean
+Note over AbstractApplicationContext: Destroy all beans
 
 AbstractApplicationContext->>DefaultListableBeanFactory: destroySingletons()
-Note over DefaultListableBeanFactory: 销毁所有单例bean
+Note over DefaultListableBeanFactory: Destroy all singleton beans
 
 DefaultListableBeanFactory->>DefaultSingletonBeanRegistry: destroySingletons()
-Note over DefaultSingletonBeanRegistry: 销毁所有单例bean
+Note over DefaultSingletonBeanRegistry: Destroy all singleton beans
 
 DefaultSingletonBeanRegistry->>DefaultSingletonBeanRegistry: destroySingleton(beanName)
-Note over DefaultSingletonBeanRegistry: 销毁单例bean
+Note over DefaultSingletonBeanRegistry: Destroy a singleton bean
 
 DefaultSingletonBeanRegistry->>DefaultSingletonBeanRegistry: destroyBean(beanName, disposableBean)
-Note over DefaultSingletonBeanRegistry: 销毁bean的销毁适配器
+Note over DefaultSingletonBeanRegistry: Destroy the bean through its destruction adapter
 
 DefaultSingletonBeanRegistry->>DisposableBeanAdapter: destroy()
-Note over DisposableBeanAdapter: 调用bean的destroy方法
+Note over DisposableBeanAdapter: Call the destroy method of the bean
 
 DisposableBeanAdapter->>MyBean: destroy()
-Note over MyBean: MyBean的销毁逻辑执行
+Note over MyBean: Run the destruction logic of MyBean
 end
 ~~~
 
-### 七、源码分析
+### 7. Source Code Analysis
 
-#### 注册适配器
+#### Register the Adapter
 
-在`org.springframework.context.support.AbstractApplicationContext#refresh`方法中我们重点关注一下`finishBeanFactoryInitialization(beanFactory)`这方法会对实例化所有剩余非懒加载的单列Bean对象，其他方法不是本次源码阅读的重点暂时忽略。
+In the `org.springframework.context.support.AbstractApplicationContext#refresh` method, we focus on `finishBeanFactoryInitialization(beanFactory)`. It instantiates all remaining non-lazy singleton beans. The other methods are not the focus of this reading, so we ignore them for now.
 
 ```java
 @Override
 public void refresh() throws BeansException, IllegalStateException {
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     // Instantiate all remaining (non-lazy-init) singletons.
     finishBeanFactoryInitialization(beanFactory);
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-在`org.springframework.context.support.AbstractApplicationContext#finishBeanFactoryInitialization`方法中，会继续调用`DefaultListableBeanFactory`类中的`preInstantiateSingletons`方法来完成所有剩余非懒加载的单列Bean对象。
+The `org.springframework.context.support.AbstractApplicationContext#finishBeanFactoryInitialization` method calls the `preInstantiateSingletons` method of `DefaultListableBeanFactory` to create all remaining non-lazy singleton beans.
 
 ```java
 protected void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
-    // ... [代码部分省略以简化]
-    // 完成所有剩余非懒加载的单列Bean对象。
+    // ... [code omitted for brevity]
+    // Instantiate all remaining non-lazy singleton beans.
     beanFactory.preInstantiateSingletons();
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultListableBeanFactory#preInstantiateSingletons`方法中，主要的核心目的是预先实例化所有非懒加载的单例bean。在Spring的上下文初始化完成后，该方法会被触发，以确保所有单例bean都被正确地创建并初始化。其中`getBean(beanName)`是此方法的核心操作。对于容器中定义的每一个单例bean，都会调用`getBean`方法，这将触发bean的实例化、初始化及其依赖的注入。如果bean之前没有被创建过，那么这个调用会导致其被实例化和初始化。
+The main goal of the `org.springframework.beans.factory.support.DefaultListableBeanFactory#preInstantiateSingletons` method is to instantiate all non-lazy singleton beans in advance. It is triggered after the Spring context is set up. This makes sure all singleton beans are created and initialized correctly. The core operation is `getBean(beanName)`. For every singleton bean defined in the container, `getBean` is called. This triggers the instantiation, initialization and dependency injection of the bean. If the bean has not been created before, this call creates and initializes it.
 
 ```java
 public void preInstantiateSingletons() throws BeansException {
-    // ... [代码部分省略以简化]
-    // 循环遍历所有bean的名称
+    // ... [code omitted for brevity]
+    // Loop over all bean names
     for (String beanName : beanNames) {
         getBean(beanName);
     }
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractBeanFactory#getBean()`方法中，又调用了`doGetBean`方法来实际执行创建Bean的过程，传递给它bean的名称和一些其他默认的参数值。此处，`doGetBean`负责大部分工作，如查找bean定义、创建bean（如果尚未创建）、处理依赖关系等。
+The `org.springframework.beans.factory.support.AbstractBeanFactory#getBean()` method calls `doGetBean` to do the actual work of creating the bean. It passes the bean name and some other default values. `doGetBean` does most of the work, such as finding the bean definition, creating the bean (if it does not exist yet) and handling dependencies.
 
 ```java
 @Override
@@ -223,141 +223,141 @@ public Object getBean(String name) throws BeansException {
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractBeanFactory#doGetBean`方法中，首先检查所请求的bean是否是一个单例并且已经创建。如果尚未创建，将创建一个新的实例。在这个过程中，处理可能的异常情况，如循环引用，并确保返回的bean是正确的类型。这是Spring容器bean生命周期管理的核心部分。
+The `org.springframework.beans.factory.support.AbstractBeanFactory#doGetBean` method first checks whether the requested bean is a singleton that already exists. If not, it creates a new instance. On the way, it handles possible problems such as circular references and makes sure the returned bean has the right type. This is a core part of bean lifecycle management in the Spring container.
 
 ```java
 protected <T> T doGetBean(
         String name, @Nullable Class<T> requiredType, @Nullable Object[] args, boolean typeCheckOnly)
         throws BeansException {
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
-    // 开始创建bean实例
+    // Start creating the bean instance
     if (mbd.isSingleton()) {
-        // 如果bean是单例的，我们会尝试从单例缓存中获取
-        // 如果不存在，则使用lambda创建一个新的实例
+        // If the bean is a singleton, try to get it from the singleton cache
+        // If it does not exist, create a new instance with a lambda
         sharedInstance = getSingleton(beanName, () -> {
             try {
-                // 尝试创建bean实例
+                // Try to create the bean instance
                 return createBean(beanName, mbd, args);
             }
             catch (BeansException ex) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
         });
-        // 对于某些bean（例如FactoryBeans），可能需要进一步处理以获取真正的bean实例
+        // For some beans (for example FactoryBeans), more processing may be needed to get the real bean instance
         beanInstance = getObjectForBeanInstance(sharedInstance, name, beanName, mbd);
     }
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
-    // 确保返回的bean实例与请求的类型匹配
+    // Make sure the returned bean instance matches the requested type
     return adaptBeanInstance(name, beanInstance, requiredType);
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultSingletonBeanRegistry#getSingleton()`方法中，主要负责从单例缓存中获取一个已存在的bean实例，或者使用提供的`ObjectFactory`创建一个新的实例。这是确保bean在Spring容器中作为单例存在的关键部分。
+The `org.springframework.beans.factory.support.DefaultSingletonBeanRegistry#getSingleton()` method gets an existing bean instance from the singleton cache, or creates a new one with the given `ObjectFactory`. This is a key part of making sure a bean exists as a singleton in the Spring container.
 
 ```java
 public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) {
-    // 断言bean名称不能为空
+    // The bean name must not be null
     Assert.notNull(beanName, "Bean name must not be null");
 
-    // 同步访问单例对象缓存，确保线程安全
+    // Synchronize access to the singleton cache to keep it thread safe
     synchronized (this.singletonObjects) {
-        // 从缓存中获取单例对象
+        // Get the singleton object from the cache
         Object singletonObject = this.singletonObjects.get(beanName);
 
-        // 如果缓存中没有找到
+        // If it is not found in the cache
         if (singletonObject == null) {
-            // ... [代码部分省略以简化]
+            // ... [code omitted for brevity]
 
             try {
-                // 使用工厂创建新的单例实例
+                // Create a new singleton instance with the factory
                 singletonObject = singletonFactory.getObject();
                 newSingleton = true;
             }
             catch (IllegalStateException ex) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
             catch (BeanCreationException ex) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
             finally {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
 
-            // ... [代码部分省略以简化]
+            // ... [code omitted for brevity]
         }
 
-        // 返回单例对象
+        // Return the singleton object
         return singletonObject;
     }
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#createBean()`方法中，主要的逻辑是调用 `doCreateBean`，这是真正进行 bean 实例化、属性填充和初始化的地方。这个方法会返回新创建的 bean 实例。
+The main logic of the `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#createBean()` method is to call `doCreateBean`. That is where bean instantiation, property population and initialization really happen. The method returns the newly created bean instance.
 
 ```java
 @Override
 protected Object createBean(String beanName, RootBeanDefinition mbd, @Nullable Object[] args)
     throws BeanCreationException {
     
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     
     try {
-        // 正常的bean实例化、属性注入和初始化。
-        // 这里是真正进行bean创建的部分。
+        // Normal bean instantiation, property injection and initialization.
+        // This is where the bean is really created.
         Object beanInstance = doCreateBean(beanName, mbdToUse, args);
-        // 记录bean成功创建的日志
+        // Log that the bean was created successfully
         if (logger.isTraceEnabled()) {
             logger.trace("Finished creating instance of bean '" + beanName + "'");
         }
         return beanInstance;
     }
     catch (BeanCreationException | ImplicitlyAppearedSingletonException ex) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
     catch (Throwable ex) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#doCreateBean`方法中，主要是在创建 bean 实例的过程中注册了销毁适配器，以便在容器关闭时能够执行相应的销毁逻辑。
+The `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#doCreateBean` method registers the destruction adapter while the bean instance is created. This lets the destruction logic run when the container closes.
 
 ```java
 protected Object doCreateBean(String beanName, RootBeanDefinition mbd, @Nullable Object[] args)
         throws BeanCreationException {
 
-    // 在此注册bean以便在销毁时进行处理。
+    // Register the bean so it can be handled on destruction.
     try {
         registerDisposableBeanIfNecessary(beanName, bean, mbd);
     }
     catch (BeanDefinitionValidationException ex) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractBeanFactory#registerDisposableBeanIfNecessary`方法中，首先检查Bean的作用域是否为单例且是否需要执行销毁逻辑。如果是单例作用域，注册一个`DisposableBean`适配器，负责执行各种销毁工作，包括`DestructionAwareBeanPostProcessors`、`DisposableBean`接口以及自定义的销毁方法。对于自定义作用域，查找相应的Scope并注册销毁回调。
+The `org.springframework.beans.factory.support.AbstractBeanFactory#registerDisposableBeanIfNecessary` method first checks whether the bean is a singleton and needs destruction logic. If it is a singleton, it registers a `DisposableBean` adapter that does all the destruction work, including `DestructionAwareBeanPostProcessors`, the `DisposableBean` interface and custom destroy methods. For a custom scope, it finds the matching Scope and registers a destruction callback.
 
 ```java
 protected void registerDisposableBeanIfNecessary(String beanName, Object bean, RootBeanDefinition mbd) {
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
-    // 检查是否为原型作用域（prototype），以及是否需要销毁
+    // Check that the scope is not prototype and that destruction is needed
     if (!mbd.isPrototype() && requiresDestruction(bean, mbd)) {
         if (mbd.isSingleton()) {
-            // 如果是单例作用域，注册一个 DisposableBean 适配器，该适配器执行所有销毁工作
-            // 包括 DestructionAwareBeanPostProcessors、DisposableBean 接口、自定义销毁方法等
+            // For a singleton, register a DisposableBean adapter that does all the destruction work
+            // including DestructionAwareBeanPostProcessors, the DisposableBean interface, custom destroy methods and so on
             registerDisposableBean(beanName, new DisposableBeanAdapter(
                 bean, beanName, mbd, getBeanPostProcessorCache().destructionAware, acc));
         } else {
-            // 如果是自定义作用域，找到相应的 Scope 并注册销毁回调
+            // For a custom scope, find the matching Scope and register a destruction callback
             Scope scope = this.scopes.get(mbd.getScope());
             if (scope == null) {
                 throw new IllegalStateException("No Scope registered for scope name '" + mbd.getScope() + "'");
             }
-            // 注册一个 DisposableBean 适配器，该适配器执行所有销毁工作
+            // Register a DisposableBean adapter that does all the destruction work
             scope.registerDestructionCallback(beanName, new DisposableBeanAdapter(
                 bean, beanName, mbd, getBeanPostProcessorCache().destructionAware, acc));
         }
@@ -365,7 +365,7 @@ protected void registerDisposableBeanIfNecessary(String beanName, Object bean, R
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractBeanFactory#requiresDestruction`方法中，如果 bean 类型不是 `NullBean` 且存在销毁方法或与销毁相关的 `DestructionAwareBeanPostProcessor`，则返回 `true`，表示该 bean 需要执行销毁逻辑。否则，返回 `false`，表示不需要执行销毁逻辑。
+In the `org.springframework.beans.factory.support.AbstractBeanFactory#requiresDestruction` method, if the bean type is not `NullBean` and it has a destroy method or a related `DestructionAwareBeanPostProcessor`, it returns `true`. This means the bean needs destruction logic. Otherwise it returns `false`.
 
 ```java
 protected boolean requiresDestruction(Object bean, RootBeanDefinition mbd) {
@@ -375,99 +375,99 @@ protected boolean requiresDestruction(Object bean, RootBeanDefinition mbd) {
 }
 ```
 
-在`org.springframework.beans.factory.support.DisposableBeanAdapter#DisposableBeanAdapter`方法中，主要用于处理 Bean 销毁逻辑的适配器。根据 Bean 的定义和类型信息，确定是否存在可调用的销毁方法，以及如何执行销毁逻辑。在初始化过程中，检查是否实现了 `DisposableBean` 接口、存在自定义的销毁方法，以及相关的 BeanPostProcessor。如果存在可调用的销毁方法，将进行相关的配置，以便在容器关闭时执行销毁逻辑。
+The `org.springframework.beans.factory.support.DisposableBeanAdapter#DisposableBeanAdapter` constructor builds the adapter that handles bean destruction. From the bean definition and type information, it decides whether a destroy method can be called and how to run it. During initialization, it checks whether the bean implements the `DisposableBean` interface, whether it has a custom destroy method, and which BeanPostProcessors apply. If a destroy method can be called, it sets things up so the destruction logic runs when the container closes.
 
 ```java
 public DisposableBeanAdapter(Object bean, String beanName, RootBeanDefinition beanDefinition,
         List<DestructionAwareBeanPostProcessor> postProcessors, @Nullable AccessControlContext acc) {
 
-    // 确保待销毁的 Bean 实例不为 null
+    // Make sure the bean instance to destroy is not null
     Assert.notNull(bean, "Disposable bean must not be null");
 
-    // 初始化实例变量
+    // Initialize the instance variables
     this.bean = bean;
     this.beanName = beanName;
 
-    // 确定是否需要调用 DisposableBean 接口的 destroy 方法
+    // Decide whether the destroy method of the DisposableBean interface must be called
     this.invokeDisposableBean = (this.bean instanceof DisposableBean && !beanDefinition.isExternallyManagedDestroyMethod("destroy"));
 
-    // 是否允许访问非公共方法
+    // Whether non-public methods may be accessed
     this.nonPublicAccessAllowed = beanDefinition.isNonPublicAccessAllowed();
     this.acc = acc;
 
-    // 推断销毁方法的名称
+    // Infer the name of the destroy method
     String destroyMethodName = inferDestroyMethodIfNecessary(bean, beanDefinition);
 
-    // 如果存在销毁方法，并且不是外部管理的 destroy 方法，则进行相关处理
+    // If there is a destroy method and it is not an externally managed destroy method, handle it
     if (destroyMethodName != null && !(this.invokeDisposableBean && "destroy".equals(destroyMethodName)) &&
         !beanDefinition.isExternallyManagedDestroyMethod(destroyMethodName)) {
         
-        // 记录销毁方法的名称
+        // Record the name of the destroy method
         this.destroyMethodName = destroyMethodName;
 
-        // 确定销毁方法
+        // Find the destroy method
         Method destroyMethod = determineDestroyMethod(destroyMethodName);
 
-        // 如果找不到销毁方法，并且 Bean 定义要求强制存在，则抛出异常
+        // If the destroy method is not found and the bean definition requires it, throw an exception
         if (destroyMethod == null) {
-            // ... [代码部分省略以简化]
+            // ... [code omitted for brevity]
         }
-        // 否则，检查销毁方法的合法性
+        // Otherwise, check that the destroy method is valid
         else {
             if (destroyMethod.getParameterCount() > 0) {
                 Class<?>[] paramTypes = destroyMethod.getParameterTypes();
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
-            // 获取销毁方法的接口方法（如果存在）
+            // Get the interface method of the destroy method (if any)
             destroyMethod = ClassUtils.getInterfaceMethodIfPossible(destroyMethod);
         }
-        // 记录销毁方法
+        // Record the destroy method
         this.destroyMethod = destroyMethod;
     }
 
-    // 过滤与销毁相关的 BeanPostProcessor
+    // Filter the BeanPostProcessors related to destruction
     this.beanPostProcessors = filterPostProcessors(postProcessors, bean);
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultSingletonBeanRegistry#registerDisposableBean`方法中，
+The `org.springframework.beans.factory.support.DefaultSingletonBeanRegistry#registerDisposableBean` method,
 
 ```java
 public void registerDisposableBean(String beanName, DisposableBean bean) {
-    // 使用同步块确保线程安全
+    // Use a synchronized block to keep it thread safe
     synchronized (this.disposableBeans) {
-        // 将待销毁的 Bean 放入 disposableBeans 集合中
+        // Put the bean to destroy into the disposableBeans collection
         this.disposableBeans.put(beanName, bean);
     }
 }
 ```
 
-#### Bean销毁
+#### Bean Destruction
 
-在`org.springframework.context.support.AbstractApplicationContext#close`方法中，首先是启动了一个同步块，它同步在 `startupShutdownMonitor` 对象上。这确保了在给定时刻只有一个线程可以执行这个块内的代码，防止多线程导致的资源竞争或数据不一致，然后是调用了 `doClose` 方法。
+The `org.springframework.context.support.AbstractApplicationContext#close` method first enters a synchronized block on the `startupShutdownMonitor` object. This makes sure only one thread at a time can run the code in the block. It prevents resource races and inconsistent data caused by multiple threads. Then it calls the `doClose` method.
 
 ```java
 @Override
 public void close() {
     synchronized (this.startupShutdownMonitor) {
         doClose();
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
 }
 ```
 
-在`org.springframework.context.support.AbstractApplicationContext#doClose`方法中，又调用了 `destroyBeans` 方法。
+The `org.springframework.context.support.AbstractApplicationContext#doClose` method calls the `destroyBeans` method.
 
 ```java
 protected void doClose() {
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     // Destroy all cached singletons in the context's BeanFactory.
     destroyBeans();
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-在`org.springframework.context.support.AbstractApplicationContext#destroyBeans`方法中，首先是调用了`getBeanFactory()`返回 Spring 的 `BeanFactory` ，然后在获得的 `BeanFactory` 上，调用了 `destroySingletons` 方法，这个方法的目的是销毁所有在 `BeanFactory` 中缓存的单例 beans。
+The `org.springframework.context.support.AbstractApplicationContext#destroyBeans` method first calls `getBeanFactory()` to get the Spring `BeanFactory`. Then it calls `destroySingletons` on that `BeanFactory`. This method destroys all singleton beans cached in the `BeanFactory`.
 
 ```java
 protected void destroyBeans() {
@@ -475,21 +475,21 @@ protected void destroyBeans() {
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultListableBeanFactory#destroySingletons`方法中，首先是调用了父类的 `destroySingletons` 方法，为了确保继承自父类的销毁逻辑得到了执行。
+The `org.springframework.beans.factory.support.DefaultListableBeanFactory#destroySingletons` method first calls the `destroySingletons` method of the parent class. This makes sure the destruction logic inherited from the parent class runs.
 
 ```java
 @Override
 public void destroySingletons() {
     super.destroySingletons();
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultSingletonBeanRegistry#destroySingletons`方法中，首先是在`disposableBeans` 字段上，从其键集合中获取所有的 bean 名称，并将它们转换为一个字符串数组。`disposableBeans` 可能包含了实现了 `DisposableBean` 接口的 beans，这些 beans 需要在容器销毁时特殊处理，最后倒序循环，从最后一个开始，销毁所有在 `disposableBeans` 列表中的 beans。这样做是为了确保依赖关系正确地处理，beans先被创建的应该后被销毁。
+The `org.springframework.beans.factory.support.DefaultSingletonBeanRegistry#destroySingletons` method first takes all bean names from the key set of the `disposableBeans` field and turns them into a string array. `disposableBeans` may hold beans that implement the `DisposableBean` interface. These beans need special handling when the container is destroyed. Then it loops in reverse order, from the last one, and destroys all beans in the `disposableBeans` list. This keeps dependencies correct. A bean that was created first should be destroyed last.
 
 ```java
 public void destroySingletons() {
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     String[] disposableBeanNames;
     synchronized (this.disposableBeans) {
         disposableBeanNames = StringUtils.toStringArray(this.disposableBeans.keySet());
@@ -497,71 +497,71 @@ public void destroySingletons() {
     for (int i = disposableBeanNames.length - 1; i >= 0; i--) {
         destroySingleton(disposableBeanNames[i]);
     }
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultListableBeanFactory#destroySingleton`方法中，首先是调用了父类的 `destroySingleton` 方法，为了确保继承自父类的销毁逻辑得到了执行。
+The `org.springframework.beans.factory.support.DefaultListableBeanFactory#destroySingleton` method first calls the `destroySingleton` method of the parent class. This makes sure the destruction logic inherited from the parent class runs.
 
 ```java
 @Override
 public void destroySingleton(String beanName) {
     super.destroySingleton(beanName);
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultSingletonBeanRegistry#destroySingleton`方法中，首先是使用 `synchronized` 关键字在 `disposableBeans` 对象上进行同步，以确保在多线程环境中安全地访问和修改它，从 `disposableBeans` 集合中移除指定名称的 bean，并将其转换为 `DisposableBean` 类型，最后调用`destroyBean`方法执行实际的销毁操作。
+The `org.springframework.beans.factory.support.DefaultSingletonBeanRegistry#destroySingleton` method first synchronizes on the `disposableBeans` object, so that access and changes are safe in a multi-threaded environment. It removes the bean with the given name from the `disposableBeans` collection and casts it to `DisposableBean`. Finally, it calls the `destroyBean` method to do the actual destruction.
 
 ```java
 public void destroySingleton(String beanName) {
-    // 从已注册的单例中移除指定名称的单例 Bean
+    // Remove the singleton bean with the given name from the registered singletons
     removeSingleton(beanName);
 
-    // 获取对应的 DisposableBean 实例
+    // Get the matching DisposableBean instance
     DisposableBean disposableBean;
     synchronized (this.disposableBeans) {
         disposableBean = (DisposableBean) this.disposableBeans.remove(beanName);
     }
 
-    // 执行销毁逻辑
+    // Run the destruction logic
     destroyBean(beanName, disposableBean);
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultSingletonBeanRegistry#destroyBean`方法中，主要用于销毁给定名称的 Bean，包括触发其依赖关系的销毁、执行 Bean 的 `destroy` 方法以及销毁该 Bean 包含的其他 Bean，最后，清理已销毁 Bean 的依赖关系和准备好的依赖信息。
+The `org.springframework.beans.factory.support.DefaultSingletonBeanRegistry#destroyBean` method destroys the bean with the given name. It triggers the destruction of the beans that depend on it, runs the `destroy` method of the bean, and destroys the other beans contained in it. At the end, it cleans up the dependency information of the destroyed bean.
 
 ```java
 protected void destroyBean(String beanName, @Nullable DisposableBean bean) {
-    // 触发销毁依赖于该 Bean 的其他 Bean...
+    // Trigger the destruction of other beans that depend on this bean...
     Set<String> dependencies;
     
-    // 在完全同步的情况下，以确保获取的 Set 是线程安全的
+    // Fully synchronized, so the Set we get is thread safe
     synchronized (this.dependentBeanMap) {
         dependencies = this.dependentBeanMap.remove(beanName);
     }
     
     if (dependencies != null) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
         for (String dependentBeanName : dependencies) {
             destroySingleton(dependentBeanName);
         }
     }
 
-    // 实际执行 Bean 的销毁逻辑...
+    // Actually run the destruction logic of the bean...
     if (bean != null) {
         try {
             bean.destroy();
         }
         catch (Throwable ex) {
-            // ... [代码部分省略以简化]
+            // ... [code omitted for brevity]
         }
     }
 
-    // 触发销毁该 Bean 包含的其他 Bean...
+    // Trigger the destruction of other beans contained in this bean...
     Set<String> containedBeans;
     synchronized (this.containedBeanMap) {
-        // 在完全同步的情况下，以确保获取的 Set 是断开连接的
+        // Fully synchronized, so the Set we get is disconnected
         containedBeans = this.containedBeanMap.remove(beanName);
     }
     if (containedBeans != null) {
@@ -570,7 +570,7 @@ protected void destroyBean(String beanName, @Nullable DisposableBean bean) {
         }
     }
 
-    // 从其他 Bean 的依赖关系中移除已销毁的 Bean...
+    // Remove the destroyed bean from the dependency information of other beans...
     synchronized (this.dependentBeanMap) {
         for (Iterator<Map.Entry<String, Set<String>>> it = this.dependentBeanMap.entrySet().iterator(); it.hasNext();) {
             Map.Entry<String, Set<String>> entry = it.next();
@@ -582,103 +582,103 @@ protected void destroyBean(String beanName, @Nullable DisposableBean bean) {
         }
     }
 
-    // 移除已销毁 Bean 的准备好的依赖信息
+    // Remove the prepared dependency information of the destroyed bean
     this.dependenciesForBeanMap.remove(beanName);
 }
 ```
 
-在`org.springframework.beans.factory.support.DisposableBeanAdapter#destroy`方法中，实现了 `DisposableBean` 接口的销毁方法，负责在 Bean 销毁阶段执行各个销毁相关的操作。这包括前置销毁处理、调用 `DisposableBean` 接口的 `destroy` 方法、执行自定义的销毁方法。
+The `org.springframework.beans.factory.support.DisposableBeanAdapter#destroy` method implements the destroy method of the `DisposableBean` interface. It runs all the destruction steps in the bean destruction phase. This includes pre-destruction processing, calling the `destroy` method of the `DisposableBean` interface, and running the custom destroy method.
 
 ```java
 @Override
 public void destroy() {
-    // 执行 DestructionAwareBeanPostProcessor 的前置销毁处理
+    // Run the pre-destruction processing of DestructionAwareBeanPostProcessor
     if (!CollectionUtils.isEmpty(this.beanPostProcessors)) {
         for (DestructionAwareBeanPostProcessor processor : this.beanPostProcessors) {
             processor.postProcessBeforeDestruction(this.bean, this.beanName);
         }
     }
 
-    // 如果实现了 DisposableBean 接口，则调用其 destroy 方法
+    // If DisposableBean is implemented, call its destroy method
     if (this.invokeDisposableBean) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
         try {
-            // ... [代码部分省略以简化]
+            // ... [code omitted for brevity]
             ((DisposableBean) this.bean).destroy();
         }
         catch (Throwable ex) {
-            // ... [代码部分省略以简化]
+            // ... [code omitted for brevity]
         }
     }
 
-    // 如果存在自定义的销毁方法，则执行
+    // If there is a custom destroy method, run it
     if (this.destroyMethod != null) {
         invokeCustomDestroyMethod(this.destroyMethod);
     }
-    // 如果存在指定名称的自定义销毁方法，则查找并执行
+    // If a custom destroy method name is given, find it and run it
     else if (this.destroyMethodName != null) {
         Method methodToInvoke = determineDestroyMethod(this.destroyMethodName);
         if (methodToInvoke != null) {
-            // 获取接口方法（如果存在）并执行自定义销毁方法
+            // Get the interface method (if any) and run the custom destroy method
             invokeCustomDestroyMethod(ClassUtils.getInterfaceMethodIfPossible(methodToInvoke));
         }
     }
 }
 ```
 
-### 八、注意事项
+### 8. Notes
 
-1. **销毁方法避免抛出异常**
+1. **Avoid throwing exceptions in destroy methods**
 
-   + 在销毁方法中应尽量避免抛出异常，因为抛出的异常可能会影响到其他Bean的销毁过程。如果有异常，最好进行适当的记录。
+   + Try not to throw exceptions in a destroy method. An exception can affect the destruction of other beans. If an exception happens, log it properly.
 
-2. **注意Bean的依赖关系**
+2. **Watch the bean dependencies**
 
-   + 确保销毁Bean的顺序符合依赖关系，首先销毁依赖关系较少的Bean，然后再销毁依赖关系较多的Bean。Spring容器会尽量按照依赖关系的顺序销毁Bean。
+   + Make sure beans are destroyed in an order that respects their dependencies. Beans with fewer dependencies are destroyed first, and beans with more dependencies later. The Spring container tries to destroy beans in dependency order.
 
-3. **注意Bean的生命周期和作用域**
+3. **Watch the bean lifecycle and scope**
 
-   + 对于单例（Singleton）Bean，其销毁过程会在容器关闭时触发。对于原型（Prototype）Bean，Spring容器不会负责销毁，需要手动管理。
+   + For singleton beans, destruction is triggered when the container closes. For prototype beans, the Spring container does not destroy them. You must manage them by hand.
 
 
-### 九、总结
+### 9. Summary
 
-#### 最佳实践总结
+#### Best Practices Summary
 
-1. **创建应用程序上下文**
+1. **Create the application context**
 
-   + 使用`AnnotationConfigApplicationContext`创建一个基于注解的应用程序上下文对象。
+   + Use `AnnotationConfigApplicationContext` to create an annotation-based application context.
 
-2. **注册Bean**
+2. **Register the bean**
 
-   + 使用`context.register(MyBean.class)`注册了`MyBean`类，告诉Spring容器要管理这个配置类所定义的bean。
+   + Use `context.register(MyBean.class)` to register the `MyBean` class. This tells the Spring container to manage the beans defined by this configuration class.
 
-3. **刷新应用程序上下文**
+3. **Refresh the application context**
 
-   + 使用`context.refresh()`刷新应用程序上下文，初始化并启动Spring容器。
+   + Use `context.refresh()` to refresh the application context. This initializes and starts the Spring container.
 
-4. **容器关闭**
+4. **Close the container**
 
-   + 使用`context.close()`关闭应用程序上下文。在关闭过程中，Spring容器会触发bean的销毁阶段。
+   + Use `context.close()` to close the application context. While closing, the Spring container triggers the destruction phase of the beans.
 
-5. **Bean销毁**
+5. **Bean destruction**
 
-   + 由于`MyBean`实现了`DisposableBean`接口，因此在容器关闭时，会调用`MyBean`的`destroy`方法。在`destroy`方法中，我们简单地打印一条消息，表示`MyBean`被销毁了。
-   + 最后，控制台输出了`MyBean被销毁了`的消息，证明了bean的销毁过程已经执行。
+   + Because `MyBean` implements the `DisposableBean` interface, the container calls the `destroy` method of `MyBean` when it closes. In the `destroy` method, we simply print a message to show that `MyBean` was destroyed.
+   + At the end, the console prints the message `MyBean was destroyed`. This proves that the bean destruction process has run.
 
-#### 源码分析总结
+#### Source Code Analysis Summary
 
-1. **注册Bean销毁适配器** 
+1. **Register the bean destruction adapter**
 
-   + 在`AbstractApplicationContext`的`finishBeanFactoryInitialization`方法中，调用了`DefaultListableBeanFactory`的`preInstantiateSingletons`方法，该方法会预先实例化所有非懒加载的单例bean。在实例化的过程中，对于每个bean，会调用`registerDisposableBeanIfNecessary`方法注册销毁适配器，以确保在容器关闭时能够执行相应的销毁逻辑。
+   + In the `finishBeanFactoryInitialization` method of `AbstractApplicationContext`, the `preInstantiateSingletons` method of `DefaultListableBeanFactory` is called. It instantiates all non-lazy singleton beans in advance. During instantiation, `registerDisposableBeanIfNecessary` is called for each bean to register its destruction adapter. This makes sure the destruction logic runs when the container closes.
 
-2. **Bean销毁** 
+2. **Bean destruction**
 
-   + 在容器关闭时，通过`AbstractApplicationContext`的`close`方法触发销毁过程。在`destroyBeans`方法中，调用了`DefaultListableBeanFactory`的`destroySingletons`方法，该方法销毁所有在`BeanFactory`中缓存的单例beans。
+   + When the container closes, the `close` method of `AbstractApplicationContext` triggers the destruction process. In `destroyBeans`, the `destroySingletons` method of `DefaultListableBeanFactory` is called. It destroys all singleton beans cached in the `BeanFactory`.
 
-   + 在`destroySingletons`方法中，遍历`disposableBeans`集合，获取所有待销毁的bean名称，并倒序循环销毁这些bean。在销毁过程中，首先调用`destroyBean`方法执行实际的销毁操作。
+   + The `destroySingletons` method goes through the `disposableBeans` collection, gets the names of all beans to destroy, and destroys them in reverse order. During destruction, it first calls `destroyBean` to do the actual work.
 
-   + 在`destroyBean`方法中，触发销毁依赖于该bean的其他bean，执行bean的`destroy`方法，销毁bean包含的其他bean，从其他bean的依赖关系中移除已销毁的bean，清理已销毁bean的准备好的依赖信息。
+   + The `destroyBean` method triggers the destruction of other beans that depend on this bean, runs the `destroy` method of the bean, destroys the other beans contained in it, removes the destroyed bean from the dependency information of other beans, and cleans up its prepared dependency information.
 
-   + 最后通过`DisposableBeanAdapter`类处理Bean的销毁逻辑。该类实现了`DisposableBean`接口的`destroy`方法，执行前置销毁处理、调用`DisposableBean`接口的`destroy`方法、执行自定义的销毁方法等操作。
+   + Finally, the `DisposableBeanAdapter` class handles the destruction logic of the bean. It implements the `destroy` method of the `DisposableBean` interface. It runs pre-destruction processing, calls the `destroy` method of the `DisposableBean` interface, and runs the custom destroy method.
 
