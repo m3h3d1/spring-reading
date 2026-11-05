@@ -7,9 +7,9 @@ public class MyService {
 
     public void foo() {
         System.out.println("foo...");
-        // 直接调用bar会导致切入无效
+        // Calling bar directly makes the aspect not work
         // this.bar();
-        // 获取代理对象并调用bar
+        // Get the proxy object and call bar
         ((MyService) AopContext.currentProxy()).bar();
     }
 

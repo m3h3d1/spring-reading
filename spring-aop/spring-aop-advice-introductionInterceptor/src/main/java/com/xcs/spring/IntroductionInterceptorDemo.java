@@ -6,19 +6,19 @@ import org.springframework.aop.support.DefaultIntroductionAdvisor;
 public class IntroductionInterceptorDemo {
 
     public static void main(String[] args) {
-        // 创建代理工厂&创建目标对象
+        // Create the proxy factory and the target object
         ProxyFactory proxyFactory = new ProxyFactory(new MyService());
-        // 强制私用CGLIB
+        // Force the use of CGLIB
         proxyFactory.setProxyTargetClass(true);
-        // 创建通知
+        // Create the advice
         proxyFactory.addAdvisor(new DefaultIntroductionAdvisor(new MyMonitoringIntroductionAdvice(), MyMonitoringCapable.class));
-        // 创建代理对象
+        // Create the proxy object
         MyService proxy = (MyService) proxyFactory.getProxy();
-        // 调用代理对象的方法
+        // Call a method on the proxy object
         proxy.foo();
-        // 开始监控
+        // Start monitoring
         ((MyMonitoringCapable) proxy).toggleMonitoring();
-        // 再次调用代理对象的方法
+        // Call a method on the proxy object again
         proxy.foo();
     }
 }

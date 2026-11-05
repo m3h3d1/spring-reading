@@ -1,66 +1,66 @@
 ## ThrowsAdvice
 
 - [ThrowsAdvice](#throwsadvice)
-  - [一、基本信息](#一基本信息)
-  - [二、基本描述](#二基本描述)
-  - [三、主要功能](#三主要功能)
-  - [四、接口源码](#四接口源码)
-  - [五、主要实现](#五主要实现)
-  - [六、类关系图](#六类关系图)
-  - [七、最佳实践](#七最佳实践)
+  - [1. Overview](#1-overview)
+  - [2. Description](#2-description)
+  - [3. Main Features](#3-main-features)
+  - [4. Interface Source](#4-interface-source)
+  - [5. Main Implementations](#5-main-implementations)
+  - [6. Class Diagram](#6-class-diagram)
+  - [7. Best Practices](#7-best-practices)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [Juejin](https://juejin.cn/user/4251135018533068/posts) 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、基本描述
+### 2. Description
 
-`ThrowsAdvice`接口是Spring AOP中的一种通知类型，用于在方法抛出异常时执行额外的逻辑。实现该接口的类可以捕获方法抛出的异常并执行自定义的异常处理逻辑。
+The `ThrowsAdvice` interface is a type of advice in Spring AOP. It runs extra logic when a method throws an exception. A class that implements this interface can catch the exceptions thrown by a method and run custom exception handling.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **捕获异常** 
+1. **Catch exceptions** 
 
-   + 允许在目标方法抛出异常时捕获这些异常。
+   + Lets you catch exceptions thrown by the target method.
 
-2. **执行额外逻辑** 
+2. **Run extra logic** 
 
-   + 提供了`afterThrowing()`方法，允许实现类在方法抛出异常时执行额外的逻辑，比如记录日志、发送通知等。
+   + Provides the `afterThrowing()` method. Implementing classes can run extra logic when a method throws an exception, such as logging or sending notifications.
 
-3. **参数传递** 
+3. **Pass arguments** 
 
-   + `afterThrowing()`方法提供了抛出异常的方法对象、参数数组、目标对象和异常对象作为参数，方便实现类在处理异常时获取相关信息。
+   + The `afterThrowing()` method receives the method object, the argument array, the target object, and the exception. This makes it easy to get related information while handling the exception.
 
-4. **定制化处理** 
+4. **Custom handling** 
 
-   + 可以根据业务需求定制化异常处理逻辑，使应用程序更加灵活和健壮。
+   + You can customize exception handling to fit business needs. This makes the application more flexible and robust.
 
-### 四、接口源码
+### 4. Interface Source
 
-`ThrowsAdvice`接口，用作异常通知的标签接口。它没有任何方法，方法是通过反射调用的。实现类必须实现`afterThrowing()`方法，以处理方法抛出的异常。该方法的参数形式为`void afterThrowing([Method, args, target], ThrowableSubclass)`，前三个参数可选，用于提供关于连接点的更多信息，
+The `ThrowsAdvice` interface is a tag interface for throws advice. It has no methods, because the methods are called by reflection. An implementing class must implement the `afterThrowing()` method to handle exceptions thrown by a method. The method has the form `void afterThrowing([Method, args, target], ThrowableSubclass)`. The first three arguments are optional. They give more information about the join point.
 
 ```java
 /**
- * 用于异常通知的标签接口。
+ * Tag interface for throws advice.
  *
- * <p>该接口没有任何方法，因为方法是通过反射调用的。实现类必须实现以下形式的方法：
+ * <p>This interface has no methods, because the methods are called by reflection. Implementing classes must implement methods of the following form:
  *
  * <pre class="code">void afterThrowing([Method, args, target], ThrowableSubclass);</pre>
  *
- * <p>以下是一些有效的方法示例：
+ * <p>Here are some valid methods:
  *
  * <pre class="code">public void afterThrowing(Exception ex)</pre>
  * <pre class="code">public void afterThrowing(RemoteException)</pre>
  * <pre class="code">public void afterThrowing(Method method, Object[] args, Object target, Exception ex)</pre>
  * <pre class="code">public void afterThrowing(Method method, Object[] args, Object target, ServletException ex)</pre>
  *
- * 前三个参数是可选的，只有在我们需要有关连接点更多信息时才有用，如AspectJ中的<b>after-throwing</b>通知。
+ * The first three arguments are optional. They are only useful if we need more information about the join point, as in AspectJ <b>after-throwing</b> advice.
  *
- * <p><b>注意:</b> 如果throws-advice方法本身抛出异常，它将覆盖原始异常（即将异常更改为用户）。
- * 覆盖的异常通常是RuntimeException; 这与任何方法签名兼容。但是，如果throws-advice方法抛出一个已检查的异常，
- * 它将必须匹配目标方法的声明异常，并且在某种程度上与特定目标方法签名耦合。
- * <b>不要抛出与目标方法签名不兼容的未声明的检查异常！</b>
+ * <p><b>Note:</b> If a throws-advice method throws an exception itself, it overrides the original exception (that is, it changes the exception to the user).
+ * The overriding exception is usually a RuntimeException; this is compatible with any method signature. However, if a throws-advice method throws a checked exception,
+ * it must match the declared exceptions of the target method, and it is coupled to the specific target method signature in some way.
+ * <b>Do not throw an undeclared checked exception that is not compatible with the target method signature!</b>
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -72,12 +72,12 @@ public interface ThrowsAdvice extends AfterAdvice {
 }
 ```
 
-### 五、主要实现
+### 5. Main Implementations
 
 1. **ThrowsAdviceInterceptor**
-   + 用于拦截方法抛出的异常，并触发相应的异常通知（`ThrowsAdvice`）。它负责捕获方法执行过程中抛出的异常，并调用相关的异常通知来处理异常情况。
+   + Intercepts exceptions thrown by a method and triggers the matching throws advice (`ThrowsAdvice`). It catches the exception thrown while the method runs and calls the related throws advice to handle it.
 
-### 六、类关系图
+### 6. Class Diagram
 
 ~~~mermaid
 classDiagram
@@ -99,27 +99,27 @@ AfterAdvice  -->  Advice
 ThrowsAdvice  -->  AfterAdvice 
 ~~~
 
-### 七、最佳实践
+### 7. Best Practices
 
-使用`ThrowsAdvice`接口来处理方法抛出的异常。它创建了一个代理工厂，并将目标对象（`MyService`）和异常通知（`MyThrowsAdvice`）传递给代理工厂。然后，它通过代理工厂获取代理对象，并调用代理对象的方法`foo()`。
+This example uses the `ThrowsAdvice` interface to handle exceptions thrown by a method. It creates a proxy factory and passes the target object (`MyService`) and the throws advice (`MyThrowsAdvice`) to it. Then it gets the proxy object from the factory and calls the method `foo()` on it.
 
 ```java
 public class ThrowsAdviceDemo {
 
     public static void main(String[] args) {
-        // 创建代理工厂&创建目标对象
+        // Create the proxy factory and the target object
         ProxyFactory proxyFactory = new ProxyFactory(new MyService());
-        // 创建通知
+        // Create the advice
         proxyFactory.addAdvice(new MyThrowsAdvice());
-        // 获取代理对象
+        // Get the proxy object
         MyService proxy = (MyService) proxyFactory.getProxy();
-        // 调用代理对象的方法
+        // Call a method on the proxy object
         proxy.foo();
     }
 }
 ```
 
-`MyThrowsAdvice`类实现了`ThrowsAdvice`接口，并定义了`afterThrowing()`方法，用于处理方法抛出的异常。当目标方法抛出异常时，该方法将被调用，并打印出异常信息。
+The `MyThrowsAdvice` class implements the `ThrowsAdvice` interface and defines the `afterThrowing()` method to handle exceptions thrown by a method. When the target method throws an exception, this method is called and prints the exception information.
 
 ```java
 public class MyThrowsAdvice implements ThrowsAdvice {
@@ -129,7 +129,7 @@ public class MyThrowsAdvice implements ThrowsAdvice {
 }
 ```
 
-`MyService`类包含了一个名为`foo()`的方法，该方法执行某些操作，并故意引发了一个异常（通过除以零）。
+The `MyService` class has a method named `foo()`. It does some work and throws an exception on purpose (by dividing by zero).
 
 ```java
 public class MyService {
@@ -141,7 +141,7 @@ public class MyService {
 }
 ```
 
-运行结果，当调用了`MyService`类的`foo()`方法，但在该方法中发生了除以零的错误，导致了`java.lang.ArithmeticException: / by zero`异常的抛出。
+This is the result. The `foo()` method of the `MyService` class was called. A divide-by-zero error happened inside it, so a `java.lang.ArithmeticException: / by zero` exception was thrown.
 
 ```java
 Doing something exception...

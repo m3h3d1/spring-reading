@@ -9,29 +9,29 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 public class AspectInstanceFactoryDemo {
 
     public static void main(String[] args) {
-        // 使用 SimpleAspectInstanceFactory 创建切面实例
+        // Create an aspect instance with SimpleAspectInstanceFactory
         SimpleAspectInstanceFactory sAif = new SimpleAspectInstanceFactory(MyAspect.class);
         System.out.println("SimpleAspectInstanceFactory (1): " + sAif.getAspectInstance());
         System.out.println("SimpleAspectInstanceFactory (2): " + sAif.getAspectInstance());
 
-        // 使用 SingletonAspectInstanceFactory 创建单例切面实例
+        // Create a singleton aspect instance with SingletonAspectInstanceFactory
         SingletonAspectInstanceFactory singletonAif = new SingletonAspectInstanceFactory(new MyAspect());
         System.out.println("SingletonAspectInstanceFactory (1): " + singletonAif.getAspectInstance());
         System.out.println("SingletonAspectInstanceFactory (2): " + singletonAif.getAspectInstance());
 
-        // 创建一个 DefaultListableBeanFactory 实例，用于注册和管理 bean
+        // Create a DefaultListableBeanFactory instance to register and manage beans
         DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-        // 注册一个名为 "myAspect" 的单例 bean，类型为 MyAspect
+        // Register a singleton bean named "myAspect" of type MyAspect
         beanFactory.registerSingleton("myAspect", new MyAspect());
-        // 创建一个切面工厂的 BeanDefinition
+        // Create a BeanDefinition for the aspect factory
         RootBeanDefinition aspectFactoryDef = new RootBeanDefinition(SimpleBeanFactoryAwareAspectInstanceFactory.class);
-        // 设置切面工厂的属性 aspectBeanName 为 "myAspect"
+        // Set the property aspectBeanName of the aspect factory to "myAspect"
         aspectFactoryDef.getPropertyValues().add("aspectBeanName", "myAspect");
-        // 设置切面工厂为合成的，即不对外暴露
+        // Mark the aspect factory as synthetic, so it is not exposed
         aspectFactoryDef.setSynthetic(true);
-        // 注册名为 "simpleBeanFactoryAwareAspectInstanceFactory" 的 bean，并使用切面工厂的 BeanDefinition
+        // Register a bean named "simpleBeanFactoryAwareAspectInstanceFactory" with the BeanDefinition of the aspect factory
         beanFactory.registerBeanDefinition("simpleBeanFactoryAwareAspectInstanceFactory", aspectFactoryDef);
-        // 从 BeanFactory 中获取 SimpleBeanFactoryAwareAspectInstanceFactory 的实例
+        // Get the SimpleBeanFactoryAwareAspectInstanceFactory instance from the BeanFactory
         SimpleBeanFactoryAwareAspectInstanceFactory simpleBeanFactoryAwareAif = beanFactory.getBean(SimpleBeanFactoryAwareAspectInstanceFactory.class);
         System.out.println("SimpleBeanFactoryAwareAspectInstanceFactory (1): " + simpleBeanFactoryAwareAif.getAspectInstance());
         System.out.println("SimpleBeanFactoryAwareAspectInstanceFactory (2): " + simpleBeanFactoryAwareAif.getAspectInstance());

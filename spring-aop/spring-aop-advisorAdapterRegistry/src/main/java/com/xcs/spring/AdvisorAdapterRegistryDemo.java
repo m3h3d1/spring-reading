@@ -7,14 +7,14 @@ import org.springframework.aop.framework.adapter.DefaultAdvisorAdapterRegistry;
 public class AdvisorAdapterRegistryDemo {
 
     public static void main(String[] args) {
-        // 创建默认的Advisor适配器注册表实例
+        // Create the default Advisor adapter registry instance
         DefaultAdvisorAdapterRegistry registry = new DefaultAdvisorAdapterRegistry();
-        // 包装给定的MyMethodBeforeAdvice为Advisor
+        // Wrap the given MyMethodBeforeAdvice as an Advisor
         Advisor advisor = registry.wrap(new MyMethodBeforeAdvice());
 
-        // 获取Advisor中的拦截器数组
+        // Get the interceptor array from the Advisor
         MethodInterceptor[] interceptors = registry.getInterceptors(advisor);
-        // 输出拦截器信息
+        // Print the interceptor information
         for (MethodInterceptor interceptor : interceptors) {
             System.out.println("interceptor = " + interceptor);
         }

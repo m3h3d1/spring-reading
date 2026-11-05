@@ -13,68 +13,68 @@ public class AopProxyDemo {
     }
 
     /**
-     * cglib代理
+     * CGLIB proxy
      *
      * @throws Exception
      */
     private static void cglibProxy() throws Exception {
-        // 创建AdvisedSupport对象，用于配置AOP代理
+        // Create an AdvisedSupport object to configure the AOP proxy
         AdvisedSupport advisedSupport = new AdvisedSupport();
-        // 设置目标对象
+        // Set the target object
         advisedSupport.setTarget(new MyServiceImpl());
-        // 添加拦截器
+        // Add an interceptor
         advisedSupport.addAdvice(new MyMethodInterceptor());
 
-        // 获取CglibAopProxy的Class对象
+        // Get the Class object of CglibAopProxy
         Class<?> cglibClass = Class.forName("org.springframework.aop.framework.CglibAopProxy");
 
-        // 获取CglibAopProxy的构造方法
+        // Get the constructor of CglibAopProxy
         Constructor<?> constructor = cglibClass.getConstructor(AdvisedSupport.class);
         constructor.setAccessible(true);
 
-        // 使用构造方法创建CglibAopProxy实例
+        // Create a CglibAopProxy instance with the constructor
         AopProxy aopProxy = (AopProxy) constructor.newInstance(advisedSupport);
 
-        // 调用getProxy方法创建代理对象
+        // Call the getProxy method to create the proxy object
         MyService myService = (MyService) aopProxy.getProxy();
 
-        // 输出代理对象的信息
+        // Print information about the proxy object
         System.out.println("Cglib Class = " + myService.getClass());
-        // 调用代理对象的方法
+        // Call a method on the proxy object
         myService.foo();
     }
 
     /**
-     * Jdk代理
+     * JDK proxy
      *
      * @throws Exception
      */
     private static void jdkProxy() throws Exception {
-        // 创建AdvisedSupport对象，用于配置AOP代理
+        // Create an AdvisedSupport object to configure the AOP proxy
         AdvisedSupport advisedSupport = new AdvisedSupport();
-        // 设置目标对象
+        // Set the target object
         advisedSupport.setTarget(new MyServiceImpl());
-        // 设置目标对象实现的接口
+        // Set the interfaces implemented by the target object
         advisedSupport.setInterfaces(MyService.class);
-        // 添加拦截器
+        // Add an interceptor
         advisedSupport.addAdvice(new MyMethodInterceptor());
 
-        // 获取JdkDynamicAopProxy的Class对象
+        // Get the Class object of JdkDynamicAopProxy
         Class<?> jdkClass = Class.forName("org.springframework.aop.framework.JdkDynamicAopProxy");
 
-        // 获取JdkDynamicAopProxy的构造方法
+        // Get the constructor of JdkDynamicAopProxy
         Constructor<?> constructor = jdkClass.getConstructor(AdvisedSupport.class);
         constructor.setAccessible(true);
 
-        // 使用构造方法创建JdkDynamicAopProxy实例
+        // Create a JdkDynamicAopProxy instance with the constructor
         AopProxy aopProxy = (AopProxy) constructor.newInstance(advisedSupport);
 
-        // 调用getProxy方法创建代理对象
+        // Call the getProxy method to create the proxy object
         MyService myService = (MyService) aopProxy.getProxy();
 
-        // 输出代理对象的信息
+        // Print information about the proxy object
         System.out.println("JDK Class = " + myService.getClass());
-        // 调用代理对象的方法
+        // Call a method on the proxy object
         myService.foo();
     }
 }

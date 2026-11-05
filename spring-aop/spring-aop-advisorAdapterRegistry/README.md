@@ -1,42 +1,42 @@
 ## AdvisorAdapterRegistry
 
 - [AdvisorAdapterRegistry](#advisoradapterregistry)
-    - [一、基本信息](#一基本信息)
-    - [二、基本描述](#二基本描述)
-    - [三、主要功能](#三主要功能)
-    - [四、接口源码](#四接口源码)
-    - [五、主要实现](#五主要实现)
-    - [六、类关系图](#六类关系图)
-    - [七、最佳实践](#七最佳实践)
-    - [八、源码分析](#八源码分析)
+    - [1. Overview](#1-overview)
+    - [2. Description](#2-description)
+    - [3. Main Features](#3-main-features)
+    - [4. Interface Source](#4-interface-source)
+    - [5. Main Implementations](#5-main-implementations)
+    - [6. Class Diagram](#6-class-diagram)
+    - [7. Best Practices](#7-best-practices)
+    - [8. Source Code Analysis](#8-source-code-analysis)
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [Juejin](https://juejin.cn/user/4251135018533068/posts) 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、基本描述
+### 2. Description
 
-`AdvisorAdapterRegistry`接口是Spring AOP中的关键接口之一，用于注册和管理AdvisorAdapters，它负责将Advisor与AOP框架所支持的特定拦截器关联起来，实现对目标对象方法的拦截和增强，从而实现面向切面编程的功能。
+The `AdvisorAdapterRegistry` interface is one of the key interfaces in Spring AOP. It registers and manages AdvisorAdapters. It links an Advisor to the specific interceptor that the AOP framework supports. This lets the framework intercept and enhance methods of the target object, which is the aspect-oriented programming feature.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **注册AdvisorAdapters**
+1. **Register AdvisorAdapters**
 
-   + 允许我们注册自定义的AdvisorAdapters，以适配新的拦截器类型或扩展现有的拦截器逻辑。
+   + Lets us register custom AdvisorAdapters to support new interceptor types or extend existing interceptor logic.
 
-3. **支持内置拦截器**
+3. **Support built-in interceptors**
 
-   + 默认实现预先注册了一些标准的AdvisorAdapters，用于支持Spring AOP框架内置的拦截器类型（如BeforeAdvice、AfterReturningAdvice等）。
+   + The default implementation registers some standard AdvisorAdapters in advance. They support the interceptor types built into the Spring AOP framework (such as BeforeAdvice and AfterReturningAdvice).
 
-### 四、接口源码
+### 4. Interface Source
 
-作为Advisor适配器的注册表。它提供了方法来包装给定的advice为Advisor，并获取Advisor中的拦截器数组。通过注册AdvisorAdapter，实现了Advisor与AOP框架所支持的不同拦截器类型之间的适配。
+A registry of Advisor adapters. It has methods to wrap a given advice as an Advisor, and to get the array of interceptors from an Advisor. By registering AdvisorAdapters, it adapts between an Advisor and the different interceptor types that the AOP framework supports.
 
 ```java
 /**
- * Advisor适配器注册表的接口。
+ * Interface for registries of Advisor adapters.
  *
- * <p><i>这是一个SPI接口，不应该由任何Spring用户实现。</i>
+ * <p><i>This is an SPI interface and should not be implemented by any Spring user.</i>
  *
  * @author Rod Johnson
  * @author Rob Harrop
@@ -44,49 +44,49 @@
 public interface AdvisorAdapterRegistry {
 
 	/**
-	 * 返回一个包装了给定advice的{@link Advisor}。
-	 * <p>默认情况下应该至少支持
+	 * Return an {@link Advisor} that wraps the given advice.
+	 * <p>By default, at least the following should be supported:
 	 * {@link org.aopalliance.intercept.MethodInterceptor},
 	 * {@link org.springframework.aop.MethodBeforeAdvice},
 	 * {@link org.springframework.aop.AfterReturningAdvice},
 	 * {@link org.springframework.aop.ThrowsAdvice}。
-	 * @param advice 应该是一个advice的对象
-	 * @return 包装了给定advice的Advisor（永远不会为{@code null}；
-	 * 如果advice参数本身就是一个Advisor，则直接返回）
-	 * @throws UnknownAdviceTypeException 如果没有注册的advisor adapter
-	 * 能够包装给定的advice
+	 * @param advice an object that should be an advice
+	 * @return an Advisor that wraps the given advice (never {@code null};
+	 * if the advice argument is already an Advisor, it is returned directly)
+	 * @throws UnknownAdviceTypeException if no registered advisor adapter
+	 * can wrap the given advice
 	 */
 	Advisor wrap(Object advice) throws UnknownAdviceTypeException;
 
 	/**
-	 * 返回一组AOP Alliance MethodInterceptors，以允许在基于拦截的框架中使用给定的Advisor。
-	 * <p>如果Advisor是一个{@link org.springframework.aop.PointcutAdvisor}，
-	 * 则不必担心与其关联的切入点表达式只需返回一个拦截器。
-	 * @param advisor 要查找拦截器的Advisor
-	 * @return 一组MethodInterceptor，用于暴露此Advisor的行为
-	 * @throws UnknownAdviceTypeException 如果Advisor类型
-	 * 不被任何注册的AdvisorAdapter理解
+	 * Return an array of AOP Alliance MethodInterceptors, so that the given Advisor can be used in an interception-based framework.
+	 * <p>If the Advisor is a {@link org.springframework.aop.PointcutAdvisor},
+	 * do not worry about the pointcut expression attached to it. Just return an interceptor.
+	 * @param advisor the Advisor to find interceptors for
+	 * @return an array of MethodInterceptors that expose the behavior of this Advisor
+	 * @throws UnknownAdviceTypeException if the Advisor type
+	 * is not understood by any registered AdvisorAdapter
 	 */
 	MethodInterceptor[] getInterceptors(Advisor advisor) throws UnknownAdviceTypeException;
 
 	/**
-	 * 注册给定的{@link AdvisorAdapter}。
-	 * 注意，不需要为AOP Alliance Interceptors或Spring Advices注册适配器
-	 * 这些必须由{@code AdvisorAdapterRegistry}的实现自动识别。
-	 * @param adapter 理解特定Advisor或Advice类型的AdvisorAdapter
+	 * Register the given {@link AdvisorAdapter}.
+	 * Note that there is no need to register adapters for AOP Alliance Interceptors or Spring Advices.
+	 * These must be recognized automatically by an implementation of {@code AdvisorAdapterRegistry}.
+	 * @param adapter an AdvisorAdapter that understands a particular Advisor or Advice type
 	 */
 	void registerAdvisorAdapter(AdvisorAdapter adapter);
 
 }
 ```
 
-### 五、主要实现
+### 5. Main Implementations
 
 1. **DefaultAdvisorAdapterRegistry**
 
-   + 默认Advisor适配器注册表实现，预先注册了标准的Advisor适配器，支持将各种类型的Advice适配到AOP Alliance MethodInterceptor，并允许我们注册自定义的Advisor适配器，从而实现了Advisor与拦截器之间的灵活适配和管理。
+   + The default Advisor adapter registry. It registers the standard Advisor adapters in advance. It adapts the various types of Advice to the AOP Alliance MethodInterceptor, and lets us register custom Advisor adapters. This gives flexible adaptation and management between Advisors and interceptors.
 
-### 六、类关系图
+### 6. Class Diagram
 
 ~~~mermaid
 classDiagram
@@ -100,22 +100,22 @@ class DefaultAdvisorAdapterRegistry
 DefaultAdvisorAdapterRegistry  ..>  AdvisorAdapterRegistry 
 ~~~
 
-### 七、最佳实践
+### 7. Best Practices
 
-使用`DefaultAdvisorAdapterRegistry`来包装自定义的`MyMethodBeforeAdvice`，并获取其对应的拦截器数组。通过`wrap()`方法将`MyMethodBeforeAdvice`转换为`Advisor`，然后使用`getInterceptors()`方法获取该`Advisor`中的拦截器数组，最后输出拦截器的信息。
+This example uses `DefaultAdvisorAdapterRegistry` to wrap the custom `MyMethodBeforeAdvice` and get its interceptor array. The `wrap()` method turns `MyMethodBeforeAdvice` into an `Advisor`. Then the `getInterceptors()` method gets the interceptor array of that `Advisor`. Finally, it prints the interceptor information.
 
 ```java
 public class AdvisorAdapterRegistryDemo {
 
     public static void main(String[] args) {
-        // 创建默认的Advisor适配器注册表实例
+        // Create the default Advisor adapter registry instance
         DefaultAdvisorAdapterRegistry registry = new DefaultAdvisorAdapterRegistry();
-        // 包装给定的MyMethodBeforeAdvice为Advisor
+        // Wrap the given MyMethodBeforeAdvice as an Advisor
         Advisor advisor = registry.wrap(new MyMethodBeforeAdvice());
 
-        // 获取Advisor中的拦截器数组
+        // Get the interceptor array from the Advisor
         MethodInterceptor[] interceptors = registry.getInterceptors(advisor);
-        // 输出拦截器信息
+        // Print the interceptor information
         for (MethodInterceptor interceptor : interceptors) {
             System.out.println("interceptor = " + interceptor);
         }
@@ -123,16 +123,16 @@ public class AdvisorAdapterRegistryDemo {
 }
 ```
 
-### 八、源码分析
+### 8. Source Code Analysis
 
-实现了`AdvisorAdapterRegistry`接口的默认实现`DefaultAdvisorAdapterRegistry`，支持将不同类型的Advice对象适配为Advisor，并提供获取Advisor中拦截器数组的功能。它预先注册了一些常见的Advisor适配器，并允许用户注册自定义的适配器。其核心逻辑包括将Advice对象包装为Advisor、根据Advisor获取拦截器数组以及注册Advisor适配器。
+`DefaultAdvisorAdapterRegistry` is the default implementation of the `AdvisorAdapterRegistry` interface. It adapts different types of Advice objects into Advisors, and it can get the interceptor array from an Advisor. It registers some common Advisor adapters in advance, and lets users register custom adapters. Its core logic is to wrap an Advice object as an Advisor, get the interceptor array from an Advisor, and register Advisor adapters.
 
-[AdvisorAdapter源码分析](../spring-aop-advisorAdapter/README.md)
+[AdvisorAdapter Source Code Analysis](../spring-aop-advisorAdapter/README.md)
 
 ```java
 /**
- * AdvisorAdapterRegistry接口的默认实现。
- * 支持{@link org.aopalliance.intercept.MethodInterceptor}、
+ * Default implementation of the AdvisorAdapterRegistry interface.
+ * Supports {@link org.aopalliance.intercept.MethodInterceptor},
  * {@link org.springframework.aop.MethodBeforeAdvice}、
  * {@link org.springframework.aop.AfterReturningAdvice}、
  * {@link org.springframework.aop.ThrowsAdvice}。
@@ -144,32 +144,32 @@ public class AdvisorAdapterRegistryDemo {
 @SuppressWarnings("serial")
 public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Serializable {
 
-    // 用于存储注册的AdvisorAdapter的列表
+    // List that stores the registered AdvisorAdapters
     private final List<AdvisorAdapter> adapters = new ArrayList<>(3);
 
     /**
-     * 创建一个新的DefaultAdvisorAdapterRegistry实例，并注册已知的适配器。
-     * 这里的“已知的适配器”包括MethodBeforeAdviceAdapter、AfterReturningAdviceAdapter、ThrowsAdviceAdapter。
+     * Create a new DefaultAdvisorAdapterRegistry instance and register the known adapters.
+     * The "known adapters" here are MethodBeforeAdviceAdapter, AfterReturningAdviceAdapter, and ThrowsAdviceAdapter.
      */
     public DefaultAdvisorAdapterRegistry() {
-        // 注册MethodBeforeAdviceAdapter适配器
+        // Register the MethodBeforeAdviceAdapter adapter
         registerAdvisorAdapter(new MethodBeforeAdviceAdapter());
-        // 注册AfterReturningAdviceAdapter适配器
+        // Register the AfterReturningAdviceAdapter adapter
         registerAdvisorAdapter(new AfterReturningAdviceAdapter());
-        // 注册ThrowsAdviceAdapter适配器
+        // Register the ThrowsAdviceAdapter adapter
         registerAdvisorAdapter(new ThrowsAdviceAdapter());
     }
 
     /**
-     * 将给定的adviceObject包装为Advisor。
-     * 如果adviceObject已经是Advisor，则直接返回；
-     * 如果不是Advice类型，则抛出UnknownAdviceTypeException；
-     * 如果advice是MethodInterceptor类型，则创建一个DefaultPointcutAdvisor并返回；
-     * 否则，遍历已注册的AdvisorAdapter，找到支持advice的适配器，创建一个DefaultPointcutAdvisor并返回。
+     * Wrap the given adviceObject as an Advisor.
+     * If adviceObject is already an Advisor, it is returned directly.
+     * If it is not an Advice type, an UnknownAdviceTypeException is thrown.
+     * If the advice is a MethodInterceptor, a DefaultPointcutAdvisor is created and returned.
+     * Otherwise, it loops over the registered AdvisorAdapters, finds an adapter that supports the advice, creates a DefaultPointcutAdvisor, and returns it.
      *
-     * @param adviceObject 要包装为Advisor的Advice对象
-     * @return 包装后的Advisor对象
-     * @throws UnknownAdviceTypeException 如果adviceObject无法被识别为Advisor或Advice
+     * @param adviceObject the Advice object to wrap as an Advisor
+     * @return the wrapped Advisor object
+     * @throws UnknownAdviceTypeException if adviceObject cannot be recognized as an Advisor or Advice
      */
     @Override
     public Advisor wrap(Object adviceObject) throws UnknownAdviceTypeException {
@@ -181,57 +181,57 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Se
         }
         Advice advice = (Advice) adviceObject;
         if (advice instanceof MethodInterceptor) {
-            // 对于MethodInterceptor类型的Advice，不需要适配器，直接创建Advisor并返回
+            // For a MethodInterceptor, no adapter is needed. Create the Advisor and return it directly
             return new DefaultPointcutAdvisor(advice);
         }
-        // 遍历已注册的AdvisorAdapter，查找支持当前Advice的适配器
+        // Loop over the registered AdvisorAdapters and look for one that supports the current Advice
         for (AdvisorAdapter adapter : this.adapters) {
-            // 检查是否支持当前Advice
+            // Check whether the current Advice is supported
             if (adapter.supportsAdvice(advice)) {
-                // 创建Advisor并返回
+                // Create the Advisor and return it
                 return new DefaultPointcutAdvisor(advice);
             }
         }
-        // 如果无法找到合适的适配器，抛出异常
+        // If no suitable adapter is found, throw an exception
         throw new UnknownAdviceTypeException(advice);
     }
 
     /**
-     * 获取Advisor中的拦截器数组。
-     * 如果Advisor中的Advice是MethodInterceptor类型，则直接返回；
-     * 否则，遍历已注册的AdvisorAdapter，找到支持Advisor中的Advice的适配器，并获取对应的拦截器，返回拦截器数组。
+     * Get the interceptor array from the Advisor.
+     * If the Advice in the Advisor is a MethodInterceptor, it is returned directly.
+     * Otherwise, it loops over the registered AdvisorAdapters, finds an adapter that supports the Advice in the Advisor, gets its interceptor, and returns the interceptor array.
      *
-     * @param advisor 要获取拦截器数组的Advisor对象
-     * @return 包含Advisor中拦截器的数组
-     * @throws UnknownAdviceTypeException 如果Advisor中的Advice无法被识别
+     * @param advisor the Advisor to get the interceptors from
+     * @return an array that holds the interceptors of the Advisor
+     * @throws UnknownAdviceTypeException if the Advice in the Advisor cannot be recognized
      */
     @Override
     public MethodInterceptor[] getInterceptors(Advisor advisor) throws UnknownAdviceTypeException {
         List<MethodInterceptor> interceptors = new ArrayList<>(3);
         Advice advice = advisor.getAdvice();
-        // 如果Advisor中的Advice是MethodInterceptor类型，直接将其添加到拦截器数组中
+        // If the Advice in the Advisor is a MethodInterceptor, add it to the interceptor list directly
         if (advice instanceof MethodInterceptor) {
             interceptors.add((MethodInterceptor) advice);
         }
-        // 遍历已注册的AdvisorAdapter，查找支持Advisor中的Advice的适配器
+        // Loop over the registered AdvisorAdapters and look for one that supports the Advice in the Advisor
         for (AdvisorAdapter adapter : this.adapters) {
-            // 如果适配器支持当前Advice，获取其拦截器并添加到数组中
+            // If the adapter supports the current Advice, get its interceptor and add it to the list
             if (adapter.supportsAdvice(advice)) {
                 interceptors.add(adapter.getInterceptor(advisor));
             }
         }
-        // 如果拦截器数组为空，表示未找到适配器，抛出异常
+        // If the interceptor list is empty, no adapter was found. Throw an exception
         if (interceptors.isEmpty()) {
             throw new UnknownAdviceTypeException(advice);
         }
-        // 将拦截器数组转换为数组并返回
+        // Turn the interceptor list into an array and return it
         return interceptors.toArray(new MethodInterceptor[0]);
     }
 
     /**
-     * 注册给定的AdvisorAdapter。
+     * Register the given AdvisorAdapter.
      *
-     * @param adapter 要注册的AdvisorAdapter对象
+     * @param adapter the AdvisorAdapter to register
      */
     @Override
     public void registerAdvisorAdapter(AdvisorAdapter adapter) {

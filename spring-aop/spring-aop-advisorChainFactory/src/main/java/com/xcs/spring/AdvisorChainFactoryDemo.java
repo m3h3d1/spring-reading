@@ -9,22 +9,22 @@ import java.util.List;
 public class AdvisorChainFactoryDemo {
 
     public static void main(String[] args) throws NoSuchMethodException {
-        // 创建AOP配置对象
+        // Create the AOP configuration object
         AdvisedSupport config = new AdvisedSupport();
-        // 添加前置通知
+        // Add before advice
         config.addAdvice(new MyMethodBeforeAdvice());
-        // 添加后置返回通知
+        // Add after returning advice
         config.addAdvice(new MyAfterReturningAdvice());
-        // 设置目标类
+        // Set the target class
         Class<MyService> targetClass = MyService.class;
-        // 获取目标方法
+        // Get the target method
         Method method = targetClass.getDeclaredMethod("foo");
 
-        // 创建默认的Advisor链工厂实例
+        // Create the default Advisor chain factory instance
         DefaultAdvisorChainFactory chainFactory = new DefaultAdvisorChainFactory();
-        // 获取Advisor链
+        // Get the Advisor chain
         List<Object> chain = chainFactory.getInterceptorsAndDynamicInterceptionAdvice(config, method, targetClass);
-        // 打印Advisor链中的拦截器
+        // Print the interceptors in the Advisor chain
         chain.forEach(System.out::println);
     }
 }

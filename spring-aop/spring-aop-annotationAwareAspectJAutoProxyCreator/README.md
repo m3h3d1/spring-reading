@@ -1,45 +1,45 @@
 ## AnnotationAwareAspectJAutoProxyCreator
 
 - [AnnotationAwareAspectJAutoProxyCreator](#annotationawareaspectjautoproxycreator)
-  - [一、基本信息](#一基本信息)
-  - [二、基本描述](#二基本描述)
-  - [三、主要功能](#三主要功能)
-  - [四、类关系图](#四类关系图)
-  - [五、最佳实践](#五最佳实践)
-  - [六、时序图](#六时序图)
-  - [七、源码分析](#七源码分析)
+  - [1. Overview](#1-overview)
+  - [2. Description](#2-description)
+  - [3. Main Features](#3-main-features)
+  - [4. Class Diagram](#4-class-diagram)
+  - [5. Best Practices](#5-best-practices)
+  - [6. Sequence Diagram](#6-sequence-diagram)
+  - [7. Source Code Analysis](#7-source-code-analysis)
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [Juejin](https://juejin.cn/user/4251135018533068/posts) 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、基本描述
+### 2. Description
 
-`AnnotationAwareAspectJAutoProxyCreator`是Spring AOP中的关键类，负责自动检测标记有`@Aspect`注解的切面类，并将其代理到Spring应用程序的bean中，实现切面逻辑的自动织入，从而支持注解驱动的面向切面编程。
+`AnnotationAwareAspectJAutoProxyCreator` is a key class in Spring AOP. It finds aspect classes marked with the `@Aspect` annotation and creates proxies for the beans of a Spring application. This weaves the aspect logic in automatically and supports annotation-driven aspect-oriented programming.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **自动代理创建** 
+1. **Automatic proxy creation** 
 
-   + 检测应用程序上下文中被`@Aspect`注解标记的切面类，并自动创建代理对象，使切面逻辑能够在目标bean的方法调用中被织入。
+   + Finds the aspect classes marked with `@Aspect` in the application context and creates proxy objects automatically. The aspect logic is then woven into the method calls of the target beans.
 
-2. **切面逻辑织入** 
+2. **Aspect logic weaving** 
 
-   + 将切面逻辑织入到目标bean的方法调用中，实现例如在方法执行前后、异常抛出时等的切面操作，以实现各种横切关注点的功能。
+   + Weaves the aspect logic into the method calls of the target beans. This gives aspect actions such as running before or after a method, or when an exception is thrown, to cover all kinds of cross-cutting concerns.
 
-3. **支持注解驱动的切面编程** 
+3. **Support for annotation-driven aspects** 
 
-   + 提供了基于注解的切面编程的支持，通过`@Aspect`等注解，开发者能够更便捷地定义切面类和切面逻辑。
+   + Supports annotation-based aspect programming. With annotations such as `@Aspect`, developers can define aspect classes and aspect logic more easily.
 
-4. **灵活的切面配置** 
+4. **Flexible aspect configuration** 
 
-   + 允许我们通过注解方式配置切面，而不需要在XML配置文件中显式声明，从而使切面的配置更加灵活和便捷。
+   + Lets us configure aspects with annotations, without declaring them in XML configuration files. This makes aspect configuration more flexible and convenient.
    
-5. **AOP功能整合** 
+5. **AOP feature integration** 
 
-   + 将AspectJ切面功能整合到Spring框架中，使得我们能够在Spring应用程序中使用AspectJ风格的切面编程，从而更好地实现横切关注点的模块化和重用。
+   + Brings AspectJ aspect features into the Spring framework. We can use AspectJ-style aspect programming in a Spring application, which makes cross-cutting concerns more modular and reusable.
 
-### 四、类关系图
+### 4. Class Diagram
 
 ~~~mermaid
 classDiagram
@@ -94,28 +94,28 @@ ProxyProcessorSupport  -->  ProxyConfig
 SmartInstantiationAwareBeanPostProcessor  -->  InstantiationAwareBeanPostProcessor 
 ~~~
 
-### 五、最佳实践
+### 5. Best Practices
 
-使用`EnableAspectJAutoProxy`
-注解和Spring的基于注解的应用上下文来启用AspectJ自动代理功能。在程序中，首先创建了一个基于注解的应用上下文，然后通过该上下文获取了`MyService`
-bean，并调用了其方法。
+This example uses `EnableAspectJAutoProxy`
+and an annotation-based application context to turn on AspectJ auto proxy. In the program, it first creates an annotation-based application context. Then it gets the `MyService`
+bean from the context and calls its method.
 
 ```java
 public class EnableAspectJAutoProxyDemo {
 
     public static void main(String[] args) {
-        // 创建基于注解的应用上下文
+        // Create an annotation-based application context
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
-        // 从应用上下文中获取MyService bean
+        // Get the MyService bean from the application context
         MyService myService = context.getBean(MyService.class);
-        // 调用MyService的方法
+        // Call the method of MyService
         myService.foo();
     }
 }
 ```
 
-`AppConfig` 类是一个使用 `@Configuration` 注解标记的配置类，通过 `@EnableAspectJAutoProxy` 开启了 AspectJ
-自动代理功能，并通过 `@ComponentScan` 启用了组件扫描，用于自动发现和注册 Spring 组件。
+The `AppConfig` class is a configuration class marked with `@Configuration`. It turns on AspectJ
+auto proxy with `@EnableAspectJAutoProxy`, and turns on component scanning with `@ComponentScan` to find and register Spring components automatically.
 
 ```java
 
@@ -127,7 +127,7 @@ public class AppConfig {
 }
 ```
 
-`MyService` 类是一个使用 `@Service` 注解标记的服务类，提供了一个名为 `foo()` 的方法，该方法在调用时会打印消息 "foo..."。
+The `MyService` class is a service class marked with `@Service`. It has a method named `foo()` that prints the message "foo..." when called.
 
 ```java
 
@@ -140,8 +140,8 @@ public class MyService {
 }
 ```
 
-`MyAspect`是一个使用了`@Aspect`注解的Java类，表示它是一个切面。在这个类中，定义了一个名为`advice`的方法，并使用了`@Before`
-注解来指定在目标方法执行之前执行的通知。
+`MyAspect` is a Java class marked with `@Aspect`, which means it is an aspect. In this class, a method named `advice` is defined and marked with `@Before`
+to specify the advice that runs before the target method.
 
 ```java
 
@@ -156,8 +156,8 @@ public class MyAspect {
 }
 ```
 
-运行结果，调用 `MyService` 类的 `foo()` 方法之前，成功地执行了一个切面通知，输出了 "Before method execution"
-的消息，然后执行了 `foo()` 方法，输出了 "foo..." 的消息。
+This is the result. Before the `foo()` method of the `MyService` class was called, an aspect advice ran successfully and printed the message "Before method execution"
+Then the `foo()` method ran and printed the message "foo...".
 
 ```java
 Before method
@@ -165,100 +165,100 @@ execution
 foo...
 ```
 
-### 六、时序图
+### 6. Sequence Diagram
 
 ~~~mermaid
 sequenceDiagram
 autonumber
 BeanFactory->>AbstractAutoProxyCreator:postProcessAfterInitialization()
-Note over BeanFactory,AbstractAutoProxyCreator: BeanFactory调用初始化后处理方法
+Note over BeanFactory,AbstractAutoProxyCreator: BeanFactory calls the post-initialization method
 AbstractAutoProxyCreator->>AbstractAutoProxyCreator:wrapIfNecessary()
-Note over AbstractAutoProxyCreator,AbstractAutoProxyCreator: 条件判断与代理创建
+Note over AbstractAutoProxyCreator,AbstractAutoProxyCreator: Check conditions and create the proxy
 AbstractAutoProxyCreator->>AbstractAdvisorAutoProxyCreator:getAdvicesAndAdvisorsForBean()
-Note over AbstractAutoProxyCreator,AbstractAdvisorAutoProxyCreator: 获取并返回适用的Advisors数组
+Note over AbstractAutoProxyCreator,AbstractAdvisorAutoProxyCreator: Get and return the array of applicable Advisors
 AbstractAdvisorAutoProxyCreator->>AbstractAdvisorAutoProxyCreator:findEligibleAdvisors()
-Note over AbstractAdvisorAutoProxyCreator,AbstractAdvisorAutoProxyCreator: 查找并扩展可应用的Advisors列表
+Note over AbstractAdvisorAutoProxyCreator,AbstractAdvisorAutoProxyCreator: Find and extend the list of applicable Advisors
 AbstractAdvisorAutoProxyCreator->>AnnotationAwareAspectJAutoProxyCreator:findCandidateAdvisors()
-Note over AbstractAdvisorAutoProxyCreator,AnnotationAwareAspectJAutoProxyCreator: 添加Spring和AspectJ，合并为候选Advisors列表
+Note over AbstractAdvisorAutoProxyCreator,AnnotationAwareAspectJAutoProxyCreator: Add Spring and AspectJ Advisors and merge them into the candidate Advisor list
 AnnotationAwareAspectJAutoProxyCreator->>AbstractAdvisorAutoProxyCreator:super.findCandidateAdvisors()
-Note over AnnotationAwareAspectJAutoProxyCreator,AbstractAdvisorAutoProxyCreator: 获取自动代理的候选Advisors列表
+Note over AnnotationAwareAspectJAutoProxyCreator,AbstractAdvisorAutoProxyCreator: Get the candidate Advisors for auto proxy
 AbstractAdvisorAutoProxyCreator->>BeanFactoryAdvisorRetrievalHelper:findAdvisorBeans()
-Note over AbstractAdvisorAutoProxyCreator,BeanFactoryAdvisorRetrievalHelper: 获取当前bean工厂中所有合格的Advisor beans
+Note over AbstractAdvisorAutoProxyCreator,BeanFactoryAdvisorRetrievalHelper: Get all eligible Advisor beans in the current bean factory
 AnnotationAwareAspectJAutoProxyCreator->>BeanFactoryAspectJAdvisorsBuilder:buildAspectJAdvisors()
-Note over AnnotationAwareAspectJAutoProxyCreator,BeanFactoryAspectJAdvisorsBuilder: 获取AspectJ注解的切面并创建Advisor
-AnnotationAwareAspectJAutoProxyCreator->>AbstractAdvisorAutoProxyCreator:返回Advisors
+Note over AnnotationAwareAspectJAutoProxyCreator,BeanFactoryAspectJAdvisorsBuilder: Get the AspectJ annotated aspects and create Advisors
+AnnotationAwareAspectJAutoProxyCreator->>AbstractAdvisorAutoProxyCreator:Return Advisors
 AbstractAdvisorAutoProxyCreator->>AbstractAdvisorAutoProxyCreator:findAdvisorsThatCanApply()
-Note over AbstractAdvisorAutoProxyCreator,AbstractAdvisorAutoProxyCreator: 查找适用的候选顾问并设置代理
+Note over AbstractAdvisorAutoProxyCreator,AbstractAdvisorAutoProxyCreator: Find the applicable candidate Advisors and set up the proxy
 AbstractAdvisorAutoProxyCreator->>AopUtils:findAdvisorsThatCanApply()
-Note over AbstractAdvisorAutoProxyCreator,AopUtils: 筛选适用的顾问并添加到列表。
+Note over AbstractAdvisorAutoProxyCreator,AopUtils: Filter the applicable Advisors and add them to the list.
 AopUtils->>AopUtils:canApply(advisor,targetClass,hasIntroductions)
-Note over AopUtils,AopUtils: 判断顾问是否适用于目标类。
+Note over AopUtils,AopUtils: Check whether the Advisor applies to the target class.
 AopUtils->>AopUtils:canApply(pc,targetClass,hasIntroductions)
-Note over AopUtils,AopUtils: 判断切点是否适用于目标类。
+Note over AopUtils,AopUtils: Check whether the pointcut applies to the target class.
 AbstractAdvisorAutoProxyCreator->>AspectJAwareAdvisorAutoProxyCreator:extendAdvisors()
-Note over AbstractAdvisorAutoProxyCreator,AspectJAwareAdvisorAutoProxyCreator: 添加AspectJ支持到Advisor链。
+Note over AbstractAdvisorAutoProxyCreator,AspectJAwareAdvisorAutoProxyCreator: Add AspectJ support to the Advisor chain.
 AspectJAwareAdvisorAutoProxyCreator->>AspectJProxyUtils:makeAdvisorChainAspectJCapableIfNecessary()
-Note over AspectJAwareAdvisorAutoProxyCreator,AspectJProxyUtils: 在Advisor链中添加AspectJ支持。
-AbstractAdvisorAutoProxyCreator->>AbstractAutoProxyCreator:返回拦截器
+Note over AspectJAwareAdvisorAutoProxyCreator,AspectJProxyUtils: Add AspectJ support to the Advisor chain.
+AbstractAdvisorAutoProxyCreator->>AbstractAutoProxyCreator:Return interceptors
 AbstractAutoProxyCreator->>AbstractAutoProxyCreator:createProxy()
-Note over AbstractAutoProxyCreator,AbstractAutoProxyCreator: 创建 AOP 代理对象的过程。
+Note over AbstractAutoProxyCreator,AbstractAutoProxyCreator: The process of creating the AOP proxy object.
 AbstractAutoProxyCreator->>ProxyFactory:new ProxyFactory()
-ProxyFactory->>AbstractAutoProxyCreator:返回proxyFactory
+ProxyFactory->>AbstractAutoProxyCreator:Return proxyFactory
 AbstractAutoProxyCreator->>ProxyFactory:getProxy()
-ProxyFactory->>AbstractAutoProxyCreator:返回代理对象
-AbstractAutoProxyCreator->>BeanFactory:返回代理对象
+ProxyFactory->>AbstractAutoProxyCreator:Return the proxy object
+AbstractAutoProxyCreator->>BeanFactory:Return the proxy object
 ~~~
 
-### 七、源码分析
+### 7. Source Code Analysis
 
-在`org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#postProcessAfterInitialization`方法中，用于在初始化后对bean进行后置处理。它的作用是检查是否需要对bean创建代理，并在需要时使用配置的拦截器创建代理对象，以实现AOP功能。
+In the method `org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#postProcessAfterInitialization`, the bean is post-processed after initialization. It checks whether a proxy is needed for the bean. If so, it creates the proxy object with the configured interceptors, which gives the AOP feature.
 
 ```java
 /**
- * 如果子类确定要将该bean标识为需要代理的bean，则使用配置的拦截器创建代理。
+ * Create a proxy with the configured interceptors if the bean is identified as one to proxy by the subclass.
  * @see #getAdvicesAndAdvisorsForBean
  */
 @Override
 public Object postProcessAfterInitialization(@Nullable Object bean, String beanName) {
     if (bean != null) {
-        // 获取缓存键
+        // Get the cache key
         Object cacheKey = getCacheKey(bean.getClass(), beanName);
-        // 如果早期代理引用集合中存在该bean，并且不是同一引用，则进行包装
+        // If the early proxy reference set has this bean and it is not the same reference, wrap it
         if (this.earlyProxyReferences.remove(cacheKey) != bean) {
             return wrapIfNecessary(bean, beanName, cacheKey);
         }
     }
-    // 返回bean
+    // Return the bean
     return bean;
 }
 ```
 
-在`org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#wrapIfNecessary`方法中，首先检查bean的名称是否存在且是否属于目标源bean，如果是，则直接返回原始bean实例；然后检查缓存中是否存在已标记为不需要代理的bean，如果是，则同样直接返回原始bean实例；接着检查bean的类是否为基础结构类或者是否应该跳过该bean，如果是，则将其标记为不需要代理并返回原始bean实例；最后，如果存在通知（拦截器），则创建代理对象并返回，否则同样将其标记为不需要代理并返回原始bean实例。
+In the method `org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#wrapIfNecessary`, it first checks whether the bean name exists and belongs to a target source bean. If so, it returns the original bean instance. Then it checks the cache for beans already marked as not needing a proxy. If found, it also returns the original bean instance. Next, it checks whether the bean class is an infrastructure class or should be skipped. If so, it marks the bean as not needing a proxy and returns the original bean instance. Finally, if there is advice (interceptors), it creates the proxy object and returns it. Otherwise, it marks the bean as not needing a proxy and returns the original bean instance.
 
 ```java
 /**
- * 如果需要，对给定的bean进行包装，即如果它符合被代理的条件。
- * @param bean 原始的bean实例
- * @param beanName bean的名称
- * @param cacheKey 元数据访问的缓存键
- * @return 包装了bean的代理，或者原始的bean实例
+ * Wrap the given bean if necessary, that is, if it is eligible to be proxied.
+ * @param bean the original bean instance
+ * @param beanName the name of the bean
+ * @param cacheKey the cache key for metadata access
+ * @return a proxy wrapping the bean, or the original bean instance
  */
 protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
-    // 如果beanName非空，并且该bean已经被目标源bean包含，则直接返回原始的bean实例
+    // If beanName is not empty and the bean is already contained in the target source beans, return the original bean instance directly
     if (StringUtils.hasLength(beanName) && this.targetSourcedBeans.contains(beanName)) {
         return bean;
     }
-    // 如果缓存中已经存在该bean的标记为不需要代理，则直接返回原始的bean实例
+    // If the cache already marks this bean as not needing a proxy, return the original bean instance directly
     if (Boolean.FALSE.equals(this.advisedBeans.get(cacheKey))) {
         return bean;
     }
-    // 如果bean的类为基础结构类，或者应该跳过该bean的类，则直接返回原始的bean实例
+    // If the bean class is an infrastructure class, or the bean class should be skipped, return the original bean instance directly
     if (isInfrastructureClass(bean.getClass()) || shouldSkip(bean.getClass(), beanName)) {
         this.advisedBeans.put(cacheKey, Boolean.FALSE);
         return bean;
     }
 
-    // 如果存在通知，则创建代理
+    // If there is advice, create the proxy
     Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
     if (specificInterceptors != DO_NOT_PROXY) {
         this.advisedBeans.put(cacheKey, Boolean.TRUE);
@@ -268,58 +268,58 @@ protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) 
         return proxy;
     }
 
-    // 没有通知，将bean标记为不需要代理
+    // No advice, so mark the bean as not needing a proxy
     this.advisedBeans.put(cacheKey, Boolean.FALSE);
     return bean;
 }
 ```
 
-在`org.springframework.aop.framework.autoproxy.AbstractAdvisorAutoProxyCreator#getAdvicesAndAdvisorsForBean`方法中，首先调用`findEligibleAdvisors`方法查找适用于该bean的Advisors，然后将其转换为数组并返回。如果没有找到适用的Advisors，则返回一个特定的标记值`DO_NOT_PROXY`。
+In the method `org.springframework.aop.framework.autoproxy.AbstractAdvisorAutoProxyCreator#getAdvicesAndAdvisorsForBean`, it first calls the `findEligibleAdvisors` method to find the Advisors that apply to the bean. Then it converts them into an array and returns it. If no applicable Advisors are found, it returns the special value `DO_NOT_PROXY`.
 
 ```java
 /**
- * 获取适用于给定bean的Advisors。
- * @param beanClass bean的类
- * @param beanName bean的名称
- * @param targetSource 目标源
- * @return 包含Advisors的数组，如果没有找到适用的Advisors，则返回DO_NOT_PROXY
+ * Get the Advisors that apply to the given bean.
+ * @param beanClass the class of the bean
+ * @param beanName the name of the bean
+ * @param targetSource the target source
+ * @return an array that holds the Advisors, or DO_NOT_PROXY if no applicable Advisors are found
  */
 @Override
 @Nullable
 protected Object[] getAdvicesAndAdvisorsForBean(
         Class<?> beanClass, String beanName, @Nullable TargetSource targetSource) {
 
-    // 查找适用于bean的Advisors
+    // Find the Advisors that apply to the bean
     List<Advisor> advisors = findEligibleAdvisors(beanClass, beanName);
-    // 如果没有找到适用的Advisors，则返回DO_NOT_PROXY
+    // If no applicable Advisors are found, return DO_NOT_PROXY
     if (advisors.isEmpty()) {
         return DO_NOT_PROXY;
     }
-    // 返回Advisors的数组
+    // Return the array of Advisors
     return advisors.toArray();
 }
 ```
 
-在`org.springframework.aop.framework.autoproxy.AbstractAdvisorAutoProxyCreator#findEligibleAdvisors`方法中，主要用于查找适用于自动代理给定类的所有合适的 Advisors。它首先调用 findCandidateAdvisors 方法来查找候选的 Advisors，然后通过 findAdvisorsThatCanApply 方法筛选出可以应用于当前类的 Advisors。接着，它调用 extendAdvisors 方法来扩展 Advisors 列表，以确保适当的拦截器和通知已被应用。最后，如果有适用的 Advisors，则对 Advisors 列表进行排序并返回；如果没有适用的 Advisors，则返回一个空列表。
+In the method `org.springframework.aop.framework.autoproxy.AbstractAdvisorAutoProxyCreator#findEligibleAdvisors`, it finds all eligible Advisors for auto proxying the given class. It first calls the findCandidateAdvisors method to find the candidate Advisors. Then it calls the findAdvisorsThatCanApply method to keep the Advisors that can apply to the current class. Next, it calls the extendAdvisors method to extend the Advisor list, so that the proper interceptors and advice are applied. Finally, if there are applicable Advisors, it sorts the list and returns it. If there are none, it returns an empty list.
 
 ```java
 /**
- * 查找适用于自动代理该类的所有合格Advisors。
- * @param beanClass 要查找Advisors的类
- * @param beanName 当前代理的bean的名称
- * @return 空列表，非null，如果没有切点或拦截器
+ * Find all eligible Advisors for auto proxying this class.
+ * @param beanClass the class to find Advisors for
+ * @param beanName the name of the bean currently being proxied
+ * @return an empty list, not null, if there are no pointcuts or interceptors
  * @see #findCandidateAdvisors
  * @see #sortAdvisors
  * @see #extendAdvisors
  */
 protected List<Advisor> findEligibleAdvisors(Class<?> beanClass, String beanName) {
-    // 查找候选Advisors
+    // Find the candidate Advisors
     List<Advisor> candidateAdvisors = findCandidateAdvisors();
-    // 查找可应用的Advisors
+    // Find the Advisors that can apply
     List<Advisor> eligibleAdvisors = findAdvisorsThatCanApply(candidateAdvisors, beanClass, beanName);
-    // 扩展Advisors
+    // Extend the Advisors
     extendAdvisors(eligibleAdvisors);
-    // 如果有可应用的Advisors，则对Advisors进行排序
+    // If there are applicable Advisors, sort them
     if (!eligibleAdvisors.isEmpty()) {
         eligibleAdvisors = sortAdvisors(eligibleAdvisors);
     }
@@ -327,16 +327,16 @@ protected List<Advisor> findEligibleAdvisors(Class<?> beanClass, String beanName
 }
 ```
 
-在`org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator#findCandidateAdvisors`方法中，重写了父类方法 `findCandidateAdvisors()`，首先调用了父类方法以获取所有Spring Advisors，然后利用 `aspectJAdvisorsBuilder` 构建了所有AspectJ切面对应的Advisors，并将其添加到`advisors`列表中返回。
+In the method `org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator#findCandidateAdvisors`, the parent method `findCandidateAdvisors()` is overridden. It first calls the parent method to get all Spring Advisors. Then it uses `aspectJAdvisorsBuilder` to build the Advisors for all AspectJ aspects, adds them to the `advisors` list, and returns the list.
 
-[BeanFactoryAspectJAdvisorsBuilder源码分析](../spring-aop-beanFactoryAspectJAdvisorsBuilder/README.md)
+[BeanFactoryAspectJAdvisorsBuilder Source Code Analysis](../spring-aop-beanFactoryAspectJAdvisorsBuilder/README.md)
 
 ```java
 @Override
 protected List<Advisor> findCandidateAdvisors() {
-    // 添加根据超类规则找到的所有Spring顾问。
+    // Add all the Spring Advisors found according to the superclass rules.
     List<Advisor> advisors = super.findCandidateAdvisors();
-    // 为bean工厂中的所有AspectJ切面构建顾问。
+    // Build the Advisors for all AspectJ aspects in the bean factory.
     if (this.aspectJAdvisorsBuilder != null) {
         advisors.addAll(this.aspectJAdvisorsBuilder.buildAspectJAdvisors());
     }
@@ -344,14 +344,14 @@ protected List<Advisor> findCandidateAdvisors() {
 }
 ```
 
-在`org.springframework.aop.framework.autoproxy.AbstractAdvisorAutoProxyCreator#findCandidateAdvisors`方法中，调用`BeanFactoryAdvisorRetrievalHelper.findAdvisorBeans()` 方法来获取候选的Advisors列表。
+In the method `org.springframework.aop.framework.autoproxy.AbstractAdvisorAutoProxyCreator#findCandidateAdvisors`, the method `BeanFactoryAdvisorRetrievalHelper.findAdvisorBeans()` is called to get the list of candidate Advisors.
 
-[BeanFactoryAdvisorRetrievalHelper源码分析](../spring-aop-beanFactoryAdvisorRetrievalHelper/README.md)
+[BeanFactoryAdvisorRetrievalHelper Source Code Analysis](../spring-aop-beanFactoryAdvisorRetrievalHelper/README.md)
 
 ```java
 /**
- * 查找用于自动代理的所有候选Advisors。
- * @return 候选Advisors的列表
+ * Find all candidate Advisors to use in auto proxying.
+ * @return the list of candidate Advisors
  */
 protected List<Advisor> findCandidateAdvisors() {
     Assert.state(this.advisorRetrievalHelper != null, "No BeanFactoryAdvisorRetrievalHelper available");
@@ -359,67 +359,67 @@ protected List<Advisor> findCandidateAdvisors() {
 }
 ```
 
-在`org.springframework.aop.framework.autoproxy.AbstractAdvisorAutoProxyCreator#findAdvisorsThatCanApply`方法中，搜索给定的候选 Advisors，以找到所有能够应用于指定 bean 的 Advisors。它设置当前被代理的 bean 名称，并尝试查找所有适用于指定 bean 的 Advisors。在查找完成后，它会清除当前被代理的 bean 名称。
+In the method `org.springframework.aop.framework.autoproxy.AbstractAdvisorAutoProxyCreator#findAdvisorsThatCanApply`, the given candidate Advisors are searched to find all Advisors that can apply to the specified bean. It sets the name of the bean currently being proxied, and then looks for all Advisors that apply to the specified bean. When the search is done, it clears the name of the bean currently being proxied.
 
 ```java
 /**
- * 搜索给定的候选顾问，找到所有适用于指定bean的顾问。
- * @param candidateAdvisors 候选顾问列表
- * @param beanClass 目标bean的类
- * @param beanName 目标bean的名称
- * @return 适用的顾问列表
+ * Search the given candidate Advisors to find all Advisors that can apply to the specified bean.
+ * @param candidateAdvisors the list of candidate Advisors
+ * @param beanClass the class of the target bean
+ * @param beanName the name of the target bean
+ * @return the list of applicable Advisors
  * @see ProxyCreationContext#getCurrentProxiedBeanName()
  */
 protected List<Advisor> findAdvisorsThatCanApply(
         List<Advisor> candidateAdvisors, Class<?> beanClass, String beanName) {
     
-    // 设置当前代理的bean名称
+    // Set the name of the bean currently being proxied
     ProxyCreationContext.setCurrentProxiedBeanName(beanName);
     try {
-        // 查找适用于指定bean的顾问
+        // Find the Advisors that apply to the specified bean
         return AopUtils.findAdvisorsThatCanApply(candidateAdvisors, beanClass);
     }
     finally {
-        // 清除当前代理的bean名称
+        // Clear the name of the bean currently being proxied
         ProxyCreationContext.setCurrentProxiedBeanName(null);
     }
 }
 ```
 
-在`org.springframework.aop.support.AopUtils#findAdvisorsThatCanApply`方法中，用于确定适用于给定类的候选Advisors子列表。它遍历给定的Advisors列表，首先将能够应用于指定类的引介Advisors添加到结果列表中。然后，它检查是否已经存在引介Advisors，如果存在，则跳过；如果不存在，则继续遍历Advisors列表，并将能够应用于指定类的其他Advisors添加到结果列表中。最终返回这个子列表，其中包含可以应用于给定类的所有Advisors。
+In the method `org.springframework.aop.support.AopUtils#findAdvisorsThatCanApply`, the sub-list of candidate Advisors that apply to the given class is determined. It loops over the given Advisor list. First, it adds the introduction Advisors that can apply to the class to the result list. Then it checks whether any introduction Advisors exist. If so, it skips them. If not, it keeps looping over the list and adds the other Advisors that can apply to the class to the result list. In the end, it returns the sub-list that holds all Advisors that can apply to the given class.
 
 ```java
 /**
- * 确定 {@code candidateAdvisors} 列表中适用于给定类的子列表。
- * @param candidateAdvisors 要评估的顾问列表
- * @param clazz 目标类
- * @return 可应用于给定类的顾问子列表
- * （可能是原始列表）
+ * Determine the sub-list of the {@code candidateAdvisors} list that is applicable to the given class.
+ * @param candidateAdvisors the Advisors to evaluate
+ * @param clazz the target class
+ * @return the sub-list of Advisors that can apply to the given class
+ * (may be the original list)
  */
 public static List<Advisor> findAdvisorsThatCanApply(List<Advisor> candidateAdvisors, Class<?> clazz) {
-    // 如果候选顾问列表为空，则直接返回空列表
+    // If the candidate Advisor list is empty, return it directly
     if (candidateAdvisors.isEmpty()) {
        return candidateAdvisors;
     }
-    // 创建一个用于存储适用于给定类的顾问的列表
+    // Create a list to store the Advisors that apply to the given class
     List<Advisor> eligibleAdvisors = new ArrayList<>();
-    // 遍历候选顾问列表
+    // Loop over the candidate Advisor list
     for (Advisor candidate : candidateAdvisors) {
-       // 如果候选顾问是引介顾问，并且可以应用于给定类，则将其添加到结果列表中
+       // If the candidate Advisor is an introduction Advisor and can apply to the given class, add it to the result list
        if (candidate instanceof IntroductionAdvisor && canApply(candidate, clazz)) {
           eligibleAdvisors.add(candidate);
        }
     }
-    // 检查是否存在引介顾问
+    // Check whether there are introduction Advisors
     boolean hasIntroductions = !eligibleAdvisors.isEmpty();
-    // 继续遍历候选顾问列表
+    // Keep looping over the candidate Advisor list
     for (Advisor candidate : candidateAdvisors) {
-       // 如果候选顾问是引介顾问，则跳过
+       // If the candidate Advisor is an introduction Advisor, skip it
        if (candidate instanceof IntroductionAdvisor) {
-          // 已经处理过
+          // Already handled
           continue;
        }
-       // 如果候选顾问可以应用于给定类，则将其添加到结果列表中
+       // If the candidate Advisor can apply to the given class, add it to the result list
        if (canApply(candidate, clazz, hasIntroductions)) {
           eligibleAdvisors.add(candidate);
        }
@@ -428,58 +428,58 @@ public static List<Advisor> findAdvisorsThatCanApply(List<Advisor> candidateAdvi
 }
 ```
 
-在`org.springframework.aop.support.AopUtils#canApply(org.springframework.aop.Advisor, java.lang.Class<?>, boolean)`方法中，判断给定的顾问是否能够在指定的类上应用。它首先检查顾问是否是引介顾问，如果是，则通过类过滤器来判断是否可以应用于目标类。如果顾问不是引介顾问，而是切点顾问，则通过切点来判断是否可以应用于目标类。如果顾问既不是引介顾问也不是切点顾问，则假设它适用于目标类。
+In the method `org.springframework.aop.support.AopUtils#canApply(org.springframework.aop.Advisor, java.lang.Class<?>, boolean)`, it checks whether the given Advisor can apply to the specified class. It first checks whether the Advisor is an introduction Advisor. If so, it uses the class filter to decide whether it can apply to the target class. If the Advisor is not an introduction Advisor but a pointcut Advisor, it uses the pointcut to decide. If the Advisor is neither, it assumes it applies to the target class.
 
 ```java
 /**
- * 判断给定的顾问是否能够在指定的类上应用。
- * <p>这是一个重要的测试，因为它可以用于优化掉一个类的顾问。
- * 这个版本还考虑了引介（对于IntroductionAwareMethodMatchers）。
- * @param advisor 要检查的顾问
- * @param targetClass 我们正在测试的类
- * @param hasIntroductions 顾问链中是否包含任何引介
- * @return 切点是否能够应用于任何方法
+ * Check whether the given Advisor can apply to the specified class.
+ * <p>This is an important test, as it can be used to optimize out an Advisor for a class.
+ * This version also takes introductions into account (for IntroductionAwareMethodMatchers).
+ * @param advisor the Advisor to check
+ * @param targetClass the class we are testing
+ * @param hasIntroductions whether the Advisor chain contains any introductions
+ * @return whether the pointcut can apply to any method
  */
 public static boolean canApply(Advisor advisor, Class<?> targetClass, boolean hasIntroductions) {
-    // 如果顾问是引介顾问，则通过类过滤器来判断是否可以应用于目标类
+    // If the Advisor is an introduction Advisor, use the class filter to decide whether it can apply to the target class
     if (advisor instanceof IntroductionAdvisor) {
        return ((IntroductionAdvisor) advisor).getClassFilter().matches(targetClass);
     }
-    // 如果顾问是切点顾问，则通过切点来判断是否可以应用于目标类
+    // If the Advisor is a pointcut Advisor, use the pointcut to decide whether it can apply to the target class
     else if (advisor instanceof PointcutAdvisor) {
        PointcutAdvisor pca = (PointcutAdvisor) advisor;
        return canApply(pca.getPointcut(), targetClass, hasIntroductions);
     }
-    // 否则，假设它适用于目标类
+    // Otherwise, assume it applies to the target class
     else {
-       // 它没有切点，因此我们假设它适用。
+       // It has no pointcut, so we assume it applies.
        return true;
     }
 }
 ```
 
-在`org.springframework.aop.support.AopUtils#canApply(org.springframework.aop.Pointcut, java.lang.Class<?>, boolean)`方法中，确定给定的切点是否能够在指定的类上应用。首先，它检查切点的类过滤器是否与目标类匹配。如果不匹配，则返回 false。如果类过滤器匹配目标类，它会检查方法匹配器是否为 MethodMatcher.TRUE，如果是，则表示切点适用于目标类的任何方法，直接返回 true。如果方法匹配器不是 MethodMatcher.TRUE，则遍历目标类及其所有接口，并检查每个类中的方法是否与切点匹配。如果找到匹配的方法，则返回 true；如果没有找到匹配的方法，则返回 false。
+In the method `org.springframework.aop.support.AopUtils#canApply(org.springframework.aop.Pointcut, java.lang.Class<?>, boolean)`, it decides whether the given pointcut can apply to the specified class. First, it checks whether the class filter of the pointcut matches the target class. If not, it returns false. If the class filter matches, it checks whether the method matcher is MethodMatcher.TRUE. If so, the pointcut applies to any method of the target class, and it returns true. If not, it loops over the target class and all its interfaces, and checks whether the methods in each class match the pointcut. If a matching method is found, it returns true. If none is found, it returns false.
 
 ```java
 /**
- * 判断给定的切点是否能够在指定的类上应用。
- * <p>这是一个重要的测试，因为它可以用于优化掉一个类的切点。
- * @param pc 要检查的静态或动态切点
- * @param targetClass 要测试的类
- * @param hasIntroductions 顾问链中是否包含任何引介
- * @return 切点是否能够应用于任何方法
+ * Check whether the given pointcut can apply to the specified class.
+ * <p>This is an important test, as it can be used to optimize out a pointcut for a class.
+ * @param pc the static or dynamic pointcut to check
+ * @param targetClass the class to test
+ * @param hasIntroductions whether the Advisor chain contains any introductions
+ * @return whether the pointcut can apply to any method
  */
 public static boolean canApply(Pointcut pc, Class<?> targetClass, boolean hasIntroductions) {
 	Assert.notNull(pc, "Pointcut must not be null");
-    // 首先检查类过滤器是否匹配目标类
+    // First check whether the class filter matches the target class
     if (!pc.getClassFilter().matches(targetClass)) {
         return false;
     }
 
     MethodMatcher methodMatcher = pc.getMethodMatcher();
-    // 如果方法匹配器是 MethodMatcher.TRUE，则不需要遍历方法，直接返回true
+    // If the method matcher is MethodMatcher.TRUE, there is no need to loop over the methods. Return true directly
     if (methodMatcher == MethodMatcher.TRUE) {
-        // 如果我们匹配任何方法，则不需要遍历方法...
+        // If we match any method, there is no need to loop over the methods...
         return true;
     }
 
@@ -488,23 +488,23 @@ public static boolean canApply(Pointcut pc, Class<?> targetClass, boolean hasInt
         introductionAwareMethodMatcher = (IntroductionAwareMethodMatcher) methodMatcher;
     }
 
-    // 获取目标类及其所有接口的集合
+    // Get the set of the target class and all its interfaces
     Set<Class<?>> classes = new LinkedHashSet<>();
-    // 如果目标类不是代理类，则将其添加到类集合中
+    // If the target class is not a proxy class, add it to the class set
     if (!Proxy.isProxyClass(targetClass)) {
         classes.add(ClassUtils.getUserClass(targetClass));
     }
-    // 将目标类的所有接口添加到类集合中
+    // Add all interfaces of the target class to the class set
     classes.addAll(ClassUtils.getAllInterfacesForClassAsSet(targetClass));
 
-    // 遍历类集合
+    // Loop over the class set
     for (Class<?> clazz : classes) {
-        // 获取类中声明的所有方法
+        // Get all methods declared in the class
         Method[] methods = ReflectionUtils.getAllDeclaredMethods(clazz);
-        // 遍历方法
+        // Loop over the methods
         for (Method method : methods) {
-            // 如果存在引介感知的方法匹配器，并且方法匹配，则返回true；
-            // 否则，如果方法匹配器匹配方法，则返回true
+            // If there is an introduction-aware method matcher and the method matches, return true;
+            // otherwise, if the method matcher matches the method, return true
             if (introductionAwareMethodMatcher != null ?
                     introductionAwareMethodMatcher.matches(method, targetClass, hasIntroductions) :
                     methodMatcher.matches(method, targetClass)) {
@@ -517,57 +517,57 @@ public static boolean canApply(Pointcut pc, Class<?> targetClass, boolean hasInt
 }
 ```
 
-在`org.springframework.aop.aspectj.autoproxy.AspectJAwareAdvisorAutoProxyCreator#extendAdvisors`方法中，将 `ExposeInvocationInterceptor` 添加到通知链的开头。这是必要的额外处理，特别是在使用 AspectJ 切点表达式和 AspectJ 风格的建议时。
+In the method `org.springframework.aop.aspectj.autoproxy.AspectJAwareAdvisorAutoProxyCreator#extendAdvisors`, `ExposeInvocationInterceptor` is added to the start of the advice chain. This extra step is needed, especially when using AspectJ pointcut expressions and AspectJ-style advice.
 
 ```java
 /**
- * 将 {@link ExposeInvocationInterceptor} 添加到通知链的开头。
- * <p>在使用AspectJ切点表达式和AspectJ风格的建议时，需要添加此额外的建议。
+ * Add the {@link ExposeInvocationInterceptor} to the start of the advice chain.
+ * <p>This extra advice is needed when using AspectJ pointcut expressions and AspectJ-style advice.
  * @Override
- * @param candidateAdvisors 候选的Advisors列表
+ * @param candidateAdvisors the list of candidate Advisors
  */
 @Override
 protected void extendAdvisors(List<Advisor> candidateAdvisors) {
-    // 如果需要，使Advisor链支持AspectJ
+    // Make the Advisor chain support AspectJ if needed
     AspectJProxyUtils.makeAdvisorChainAspectJCapableIfNecessary(candidateAdvisors);
 }
 ```
 
-在`org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#createProxy`方法中，首先检查`BeanFactory`是否是`ConfigurableListableBeanFactory`类型的，如果是，则调用`AutoProxyUtils.exposeTargetClass`方法来暴露目标类。然后创建一个`ProxyFactory`实例，并根据当前的代理配置进行设置。根据是否启用了代理目标类的标志，决定是否将代理目标类设置为true或false。接着构建适用于该bean的所有顾问，将它们添加到`ProxyFactory`中，并设置目标源为预先配置好的`TargetSource`。最后，根据当前的代理配置和代理类加载器，使用`ProxyFactory`获取代理实例并返回。
+In the method `org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#createProxy`, it first checks whether the `BeanFactory` is a `ConfigurableListableBeanFactory`. If so, it calls `AutoProxyUtils.exposeTargetClass` to expose the target class. Then it creates a `ProxyFactory` instance and sets it up from the current proxy configuration. Depending on whether the proxy-target-class flag is on, it sets proxy target class to true or false. Next, it builds all the Advisors for the bean, adds them to the `ProxyFactory`, and sets the target source to the preconfigured `TargetSource`. Finally, it uses the `ProxyFactory` to get the proxy instance, based on the current proxy configuration and the proxy class loader, and returns it.
 
 ```java
 /**
- * 为给定的 bean 创建一个 AOP 代理。
- * @param beanClass bean 的类
- * @param beanName bean 的名称
- * @param specificInterceptors 适用于此 bean 的拦截器集合（可能为空，但不为 null）
- * @param targetSource 代理的 TargetSource，已预先配置以访问该 bean
- * @return bean 的 AOP 代理
+ * Create an AOP proxy for the given bean.
+ * @param beanClass the class of the bean
+ * @param beanName the name of the bean
+ * @param specificInterceptors the set of interceptors that apply to this bean (may be empty, but not null)
+ * @param targetSource the TargetSource for the proxy, already preconfigured to access the bean
+ * @return the AOP proxy for the bean
  * @see #buildAdvisors
  */
 protected Object createProxy(Class<?> beanClass, @Nullable String beanName,
                               @Nullable Object[] specificInterceptors, TargetSource targetSource) {
 
-    // 如果 beanFactory 是 ConfigurableListableBeanFactory 类型的，则暴露目标类
+    // If beanFactory is a ConfigurableListableBeanFactory, expose the target class
     if (this.beanFactory instanceof ConfigurableListableBeanFactory) {
         AutoProxyUtils.exposeTargetClass((ConfigurableListableBeanFactory) this.beanFactory, beanName, beanClass);
     }
 
-    // 创建 ProxyFactory 实例
+    // Create the ProxyFactory instance
     ProxyFactory proxyFactory = new ProxyFactory();
     proxyFactory.copyFrom(this);
 
-    // 如果需要使用代理目标类，则设置为 true
+    // If the proxy target class is needed, set it to true
     if (proxyFactory.isProxyTargetClass()) {
-        // 对 JDK 代理目标进行显式处理（用于介绍建议场景）
+        // Handle the JDK proxy target explicitly (for the introduction advice case)
         if (Proxy.isProxyClass(beanClass)) {
-            // 必须允许引入；不能只设置接口为代理的接口。
+            // Introductions must be allowed. Do not just set the interfaces as the proxied interfaces.
             for (Class<?> ifc : beanClass.getInterfaces()) {
                 proxyFactory.addInterface(ifc);
             }
         }
     } else {
-        // 未强制代理目标类标志，让我们应用默认检查...
+        // The proxy-target-class flag is not forced, so apply the default checks...
         if (shouldProxyTargetClass(beanClass, beanName)) {
             proxyFactory.setProxyTargetClass(true);
         } else {
@@ -575,12 +575,12 @@ protected Object createProxy(Class<?> beanClass, @Nullable String beanName,
         }
     }
 
-    // 构建顾问数组
+    // Build the Advisor array
     Advisor[] advisors = buildAdvisors(beanName, specificInterceptors);
-    // 将顾问添加到 ProxyFactory
+    // Add the Advisors to the ProxyFactory
     proxyFactory.addAdvisors(advisors);
     proxyFactory.setTargetSource(targetSource);
-    // 自定义 ProxyFactory
+    // Customize the ProxyFactory
     customizeProxyFactory(proxyFactory);
 
     proxyFactory.setFrozen(this.freezeProxy);
@@ -588,12 +588,12 @@ protected Object createProxy(Class<?> beanClass, @Nullable String beanName,
         proxyFactory.setPreFiltered(true);
     }
 
-    // 如果 bean 类没有在重写类加载器中本地加载，则使用原始 ClassLoader
+    // If the bean class is not loaded locally in the overriding class loader, use the original ClassLoader
     ClassLoader classLoader = getProxyClassLoader();
     if (classLoader instanceof SmartClassLoader && classLoader != beanClass.getClassLoader()) {
         classLoader = ((SmartClassLoader) classLoader).getOriginalClassLoader();
     }
-    // 获取代理实例
+    // Get the proxy instance
     return proxyFactory.getProxy(classLoader);
 }
 ```

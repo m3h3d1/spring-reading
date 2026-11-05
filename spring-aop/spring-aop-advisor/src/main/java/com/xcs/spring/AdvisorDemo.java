@@ -5,13 +5,13 @@ import org.springframework.aop.framework.ProxyFactory;
 public class AdvisorDemo {
 
     public static void main(String[] args) {
-        // 创建代理工厂
+        // Create the proxy factory
         ProxyFactory proxyFactory = new ProxyFactory(new MyService());
-        // 添加Advisor
+        // Add the Advisor
         proxyFactory.addAdvisor(new MyCustomAdvisor());
-        // 获取代理对象
+        // Get the proxy object
         MyService proxy = (MyService) proxyFactory.getProxy();
-        // 调用方法
+        // Call the method
         proxy.foo();
     }
 }

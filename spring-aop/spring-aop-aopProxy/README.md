@@ -1,45 +1,45 @@
 ## AopProxy
 
 - [AopProxy](#aopproxy)
-  - [一、基本信息](#一基本信息)
-  - [二、基本描述](#二基本描述)
-  - [三、主要功能](#三主要功能)
-  - [四、接口源码](#四接口源码)
-  - [五、主要实现](#五主要实现)
-  - [六、类关系图](#六类关系图)
-  - [七、最佳实践](#七最佳实践)
-  - [八、时序图](#八时序图)
-  - [九、源码分析](#九源码分析)
+  - [1. Overview](#1-overview)
+  - [2. Description](#2-description)
+  - [3. Main Features](#3-main-features)
+  - [4. Interface Source](#4-interface-source)
+  - [5. Main Implementations](#5-main-implementations)
+  - [6. Class Diagram](#6-class-diagram)
+  - [7. Best Practices](#7-best-practices)
+  - [8. Sequence Diagram](#8-sequence-diagram)
+  - [9. Source Code Analysis](#9-source-code-analysis)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [Juejin](https://juejin.cn/user/4251135018533068/posts) 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、基本描述
+### 2. Description
 
-`AopProxy` 接口是Spring框架中用于支持面向切面编程（AOP）的关键组件之一，它定义了生成代理对象的标准接口，允许在运行时动态地创建代理对象，以实现对目标对象的方法调用进行拦截和增强。
+The `AopProxy` interface is a key part of Spring's support for aspect-oriented programming (AOP). It defines the standard interface for creating proxy objects. It lets you create proxy objects at runtime, so that method calls on the target object can be intercepted and enhanced.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **代理对象的创建与管理**
+1. **Create and manage proxy objects**
 
-   + `AopProxy` 接口定义了创建和管理代理对象的标准方法，可以通过这些方法在运行时动态地生成代理对象。
+   + The `AopProxy` interface defines the standard methods to create and manage proxy objects. You can use them to create proxy objects at runtime.
 
-3. **支持不同的代理方式**
+3. **Support for different proxy types**
 
-   + `AopProxy` 接口支持多种代理方式，包括JDK动态代理和CGLIB代理。这样可以根据目标对象是否实现接口来选择合适的代理方式。
+   + The `AopProxy` interface supports several proxy types, including the JDK dynamic proxy and the CGLIB proxy. The right type is chosen depending on whether the target object implements an interface.
 
-### 四、接口源码
+### 4. Interface Source
 
-`AopProxy` 接口是一个委托接口，用于配置AOP代理，并允许创建实际的代理对象。它提供了两个方法用于创建代理对象，第一个方法使用默认的类加载器创建代理对象，通常是线程上下文类加载器；第二个方法允许指定类加载器创建代理对象。可以使用JDK动态代理或者CGLIB代理技术来生成代理对象。
+The `AopProxy` interface is a delegate interface that configures an AOP proxy and lets you create the actual proxy object. It has two methods to create a proxy object. The first one uses the default class loader, usually the thread context class loader. The second one lets you give a class loader. The proxy object can be created with the JDK dynamic proxy or with CGLIB.
 
 ```java
 /**
- * 配置AOP代理的委托接口，允许创建实际的代理对象。
+ * Delegate interface for a configured AOP proxy, which allows the creation of the actual proxy object.
  *
- * <p>默认情况下，可用于创建代理对象的实现包括JDK动态代理和CGLIB代理，
- * 这些代理实现由 {@link DefaultAopProxyFactory} 应用。
+ * <p>By default, the implementations available for creating proxy objects are the JDK dynamic proxy and the CGLIB proxy,
+ * and these are applied by {@link DefaultAopProxyFactory}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -48,39 +48,39 @@
 public interface AopProxy {
 
 	/**
-	 * 创建一个新的代理对象。
-	 * <p>使用AopProxy的默认类加载器（必要时用于代理创建）：
-	 * 通常为线程上下文类加载器。
-	 * @return 新的代理对象（永远不会是 {@code null}）
+	 * Create a new proxy object.
+	 * <p>Uses the default class loader of the AopProxy (if needed for proxy creation):
+	 * usually the thread context class loader.
+	 * @return the new proxy object (never {@code null})
 	 * @see Thread#getContextClassLoader()
 	 */
 	Object getProxy();
 
 	/**
-	 * 创建一个新的代理对象。
-	 * <p>使用给定的类加载器（必要时用于代理创建）。
-	 * 如果给定的类加载器为 {@code null}，则简单地传递并因此导致低级代理工具的默认值，
-	 * 这通常不同于AopProxy实现的 {@link #getProxy()} 方法选择的默认值。
-	 * @param classLoader 用于创建代理的类加载器
-	 * （或 {@code null} 表示使用低级代理工具的默认值）
-	 * @return 新的代理对象（永远不会是 {@code null}）
+	 * Create a new proxy object.
+	 * <p>Uses the given class loader (if needed for proxy creation).
+	 * If the given class loader is {@code null}, it is simply passed on, which leads to the defaults of the low-level proxy facility,
+	 * and these usually differ from the default chosen by the {@link #getProxy()} method of the AopProxy implementation.
+	 * @param classLoader the class loader to create the proxy with
+	 * (or {@code null} to use the defaults of the low-level proxy facility)
+	 * @return the new proxy object (never {@code null})
 	 */
 	Object getProxy(@Nullable ClassLoader classLoader);
 
 }
 ```
 
-### 五、主要实现
+### 5. Main Implementations
 
 1. **JdkDynamicAopProxy**
 
-   + 使用 JDK 动态代理实现的 `AopProxy` 实现类。当目标对象实现了至少一个接口时，Spring 将使用该类创建代理对象。该类通过 Java 标准库中的 `java.lang.reflect.Proxy` 类来创建代理对象。
+   + The `AopProxy` implementation that uses the JDK dynamic proxy. When the target object implements at least one interface, Spring uses this class to create the proxy object. It creates the proxy object with the `java.lang.reflect.Proxy` class from the Java standard library.
    
 2. **CglibAopProxy**
 
-     + 使用 CGLIB（Code Generation Library）动态代理实现的 `AopProxy` 实现类。当目标对象没有实现任何接口时，Spring 将使用该类创建代理对象。该类通过生成目标类的子类来创建代理对象，实现了对目标对象方法的拦截和增强。
+     + The `AopProxy` implementation that uses the CGLIB (Code Generation Library) dynamic proxy. When the target object implements no interface, Spring uses this class to create the proxy object. It creates the proxy object by generating a subclass of the target class, which intercepts and enhances the methods of the target object.
 
-### 六、类关系图
+### 6. Class Diagram
 
 ~~~mermaid
 classDiagram
@@ -98,11 +98,11 @@ JdkDynamicAopProxy  ..>  AopProxy
 ObjenesisCglibAopProxy  -->  CglibAopProxy 
 ~~~
 
-### 七、最佳实践
+### 7. Best Practices
 
-**JDK动态代理**
+**JDK dynamic proxy**
 
-使用 JDK 动态代理来创建 AOP 代理对象。在 `jdkProxy` 方法中，通过配置 `AdvisedSupport` 对象，设置目标对象和接口，然后利用反射创建 `JdkDynamicAopProxy` 实例，并调用 `AopProxy` 接口的 `getProxy` 方法生成代理对象。最后，输出代理对象的信息和调用代理对象方法的结果。
+This example uses the JDK dynamic proxy to create an AOP proxy object. In the `jdkProxy` method, it configures an `AdvisedSupport` object with the target object and interfaces. Then it creates a `JdkDynamicAopProxy` instance by reflection, and calls the `getProxy` method of the `AopProxy` interface to create the proxy object. Finally, it prints information about the proxy object and the result of calling a method on it.
 
 ```java
 public class AopProxyDemo {
@@ -112,40 +112,40 @@ public class AopProxyDemo {
     }
 
     /**
-     * Jdk代理
+     * JDK proxy
      *
      * @throws Exception
      */
     private static void jdkProxy() throws Exception {
-        // 创建AdvisedSupport对象，用于配置AOP代理
+        // Create an AdvisedSupport object to configure the AOP proxy
         AdvisedSupport advisedSupport = new AdvisedSupport();
-        // 设置目标对象
+        // Set the target object
         advisedSupport.setTarget(new MyServiceImpl());
-        // 设置目标对象实现的接口
+        // Set the interfaces implemented by the target object
         advisedSupport.setInterfaces(MyService.class);
 
-        // 获取JdkDynamicAopProxy的Class对象
+        // Get the Class object of JdkDynamicAopProxy
         Class jdkClass = Class.forName("org.springframework.aop.framework.JdkDynamicAopProxy");
 
-        // 获取JdkDynamicAopProxy的构造方法
+        // Get the constructor of JdkDynamicAopProxy
         Constructor constructor = jdkClass.getConstructor(AdvisedSupport.class);
         constructor.setAccessible(true);
 
-        // 使用构造方法创建JdkDynamicAopProxy实例
+        // Create a JdkDynamicAopProxy instance with the constructor
         AopProxy aopProxy = (AopProxy) constructor.newInstance(advisedSupport);
 
-        // 调用getProxy方法创建代理对象
+        // Call the getProxy method to create the proxy object
         MyService myService = (MyService) aopProxy.getProxy();
 
-        // 输出代理对象的信息
+        // Print information about the proxy object
         System.out.println("JDK Class = " + myService.getClass());
-        // 调用代理对象的方法
+        // Call a method on the proxy object
         myService.foo();
     } 
 }
 ```
 
-运行结果，代理对象的类为 `com.sun.proxy.$Proxy0`。
+This is the result. The class of the proxy object is `com.sun.proxy.$Proxy0`.
 
 ```java
 JDK Class = class com.sun.proxy.$Proxy0
@@ -154,9 +154,9 @@ foo...
 After foo
 ```
 
-**CGLIB代理**
+**CGLIB proxy**
 
-使用 CGLIB 动态代理来创建 AOP 代理对象。在 `cglibProxy` 方法中，通过配置 `AdvisedSupport` 对象，设置目标对象，然后利用反射创建 `CglibAopProxy` 实例，并调用 `AopProxy` 接口的 `getProxy` 方法生成代理对象。最后，输出代理对象的信息和调用代理对象方法的结果。
+This example uses the CGLIB dynamic proxy to create an AOP proxy object. In the `cglibProxy` method, it configures an `AdvisedSupport` object with the target object. Then it creates a `CglibAopProxy` instance by reflection, and calls the `getProxy` method of the `AopProxy` interface to create the proxy object. Finally, it prints information about the proxy object and the result of calling a method on it.
 
 ```java
 public class AopProxyDemo {
@@ -166,38 +166,38 @@ public class AopProxyDemo {
     }
 
     /**
-     * cglib代理
+     * CGLIB proxy
      *
      * @throws Exception
      */
     private static void cglibProxy() throws Exception {
-        // 创建AdvisedSupport对象，用于配置AOP代理
+        // Create an AdvisedSupport object to configure the AOP proxy
         AdvisedSupport advisedSupport = new AdvisedSupport();
-        // 设置目标对象
+        // Set the target object
         advisedSupport.setTarget(new MyServiceImpl());
 
-        // 获取CglibAopProxy的Class对象
+        // Get the Class object of CglibAopProxy
         Class cglibClass = Class.forName("org.springframework.aop.framework.CglibAopProxy");
 
-        // 获取CglibAopProxy的构造方法
+        // Get the constructor of CglibAopProxy
         Constructor constructor = cglibClass.getConstructor(AdvisedSupport.class);
         constructor.setAccessible(true);
 
-        // 使用构造方法创建CglibAopProxy实例
+        // Create a CglibAopProxy instance with the constructor
         AopProxy aopProxy = (AopProxy) constructor.newInstance(advisedSupport);
 
-        // 调用getProxy方法创建代理对象
+        // Call the getProxy method to create the proxy object
         MyService myService = (MyService) aopProxy.getProxy();
 
-        // 输出代理对象的信息
+        // Print information about the proxy object
         System.out.println("Cglib Class = " + myService.getClass());
-        // 调用代理对象的方法
+        // Call a method on the proxy object
         myService.foo();
     }   
 }
 ```
 
-运行结果，代理对象的类为 `com.xcs.spring.MyServiceImpl$$EnhancerBySpringCGLIB$$db84547f`。
+This is the result. The class of the proxy object is `com.xcs.spring.MyServiceImpl$$EnhancerBySpringCGLIB$$db84547f`.
 
 ```java
 Cglib Class = class com.xcs.spring.MyServiceImpl$$EnhancerBySpringCGLIB$$db84547f
@@ -206,7 +206,7 @@ foo...
 After foo
 ```
 
-### 八、时序图
+### 8. Sequence Diagram
 
 **JdkDynamicAopProxy**
 
@@ -216,15 +216,15 @@ autonumber
 AopProxyDemo->>JdkDynamicAopProxy:new JdkDynamicAopProxy()
 JdkDynamicAopProxy->>JdkDynamicAopProxy:this.advised
 JdkDynamicAopProxy->>JdkDynamicAopProxy:this.proxiedInterfaces
-JdkDynamicAopProxy->>AopProxyDemo:返回aopProxy
+JdkDynamicAopProxy->>AopProxyDemo:Return aopProxy
 AopProxyDemo->>JdkDynamicAopProxy:aopProxy.getProxy()
 JdkDynamicAopProxy->>JdkDynamicAopProxy:getProxy(classLoader)
 JdkDynamicAopProxy->>Proxy:Proxy.newProxyInstance()
-JdkDynamicAopProxy->>AopProxyDemo:返回代理对象
+JdkDynamicAopProxy->>AopProxyDemo:Return the proxy object
 AopProxyDemo->>$Proxy0:aopProxy.foo()
 $Proxy0->>JdkDynamicAopProxy:invoke()
 JdkDynamicAopProxy->>ReflectiveMethodInvocation:new ReflectiveMethodInvocation()
-ReflectiveMethodInvocation->>JdkDynamicAopProxy:返回invocation
+ReflectiveMethodInvocation->>JdkDynamicAopProxy:Return invocation
 JdkDynamicAopProxy->>ReflectiveMethodInvocation:invocation.proceed()
 ~~~
 
@@ -236,27 +236,27 @@ autonumber
 AopProxyDemo->>CglibAopProxy:new CglibAopProxy()
 CglibAopProxy->>CglibAopProxy:this.advised
 CglibAopProxy->>CglibAopProxy:this.advisedDispatcher
-CglibAopProxy->>AopProxyDemo:返回aopProxy
+CglibAopProxy->>AopProxyDemo:Return aopProxy
 AopProxyDemo->>CglibAopProxy:aopProxy.getProxy()
 CglibAopProxy->>CglibAopProxy:getProxy(classLoader)
 CglibAopProxy->>Enhancer:new Enhancer()
-Enhancer->>CglibAopProxy:返回enhancer
+Enhancer->>CglibAopProxy:Return enhancer
 CglibAopProxy->>CglibAopProxy:getCallbacks()
 CglibAopProxy->>CglibAopProxy:createProxyClassAndInstance()
 CglibAopProxy->>Enhancer:enhancer.create()
-CglibAopProxy->>AopProxyDemo:返回代理对象
+CglibAopProxy->>AopProxyDemo:Return the proxy object
 AopProxyDemo->>MyServiceImpl$$EnhancerBySpringCGLIB$$:aopProxy.foo()
 MyServiceImpl$$EnhancerBySpringCGLIB$$->>DynamicAdvisedInterceptor:intercept()
 DynamicAdvisedInterceptor->>CglibMethodInvocation:new CglibMethodInvocation()
-CglibMethodInvocation->>DynamicAdvisedInterceptor:返回invocation
+CglibMethodInvocation->>DynamicAdvisedInterceptor:Return invocation
 DynamicAdvisedInterceptor->>CglibMethodInvocation:invocation.proceed()
 ~~~
 
-### 九、源码分析
+### 9. Source Code Analysis
 
 **JdkDynamicAopProxy**
 
-在`org.springframework.aop.framework.JdkDynamicAopProxy#getProxy()`方法中，主要作用是返回一个代理对象，使用默认的类加载器来生成代理。
+The method `org.springframework.aop.framework.JdkDynamicAopProxy#getProxy()` returns a proxy object. It uses the default class loader to create the proxy.
 
 ```java
 @Override
@@ -265,7 +265,7 @@ public Object getProxy() {
 }
 ```
 
-在`org.springframework.aop.framework.JdkDynamicAopProxy#getProxy(java.lang.ClassLoader)`方法中，接收一个类加载器作为参数，并根据传入的类加载器和被代理的接口数组来创建一个 JDK 动态代理对象。
+The method `org.springframework.aop.framework.JdkDynamicAopProxy#getProxy(java.lang.ClassLoader)` takes a class loader as an argument. It creates a JDK dynamic proxy object from the given class loader and the array of proxied interfaces.
 
 ```java
 @Override
@@ -277,82 +277,82 @@ public Object getProxy(@Nullable ClassLoader classLoader) {
 }
 ```
 
-在`org.springframework.aop.framework.JdkDynamicAopProxy#invoke`方法中，`JdkDynamicAopProxy`实现了`InvocationHandler`接口，因此可以执行`invoke`方法。在方法中，首先根据方法是否为`equals`或`hashCode`方法进行特殊处理，然后获取目标对象并获取拦截器链。接着，根据拦截器链是否为空，选择直接调用目标对象方法或者通过方法拦截器链依次执行。最后，根据方法的返回值类型进行处理，如果返回值为目标对象并且返回类型与代理类型相同，则将返回值修改为代理对象。在方法执行完毕后，确保释放目标对象并恢复旧的代理对象。
+In the method `org.springframework.aop.framework.JdkDynamicAopProxy#invoke`, `JdkDynamicAopProxy` implements the `InvocationHandler` interface, so it can run the `invoke` method. In the method, it first handles the `equals` and `hashCode` methods specially. Then it gets the target object and the interceptor chain. Next, depending on whether the interceptor chain is empty, it either calls the target method directly or runs the method interceptor chain one by one. Finally, it handles the return value by its type. If the return value is the target object and the return type matches the proxy type, the return value is changed to the proxy object. After the method finishes, it makes sure the target object is released and the old proxy object is restored.
 
-[AdvisorChainFactory源码分析](../spring-aop-advisorChainFactory/README.md)
+[AdvisorChainFactory Source Code Analysis](../spring-aop-advisorChainFactory/README.md)
 
-[ProxyMethodInvocation源码分析](../spring-aop-proxyMethodInvocation/README.md)
+[ProxyMethodInvocation Source Code Analysis](../spring-aop-proxyMethodInvocation/README.md)
 
 ```java
 /**
- * 实现了 {@code InvocationHandler.invoke} 方法。
- * <p>调用者将看到目标对象抛出的异常，除非一个钩子方法抛出异常。
+ * Implementation of the {@code InvocationHandler.invoke} method.
+ * <p>Callers will see exactly the exception thrown by the target, unless a hook method throws an exception.
  */
 @Override
 @Nullable
 public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-    // 旧的代理对象
+    // The old proxy object
     Object oldProxy = null; 
-    // 是否设置了代理上下文标志
+    // Whether the proxy context flag was set
     boolean setProxyContext = false; 
 
-    // 目标源
+    // The target source
     TargetSource targetSource = this.advised.targetSource; 
-    // 目标对象
+    // The target object
     Object target = null; 
 
     try {
         if (!this.equalsDefined && AopUtils.isEqualsMethod(method)) {
-            // 目标对象未实现 equals(Object) 方法
+            // The target object does not implement the equals(Object) method
             return equals(args[0]);
         } else if (!this.hashCodeDefined && AopUtils.isHashCodeMethod(method)) {
-            // 目标对象未实现 hashCode() 方法
+            // The target object does not implement the hashCode() method
             return hashCode();
         } else if (method.getDeclaringClass() == DecoratingProxy.class) {
-            // 只有 getDecoratedClass() 声明 -> 转发到代理配置
+            // Only getDecoratedClass() is declared -> forward to the proxy configuration
             return AopProxyUtils.ultimateTargetClass(this.advised);
         } else if (!this.advised.opaque && method.getDeclaringClass().isInterface() &&
                 method.getDeclaringClass().isAssignableFrom(Advised.class)) {
-            // 在代理配置上执行服务调用...
+            // Make a service call on the proxy configuration...
             return AopUtils.invokeJoinpointUsingReflection(this.advised, method, args);
         }
 
         Object retVal;
 
         if (this.advised.exposeProxy) {
-            // 必要时使调用可用
+            // Make the invocation available if necessary
             oldProxy = AopContext.setCurrentProxy(proxy);
             setProxyContext = true;
         }
 
-        // 尽可能晚地获取目标对象，以最小化我们“拥有”目标对象的时间，以防它来自池。
+        // Get the target object as late as possible, to minimize the time we "own" the target, in case it comes from a pool.
         target = targetSource.getTarget();
         Class<?> targetClass = (target != null ? target.getClass() : null);
 
-        // 获取此方法的拦截器链。
+        // Get the interceptor chain for this method.
         List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
 
-        // 检查是否有任何通知。如果没有，则可以回退到直接反射调用目标，避免创建 MethodInvocation。
+        // Check whether there is any advice. If not, we can fall back to a direct reflective call on the target, and avoid creating a MethodInvocation.
         if (chain.isEmpty()) {
-            // 我们可以跳过创建一个 MethodInvocation：直接调用目标
-            // 注意，最终的调用者必须是一个 InvokerInterceptor，这样我们就知道它只是在目标上执行反射操作，而没有热交换或花哨的代理。
+            // We can skip creating a MethodInvocation: just invoke the target directly
+            // Note that the final invoker must be an InvokerInterceptor, so we know it only does reflective operations on the target, with no hot swapping or fancy proxying.
             Object[] argsToUse = AopProxyUtils.adaptArgumentsIfNecessary(method, args);
             retVal = AopUtils.invokeJoinpointUsingReflection(target, method, argsToUse);
         } else {
-            // 我们需要创建一个方法调用...
+            // We need to create a method invocation...
             MethodInvocation invocation =
                     new ReflectiveMethodInvocation(proxy, target, method, args, targetClass, chain);
-            // 通过拦截器链继续进行连接点。
+            // Proceed to the join point through the interceptor chain.
             retVal = invocation.proceed();
         }
 
-        // 如果需要，修改返回值。
+        // Modify the return value if necessary.
         Class<?> returnType = method.getReturnType();
         if (retVal != null && retVal == target &&
                 returnType != Object.class && returnType.isInstance(proxy) &&
                 !RawTargetAccess.class.isAssignableFrom(method.getDeclaringClass())) {
-            // 特殊情况：它返回了“this”，并且方法的返回类型与之相容。
-            // 请注意，如果目标在另一个返回对象中设置了对自身的引用，我们无法帮助。
+            // Special case: it returned "this", and the return type of the method is compatible.
+            // Note that we cannot help if the target sets a reference to itself in another returned object.
             retVal = proxy;
         } else if (retVal == null && returnType != Void.TYPE && returnType.isPrimitive()) {
             throw new AopInvocationException(
@@ -361,11 +361,11 @@ public Object invoke(Object proxy, Method method, Object[] args) throws Throwabl
         return retVal;
     } finally {
         if (target != null && !targetSource.isStatic()) {
-            // 必须来自 TargetSource。
+            // Must come from the TargetSource.
             targetSource.releaseTarget(target);
         }
         if (setProxyContext) {
-            // 恢复旧代理。
+            // Restore the old proxy.
             AopContext.setCurrentProxy(oldProxy);
         }
     }
@@ -374,7 +374,7 @@ public Object invoke(Object proxy, Method method, Object[] args) throws Throwabl
 
 **CglibAopProxy**
 
-在`org.springframework.aop.framework.CglibAopProxy#getProxy()`方法中，它返回代理对象。在没有指定目标类加载器的情况下，它调用了另一个重载方法 `getProxy(null)` 来生成代理对象并返回。
+The method `org.springframework.aop.framework.CglibAopProxy#getProxy()` returns the proxy object. When no target class loader is given, it calls the other overloaded method `getProxy(null)` to create the proxy object and returns it.
 
 ```java
 @Override
@@ -383,40 +383,40 @@ public Object getProxy() {
 }
 ```
 
-在`org.springframework.aop.framework.CglibAopProxy#getProxy(java.lang.ClassLoader)`方法中，使用 CGLIB 动态生成代理类，并创建代理对象。首先，它检查是否启用了跟踪日志，然后获取目标类的根类，并确保目标类可用于创建代理。接着，它设置代理类的父类为目标类的根类，并根据需要添加额外的接口。在配置 CGLIB Enhancer 之后，它为代理类设置回调函数，并最终生成代理类并创建代理实例。
+The method `org.springframework.aop.framework.CglibAopProxy#getProxy(java.lang.ClassLoader)` uses CGLIB to generate the proxy class and create the proxy object. First, it checks whether trace logging is on, then gets the root class of the target class and makes sure the target class can be used to create a proxy. Next, it sets the superclass of the proxy class to the root class of the target class and adds extra interfaces if needed. After configuring the CGLIB Enhancer, it sets the callbacks for the proxy class, and finally generates the proxy class and creates the proxy instance.
 
 ```java
 @Override
 public Object getProxy(@Nullable ClassLoader classLoader) {
-    // 如果启用了跟踪日志，则记录正在创建 CGLIB 代理的信息
+    // If trace logging is on, log that a CGLIB proxy is being created
     if (logger.isTraceEnabled()) {
         logger.trace("Creating CGLIB proxy: " + this.advised.getTargetSource());
     }
 
     try {
-        // 获取目标类的根类
+        // Get the root class of the target class
         Class<?> rootClass = this.advised.getTargetClass();
-        // 断言目标类必须可用于创建 CGLIB 代理
+        // Assert that the target class can be used to create a CGLIB proxy
         Assert.state(rootClass != null, "Target class must be available for creating a CGLIB proxy");
 
-        // 设置代理类的父类为目标类的根类
+        // Set the superclass of the proxy class to the root class of the target class
         Class<?> proxySuperClass = rootClass;
-        // 如果目标类的名称包含了 CGLIB 分隔符，则将父类修改为目标类的父类，并将额外的接口添加到代理类中
+        // If the name of the target class contains the CGLIB separator, change the superclass to the superclass of the target class and add the extra interfaces to the proxy class
         if (rootClass.getName().contains(ClassUtils.CGLIB_CLASS_SEPARATOR)) {
             proxySuperClass = rootClass.getSuperclass();
-            // 获取额外的接口并添加到代理类中
+            // Get the extra interfaces and add them to the proxy class
             Class<?>[] additionalInterfaces = rootClass.getInterfaces();
             for (Class<?> additionalInterface : additionalInterfaces) {
                 this.advised.addInterface(additionalInterface);
             }
         }
 
-        // 在需要时验证类，并写入日志消息
+        // Validate the class if needed, and write log messages
         validateClassIfNecessary(proxySuperClass, classLoader);
 
-        // 配置 CGLIB Enhancer...
+        // Configure the CGLIB Enhancer...
         Enhancer enhancer = createEnhancer();
-        // 如果指定了类加载器，则设置 Enhancer 的类加载器，并在类加载器为可重新加载时禁用缓存
+        // If a class loader is given, set it on the Enhancer, and disable caching when the class loader is reloadable
         if (classLoader != null) {
             enhancer.setClassLoader(classLoader);
             if (classLoader instanceof SmartClassLoader &&
@@ -424,54 +424,54 @@ public Object getProxy(@Nullable ClassLoader classLoader) {
                 enhancer.setUseCache(false);
             }
         }
-        // 设置代理类的父类
+        // Set the superclass of the proxy class
         enhancer.setSuperclass(proxySuperClass);
-        // 设置代理类实现的接口
+        // Set the interfaces implemented by the proxy class
         enhancer.setInterfaces(AopProxyUtils.completeProxiedInterfaces(this.advised));
-        // 设置命名策略
+        // Set the naming policy
         enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
-        // 设置策略以考虑类加载器
+        // Set the strategy to take the class loader into account
         enhancer.setStrategy(new ClassLoaderAwareGeneratorStrategy(classLoader));
 
-        // 获取回调对象和对应的类型
+        // Get the callbacks and their types
         Callback[] callbacks = getCallbacks(rootClass);
         Class<?>[] types = new Class<?>[callbacks.length];
         for (int x = 0; x < types.length; x++) {
             types[x] = callbacks[x].getClass();
         }
-        // fixedInterceptorMap 只在上面的 getCallbacks 调用后才填充
-        // 设置回调过滤器，用于过滤固定拦截器
+        // fixedInterceptorMap is only filled after the getCallbacks call above
+        // Set the callback filter, used to filter the fixed interceptors
         enhancer.setCallbackFilter(new ProxyCallbackFilter(
                 this.advised.getConfigurationOnlyCopy(), this.fixedInterceptorMap, this.fixedInterceptorOffset));
-        // 设置回调类型
+        // Set the callback types
         enhancer.setCallbackTypes(types);
 
-        // 生成代理类并创建代理实例
+        // Generate the proxy class and create the proxy instance
         return createProxyClassAndInstance(enhancer, callbacks);
     } catch (CodeGenerationException | IllegalArgumentException ex) {
-        // 如果生成代理类出现异常，则抛出 AopConfigException
+        // If generating the proxy class fails, throw an AopConfigException
         throw new AopConfigException("Could not generate CGLIB subclass of " + this.advised.getTargetClass() +
                 ": Common causes of this problem include using a final class or a non-visible class", ex);
     } catch (Throwable ex) {
-        // 如果获取目标类实例失败，则抛出 AopConfigException
+        // If getting the target class instance fails, throw an AopConfigException
         throw new AopConfigException("Unexpected AOP exception", ex);
     }
 }
 ```
 
-在`org.springframework.aop.framework.CglibAopProxy#getCallbacks`方法中，根据代理配置的不同情况，选择不同的拦截器和分发器，并根据目标类的静态性和建议链的冻结状态进行优化选择。如果目标是静态的并且建议链是冻结的，它会通过使用固定链将AOP调用直接发送到目标来进行一些优化。最终返回一个包含所有选定回调的数组。
+The method `org.springframework.aop.framework.CglibAopProxy#getCallbacks` chooses different interceptors and dispatchers depending on the proxy configuration. It also optimizes the choice based on whether the target is static and whether the advice chain is frozen. If the target is static and the advice chain is frozen, it optimizes by sending AOP calls straight to the target with a fixed chain. In the end, it returns an array that holds all the chosen callbacks.
 
 ```java
 private Callback[] getCallbacks(Class<?> rootClass) throws Exception {
-    // 用于优化选择的参数...
+    // Parameters used for the optimized choice...
     boolean exposeProxy = this.advised.isExposeProxy();
     boolean isFrozen = this.advised.isFrozen();
     boolean isStatic = this.advised.getTargetSource().isStatic();
 
-    // 选择一个“AOP”拦截器（用于AOP调用）。
+    // Choose an "AOP" interceptor (for AOP invocations).
     Callback aopInterceptor = new DynamicAdvisedInterceptor(this.advised);
 
-    // 选择一个“直接到目标”的拦截器（用于无通知的调用，但可以返回this）。
+    // Choose a "straight to target" interceptor (for unadvised invocations, but which can return this).
     Callback targetInterceptor;
     if (exposeProxy) {
         targetInterceptor = (isStatic ?
@@ -483,14 +483,14 @@ private Callback[] getCallbacks(Class<?> rootClass) throws Exception {
                 new DynamicUnadvisedInterceptor(this.advised.getTargetSource()));
     }
 
-    // 选择一个“直接到目标”的分发器（用于对静态目标的未通知调用，无法返回this）。
+    // Choose a "straight to target" dispatcher (for unadvised invocations on a static target, which cannot return this).
     Callback targetDispatcher = (isStatic ?
             new StaticDispatcher(this.advised.getTargetSource().getTarget()) : new SerializableNoOp());
 
     Callback[] mainCallbacks = new Callback[] {
-            aopInterceptor,  // 用于普通建议
-            targetInterceptor,  // 在优化的情况下调用目标，不考虑建议
-            new SerializableNoOp(),  // 对于映射到此的方法，没有覆盖
+            aopInterceptor,  // For normal advice
+            targetInterceptor,  // Invoke the target in the optimized case, ignoring advice
+            new SerializableNoOp(),  // No override for methods mapped to this
             targetDispatcher, this.advisedDispatcher,
             new EqualsInterceptor(this.advised),
             new HashCodeInterceptor(this.advised)
@@ -498,14 +498,14 @@ private Callback[] getCallbacks(Class<?> rootClass) throws Exception {
 
     Callback[] callbacks;
 
-    // 如果目标是静态的并且建议链被冻结，
-    // 则我们可以通过使用固定链将AOP调用直接发送到目标来进行一些优化。
+    // If the target is static and the advice chain is frozen,
+    // we can optimize by sending AOP calls straight to the target with a fixed chain.
     if (isStatic && isFrozen) {
         Method[] methods = rootClass.getMethods();
         Callback[] fixedCallbacks = new Callback[methods.length];
         this.fixedInterceptorMap = CollectionUtils.newHashMap(methods.length);
 
-        // TODO: 这里进行了一些内存优化（可以跳过没有建议的方法的创建）
+        // TODO: Some memory optimization is done here (creation could be skipped for methods without advice)
         for (int x = 0; x < methods.length; x++) {
             Method method = methods[x];
             List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, rootClass);
@@ -514,7 +514,7 @@ private Callback[] getCallbacks(Class<?> rootClass) throws Exception {
             this.fixedInterceptorMap.put(method, x);
         }
 
-        // 现在将mainCallbacks和fixedCallbacks中的回调复制到callbacks数组中。
+        // Now copy the callbacks from mainCallbacks and fixedCallbacks into the callbacks array.
         callbacks = new Callback[mainCallbacks.length + fixedCallbacks.length];
         System.arraycopy(mainCallbacks, 0, callbacks, 0, mainCallbacks.length);
         System.arraycopy(fixedCallbacks, 0, callbacks, mainCallbacks.length, fixedCallbacks.length);
@@ -526,64 +526,64 @@ private Callback[] getCallbacks(Class<?> rootClass) throws Exception {
 }
 ```
 
-在`org.springframework.aop.framework.CglibAopProxy.DynamicAdvisedInterceptor#intercept`方法中，首先，它获取目标对象和目标类，并获取与指定方法相关的拦截器链。然后，根据拦截器链和方法的特性进行适当的处理。如果拦截器链为空且方法是公共的，则直接调用目标方法，否则创建一个方法调用。最后，处理方法调用的返回值并返回结果。在方法执行过程中，还会根据配置决定是否暴露代理对象，并在必要时设置AOP上下文。最后，在finally块中释放目标对象，并在必要时恢复旧的代理对象。
+The method `org.springframework.aop.framework.CglibAopProxy.DynamicAdvisedInterceptor#intercept` first gets the target object and the target class, and gets the interceptor chain for the given method. Then it handles the call depending on the interceptor chain and the features of the method. If the interceptor chain is empty and the method is public, it calls the target method directly. Otherwise, it creates a method invocation. At the end, it handles the return value of the method invocation and returns the result. During the call, it also decides from the configuration whether to expose the proxy object, and sets the AOP context when needed. Finally, in the finally block, it releases the target object and restores the old proxy object when needed.
 
-[AdvisorChainFactory源码分析](../spring-aop-advisorChainFactory/README.md)
+[AdvisorChainFactory Source Code Analysis](../spring-aop-advisorChainFactory/README.md)
 
-[ProxyMethodInvocation源码分析](../spring-aop-proxyMethodInvocation/README.md)
+[ProxyMethodInvocation Source Code Analysis](../spring-aop-proxyMethodInvocation/README.md)
 
 ```java
 @Override
 @Nullable
 public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
-    // 保存旧代理对象
+    // Save the old proxy object
     Object oldProxy = null; 
-    // 是否设置了代理上下文
+    // Whether the proxy context was set
     boolean setProxyContext = false; 
-    // 目标对象
+    // The target object
     Object target = null; 
-    // 获取目标源
+    // Get the target source
     TargetSource targetSource = this.advised.getTargetSource(); 
     try {
        if (this.advised.exposeProxy) {
-          // 如果配置中允许暴露代理对象，则将当前代理对象设置为Aop上下文的当前代理对象
+          // If the configuration allows exposing the proxy object, set the current proxy object as the current proxy of the AOP context
           oldProxy = AopContext.setCurrentProxy(proxy);
           setProxyContext = true;
        }
-       // 获取目标对象，尽可能晚地获取以最小化拥有目标的时间，以防它来自池...
+       // Get the target object as late as possible, to minimize the time we own the target, in case it comes from a pool...
        target = targetSource.getTarget();
-       // 目标对象的类
+       // The class of the target object
        Class<?> targetClass = (target != null ? target.getClass() : null); 
-       // 获取拦截器链
+       // Get the interceptor chain
        List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass); 
-       // 方法调用返回值
+       // The return value of the method invocation
        Object retVal; 
-       // 检查是否只有一个 InvokerInterceptor：即，没有真正的建议，而只是目标的反射调用。
+       // Check whether there is only one InvokerInterceptor: that is, there is no real advice, just a reflective call on the target.
        if (chain.isEmpty() && Modifier.isPublic(method.getModifiers())) {
-          // 我们可以跳过创建一个 MethodInvocation：直接调用目标。
-          // 请注意，最终调用者必须是一个 InvokerInterceptor，因此我们知道它只是对目标进行了反射操作，并且没有热交换或花哨的代理。
+          // We can skip creating a MethodInvocation: just invoke the target directly.
+          // Note that the final invoker must be an InvokerInterceptor, so we know it only does reflective operations on the target, with no hot swapping or fancy proxying.
           Object[] argsToUse = AopProxyUtils.adaptArgumentsIfNecessary(method, args); 
-          // 直接调用目标方法
+          // Call the target method directly
           retVal = methodProxy.invoke(target, argsToUse); 
        }
        else {
-          // 我们需要创建一个方法调用...
-          // 创建方法调用并执行
+          // We need to create a method invocation...
+          // Create the method invocation and run it
           retVal = new CglibMethodInvocation(proxy, target, method, args, targetClass, chain, methodProxy).proceed(); 
        }
-       // 处理返回类型
+          // Handle the return type
        retVal = processReturnType(proxy, target, method, retVal); 
-       // 返回方法调用结果
+          // Return the result of the method invocation
        return retVal; 
     }
     finally {
        if (target != null && !targetSource.isStatic()) {
-          // 如果目标对象不是静态的，则释放目标对象
+          // If the target object is not static, release it
           targetSource.releaseTarget(target); 
        }
        if (setProxyContext) {
-          // 恢复旧代理对象。
-          AopContext.setCurrentProxy(oldProxy); // 恢复Aop上下文的当前代理对象为旧代理对象
+          // Restore the old proxy object.
+          AopContext.setCurrentProxy(oldProxy); // Restore the current proxy of the AOP context to the old proxy object
        }
     }
 }

@@ -7,23 +7,23 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
 public class AdvisedDemo {
 
     public static void main(String[] args) {
-        // 创建 AdvisedSupport 对象
+        // Create an AdvisedSupport object
         AdvisedSupport advisedSupport = new AdvisedSupport();
-        // 设置目标对象
+        // Set the target object
         advisedSupport.setTarget(new MyServiceImpl());
-        // 设置目标对象实现的接口
+        // Set the interfaces implemented by the target object
         advisedSupport.setInterfaces(MyService.class);
-        // 添加通知
+        // Add advice
         advisedSupport.addAdvice(new Advice() {});
-        // 添加通知器
+        // Add an advisor
         advisedSupport.addAdvisor(new DefaultPointcutAdvisor());
-        // 暴露代理对象
+        // Expose the proxy object
         advisedSupport.setExposeProxy(true);
-        // 设置CGLIB 代理
+        // Set CGLIB proxy
         advisedSupport.setProxyTargetClass(true);
-        // 冻结对象
+        // Freeze the object
         advisedSupport.setFrozen(true);
-        // 打印
+        // Print
         System.out.println("AdvisedSupport = " + advisedSupport.toProxyConfigString());
     }
 }

@@ -5,13 +5,13 @@ import org.springframework.aop.framework.ProxyFactory;
 public class AfterReturningAdviceDemo {
 
     public static void main(String[] args) {
-        // 创建代理工厂&创建目标对象
+        // Create the proxy factory and the target object
         ProxyFactory proxyFactory = new ProxyFactory(new MyService());
-        // 创建通知
+        // Create the advice
         proxyFactory.addAdvice(new MyAfterReturningAdvice());
-        // 获取代理对象
+        // Get the proxy object
         MyService proxy = (MyService) proxyFactory.getProxy();
-        // 调用代理对象的方法
+        // Call a method on the proxy object
         proxy.foo();
     }
 }

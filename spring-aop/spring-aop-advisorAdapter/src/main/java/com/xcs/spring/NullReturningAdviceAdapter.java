@@ -6,14 +6,14 @@ import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.adapter.AdvisorAdapter;
 
 /**
- * 空返回通知适配器，用于将空返回通知（NullReturningAdvice）适配到拦截器链中。
+ * Null returning advice adapter. It adapts null returning advice (NullReturningAdvice) into the interceptor chain.
  */
 public class NullReturningAdviceAdapter implements AdvisorAdapter {
 
     /**
-     * 判断该适配器是否支持给定的通知。
-     * @param advice 一个通知，如空返回通知（NullReturningAdvice）
-     * @return 如果该适配器支持给定的通知，则返回 true；否则返回 false
+     * Check whether this adapter supports the given advice.
+     * @param advice an advice, such as null returning advice (NullReturningAdvice)
+     * @return true if this adapter supports the given advice; otherwise false
      */
     @Override
     public boolean supportsAdvice(Advice advice) {
@@ -21,9 +21,9 @@ public class NullReturningAdviceAdapter implements AdvisorAdapter {
     }
 
     /**
-     * 获取一个方法拦截器，将给定的通知行为暴露给基于拦截的 AOP 框架。
-     * @param advisor Advisor。supportsAdvice() 方法必须在此对象上返回 true
-     * @return 给定 Advisor 的方法拦截器
+     * Get a method interceptor that exposes the behavior of the given advice to an interception-based AOP framework.
+     * @param advisor the Advisor. The supportsAdvice() method must return true on this object
+     * @return the method interceptor for the given Advisor
      */
     @Override
     public MethodInterceptor getInterceptor(Advisor advisor) {

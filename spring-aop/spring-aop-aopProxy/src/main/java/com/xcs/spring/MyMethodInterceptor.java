@@ -6,11 +6,11 @@ import org.aopalliance.intercept.MethodInvocation;
 public class MyMethodInterceptor implements MethodInterceptor {
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
-        // 在方法调用之前执行的逻辑
+        // Logic that runs before the method call
         System.out.println("Before " + invocation.getMethod().getName());
-        // 调用原始方法
+        // Call the original method
         Object result = invocation.proceed();
-        // 在方法调用之后执行的逻辑
+        // Logic that runs after the method call
         System.out.println("After " + invocation.getMethod().getName());
         return result;
     }

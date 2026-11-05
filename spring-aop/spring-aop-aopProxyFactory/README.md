@@ -1,54 +1,54 @@
 ## AopProxyFactory
 - [AopProxyFactory](#aopproxyfactory)
-    - [一、基本信息](#一基本信息)
-    - [二、基本描述](#二基本描述)
-    - [三、主要功能](#三主要功能)
-    - [四、接口源码](#四接口源码)
-    - [五、主要实现](#五主要实现)
-    - [六、类关系图](#六类关系图)
-    - [七、最佳实践](#七最佳实践)
-    - [八、源码分析](#八源码分析)
+    - [1. Overview](#1-overview)
+    - [2. Description](#2-description)
+    - [3. Main Features](#3-main-features)
+    - [4. Interface Source](#4-interface-source)
+    - [5. Main Implementations](#5-main-implementations)
+    - [6. Class Diagram](#6-class-diagram)
+    - [7. Best Practices](#7-best-practices)
+    - [8. Source Code Analysis](#8-source-code-analysis)
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [Juejin](https://juejin.cn/user/4251135018533068/posts) 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、基本描述
+### 2. Description
 
-`AopProxyFactory` 接口是 Spring AOP 框架的关键组件之一，负责根据配置信息创建 AOP 代理对象，支持根据目标对象的类型和配置选择合适的代理方式（JDK 动态代理或 CGLIB 代理）。
+The `AopProxyFactory` interface is one of the key parts of the Spring AOP framework. It creates AOP proxy objects from configuration. It chooses a suitable proxy type (JDK dynamic proxy or CGLIB proxy) based on the type of the target object and the configuration.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **创建 AOP 代理对象**
+1. **Create AOP proxy objects**
 
-   + 根据传入的 `AdvisedSupport` 对象，利用指定的代理方式（JDK 动态代理或 CGLIB 代理）生成 AOP 代理对象。
+   + Creates an AOP proxy object from the given `AdvisedSupport` object, using the chosen proxy type (JDK dynamic proxy or CGLIB proxy).
    
-2. **决定代理方式**
+2. **Decide the proxy type**
 
-   + 根据目标类的类型和配置信息，确定是否使用 JDK 动态代理或 CGLIB 代理。这个决定通常是基于配置中的一些条件，例如是否需要代理接口或者是否允许使用 CGLIB 代理。
+   + Decides whether to use a JDK dynamic proxy or a CGLIB proxy, based on the type of the target class and the configuration. The decision usually depends on some settings, such as whether interfaces should be proxied or whether CGLIB proxies are allowed.
    
-3. **支持灵活配置**
+3. **Flexible configuration**
 
-   + 通过实现该接口，可以灵活地定制 AOP 代理的生成方式，以满足不同场景下的需求。
+   + By implementing this interface, you can customize how AOP proxies are created, to fit different needs.
 
-### 四、接口源码
+### 4. Interface Source
 
-`AopProxyFactory`接口 ，其功能是创建基于 `AdvisedSupport` 配置对象的 AOP 代理。代理对象需要满足一系列约定，包括实现被配置指示的所有接口、实现 `Advised` 接口、实现 `equals` 方法用于比较被代理的接口、通知和目标、并且在通知者和目标都是可序列化的情况下应该是可序列化的，以及在通知者和目标都是线程安全的情况下应该是线程安全的。该接口的实现应该能够根据给定的 AOP 配置创建相应的 AOP 代理对象，并在配置无效时抛出 `AopConfigException` 异常。
+The `AopProxyFactory` interface creates AOP proxies from an `AdvisedSupport` configuration object. The proxy objects must follow a set of rules. They implement all interfaces the configuration says to proxy. They implement the `Advised` interface. They implement the `equals` method to compare the proxied interfaces, advice, and target. They should be serializable if all advisors and the target are serializable. They should be thread-safe if the advisors and the target are thread-safe. An implementation should create the matching AOP proxy object from the given AOP configuration, and throw an `AopConfigException` if the configuration is invalid.
 
 ```java
 /**
- * 接口，由能够基于 {@link AdvisedSupport} 配置对象创建 AOP 代理的工厂实现。
+ * Interface to be implemented by factories that can create AOP proxies based on an {@link AdvisedSupport} configuration object.
  *
- * <p>代理对象应遵守以下约定：
+ * <p>Proxies should follow these rules:
  * <ul>
- * <li>它们应该实现配置中指示应该被代理的所有接口。
- * <li>它们应该实现 {@link Advised} 接口。
- * <li>它们应该实现 equals 方法以比较被代理的接口、通知和目标。
- * <li>如果所有通知者和目标都是可序列化的，它们应该是可序列化的。
- * <li>如果通知者和目标都是线程安全的，它们应该是线程安全的。
+ * <li>They should implement all interfaces that the configuration says should be proxied.
+ * <li>They should implement the {@link Advised} interface.
+ * <li>They should implement the equals method to compare the proxied interfaces, advice, and target.
+ * <li>They should be serializable if all advisors and the target are serializable.
+ * <li>They should be thread-safe if the advisors and the target are thread-safe.
  * </ul>
  *
- * <p>代理可能允许或不允许更改通知。如果它们不允许更改通知（例如，因为配置已被冻结），则代理应在尝试更改通知时抛出 {@link AopConfigException}。
+ * <p>A proxy may or may not allow changes to the advice. If it does not allow changes (for example, because the configuration is frozen), the proxy should throw an {@link AopConfigException} when someone tries to change the advice.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -56,10 +56,10 @@
 public interface AopProxyFactory {
 
 	/**
-	 * 根据给定的 AOP 配置创建一个 {@link AopProxy}。
-	 * @param config 以 AdvisedSupport 对象形式表示的 AOP 配置
-	 * @return 相应的 AOP 代理
-	 * @throws AopConfigException 如果配置无效
+	 * Create an {@link AopProxy} for the given AOP configuration.
+	 * @param config the AOP configuration in the form of an AdvisedSupport object
+	 * @return the corresponding AOP proxy
+	 * @throws AopConfigException if the configuration is invalid
 	 */
 	AopProxy createAopProxy(AdvisedSupport config) throws AopConfigException;
 
@@ -67,13 +67,13 @@ public interface AopProxyFactory {
 
 ```
 
-### 五、主要实现
+### 5. Main Implementations
 
 1. **DefaultAopProxyFactory**
 
-   + `DefaultAopProxyFactory` 是 `AopProxyFactory` 接口的默认实现类，它负责根据给定的 `AdvisedSupport` 配置对象创建 AOP 代理，根据配置信息选择合适的代理方式（JDK 动态代理或 CGLIB 代理），并处理可能出现的异常情况，使得 Spring AOP 能够灵活地生成并使用 AOP 代理对象，实现切面编程的功能。
+   + `DefaultAopProxyFactory` is the default implementation of the `AopProxyFactory` interface. It creates an AOP proxy from the given `AdvisedSupport` configuration object. It chooses a suitable proxy type (JDK dynamic proxy or CGLIB proxy) from the configuration, and handles errors that may happen. This lets Spring AOP create and use AOP proxy objects flexibly, which gives the aspect programming feature.
 
-### 六、类关系图
+### 6. Class Diagram
 
 ~~~mermaid
 classDiagram
@@ -87,81 +87,81 @@ class DefaultAopProxyFactory
 DefaultAopProxyFactory  ..>  AopProxyFactory 
 ~~~
 
-### 七、最佳实践
+### 7. Best Practices
 
-何使用 Spring AOP 创建 JDK 动态代理和 CGLIB 代理。在 `jdkProxy()` 方法中，首先创建了一个 `AdvisedSupport` 对象用于配置 AOP 代理，然后通过 `DefaultAopProxyFactory` 实例创建 JDK 动态代理对象，并打印生成的代理类。而在 `cglibProxy()` 方法中，同样创建了一个 `AdvisedSupport` 对象用于配置 AOP 代理，然后通过 `DefaultAopProxyFactory` 实例创建 CGLIB 代理对象，并打印生成的代理类。
+This example shows how to use Spring AOP to create a JDK dynamic proxy and a CGLIB proxy. In the `jdkProxy()` method, it first creates an `AdvisedSupport` object to configure the AOP proxy. Then it uses a `DefaultAopProxyFactory` instance to create a JDK dynamic proxy object, and prints the generated proxy class. In the `cglibProxy()` method, it also creates an `AdvisedSupport` object to configure the AOP proxy. Then it uses a `DefaultAopProxyFactory` instance to create a CGLIB proxy object, and prints the generated proxy class.
 
 ```java
 public class AopProxyFactoryDemo {
 
     public static void main(String[] args) {
-        // 分别演示 JDK 动态代理和 CGLIB 代理
+        // Show the JDK dynamic proxy and the CGLIB proxy one by one
         jdkProxy();
         cglibProxy();
     }
 
     /**
-     * JDK 动态代理示例
+     * JDK dynamic proxy example
      */
     private static void jdkProxy() {
-        // 创建 AdvisedSupport 对象，用于配置 AOP 代理
+        // Create an AdvisedSupport object to configure the AOP proxy
         AdvisedSupport advisedSupport = new AdvisedSupport();
-        // 设置目标对象
+        // Set the target object
         advisedSupport.setTarget(new MyServiceImpl());
-        // 设置目标对象的类
+        // Set the class of the target object
         advisedSupport.setTargetClass(MyService.class);
 
-        // 创建 DefaultAopProxyFactory 实例
+        // Create a DefaultAopProxyFactory instance
         AopProxyFactory aopProxyFactory = new DefaultAopProxyFactory();
-        // 创建 JDK 动态代理对象
+        // Create the JDK dynamic proxy object
         MyService myService = (MyService) aopProxyFactory.createAopProxy(advisedSupport).getProxy();
-        // 打印生成的代理类
+        // Print the generated proxy class
         System.out.println("jdkProxy = " + myService.getClass());
     }
 
     /**
-     * CGLIB 代理示例
+     * CGLIB proxy example
      */
     private static void cglibProxy() {
-        // 创建 AdvisedSupport 对象，用于配置 AOP 代理
+        // Create an AdvisedSupport object to configure the AOP proxy
         AdvisedSupport advisedSupport = new AdvisedSupport();
-        // 设置目标对象
+        // Set the target object
         advisedSupport.setTarget(new MyServiceImpl());
-        // 创建 DefaultAopProxyFactory 实例
+        // Create a DefaultAopProxyFactory instance
         AopProxyFactory aopProxyFactory = new DefaultAopProxyFactory();
-        // 创建 CGLIB 代理对象
+        // Create the CGLIB proxy object
         MyService myService = (MyService) aopProxyFactory.createAopProxy(advisedSupport).getProxy();
-        // 打印生成的代理类
+        // Print the generated proxy class
         System.out.println("cglibProxy = " + myService.getClass());
     }
 }
 ```
 
-运行结果，显示了两种不同的代理类。`jdkProxy` 是使用 JDK 动态代理生成的代理类，它由 `com.sun.proxy.$Proxy0` 表示。而 `cglibProxy` 是使用 CGLIB 生成的代理类，它由 `com.xcs.spring.MyServiceImpl$$EnhancerBySpringCGLIB$$3c109cf5` 表示。这两种代理类分别对应了不同的代理方式，分别由 Spring AOP 根据配置信息生成。
+This is the result. It shows two different proxy classes. `jdkProxy` is the proxy class created by the JDK dynamic proxy, shown as `com.sun.proxy.$Proxy0`. `cglibProxy` is the proxy class created by CGLIB, shown as `com.xcs.spring.MyServiceImpl$$EnhancerBySpringCGLIB$$3c109cf5`. The two proxy classes match two different proxy types, and Spring AOP creates each of them from the configuration.
 
 ```java
 jdkProxy = class com.sun.proxy.$Proxy0
 cglibProxy = class com.xcs.spring.MyServiceImpl$$EnhancerBySpringCGLIB$$3c109cf5
 ```
 
-### 八、源码分析
+### 8. Source Code Analysis
 
-`DefaultAopProxyFactory` 是 `AopProxyFactory` 接口的默认实现，根据给定的 `AdvisedSupport` 配置对象，可以创建 CGLIB 代理或 JDK 动态代理。如果对于给定的 `AdvisedSupport` 实例满足以下条件之一，则会创建 CGLIB 代理：优化标志被设置、代理目标类标志被设置，或者未指定代理接口。通常情况下，可以通过指定 `proxyTargetClass` 来强制使用 CGLIB 代理，或者通过指定一个或多个接口来使用 JDK 动态代理。
+`DefaultAopProxyFactory` is the default implementation of the `AopProxyFactory` interface. Based on the given `AdvisedSupport` configuration object, it can create a CGLIB proxy or a JDK dynamic proxy. A CGLIB proxy is created if the given `AdvisedSupport` instance meets one of these conditions: the optimize flag is set, the proxy target class flag is set, or no proxy interfaces are specified. Usually, you can force a CGLIB proxy by setting `proxyTargetClass`, or use a JDK dynamic proxy by specifying one or more interfaces.
 
-[AopProxy源码分析](../spring-aop-aopProxy/README.md)
+[AopProxy Source Code Analysis](../spring-aop-aopProxy/README.md)
 
 ```java
 /**
- * 默认的 {@link AopProxyFactory} 实现，根据条件创建 CGLIB 代理或 JDK 动态代理。
+ * Default {@link AopProxyFactory} implementation. It creates a CGLIB proxy or a JDK dynamic proxy based on conditions.
  *
- * <p>如果对于给定的 {@link AdvisedSupport} 实例满足以下条件之一，则创建 CGLIB 代理：
+ * <p>A CGLIB proxy is created if the given {@link AdvisedSupport} instance meets one of these conditions:
  * <ul>
- * <li>设置了 {@code optimize} 标志
- * <li>设置了 {@code proxyTargetClass} 标志
- * <li>未指定代理接口
+ * <li>The {@code optimize} flag is set
+ * <li>The {@code proxyTargetClass} flag is set
+ * <li>No proxy interfaces are specified
  * </ul>
  *
- * <p>通常情况下，可以通过指定 {@code proxyTargetClass} 来强制使用 CGLIB 代理，或者通过指定一个或多个接口来使用 JDK 动态代理。
+ * <p>Usually, you can force a CGLIB proxy by setting {@code proxyTargetClass}, or use a JDK dynamic proxy by specifying one or more interfaces.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -176,31 +176,31 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 
 	@Override
     public AopProxy createAopProxy(AdvisedSupport config) throws AopConfigException {
-        // 检查是否支持CGLIB代理，如果是，则创建CGLIB代理
+        // Check whether a CGLIB proxy is supported. If so, create a CGLIB proxy
         if (!NativeDetector.inNativeImage() &&
                 (config.isOptimize() || config.isProxyTargetClass() || hasNoUserSuppliedProxyInterfaces(config))) {
-            // 获取目标类
+            // Get the target class
             Class<?> targetClass = config.getTargetClass();
             if (targetClass == null) {
-                // 如果目标类为空，则抛出AopConfigException异常
+                // If the target class is null, throw an AopConfigException
                 throw new AopConfigException("TargetSource cannot determine target class: " +
                         "Either an interface or a target is required for proxy creation.");
             }
-            // 如果目标类是接口或者是代理类，则创建JDK动态代理
+            // If the target class is an interface or a proxy class, create a JDK dynamic proxy
             if (targetClass.isInterface() || Proxy.isProxyClass(targetClass)) {
                 return new JdkDynamicAopProxy(config);
             }
-            // 否则，创建CGLIB代理
+            // Otherwise, create a CGLIB proxy
             return new ObjenesisCglibAopProxy(config);
         } else {
-            // 否则，创建JDK动态代理
+            // Otherwise, create a JDK dynamic proxy
             return new JdkDynamicAopProxy(config);
         }
     }
 
 	/**
-	 * 确定提供的 {@link AdvisedSupport} 是否仅指定了 {@link org.springframework.aop.SpringProxy} 接口
-	 * （或者根本没有指定代理接口）。
+	 * Determine whether the supplied {@link AdvisedSupport} only specifies the {@link org.springframework.aop.SpringProxy} interface
+	 * (or specifies no proxy interfaces at all).
 	 */
 	private boolean hasNoUserSuppliedProxyInterfaces(AdvisedSupport config) {
 		Class<?>[] ifcs = config.getProxiedInterfaces();

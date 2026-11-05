@@ -1,49 +1,49 @@
 ## AopContext
 
 - [AopContext](#aopcontext)
-  - [一、基本信息](#一基本信息)
-  - [二、基本描述](#二基本描述)
-  - [三、主要功能](#三主要功能)
-  - [四、类源码](#四类源码)
-  - [五、最佳实践](#五最佳实践)
-  - [六、源码分析](#六源码分析)
+  - [1. Overview](#1-overview)
+  - [2. Description](#2-description)
+  - [3. Main Features](#3-main-features)
+  - [4. Class Source](#4-class-source)
+  - [5. Best Practices](#5-best-practices)
+  - [6. Source Code Analysis](#6-source-code-analysis)
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [Juejin](https://juejin.cn/user/4251135018533068/posts) 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、基本描述
+### 2. Description
 
-`AopContext`类是Spring AOP框架提供的一个工具类，用于在方法内部访问当前AOP代理对象。通过`currentProxy()`方法，可以获取当前方法被AOP代理后的代理对象，从而在方法内部执行代理对象的其他方法或获取相关信息。
+The `AopContext` class is a utility class in the Spring AOP framework. It lets you get the current AOP proxy object from inside a method. With the `currentProxy()` method, you can get the proxy of the current object, and then call other methods of the proxy or get related information.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **获取当前AOP代理对象**
+1. **Get the current AOP proxy object**
 
-   + 通过调用`currentProxy()`方法，可以在方法内部获取到当前的AOP代理对象，即被AOP增强后的对象。
+   + By calling `currentProxy()`, you can get the current AOP proxy object inside a method. This is the object after AOP enhancement.
 
-2. **允许在方法内部调用代理对象的方法**
+2. **Call methods of the proxy object inside a method**
 
-   + 获得代理对象后，可以在方法内部直接调用代理对象的其他方法，包括被增强的切面方法或目标对象的方法。
+   + After getting the proxy object, you can call its other methods directly inside a method. This includes the enhanced aspect methods and the methods of the target object.
 
-3. **解决代理对象的传递问题**
+3. **Solve the problem of passing the proxy object**
 
-   + 在一些特定场景下，可能需要在不同的方法间传递AOP代理对象，而不是直接调用`this`。`AopContext`类提供了一种解决方案，可以在方法调用间传递AOP代理对象。
+   + In some cases, you may need to pass the AOP proxy object between methods, instead of calling `this` directly. The `AopContext` class gives a way to pass the AOP proxy object between method calls.
 
-### 四、类源码
+### 4. Class Source
 
-`AopContext`类提供了用于获取当前AOP调用信息的静态方法集合。通过`currentProxy()`方法可以获取当前AOP代理对象，前提是AOP框架已配置为暴露代理对象。这对目标对象或通知进行增强调用，以及查找通知配置非常有用。然而，由于性能成本较高，Spring的AOP框架默认不会暴露代理对象。
+The `AopContext` class provides a set of static methods to get information about the current AOP invocation. With the `currentProxy()` method, you can get the current AOP proxy object, as long as the AOP framework is set to expose the proxy. This is useful when a target object or advice needs to make an enhanced call on itself, and for finding the advice configuration. However, because it costs performance, the Spring AOP framework does not expose the proxy by default.
 
 ```java
 /**
- * 用于获取当前AOP调用信息的静态方法集合。
+ * A set of static methods to get information about the current AOP invocation.
  * 
- * <p>如果AOP框架配置为暴露当前代理对象（非默认情况），则可使用 {@code currentProxy()} 方法获取正在使用的AOP代理对象。
- * 目标对象或通知可以使用此方法进行增强调用，类似于EJB中的 {@code getEJBObject()}。也可用于查找通知配置。
+ * <p>If the AOP framework is set to expose the current proxy (not the default), the {@code currentProxy()} method gives the AOP proxy that is in use.
+ * A target object or advice can use this method to make an enhanced call, like {@code getEJBObject()} in EJB. It can also be used to find the advice configuration.
  * 
- * <p>Spring的AOP框架默认不暴露代理对象，因为这样做会带来性能开销。
+ * <p>The Spring AOP framework does not expose the proxy by default, because doing so costs performance.
  * 
- * <p>此类中的功能可被目标对象使用，以获取调用中的资源。然而，当存在合理替代方案时，不应使用此方法，因为这会使应用程序代码依赖于AOP下的使用和Spring AOP框架。
+ * <p>The features in this class can be used by target objects to get resources from the invocation. However, this method should not be used when there is a reasonable alternative, because it makes application code depend on the AOP usage and the Spring AOP framework.
  * 
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -52,8 +52,8 @@
 public final class AopContext {
 
 	/**
-	 * 线程本地变量，用于保存与该线程关联的AOP代理对象。
-	 * 除非控制代理配置的“exposeProxy”属性被设置为“true”，否则将包含{@code null}。
+	 * ThreadLocal variable that holds the AOP proxy object tied to this thread.
+	 * It holds {@code null} unless the "exposeProxy" property that controls the proxy configuration is set to "true".
 	 * @see ProxyConfig#setExposeProxy
 	 */
 	private static final ThreadLocal<Object> currentProxy = new NamedThreadLocal<>("Current AOP proxy");
@@ -64,10 +64,10 @@ public final class AopContext {
 
 
 	/**
-	 * 尝试返回当前AOP代理对象。此方法仅在调用方法通过AOP调用，并且AOP框架已设置为暴露代理对象时可用。
-	 * 否则，此方法将抛出IllegalStateException异常。
-	 * @return 当前AOP代理对象（永远不会返回{@code null}）
-	 * @throws IllegalStateException 如果无法找到代理对象，因为该方法是在AOP调用上下文之外调用的，或者因为AOP框架尚未配置为暴露代理对象
+	 * Try to return the current AOP proxy object. This method is available only when the calling method was invoked through AOP and the AOP framework is set to expose the proxy.
+	 * Otherwise, this method throws an IllegalStateException.
+	 * @return the current AOP proxy object (never returns {@code null})
+	 * @throws IllegalStateException if the proxy object cannot be found, because the method was called outside an AOP invocation context, or because the AOP framework is not set to expose the proxy
 	 */
 	public static Object currentProxy() throws IllegalStateException {
 		Object proxy = currentProxy.get();
@@ -80,10 +80,10 @@ public final class AopContext {
 	}
 
 	/**
-	 * 使给定的代理对象可通过{@code currentProxy()}方法访问。
-	 * <p>注意，调用者应谨慎地保留旧值。
-	 * @param proxy 要暴露的代理对象（或{@code null}以重置）
-	 * @return 旧的代理对象，如果没有绑定，则可能为{@code null}
+	 * Make the given proxy object available through the {@code currentProxy()} method.
+	 * <p>Note that the caller should be careful to keep the old value.
+	 * @param proxy the proxy object to expose (or {@code null} to reset it)
+	 * @return the old proxy object, which may be {@code null} if none was bound
 	 * @see #currentProxy()
 	 */
 	@Nullable
@@ -101,29 +101,29 @@ public final class AopContext {
 }
 ```
 
-### 五、最佳实践
+### 5. Best Practices
 
-使用Spring AOP创建一个代理对象，并在代理对象的方法调用前应用自定义的前置通知。首先，通过`ProxyFactory`创建了一个代理工厂，并设置了要被代理的目标对象`MyService`。然后通过`proxyFactory.setExposeProxy(true)`来暴露代理对象，以便在方法内部可以使用`AopContext`类访问到代理对象。接着，使用`proxyFactory.addAdvisor()`方法添加了一个切面通知器，将自定义的前置通知`MyMethodBeforeAdvice`应用到被`MyAnnotation`注解标记的方法上。最后，通过`proxyFactory.getProxy()`获取代理对象，并调用其方法`foo()`。
+This example uses Spring AOP to create a proxy object and applies a custom before advice before the proxy method runs. First, it creates a proxy factory with `ProxyFactory` and sets the target object `MyService` to be proxied. Then it calls `proxyFactory.setExposeProxy(true)` to expose the proxy object, so that `AopContext` can reach the proxy inside a method. Next, it uses `proxyFactory.addAdvisor()` to add an advisor that applies the custom before advice `MyMethodBeforeAdvice` to methods marked with `MyAnnotation`. Finally, it gets the proxy object with `proxyFactory.getProxy()` and calls its method `foo()`.
 
 ```java
 public class AopContextDemo {
 
     public static void main(String[] args) {
-        // 创建代理工厂&创建目标对象
+        // Create the proxy factory and the target object
         ProxyFactory proxyFactory = new ProxyFactory(new MyService());
-        // 暴露代理对象
+        // Expose the proxy object
         proxyFactory.setExposeProxy(true);
-        // 创建通知器
+        // Create the advisor
         proxyFactory.addAdvisor(new DefaultPointcutAdvisor(new AnnotationMatchingPointcut(MyAnnotation.class), new MyMethodBeforeAdvice()));
-        // 获取代理对象
+        // Get the proxy object
         MyService proxy = (MyService) proxyFactory.getProxy();
-        // 调用代理对象的方法
+        // Call a method on the proxy object
         proxy.foo();
     }
 }
 ```
 
-`MyMethodBeforeAdvice`自定义前置通知类``。
+`MyMethodBeforeAdvice` is the custom before advice class.
 
 ```java
 public class MyMethodBeforeAdvice implements MethodBeforeAdvice {
@@ -134,7 +134,7 @@ public class MyMethodBeforeAdvice implements MethodBeforeAdvice {
 }
 ```
 
-自定义注解`MyAnnotation`。
+The custom annotation `MyAnnotation`.
 
 ```java
 @Retention(RetentionPolicy.RUNTIME)
@@ -143,7 +143,7 @@ public @interface MyAnnotation {
 }
 ```
 
-定义了一个名为`MyService`的Java类，它被`@MyAnnotation`注解标记。该类包含两个方法，`foo()`和`bar()`。在`foo()`方法中，通过调用`AopContext.currentProxy()`来获取当前的AOP代理对象，并使用该代理对象来调用`bar()`方法，以确保AOP切面可以正确地被应用。这种方式避免了直接调用`bar()`方法而导致AOP切面失效的问题。
+This defines a Java class named `MyService`, marked with `@MyAnnotation`. The class has two methods, `foo()` and `bar()`. In `foo()`, it calls `AopContext.currentProxy()` to get the current AOP proxy object, and uses that proxy to call `bar()`. This makes sure the AOP aspect is applied correctly. It avoids the problem where calling `bar()` directly makes the AOP aspect not work.
 
 ```java
 @MyAnnotation
@@ -151,9 +151,9 @@ public class MyService {
 
     public void foo() {
         System.out.println("foo...");
-        // 直接调用bar会导致切入无效
+        // Calling bar directly makes the aspect not work
         // this.bar();
-        // 获取代理对象并调用bar
+        // Get the proxy object and call bar
         ((MyService) AopContext.currentProxy()).bar();
     }
 
@@ -163,7 +163,7 @@ public class MyService {
 }
 ```
 
-运行结果1，`foo()`方法被调用时，会执行前置通知打印日志，然后调用`this.bar()`方法，由于直接调用`this.bar()`方法绕过了AOP代理对象，因此不会触发AOP切面的逻辑。
+Result 1. When `foo()` is called, the before advice runs and prints a log. Then `this.bar()` is called. Because calling `this.bar()` directly bypasses the AOP proxy object, the aspect logic is not triggered.
 
 ```java
 Before method foo is called.
@@ -171,7 +171,7 @@ foo...
 bar...
 ```
 
-运行结果2，`foo()`方法被调用时，会执行前置通知打印日志，然后调用`((MyService) AopContext.currentProxy()).bar();`方法。由于使用了`AopContext.currentProxy()`获取了当前的AOP代理对象，并调用了该代理对象的`bar()`方法，因此会触发AOP切面的逻辑。
+Result 2. When `foo()` is called, the before advice runs and prints a log. Then `((MyService) AopContext.currentProxy()).bar();` is called. Because `AopContext.currentProxy()` gets the current AOP proxy object and `bar()` is called on that proxy, the aspect logic is triggered.
 
 ```java
 Before method foo is called.
@@ -180,13 +180,13 @@ Before method bar is called.
 bar...
 ```
 
-### 六、源码分析
+### 6. Source Code Analysis
 
-在Spring AOP框架中，无论是在JDK动态代理还是CGLIB动态代理的拦截器中，都对`AopContext.setCurrentProxy(proxy)`进行了赋值操作。这个赋值操作的目的是将当前AOP代理对象设置为当前线程的上下文中，以便在方法内部可以通过`AopContext.currentProxy()`获取代理对象。
+In the Spring AOP framework, both the JDK dynamic proxy interceptor and the CGLIB dynamic proxy interceptor call `AopContext.setCurrentProxy(proxy)`. This sets the current AOP proxy object in the context of the current thread, so that `AopContext.currentProxy()` can get the proxy object inside a method.
 
-**JDK动态代理拦截器**
+**JDK dynamic proxy interceptor**
 
-在`org.springframework.aop.framework.JdkDynamicAopProxy#invoke`方法中，是JDK动态代理拦截器的一部分。主要处理了AOP代理的上下文。具体来说，在方法执行前，如果AOP代理对象已经暴露了（即`this.advised.exposeProxy`为`true`），则通过`AopContext.setCurrentProxy(proxy)`方法将当前的AOP代理对象设置为当前线程的上下文中，以便在方法内部可以通过`AopContext.currentProxy()`来获取代理对象。在方法执行完成后，将之前设置的代理对象恢复，以保证AOP代理对象的上下文不会影响其他线程。
+The method `org.springframework.aop.framework.JdkDynamicAopProxy#invoke` is part of the JDK dynamic proxy interceptor. It handles the context of the AOP proxy. Before the method runs, if the AOP proxy object is exposed (that is, `this.advised.exposeProxy` is `true`), the current AOP proxy object is set in the context of the current thread with `AopContext.setCurrentProxy(proxy)`. Then `AopContext.currentProxy()` can get the proxy object inside the method. After the method finishes, the previously set proxy object is restored, so that the AOP proxy context does not affect other threads.
 
 ```java
 @Override
@@ -194,18 +194,18 @@ bar...
 public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     Object oldProxy = null;
     boolean setProxyContext = false;
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     try {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
         if (this.advised.exposeProxy) {
             // Make invocation available if necessary.
             oldProxy = AopContext.setCurrentProxy(proxy);
             setProxyContext = true;
         }
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
     finally {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
         if (setProxyContext) {
             // Restore old proxy.
             AopContext.setCurrentProxy(oldProxy);
@@ -214,9 +214,9 @@ public Object invoke(Object proxy, Method method, Object[] args) throws Throwabl
 }
 ```
 
-**CGLIB动态代理拦截器**
+**CGLIB dynamic proxy interceptor**
 
-在`org.springframework.aop.framework.CglibAopProxy.DynamicAdvisedInterceptor#intercept`方法中，是CGLIB动态代理拦截器的一部分。在方法拦截过程中，它主要处理了AOP代理的上下文。具体来说，如果AOP代理对象已经暴露了（即`this.advised.exposeProxy`为`true`），则通过`AopContext.setCurrentProxy(proxy)`方法将当前的AOP代理对象设置为当前线程的上下文中，以便在方法内部可以通过`AopContext.currentProxy()`来获取代理对象。在方法执行完成后，将之前设置的代理对象恢复，以保证AOP代理对象的上下文不会影响其他线程。
+The method `org.springframework.aop.framework.CglibAopProxy.DynamicAdvisedInterceptor#intercept` is part of the CGLIB dynamic proxy interceptor. While the method is intercepted, it handles the context of the AOP proxy. If the AOP proxy object is exposed (that is, `this.advised.exposeProxy` is `true`), the current AOP proxy object is set in the context of the current thread with `AopContext.setCurrentProxy(proxy)`. Then `AopContext.currentProxy()` can get the proxy object inside the method. After the method finishes, the previously set proxy object is restored, so that the AOP proxy context does not affect other threads.
 
 ```java
 @Override
@@ -224,17 +224,17 @@ public Object invoke(Object proxy, Method method, Object[] args) throws Throwabl
 public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
     Object oldProxy = null;
     boolean setProxyContext = false;
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     try {
         if (this.advised.exposeProxy) {
             // Make invocation available if necessary.
             oldProxy = AopContext.setCurrentProxy(proxy);
             setProxyContext = true;
         }
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
     finally {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
         if (setProxyContext) {
             // Restore old proxy.
             AopContext.setCurrentProxy(oldProxy);

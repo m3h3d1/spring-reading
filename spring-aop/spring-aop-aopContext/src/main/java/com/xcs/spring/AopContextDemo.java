@@ -7,15 +7,15 @@ import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 public class AopContextDemo {
 
     public static void main(String[] args) {
-        // 创建代理工厂&创建目标对象
+        // Create the proxy factory and the target object
         ProxyFactory proxyFactory = new ProxyFactory(new MyService());
-        // 暴露代理对象
+        // Expose the proxy object
         proxyFactory.setExposeProxy(true);
-        // 创建通知器
+        // Create the advisor
         proxyFactory.addAdvisor(new DefaultPointcutAdvisor(new AnnotationMatchingPointcut(MyAnnotation.class), new MyMethodBeforeAdvice()));
-        // 获取代理对象
+        // Get the proxy object
         MyService proxy = (MyService) proxyFactory.getProxy();
-        // 调用代理对象的方法
+        // Call a method on the proxy object
         proxy.foo();
     }
 }

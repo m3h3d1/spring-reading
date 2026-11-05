@@ -1,40 +1,40 @@
 ## AdvisorChainFactory
 
 - [AdvisorChainFactory](#advisorchainfactory)
-    - [一、基本信息](#一基本信息)
-    - [二、基本描述](#二基本描述)
-    - [三、主要功能](#三主要功能)
-    - [四、接口源码](#四接口源码)
-    - [五、主要实现](#五主要实现)
-    - [六、类关系图](#六类关系图)
-    - [七、最佳实践](#七最佳实践)
-    - [八、源码分析](#八源码分析)
+    - [1. Overview](#1-overview)
+    - [2. Description](#2-description)
+    - [3. Main Features](#3-main-features)
+    - [4. Interface Source](#4-interface-source)
+    - [5. Main Implementations](#5-main-implementations)
+    - [6. Class Diagram](#6-class-diagram)
+    - [7. Best Practices](#7-best-practices)
+    - [8. Source Code Analysis](#8-source-code-analysis)
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [Juejin](https://juejin.cn/user/4251135018533068/posts) 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、基本描述
+### 2. Description
 
-`AdvisorChainFactory`接口是Spring AOP中负责创建顾问链的工厂接口，通过`getInterceptorsAndDynamicInterceptionAdvice()`方法，它能够将一组顾问对象转换为拦截器数组，用于管理和执行切面逻辑，提供了灵活性和可扩展性来定制切面的执行方式。
+The `AdvisorChainFactory` interface is the factory interface in Spring AOP that creates advisor chains. Its method `getInterceptorsAndDynamicInterceptionAdvice()` turns a set of advisors into an array of interceptors. These are used to manage and run aspect logic, and give flexibility and extensibility to customize how aspects run.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **创建顾问链（Advisor Chain）** 
+1. **Create an advisor chain (Advisor Chain)** 
 
-   + 通过`getInterceptorsAndDynamicInterceptionAdvice()`方法，将一组顾问对象转换为拦截器数组，形成顾问链，用于在目标方法执行前后执行特定的操作。
+   + The method `getInterceptorsAndDynamicInterceptionAdvice()` turns a set of advisors into an array of interceptors. This forms the advisor chain, which runs specific actions before and after the target method.
 
-2. **动态顾问链的创建** 
+2. **Create dynamic advisor chains** 
 
-   + 可以根据运行时的情况动态地创建顾问链，例如根据目标对象的类型或方法签名动态地决定哪些通知要被执行。
+   + The advisor chain can be created dynamically at runtime. For example, the type of the target object or the method signature can decide which advice should run.
 
-### 四、接口源码
+### 4. Interface Source
 
-`AdvisorChainFactory`接口 ，用于创建Advisor链的工厂接口。其中的方法 `getInterceptorsAndDynamicInterceptionAdvice()` 接受AOP配置（`Advised`对象）、被代理的方法以及目标类，并返回一个包含MethodInterceptors的列表，用于配置Advisor链。这个接口的目的是根据给定的配置，确定在代理方法执行时应该应用哪些拦截器，以及是否需要动态匹配方法。
+The `AdvisorChainFactory` interface is a factory interface that creates Advisor chains. Its method `getInterceptorsAndDynamicInterceptionAdvice()` takes the AOP configuration (an `Advised` object), the proxied method, and the target class. It returns a list of MethodInterceptors that configure the Advisor chain. The interface decides which interceptors should apply when a proxied method runs, and whether the method needs dynamic matching, based on the given configuration.
 
 ```java
 /**
- * Advisor链工厂的工厂接口。
+ * Factory interface for Advisor chains.
  * Factory interface for advisor chains.
  *
  * @author Rod Johnson
@@ -43,26 +43,26 @@
 public interface AdvisorChainFactory {
 
 	/**
-	 * 根据给定的Advisor链配置，确定一组MethodInterceptor对象。
+	 * Determine a set of MethodInterceptor objects for the given Advisor chain configuration.
 	 * Determine a list of {@link org.aopalliance.intercept.MethodInterceptor} objects
 	 * for the given advisor chain configuration.
-	 * @param config 表示AOP配置的Advised对象
-	 * @param method 被代理的方法
-	 * @param targetClass 目标类（可能为null，表示没有目标对象的代理，在这种情况下，方法的声明类是下一个最佳选择）
-	 * @return 一个MethodInterceptors的列表（也可能包括InterceptorAndDynamicMethodMatchers）
+	 * @param config the Advised object that stands for the AOP configuration
+	 * @param method the proxied method
+	 * @param targetClass the target class (may be null, which means a proxy without a target object. In that case, the declaring class of the method is the next best choice)
+	 * @return a list of MethodInterceptors (may also include InterceptorAndDynamicMethodMatchers)
 	 */
 	List<Object> getInterceptorsAndDynamicInterceptionAdvice(Advised config, Method method, @Nullable Class<?> targetClass);
 
 }
 ```
 
-### 五、主要实现
+### 5. Main Implementations
 
 1. **DefaultAdvisorChainFactory**
 
-   + 负责根据给定的AOP配置、被代理的方法和目标类，确定应该应用哪些拦截器，并支持动态方法匹配和缓存机制，以提供高效的顾问链创建功能
+   + Decides which interceptors apply, based on the given AOP configuration, the proxied method, and the target class. It supports dynamic method matching and a caching mechanism, so that advisor chains are created efficiently.
 
-### 六、类关系图
+### 6. Class Diagram
 
 ~~~mermaid
 classDiagram
@@ -76,52 +76,52 @@ class DefaultAdvisorChainFactory
 DefaultAdvisorChainFactory  ..>  AdvisorChainFactory 
 ~~~
 
-### 七、最佳实践
+### 7. Best Practices
 
-使用`DefaultAdvisorChainFactory`类来创建Advisor链。首先，创建了一个`AdvisedSupport`对象，配置了前置通知和后置返回通知。然后，指定了目标类和目标方法。接着，实例化了`DefaultAdvisorChainFactory`类，并调用其`getInterceptorsAndDynamicInterceptionAdvice()`方法获取Advisor链。最后，打印了Advisor链中的拦截器。
+This example uses the `DefaultAdvisorChainFactory` class to create an Advisor chain. First, it creates an `AdvisedSupport` object and configures before advice and after returning advice. Then it sets the target class and the target method. Next, it creates a `DefaultAdvisorChainFactory` and calls its `getInterceptorsAndDynamicInterceptionAdvice()` method to get the Advisor chain. Finally, it prints the interceptors in the chain.
 
 ```java
 public class AdvisorChainFactoryDemo {
 
     public static void main(String[] args) throws NoSuchMethodException {
-        // 创建AOP配置对象
+        // Create the AOP configuration object
         AdvisedSupport config = new AdvisedSupport();
-        // 添加前置通知
+        // Add before advice
         config.addAdvice(new MyMethodBeforeAdvice());
-        // 添加后置返回通知
+        // Add after returning advice
         config.addAdvice(new MyAfterReturningAdvice());
-        // 设置目标类
+        // Set the target class
         Class<MyService> targetClass = MyService.class;
-        // 获取目标方法
+        // Get the target method
         Method method = targetClass.getDeclaredMethod("foo");
 
-        // 创建默认的Advisor链工厂实例
+        // Create the default Advisor chain factory instance
         DefaultAdvisorChainFactory chainFactory = new DefaultAdvisorChainFactory();
-        // 获取Advisor链
+        // Get the Advisor chain
         List<Object> chain = chainFactory.getInterceptorsAndDynamicInterceptionAdvice(config, method, targetClass);
-        // 打印Advisor链中的拦截器
+        // Print the interceptors in the Advisor chain
         chain.forEach(System.out::println);
     }
 }
 ```
 
-运行结果，显示了Advisor链中的两个拦截器，分别是`MethodBeforeAdviceInterceptor`和`AfterReturningAdviceInterceptor`。这些拦截器是根据配置的前置通知和后置返回通知生成的，用于在目标方法执行前后进行相应的操作。
+This is the result. It shows two interceptors in the Advisor chain: `MethodBeforeAdviceInterceptor` and `AfterReturningAdviceInterceptor`. They were created from the configured before advice and after returning advice, and they run extra actions before and after the target method.
 
 ```java
 org.springframework.aop.framework.adapter.MethodBeforeAdviceInterceptor@215be6bb
 org.springframework.aop.framework.adapter.AfterReturningAdviceInterceptor@4439f31e
 ```
 
-### 八、源码分析
+### 8. Source Code Analysis
 
-`DefaultAdvisorChainFactory`类。它提供了一种简单但确定的方法，根据给定的`Advised`对象，在方法级别确定通知链的构建顺序。通过遍历配置的Advisor数组，并根据Advisor的类型和Pointcut来确定应该应用哪些拦截器，最终返回一个拦截器列表。在此过程中，它支持动态方法匹配和引入拦截器的处理，并提供了一个缓存机制来提高性能。
+The `DefaultAdvisorChainFactory` class. It gives a simple but definite way to build the advice chain of a method, based on the given `Advised` object. It loops over the configured Advisor array, and decides which interceptors apply based on the Advisor type and Pointcut. In the end, it returns a list of interceptors. Along the way, it supports dynamic method matching and handling of introduction interceptors, and it has a cache to improve performance.
 
-[AdvisorAdapterRegistry源码分析](../spring-aop-advisorAdapterRegistry/README.md)
+[AdvisorAdapterRegistry Source Code Analysis](../spring-aop-advisorAdapterRegistry/README.md)
 
 ```java
 /**
- * 给定一个 {@link Advised} 对象，为一个方法确定一个通知链的简单但确定的方法。总是重新构建每个通知链；
- * 子类可以提供缓存功能。
+ * A simple but definite way to determine an advice chain for a method, given an {@link Advised} object. It always rebuilds each advice chain;
+ * subclasses can provide caching.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -135,28 +135,28 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializ
 	public List<Object> getInterceptorsAndDynamicInterceptionAdvice(
 			Advised config, Method method, @Nullable Class<?> targetClass) {
 
-		// 获取Advisor适配器注册表
+		// Get the Advisor adapter registry
 		AdvisorAdapterRegistry registry = GlobalAdvisorAdapterRegistry.getInstance();
-		// 获取AOP配置中的所有Advisor
+		// Get all Advisors in the AOP configuration
 		Advisor[] advisors = config.getAdvisors();
-		// 创建一个拦截器列表
+		// Create an interceptor list
 		List<Object> interceptorList = new ArrayList<>(advisors.length);
-		// 获取实际类
+		// Get the actual class
 		Class<?> actualClass = (targetClass != null ? targetClass : method.getDeclaringClass());
 		Boolean hasIntroductions = null;
 
-		// 遍历所有Advisor
+		// Loop over all Advisors
 		for (Advisor advisor : advisors) {
 			if (advisor instanceof PointcutAdvisor) {
-				// 添加条件性地。
+				// Add conditionally.
 				PointcutAdvisor pointcutAdvisor = (PointcutAdvisor) advisor;
 				if (config.isPreFiltered() || pointcutAdvisor.getPointcut().getClassFilter().matches(actualClass)) {
-					// 获取Advisor的Pointcut和MethodMatcher
+					// Get the Pointcut and MethodMatcher of the Advisor
 					MethodMatcher mm = pointcutAdvisor.getPointcut().getMethodMatcher();
 					boolean match;
 					if (mm instanceof IntroductionAwareMethodMatcher) {
 						if (hasIntroductions == null) {
-							// 检查是否存在匹配的IntroductionAdvisor
+							// Check whether there is a matching IntroductionAdvisor
 							hasIntroductions = hasMatchingIntroductions(advisors, actualClass);
 						}
 						match = ((IntroductionAwareMethodMatcher) mm).matches(method, actualClass, hasIntroductions);
@@ -164,17 +164,17 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializ
 					else {
 						match = mm.matches(method, actualClass);
 					}
-					// 如果匹配，则将Interceptor添加到拦截器列表中
+					// If it matches, add the Interceptor to the interceptor list
 					if (match) {
 						MethodInterceptor[] interceptors = registry.getInterceptors(advisor);
 						if (mm.isRuntime()) {
-							// 如果是动态匹配，则创建一个新的InterceptorAndDynamicMethodMatcher对象
+							// If it is a dynamic match, create a new InterceptorAndDynamicMethodMatcher object
 							for (MethodInterceptor interceptor : interceptors) {
 								interceptorList.add(new InterceptorAndDynamicMethodMatcher(interceptor, mm));
 							}
 						}
 						else {
-							// 否则直接添加Interceptor
+							// Otherwise add the Interceptor directly
 							interceptorList.addAll(Arrays.asList(interceptors));
 						}
 					}
@@ -183,24 +183,24 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializ
 			else if (advisor instanceof IntroductionAdvisor) {
 				IntroductionAdvisor ia = (IntroductionAdvisor) advisor;
 				if (config.isPreFiltered() || ia.getClassFilter().matches(actualClass)) {
-					// 如果是IntroductionAdvisor，则直接获取Interceptor并添加到拦截器列表中
+					// If it is an IntroductionAdvisor, get the Interceptor directly and add it to the interceptor list
 					Interceptor[] interceptors = registry.getInterceptors(advisor);
 					interceptorList.addAll(Arrays.asList(interceptors));
 				}
 			}
 			else {
-				// 对于其他类型的Advisor，直接获取Interceptor并添加到拦截器列表中
+				// For other types of Advisors, get the Interceptor directly and add it to the interceptor list
 				Interceptor[] interceptors = registry.getInterceptors(advisor);
 				interceptorList.addAll(Arrays.asList(interceptors));
 			}
 		}
 
-		// 返回拦截器列表
+		// Return the interceptor list
 		return interceptorList;
 	}
 
 	/**
-	 * 判断Advisor中是否存在匹配的引入拦截器。
+	 * Check whether the Advisor list has a matching introduction interceptor.
 	 */
 	private static boolean hasMatchingIntroductions(Advisor[] advisors, Class<?> actualClass) {
 		for (Advisor advisor : advisors) {

@@ -6,17 +6,17 @@ import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 
 /**
- * 自定义Advisor，用于将通知应用于带有特定注解的方法。
+ * Custom Advisor that applies advice to methods with a specific annotation.
  */
 public class MyCustomAdvisor implements PointcutAdvisor {
 
     /**
-     * 通知对象
+     * Advice object
      */
     private final Advice advice = new MyAdvice();
 
     /**
-     * 切点对象，用于匹配带有自定义注解的方法
+     * Pointcut object that matches methods with the custom annotation
      */
     private final Pointcut pointcut = new AnnotationMatchingPointcut(null, MyCustomAnnotation.class);
 

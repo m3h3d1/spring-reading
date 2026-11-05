@@ -1,73 +1,73 @@
 ## AfterReturningAdvice
 
 - [AfterReturningAdvice](#afterreturningadvice)
-  - [一、基本信息](#一基本信息)
-  - [二、基本描述](#二基本描述)
-  - [三、主要功能](#三主要功能)
-  - [四、接口源码](#四接口源码)
-  - [五、主要实现](#五主要实现)
-  - [六、类关系图](#六类关系图)
-  - [七、最佳实践](#七最佳实践)
+  - [1. Overview](#1-overview)
+  - [2. Description](#2-description)
+  - [3. Main Features](#3-main-features)
+  - [4. Interface Source](#4-interface-source)
+  - [5. Main Implementations](#5-main-implementations)
+  - [6. Class Diagram](#6-class-diagram)
+  - [7. Best Practices](#7-best-practices)
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [Juejin](https://juejin.cn/user/4251135018533068/posts) 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、基本描述
+### 2. Description
 
-`AfterReturningAdvice`接口是Spring AOP框架中的一个核心接口，用于在目标方法执行后拦截并执行自定义逻辑。通过实现该接口的`afterReturning`方法，可以在目标方法成功返回结果后进行一些操作。
+The `AfterReturningAdvice` interface is a core interface in the Spring AOP framework. It runs custom logic after the target method finishes. By implementing its `afterReturning` method, you can do some work after the target method returns a result successfully.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **日志记录**
+1. **Logging**
 
-   + 记录目标方法的执行情况，如方法名称、参数值、返回结果等，以便跟踪应用程序的运行状态。
+   + Record how the target method ran, such as the method name, argument values, and return value. This helps you follow the state of the application.
 
-2. **性能监控**
-   + 统计目标方法的执行时间，分析应用程序的性能瓶颈，优化程序性能。
+2. **Performance monitoring**
+   + Measure how long the target method takes. Find performance bottlenecks and improve them.
    
-3. **缓存处理**
+3. **Cache handling**
 
-   + 在方法返回结果后，将结果缓存起来，以提高后续相同请求的响应速度。
+   + After the method returns, cache the result. This speeds up later identical requests.
 
-4. **统一处理**
+4. **Common handling**
 
-   + 执行一些与业务逻辑无关的统一处理，如资源释放、清理等。
+   + Run common work that has nothing to do with business logic, such as releasing or cleaning up resources.
 
-### 四、接口源码
+### 4. Interface Source
 
-`AfterReturningAdvice`接口主要用于在方法正常返回时执行后置通知。后置通知可以查看方法的返回值，但不能修改它，并且仅在方法正常返回时被调用，不会在抛出异常时被调用。该接口提供了一个`afterReturning`方法，在方法成功返回后进行回调，其中包含了返回值、被调用的方法、方法的参数以及方法调用的目标对象等信息。
+The `AfterReturningAdvice` interface is mainly used to run after advice when a method returns normally. After advice can see the return value but cannot change it. It is called only when the method returns normally, not when an exception is thrown. The interface has one method, `afterReturning`. It is a callback that runs after the method returns successfully. It receives the return value, the called method, the method arguments, and the target object of the call.
 
 ```java
 /**
- * 后置返回通知仅在方法正常返回时被调用，如果抛出异常则不会被调用。这样的通知可以查看方法的返回值，但不能修改它。
+ * After returning advice is called only when a method returns normally. It is not called if an exception is thrown. Such advice can see the return value of the method but cannot change it.
  * 
- * 作者：Rod Johnson
+ * Author: Rod Johnson
  * @see MethodBeforeAdvice
  * @see ThrowsAdvice
  */
 public interface AfterReturningAdvice extends AfterAdvice {
 
     /**
-     * 在给定方法成功返回后的回调。
-     * @param returnValue 方法返回的值，如果有的话
-     * @param method 被调用的方法
-     * @param args 方法的参数
-     * @param target 方法调用的目标对象。可能为{@code null}。
-     * @throws Throwable 如果此对象希望中止调用。如果方法签名允许，将返回任何抛出的异常给调用者。否则，异常将被包装为运行时异常。
+     * Callback after the given method returns successfully.
+     * @param returnValue the value returned by the method, if any
+     * @param method the method that was called
+     * @param args the arguments of the method
+     * @param target the target object of the method call. May be {@code null}.
+     * @throws Throwable if this object wants to abort the call. Any exception thrown is returned to the caller if the method signature allows it. Otherwise, the exception is wrapped in a runtime exception.
      */
     void afterReturning(@Nullable Object returnValue, Method method, Object[] args, @Nullable Object target) throws Throwable;
 
 }
 ```
 
-### 五、主要实现
+### 5. Main Implementations
 
 1. **AspectJAfterReturningAdvice** 
 
-   + 实现了返回后通知，使用 AspectJ 风格定义的通知，用于在目标方法成功执行并返回结果后执行额外的逻辑。
+   + Implements after returning advice in AspectJ style. It runs extra logic after the target method finishes successfully and returns a result.
 
-### 六、类关系图
+### 6. Class Diagram
 
 ~~~mermaid
 classDiagram
@@ -93,27 +93,27 @@ AspectJAfterReturningAdvice  ..>  AfterAdvice
 AspectJAfterReturningAdvice  ..>  AfterReturningAdvice 
 ~~~
 
-### 七、最佳实践
+### 7. Best Practices
 
-使用Spring AOP中的后置返回通知（AfterReturningAdvice）。首先，创建了一个代理工厂（ProxyFactory）并指定目标对象（MyService）。然后，创建了一个后置返回通知（MyAfterReturningAdvice）并添加到代理工厂中。接着，通过代理工厂获取代理对象，并调用代理对象的方法。
+This example uses after returning advice (AfterReturningAdvice) in Spring AOP. First, it creates a proxy factory (ProxyFactory) with a target object (MyService). Then it creates an after returning advice (MyAfterReturningAdvice) and adds it to the proxy factory. Next, it gets the proxy object from the factory and calls a method on it.
 
 ```java
 public class AfterReturningAdviceDemo {
 
     public static void main(String[] args) {
-        // 创建代理工厂&创建目标对象
+        // Create the proxy factory and the target object
         ProxyFactory proxyFactory = new ProxyFactory(new MyService());
-        // 创建通知
+        // Create the advice
         proxyFactory.addAdvice(new MyAfterReturningAdvice());
-        // 获取代理对象
+        // Get the proxy object
         MyService proxy = (MyService) proxyFactory.getProxy();
-        // 调用代理对象的方法
+        // Call a method on the proxy object
         proxy.foo();
     }
 }
 ```
 
-`MyAfterReturningAdvice`的类，它实现了Spring AOP框架中的`AfterReturningAdvice`接口。在`afterReturning`方法中，当目标方法成功返回结果时，它将打印出目标方法的名称以及返回的值。
+`MyAfterReturningAdvice` is a class that implements the `AfterReturningAdvice` interface of the Spring AOP framework. In its `afterReturning` method, when the target method returns successfully, it prints the name of the target method.
 
 ```java
 public class MyAfterReturningAdvice implements AfterReturningAdvice {
@@ -124,7 +124,7 @@ public class MyAfterReturningAdvice implements AfterReturningAdvice {
 }
 ```
 
-`MyService` 类是一个简单的服务类，其中包含了一个名为 `foo()` 的方法。在上下文中，`MyService` 类被用作目标对象，即需要被拦截和增强的对象。
+`MyService` is a simple service class with a method named `foo()`. In this example, `MyService` is the target object, which is the object to be intercepted and enhanced.
 
 ```java
 public class MyService {
@@ -135,7 +135,7 @@ public class MyService {
 }
 ```
 
-运行结果，成功地执行了代理对象的`foo()`方法，并在方法执行完成后，后置返回通知`MyAfterReturningAdvice`被触发。
+This is the result. The `foo()` method of the proxy ran successfully. After it finished, the after returning advice `MyAfterReturningAdvice` was triggered.
 
 ```java
 foo...

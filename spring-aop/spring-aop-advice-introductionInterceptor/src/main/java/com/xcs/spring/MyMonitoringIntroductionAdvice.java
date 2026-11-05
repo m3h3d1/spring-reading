@@ -16,15 +16,15 @@ public class MyMonitoringIntroductionAdvice extends DelegatingIntroductionInterc
         setActive(true);
     }
 
-    // 当被监控的方法被调用时，如果监控处于激活状态，则输出日志
+    // When a monitored method is called and monitoring is active, print logs
     @Override
     protected Object doProceed(MethodInvocation mi) throws Throwable {
         if (this.active) {
-            System.out.println("[开启监控" + mi.getMethod().getName() + "]");
+            System.out.println("[Start monitoring " + mi.getMethod().getName() + "]");
             long startTime = System.currentTimeMillis();
             Object result = super.doProceed(mi);
             long endTime = System.currentTimeMillis();
-            System.out.println("[结束监控" + mi.getMethod().getName() + "] 耗费时间：" + (endTime - startTime) + " 毫秒");
+            System.out.println("[End monitoring " + mi.getMethod().getName() + "] Time taken: " + (endTime - startTime) + " ms");
             return result;
         }
         return super.doProceed(mi);

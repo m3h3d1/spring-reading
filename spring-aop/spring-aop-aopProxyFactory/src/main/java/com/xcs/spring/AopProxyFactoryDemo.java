@@ -7,43 +7,43 @@ import org.springframework.aop.framework.DefaultAopProxyFactory;
 public class AopProxyFactoryDemo {
 
     public static void main(String[] args) {
-        // 分别演示 JDK 动态代理和 CGLIB 代理
+        // Show the JDK dynamic proxy and the CGLIB proxy one by one
         jdkProxy();
         cglibProxy();
     }
 
     /**
-     * JDK 动态代理示例
+     * JDK dynamic proxy example
      */
     private static void jdkProxy() {
-        // 创建 AdvisedSupport 对象，用于配置 AOP 代理
+        // Create an AdvisedSupport object to configure the AOP proxy
         AdvisedSupport advisedSupport = new AdvisedSupport();
-        // 设置目标对象
+        // Set the target object
         advisedSupport.setTarget(new MyServiceImpl());
-        // 设置目标对象的类
+        // Set the class of the target object
         advisedSupport.setTargetClass(MyService.class);
 
-        // 创建 DefaultAopProxyFactory 实例
+        // Create a DefaultAopProxyFactory instance
         AopProxyFactory aopProxyFactory = new DefaultAopProxyFactory();
-        // 创建 JDK 动态代理对象
+        // Create the JDK dynamic proxy object
         MyService myService = (MyService) aopProxyFactory.createAopProxy(advisedSupport).getProxy();
-        // 打印生成的代理类
+        // Print the generated proxy class
         System.out.println("jdkProxy = " + myService.getClass());
     }
 
     /**
-     * CGLIB 代理示例
+     * CGLIB proxy example
      */
     private static void cglibProxy() {
-        // 创建 AdvisedSupport 对象，用于配置 AOP 代理
+        // Create an AdvisedSupport object to configure the AOP proxy
         AdvisedSupport advisedSupport = new AdvisedSupport();
-        // 设置目标对象
+        // Set the target object
         advisedSupport.setTarget(new MyServiceImpl());
-        // 创建 DefaultAopProxyFactory 实例
+        // Create a DefaultAopProxyFactory instance
         AopProxyFactory aopProxyFactory = new DefaultAopProxyFactory();
-        // 创建 CGLIB 代理对象
+        // Create the CGLIB proxy object
         MyService myService = (MyService) aopProxyFactory.createAopProxy(advisedSupport).getProxy();
-        // 打印生成的代理类
+        // Print the generated proxy class
         System.out.println("cglibProxy = " + myService.getClass());
     }
 }

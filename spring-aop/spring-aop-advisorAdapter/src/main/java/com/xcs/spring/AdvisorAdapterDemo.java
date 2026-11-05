@@ -6,19 +6,19 @@ import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
 public class AdvisorAdapterDemo {
 
     public static void main(String[] args) {
-        // 注册自定义适配器
+        // Register the custom adapter
         GlobalAdvisorAdapterRegistry.getInstance().registerAdvisorAdapter(new NullReturningAdviceAdapter());
-        // 创建代理工厂
+        // Create the proxy factory
         ProxyFactory proxyFactory = new ProxyFactory(new MyService());
-        // 添加Advisor
+        // Add the Advisor
         proxyFactory.addAdvice(new MyNullReturningAdvice());
-        // 获取代理对象
+        // Get the proxy object
         MyService proxy = (MyService) proxyFactory.getProxy();
-        // 不会触发通知
+        // Does not trigger the advice
         System.out.println("foo return value : " + proxy.foo());
-        // 换行
+        // New line
         System.out.println("==================================");
-        // 会触发通知
+        // Triggers the advice
         System.out.println("bar return value : " + proxy.bar());
     }
 }

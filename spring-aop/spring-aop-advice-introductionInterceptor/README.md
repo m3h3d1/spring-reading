@@ -1,37 +1,37 @@
 ## IntroductionInterceptor
 
 - [IntroductionInterceptor](#introductioninterceptor)
-  - [一、基本信息](#一基本信息)
-  - [二、基本描述](#二基本描述)
-  - [三、主要功能](#三主要功能)
-  - [四、接口源码](#四接口源码)
-  - [五、主要实现](#五主要实现)
-  - [六、类关系图](#六类关系图)
-  - [七、最佳实践](#七最佳实践)
+  - [1. Overview](#1-overview)
+  - [2. Description](#2-description)
+  - [3. Main Features](#3-main-features)
+  - [4. Interface Source](#4-interface-source)
+  - [5. Main Implementations](#5-main-implementations)
+  - [6. Class Diagram](#6-class-diagram)
+  - [7. Best Practices](#7-best-practices)
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [Juejin](https://juejin.cn/user/4251135018533068/posts) 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、基本描述
+### 2. Description
 
-`IntroductionInterceptor` 接口是 Spring AOP 中的一个关键接口，用于实现引介（Introduction）功能，允许向目标对象动态地添加新的方法或属性，而无需修改目标类的代码，从而实现横切关注点的功能，如日志记录、事务管理等。
+The `IntroductionInterceptor` interface is a key interface in Spring AOP. It implements the introduction feature. It lets you add new methods or properties to a target object at runtime without changing the code of the target class. This supports cross-cutting concerns such as logging and transaction management.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **引介新的接口或类**
+1. **Introduce new interfaces or classes**
 
-    + 通过实现 `implementsInterface()` 方法，在目标对象的方法调用之前，向目标对象引介新的接口或类，从而使目标对象具有额外的功能或属性。
+    + Through the `implementsInterface()` method, new interfaces or classes are introduced to the target object before its methods are called. This gives the target object extra features or properties.
 
-### 四、接口源码
+### 4. Interface Source
 
-`IntroductionInterceptor` 接口，它是 AOP 联盟 `MethodInterceptor` 的子接口，允许拦截器实现额外的接口，并通过使用该拦截器的代理对象来使用这些接口。`IntroductionInterceptor` 接口体现了 AOP 中的引介（Introduction）概念，通过引介，可以将额外的功能添加到目标对象中，类似于混合（mixins）的概念，使得可以构建复合对象，实现类似于 Java 中多继承的目标。
+The `IntroductionInterceptor` interface is a sub-interface of the AOP Alliance `MethodInterceptor`. It lets an interceptor implement extra interfaces, and lets the proxy that uses this interceptor expose them. The interface shows the idea of introduction in AOP. With introduction, extra features can be added to a target object, like a mixin. This allows you to build composite objects and get a result similar to multiple inheritance in Java.
 
 ```java
 /**
- * AOP联盟 MethodInterceptor 的子接口，允许拦截器实现额外的接口，并通过使用该拦截器的代理对象来使用这些接口。这是一个基本的AOP概念，称为<b>引介</b>。
+ * Sub-interface of the AOP Alliance MethodInterceptor. It lets an interceptor implement extra interfaces, and lets the proxy that uses this interceptor expose them. This is a basic AOP concept called <b>introduction</b>.
  *
- * <p>引介通常是<b>混合</b>，允许构建能够实现多继承目标的复合对象。
+ * <p>Introductions are usually <b>mixins</b>. They allow you to build composite objects that achieve the goal of multiple inheritance.
  *
  * @author Rod Johnson
  * @see DynamicIntroductionAdvice
@@ -41,17 +41,17 @@ public interface IntroductionInterceptor extends MethodInterceptor, DynamicIntro
 }
 ```
 
-### 五、主要实现
+### 5. Main Implementations
 
 1. **DelegatingIntroductionInterceptor**
 
-   + `DelegatingIntroductionInterceptor` 是 Spring AOP 提供的通用引介拦截器，允许我们定义自定义的引介逻辑，并在需要时将其应用于目标对象。通过配置，可以动态地向目标对象添加新的方法或属性，而不必修改目标类的代码，提高了代码的可维护性和灵活性。
+   + `DelegatingIntroductionInterceptor` is the general introduction interceptor provided by Spring AOP. It lets us define our own introduction logic and apply it to a target object when needed. With configuration, new methods or properties can be added to a target object at runtime without changing the target class. This makes the code easier to maintain and more flexible.
 
 2. **DelegatePerTargetObjectIntroductionInterceptor**
 
-   + `DelegatePerTargetObjectIntroductionInterceptor` 是 `DelegatingIntroductionInterceptor` 的子类，为每个目标对象创建一个独立的引介代理对象。这意味着每个目标对象都可以拥有自己独立的引介逻辑，而不会受到其他目标对象的影响。这种灵活性特别适用于需要为不同的目标对象动态添加不同功能或属性的场景，提供了更高级的定制能力。
+   + `DelegatePerTargetObjectIntroductionInterceptor` is a sub-class of `DelegatingIntroductionInterceptor`. It creates a separate introduction delegate for each target object. This means each target object can have its own introduction logic, not affected by other target objects. This is useful when you need to add different features or properties to different target objects at runtime. It gives you more control.
 
-### 六、类关系图
+### 6. Class Diagram
 
 ~~~mermaid
 classDiagram
@@ -88,33 +88,33 @@ IntroductionInterceptor  -->  MethodInterceptor
 MethodInterceptor  -->  Interceptor 
 ~~~
 
-### 七、最佳实践
+### 7. Best Practices
 
-使用 Spring AOP 中的引介功能。它创建了一个代理工厂，并通过设置强制使用 CGLIB 代理来创建代理对象。然后，它添加了一个通知器，将自定义的引介通知（`MyMonitoringIntroductionAdvice`）应用于目标对象（`MyService` 类），使得目标对象实现了 `MyMonitoringCapable` 接口。最后，它调用了代理对象的方法，并在必要时启用了监控功能，展示了如何在运行时动态地向目标对象引入新的功能。
+This example uses the introduction feature in Spring AOP. It creates a proxy factory and forces the use of a CGLIB proxy. Then it adds an advisor that applies the custom introduction advice (`MyMonitoringIntroductionAdvice`) to the target object (the `MyService` class). As a result, the target object implements the `MyMonitoringCapable` interface. Finally, it calls methods on the proxy and turns on monitoring when needed. This shows how to add new features to a target object at runtime.
 
 ```java
 public class IntroductionInterceptorDemo {
 
     public static void main(String[] args) {
-        // 创建代理工厂&创建目标对象
+        // Create the proxy factory and the target object
         ProxyFactory proxyFactory = new ProxyFactory(new MyService());
-        // 强制私用CGLIB
+        // Force the use of CGLIB
         proxyFactory.setProxyTargetClass(true);
-        // 创建通知
+        // Create the advice
         proxyFactory.addAdvisor(new DefaultIntroductionAdvisor(new MyMonitoringIntroductionAdvice(), MyMonitoringCapable.class));
-        // 创建代理对象
+        // Create the proxy object
         MyService proxy = (MyService) proxyFactory.getProxy();
-        // 调用代理对象的方法
+        // Call a method on the proxy object
         proxy.foo();
-        // 开始监控
+        // Start monitoring
         ((MyMonitoringCapable) proxy).toggleMonitoring();
-        // 再次调用代理对象的方法
+        // Call a method on the proxy object again
         proxy.foo();
     }
 }
 ```
 
-`MyMonitoringIntroductionAdvice` 类是一个实现了 `DelegatingIntroductionInterceptor` 接口和 `MyMonitoringCapable` 接口的自定义引介通知类。它具有一个 `active` 属性来表示监控是否处于激活状态，并提供了一个方法 `toggleMonitoring()` 来启用监控功能。在被监控的方法被调用时，如果监控处于激活状态，该类会输出相应的日志信息，包括方法执行时间等。通过继承 `doProceed()` 方法，它能够在方法执行前后添加自定义逻辑，实现了监控功能的动态引入。
+`MyMonitoringIntroductionAdvice` is a custom introduction advice class. It extends `DelegatingIntroductionInterceptor` and implements the `MyMonitoringCapable` interface. It has an `active` property that shows whether monitoring is on, and a method `toggleMonitoring()` that turns monitoring on. When a monitored method is called and monitoring is on, the class prints log messages, including the execution time. By overriding `doProceed()`, it can add custom logic before and after the method runs. This is how the monitoring feature is introduced at runtime.
 
 ```java
 public class MyMonitoringIntroductionAdvice extends DelegatingIntroductionInterceptor implements MyMonitoringCapable {
@@ -130,15 +130,15 @@ public class MyMonitoringIntroductionAdvice extends DelegatingIntroductionInterc
         setActive(true);
     }
 
-    // 当被监控的方法被调用时，如果监控处于激活状态，则输出日志
+    // When a monitored method is called and monitoring is active, print logs
     @Override
     protected Object doProceed(MethodInvocation mi) throws Throwable {
         if (this.active) {
-            System.out.println("[开启监控" + mi.getMethod().getName() + "]");
+            System.out.println("[Start monitoring " + mi.getMethod().getName() + "]");
             long startTime = System.currentTimeMillis();
             Object result = super.doProceed(mi);
             long endTime = System.currentTimeMillis();
-            System.out.println("[结束监控" + mi.getMethod().getName() + "] 耗费时间：" + (endTime - startTime) + " 毫秒");
+            System.out.println("[End monitoring " + mi.getMethod().getName() + "] Time taken: " + (endTime - startTime) + " ms");
             return result;
         }
         return super.doProceed(mi);
@@ -146,7 +146,7 @@ public class MyMonitoringIntroductionAdvice extends DelegatingIntroductionInterc
 }
 ```
 
-`MyMonitoringCapable` 接口定义了一个 `toggleMonitoring()` 方法，用于启用或禁用监控功能。
+The `MyMonitoringCapable` interface defines a `toggleMonitoring()` method. It turns the monitoring feature on or off.
 
 ```java
 public interface MyMonitoringCapable {
@@ -154,7 +154,7 @@ public interface MyMonitoringCapable {
 }
 ```
 
-`MyService` 类是一个简单的服务类，其中包含了一个名为 `foo()` 的方法。在上下文中，`MyService` 类被用作目标对象，即需要被拦截和增强的对象。
+`MyService` is a simple service class with a method named `foo()`. In this example, `MyService` is the target object, which is the object to be intercepted and enhanced.
 
 ```java
 public class MyService {
@@ -170,11 +170,11 @@ public class MyService {
 }
 ```
 
-运行结果，这个运行结果说明了引介通知成功地增强了目标方法，实现了在目标方法执行前后动态地添加额外的逻辑。
+This result shows that the introduction advice enhanced the target method. Extra logic was added before and after the target method at runtime.
 
 ```java
 foo...
-[开启监控foo]
+[Start monitoring foo]
 foo...
-[结束监控foo] 耗费时间：1008 毫秒
+[End monitoring foo] Time taken: 1008 ms
 ```

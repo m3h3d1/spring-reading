@@ -1,50 +1,50 @@
 ## Advice
 
 - [Advice](#advice)
-  - [一、基本信息](#一基本信息)
-  - [二、基本描述](#二基本描述)
-  - [三、主要功能](#三主要功能)
-  - [四、接口源码](#四接口源码)
-  - [五、子接口](#五子接口)
-  - [六、类关系图](#六类关系图)
+  - [1. Overview](#1-overview)
+  - [2. Description](#2-description)
+  - [3. Main Features](#3-main-features)
+  - [4. Interface Source](#4-interface-source)
+  - [5. Sub-interfaces](#5-sub-interfaces)
+  - [6. Class Diagram](#6-class-diagram)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [Juejin](https://juejin.cn/user/4251135018533068/posts) 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、基本描述
+### 2. Description
 
-`Advice`接口是Spring AOP中的核心接口之一，用于定义在切面逻辑中要执行的操作。它允许我们在目标方法执行前、执行后、抛出异常时等不同的连接点上添加自定义的行为。`Advice`接口的实现类可以通过方法拦截器（MethodInterceptor）、前置通知（BeforeAdvice）、后置通知（AfterReturningAdvice）、异常通知（ThrowsAdvice）等方式来实现不同类型的通知逻辑。
+The `Advice` interface is a core interface of Spring AOP. It defines the action to run inside an aspect. It lets us add custom behavior at different join points, such as before a method runs, after it runs, or when it throws an exception. Classes that implement `Advice` can use a method interceptor (MethodInterceptor), before advice (BeforeAdvice), after returning advice (AfterReturningAdvice), or throws advice (ThrowsAdvice) to build different kinds of advice.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **定义通知逻辑** 
+1. **Define advice logic**
 
-   + 允许我们定义在目标方法执行前、执行后、抛出异常时等不同连接点上执行的操作。
+   + Lets us define actions that run at different join points, such as before the target method, after it, or when it throws an exception.
 
-2. **支持不同类型的通知**
+2. **Support different kinds of advice**
 
-   + `Advice`接口的实现类可以实现不同类型的通知逻辑，如前置通知、后置通知、环绕通知、异常通知等。
+   + Classes that implement `Advice` can provide different kinds of advice logic, such as before advice, after advice, around advice, and throws advice.
 
-3. **与切点结合** 
+3. **Work with a pointcut**
 
-   + `Advice`通常与切点（Pointcut）结合使用，以确定通知应该在哪些连接点上执行。
+   + `Advice` is usually used with a pointcut (Pointcut) to decide at which join points the advice runs.
 
-4. **应用于Advisor** 
+4. **Used in an Advisor**
 
-   + `Advice`通常作为`Advisor`的一部分，与切点结合，以实现切面的逻辑。
+   + `Advice` is usually part of an `Advisor`. Together with a pointcut, it forms the aspect logic.
 
-### 四、接口源码
+### 4. Interface Source
 
-`Advice`接口是Spring AOP中的一个标签接口，用于定义各种类型的通知，例如拦截器。通过实现该接口，我们可以定义在方法执行前、执行后、抛出异常时等不同连接点上执行的操作，从而实现对应用程序行为的干预和控制。
+The `Advice` interface is a marker interface in Spring AOP. It stands for all kinds of advice, such as interceptors. By implementing it, we can define actions that run before a method, after a method, or when an exception is thrown. This lets us change and control how the application behaves.
 
 ```java
 /**
- * Advice的标签接口。实现可以是任何类型的通知，例如拦截器。
+ * Tag interface for Advice. Implementations can be any type of advice, such as interceptors.
  * 
- * 该接口用于定义通知。通知可以是在方法执行前、执行后、抛出异常时等不同连接点上执行的操作。
- * 实现该接口的类可以是拦截器（Interceptors）等任何类型的通知。
+ * This interface defines advice. Advice can run before a method, after a method, or when an exception is thrown.
+ * Classes that implement this interface can be any type of advice, such as interceptors.
  *
  * @author Rod Johnson
  * @version $Id: Advice.java,v 1.1 2004/03/19 17:02:16 johnsonr Exp $
@@ -54,45 +54,45 @@ public interface Advice {
 }
 ```
 
-### 五、子接口
+### 5. Sub-interfaces
 
-1. **AfterAdvice（后置通知）** 
+1. **AfterAdvice (after advice)**
 
-   + 是一个标记接口，用于表示后置通知的类型。
+   + A marker interface that stands for after advice.
 
-2. **AfterReturningAdvice（返回后通知）** 
+2. **AfterReturningAdvice (after returning advice)**
 
-   + 用于在目标方法成功执行并返回结果后执行自定义逻辑。
+   + Runs custom logic after the target method finishes successfully and returns a result.
 
-3. **BeforeAdvice（前置通知）** 
+3. **BeforeAdvice (before advice)**
 
-   + 用于在目标方法执行前执行自定义逻辑。
+   + Runs custom logic before the target method runs.
 
-4. **ConstructorInterceptor（构造器拦截器）** 
+4. **ConstructorInterceptor (constructor interceptor)**
 
-   + 实现该接口的类可以在目标对象的构造器被调用时执行自定义逻辑。
+   + Classes that implement this interface can run custom logic when the constructor of the target object is called.
 
-5. **Interceptor（拦截器）** 
+5. **Interceptor (interceptor)**
 
-   + 是一个标记接口，表示通用的拦截器类型，通常用于包装方法调用。
+   + A marker interface for general interceptors. It is usually used to wrap method calls.
 
-6. **IntroductionInterceptor（引介拦截器）** 
+6. **IntroductionInterceptor (introduction interceptor)**
 
-   + 实现该接口的类可以在目标对象上添加新的方法和属性，用于实现AOP引介功能。
+   + Classes that implement this interface can add new methods and properties to the target object. This is how AOP introduction works.
 
-7. **MethodBeforeAdvice（方法前置通知）** 
+7. **MethodBeforeAdvice (method before advice)**
 
-   + 用于在目标方法执行前执行自定义逻辑。
+   + Runs custom logic before the target method runs.
 
-8. **MethodInterceptor（方法拦截器）** 
+8. **MethodInterceptor (method interceptor)**
 
-   + 实现该接口的类可以在目标方法执行前、执行后以及抛出异常时进行拦截，并执行自定义的逻辑。
+   + Classes that implement this interface can intercept the target method before it runs, after it runs, and when it throws an exception, and run custom logic.
 
-9. **ThrowsAdvice（异常通知）** 
+9. **ThrowsAdvice (throws advice)**
 
-   + 用于在目标方法抛出异常时执行自定义逻辑。
+   + Runs custom logic when the target method throws an exception.
 
-### 六、类关系图
+### 6. Class Diagram
 
 ~~~mermaid
 classDiagram
