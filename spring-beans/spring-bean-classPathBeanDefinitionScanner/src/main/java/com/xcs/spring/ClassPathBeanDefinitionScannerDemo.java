@@ -8,18 +8,18 @@ import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
 
 /**
  * @author xcs
- * @date 2023年11月07日 17时45分
+ * @date 2023-11-07 17:45
  **/
 public class ClassPathBeanDefinitionScannerDemo {
 
     public static void main(String[] args) {
-        // 创建一个 AnnotationConfigApplicationContext
+        // Create an AnnotationConfigApplicationContext
         DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 
-        // 创建 ClassPathBeanDefinitionScanner 并将其关联到容器
+        // Create a ClassPathBeanDefinitionScanner and link it to the container
         ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(factory);
 
-        // 使用 ClassPathBeanDefinitionScanner的scan方法扫描Bean对象
+        // Scan beans with the scan method of ClassPathBeanDefinitionScanner
         scanner.scan("com.xcs.spring");
 
         System.out.println("MyController = " + factory.getBean(MyController.class));

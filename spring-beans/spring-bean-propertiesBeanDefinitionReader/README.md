@@ -1,43 +1,43 @@
 ## PropertiesBeanDefinitionReader
 
 - [PropertiesBeanDefinitionReader](#propertiesbeandefinitionreader)
-  - [一、知识储备](#一知识储备)
-  - [二、基本描述](#二基本描述)
-  - [三、主要功能](#三主要功能)
-  - [四、最佳实践](#四最佳实践)
-  - [五、时序图](#五时序图)
-  - [六、源码分析](#六源码分析)
-  - [七、与其他组件的关系](#七与其他组件的关系)
-  - [八、常见问题](#八常见问题)
+  - [1. Background Knowledge](#1-background-knowledge)
+  - [2. Basic Description](#2-basic-description)
+  - [3. Main Features](#3-main-features)
+  - [4. Best Practices](#4-best-practices)
+  - [5. Sequence Diagram](#5-sequence-diagram)
+  - [6. Source Code Analysis](#6-source-code-analysis)
+  - [7. Relationship with Other Components](#7-relationship-with-other-components)
+  - [8. FAQ](#8-faq)
 
 
-### 一、知识储备
+### 1. Background Knowledge
 
 1. `Resource`
-   - `Resource` 代表一个资源，可以是文件、类路径上的文件、URL 等。它提供了对资源的抽象和访问方法。
-   - [点击查看Resource接口](https://github.com/xuchengsheng/spring-reading/tree/master/spring-resources/spring-resource)
+   - `Resource` stands for a resource. It can be a file, a file on the classpath, a URL and so on. It gives an abstraction and access methods for resources.
+   - [View the Resource interface](https://github.com/xuchengsheng/spring-reading/tree/master/spring-resources/spring-resource)
 2. `BeanDefinition`
-   - `BeanDefinition` 是 Spring 中描述和管理 Bean 配置的核心概念，它包括了有关 Bean 的信息，如类名、作用域、依赖关系、初始化方法等，而 `AnnotatedBeanDefinitionReader` 的主要任务之一是将使用注解配置的类转化为 `BeanDefinition` 并注册到 Spring 容器中。
-   - [点击查看BeanDefinition接口](https://github.com/xuchengsheng/spring-reading/tree/master/spring-beans/spring-bean-beanDefinition)
+   - `BeanDefinition` is the core Spring concept that describes and manages bean configuration. It has information about a bean, such as class name, scope, dependencies and initialization method. One of the main tasks of `AnnotatedBeanDefinitionReader` is to turn annotated classes into `BeanDefinition`s and register them in the Spring container.
+   - [View the BeanDefinition interface](https://github.com/xuchengsheng/spring-reading/tree/master/spring-beans/spring-bean-beanDefinition)
 
-### 二、基本描述
+### 2. Basic Description
 
-`PropertiesBeanDefinitionReader` 是 Spring 框架的一个组件，它的主要功能是从属性文件中加载 Bean 的配置信息，然后将这些配置信息解析并转化为 Spring 容器中的 Bean 定义。属性文件的格式通常是键值对，键表示 Bean 的名称，值表示 Bean 的类名或其他配置属性。这个过程允许我们将 Bean 配置与应用程序代码和 XML 配置文件分离，以实现动态加载和管理 Bean 定义，增强了应用程序的可扩展性和配置的灵活性。
+`PropertiesBeanDefinitionReader` is a Spring component. Its main job is to load bean configuration from a properties file, then parse it and turn it into bean definitions in the Spring container. A properties file is usually made of key-value pairs. The key is the bean name. The value is the bean class name or another configuration property. With this, bean configuration is separate from the application code and from XML files. Bean definitions can be loaded and managed dynamically. This makes the application more extensible and its configuration more flexible.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **加载属性文件**
-   + `PropertiesBeanDefinitionReader` 通过 `loadBeanDefinitions(Resource resource)` 方法加载属性文件，其中的 `Resource` 可以是文件路径、类路径或其他资源标识符，指定了包含 Bean 定义信息的属性文件的位置。
-2. **解析属性文件**
-   + 一旦属性文件被加载，`PropertiesBeanDefinitionReader` 会解析文件中的内容，识别 Bean 的名称、类名以及其他配置属性。
-3. **创建 Bean 定义**
-   + 根据属性文件中的配置信息，`PropertiesBeanDefinitionReader` 创建相应的 `BeanDefinition` 对象，其中包含了 Bean 的定义信息，包括名称、类、属性、依赖关系等。
-4. **注册 Bean 定义**
-   + `PropertiesBeanDefinitionReader` 将解析得到的 Bean 定义注册到 Spring IOC 容器中，使这些 Bean 可以在应用程序中被实例化和使用。
+1. **Load the properties file**
+   + `PropertiesBeanDefinitionReader` loads the properties file with the `loadBeanDefinitions(Resource resource)` method. The `Resource` can be a file path, a classpath location or another resource identifier. It points to the properties file that holds the bean definitions.
+2. **Parse the properties file**
+   + After the properties file is loaded, `PropertiesBeanDefinitionReader` parses its content. It finds the bean names, class names and other configuration properties.
+3. **Create bean definitions**
+   + From the configuration in the properties file, `PropertiesBeanDefinitionReader` creates the matching `BeanDefinition` objects. They hold the bean definition information, including name, class, properties and dependencies.
+4. **Register bean definitions**
+   + `PropertiesBeanDefinitionReader` registers the parsed bean definitions in the Spring IoC container. The beans can then be instantiated and used in the application.
 
-### 四、最佳实践
+### 4. Best Practices
 
-我们创建了一个 Spring Bean 工厂（`DefaultListableBeanFactory`）和一个属性文件读取器（`PropertiesBeanDefinitionReader`），然后从属性文件中加载 Bean 的定义，然后通过 Bean 工厂获取相应的 Bean 对象，以实现动态加载和管理 Bean 配置
+We create a Spring bean factory (`DefaultListableBeanFactory`) and a properties file reader (`PropertiesBeanDefinitionReader`). Then we load the bean definitions from the properties file, and get the bean objects from the bean factory. This loads and manages bean configuration dynamically.
 
 ```java
 public class PropertiesBeanDefinitionReaderDemo {
@@ -46,17 +46,17 @@ public class PropertiesBeanDefinitionReaderDemo {
         DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
         PropertiesBeanDefinitionReader reader = new PropertiesBeanDefinitionReader(beanFactory);
 
-        // 从properties文件加载bean定义
+        // Load bean definitions from the properties file
         reader.loadBeanDefinitions(new ClassPathResource("bean-definitions.properties"));
 
-        // 获取bean
+        // Get the bean
         System.out.println("myBean = " + beanFactory.getBean("myBean"));
         System.out.println("myBean = " + beanFactory.getBean("myBean"));
     }
 }
 ```
 
-属性文件 "`bean-definitions.properties`" 中的内容如下：
+The content of the properties file "`bean-definitions.properties`" is as follows.
 
 ```properties
 myBean.(class)=com.xcs.spring.bean.MyBean
@@ -65,7 +65,7 @@ myBean.(lazy-init)=true
 myBean.(scope)=prototype
 ```
 
-`MyBean` 的Java类，代表了一个简单的Java Bean。
+`MyBean` is a simple Java class that represents a plain Java bean.
 
 ```java
 public class MyBean {
@@ -90,34 +90,34 @@ public class MyBean {
 }
 ```
 
-运行结果发现，我们从属性文件中动态加载 Bean 配置，同时控制懒加载和作用域，以实现更灵活的 Bean 管理。在这个场景中，每次请求 "`myBeanA`" 都会得到一个新的实例，这是因为作用域设置为 "`prototype`"。
+The result shows that the bean configuration is loaded dynamically from the properties file, with lazy initialization and scope controlled at the same time. In this case, every request for "`myBeanA`" returns a new instance, because the scope is set to "`prototype`".
 
 ```java
 myBean = MyBean{message='hello world', hashCode='0x6646153'}
 myBean = MyBean{message='hello world', hashCode='0x45DD4EDA'}
 ```
 
-### 五、时序图
+### 5. Sequence Diagram
 
 ~~~mermaid
 sequenceDiagram
 autonumber
-Title: PropertiesBeanDefinitionReader时序图
+Title: PropertiesBeanDefinitionReader Sequence Diagram
 
 PropertiesBeanDefinitionReaderDemo->>PropertiesBeanDefinitionReader:loadBeanDefinitions(resource)
-Note right of PropertiesBeanDefinitionReaderDemo: 从指定的属性文件加载bean定义
+Note right of PropertiesBeanDefinitionReaderDemo: Load bean definitions from the given properties file
 PropertiesBeanDefinitionReader->>PropertiesBeanDefinitionReader:loadBeanDefinitions(encodedResource,prefix)
-Note over PropertiesBeanDefinitionReader: 从指定的属性文件加载bean定义
+Note over PropertiesBeanDefinitionReader: Load bean definitions from the given properties file
 PropertiesBeanDefinitionReader->>PropertiesBeanDefinitionReader:registerBeanDefinitions(map,prefix,resourceDescription)
-Note over PropertiesBeanDefinitionReader: 注册Map中包含的bean定义
+Note over PropertiesBeanDefinitionReader: Register the bean definitions in the Map
 PropertiesBeanDefinitionReader->>DefaultListableBeanFactory:registerBeanDefinition(beanName,beanDefinition)
-Note over PropertiesBeanDefinitionReader,DefaultListableBeanFactory: 注册Bean定义到容器
+Note over PropertiesBeanDefinitionReader,DefaultListableBeanFactory: Register the bean definitions in the container
 
 ~~~
 
-### 六、源码分析
+### 6. Source Code Analysis
 
-在`org.springframework.beans.factory.support.PropertiesBeanDefinitionReader#loadBeanDefinitions(resource)`方法中，又调用 `loadBeanDefinitions(encodedResource,prefix)` 方法来实际加载 Bean 定义。
+The `org.springframework.beans.factory.support.PropertiesBeanDefinitionReader#loadBeanDefinitions(resource)` method calls the `loadBeanDefinitions(encodedResource,prefix)` method to actually load the bean definitions.
 
 ```java
 @Override
@@ -126,35 +126,35 @@ public int loadBeanDefinitions(Resource resource) throws BeanDefinitionStoreExce
 }
 ```
 
-在`org.springframework.beans.factory.support.PropertiesBeanDefinitionReader#loadBeanDefinitions(encodedResource,prefix)`方法中，主要是从属性文件中加载和管理 Bean 配置，实现了 Spring 中属性文件的解析和注册。
+The `org.springframework.beans.factory.support.PropertiesBeanDefinitionReader#loadBeanDefinitions(encodedResource,prefix)` method loads and manages bean configuration from a properties file. It parses and registers the properties file in Spring.
 
 ```java
 public int loadBeanDefinitions(EncodedResource encodedResource, @Nullable String prefix)
 			throws BeanDefinitionStoreException {
 
-    // 如果启用了跟踪级别的日志，则输出加载属性文件的日志信息
+    // If trace logging is enabled, log that the properties file is being loaded
     if (logger.isTraceEnabled()) {
         logger.trace("Loading properties bean definitions from " + encodedResource);
     }
 
-    // 创建 Properties 对象，用于存储属性文件中的键值对配置
+    // Create a Properties object to hold the key-value configuration of the properties file
     Properties props = new Properties();
     try {
         try (InputStream is = encodedResource.getResource().getInputStream()) {
-            // 如果指定了编码，使用指定编码读取属性文件
+            // If an encoding is given, read the properties file with it
             if (encodedResource.getEncoding() != null) {
                 getPropertiesPersister().load(props, new InputStreamReader(is, encodedResource.getEncoding()));
             }
-            // 否则，使用默认编码读取属性文件
+            // Otherwise, read the properties file with the default encoding
             else {
                 getPropertiesPersister().load(props, is);
             }
         }
 
-        // 注册 Bean 定义，将属性文件中的配置转化为 Bean 定义并注册到容器中
+        // Register bean definitions: turn the configuration of the properties file into bean definitions and register them in the container
         int count = registerBeanDefinitions(props, prefix, encodedResource.getResource().getDescription());
 
-        // 如果启用了调试级别的日志，则输出已加载的 Bean 定义数量的日志信息
+        // If debug logging is enabled, log the number of loaded bean definitions
         if (logger.isDebugEnabled()) {
             logger.debug("Loaded " + count + " bean definitions from " + encodedResource);
         }
@@ -162,13 +162,13 @@ public int loadBeanDefinitions(EncodedResource encodedResource, @Nullable String
         return count;
     }
     catch (IOException ex) {
-        // 处理异常，如果在读取或注册过程中发生异常，抛出 BeanDefinitionStoreException 异常
+        // Handle exceptions. If an error happens while reading or registering, throw BeanDefinitionStoreException
         throw new BeanDefinitionStoreException("Could not parse properties from " + encodedResource.getResource(), ex);
     }
 }
 ```
 
-在`org.springframework.beans.factory.support.PropertiesBeanDefinitionReader#registerBeanDefinitions(map, prefix,resourceDescription)`方法中，首先遍历属性文件中的键值对配置，根据配置的前缀以及键的格式，将合法的 Bean 定义注册到容器中。如果键不符合要求或已经注册，则会忽略。最终，该方法返回已注册的 Bean 定义数量，用于跟踪注册的 Bean 数量。
+The `org.springframework.beans.factory.support.PropertiesBeanDefinitionReader#registerBeanDefinitions(map, prefix,resourceDescription)` method first goes through the key-value pairs of the properties file. Using the configured prefix and the key format, it registers valid bean definitions in the container. Keys that do not match the format, or whose bean is already registered, are ignored. At the end, the method returns the number of registered bean definitions, to track how many beans were registered.
 
 ```java
 public int registerBeanDefinitions(Map<?, ?> map, @Nullable String prefix, String resourceDescription)
@@ -179,16 +179,16 @@ public int registerBeanDefinitions(Map<?, ?> map, @Nullable String prefix, Strin
     }
     int beanCount = 0;
 
-    // 遍历属性文件中的键值对配置
+    // Loop over the key-value pairs of the properties file
     for (Object key : map.keySet()) {
         if (!(key instanceof String)) {
             throw new IllegalArgumentException("Illegal key [" + key + "]: only Strings allowed");
         }
         String keyString = (String) key;
         if (keyString.startsWith(prefix)) {
-            // 键的格式为：prefix<名称>.属性
+            // The key format is: prefix<name>.property
             String nameAndProperty = keyString.substring(prefix.length());
-            // 查找属性名之前的点号，忽略属性键中的点号。
+            // Find the dot before the property name. Ignore dots inside the property key.
             int sepIdx ;
             int propKeyIdx = nameAndProperty.indexOf(PropertyAccessor.PROPERTY_KEY_PREFIX);
             if (propKeyIdx != -1) {
@@ -203,15 +203,15 @@ public int registerBeanDefinitions(Map<?, ?> map, @Nullable String prefix, Strin
                     logger.trace("Found bean name '" + beanName + "'");
                 }
                 if (!getRegistry().containsBeanDefinition(beanName)) {
-                    // 如果还未注册该 Bean...
-                    // 注册 Bean 定义
+                    // If the bean is not registered yet...
+                    // Register the bean definition
                     registerBeanDefinition(beanName, map, prefix + beanName, resourceDescription);
                     ++beanCount;
                 }
             }
             else {
-                // 忽略该键：它不是有效的 Bean 名称和属性，
-                // 尽管它以所需的前缀开始。
+                // Ignore this key: it is not a valid bean name and property,
+                // even though it starts with the required prefix.
                 if (logger.isDebugEnabled()) {
                     logger.debug("Invalid bean name and property [" + nameAndProperty + "]");
                 }
@@ -219,18 +219,18 @@ public int registerBeanDefinitions(Map<?, ?> map, @Nullable String prefix, Strin
         }
     }
 
-    // 返回已注册的 Bean 定义数量
+    // Return the number of registered bean definitions
     return beanCount;
 }
 ```
 
-在`org.springframework.beans.factory.support.PropertiesBeanDefinitionReader#registerBeanDefinition(beanName,map,prefix, resourceDescription)`方法中，主要是处理属性文件中的配置并将其转化为 Spring Bean 定义，然后注册到容器中。
+The `org.springframework.beans.factory.support.PropertiesBeanDefinitionReader#registerBeanDefinition(beanName,map,prefix, resourceDescription)` method handles the configuration in the properties file. It turns it into a Spring bean definition and registers it in the container.
 
 ```java
 protected void registerBeanDefinition(String beanName, Map<?, ?> map, String prefix, String resourceDescription)
 			throws BeansException {
 
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
     try {
         AbstractBeanDefinition bd = BeanDefinitionReaderUtils.createBeanDefinition(
@@ -251,22 +251,22 @@ protected void registerBeanDefinition(String beanName, Map<?, ?> map, String pre
 }
 ```
 
-### 七、与其他组件的关系
+### 7. Relationship with Other Components
 
-1. **独立应用程序**
-   + 在一些独立的 Spring 应用程序中，我们可以使用 `PropertiesBeanDefinitionReader` 来动态加载 Bean 定义，从而使应用程序的配置更加灵活。这样，应用程序可以根据需要动态配置和管理 Bean。
-2. **基于属性文件的配置**
-   + 一些应用程序采用基于属性文件的配置方式，将各种 Bean 的配置信息存储在属性文件中。`PropertiesBeanDefinitionReader` 可以用来加载这些配置文件，并将配置信息转化为 Spring 的 Bean 定义。
+1. **Standalone applications**
+   + In some standalone Spring applications, we can use `PropertiesBeanDefinitionReader` to load bean definitions dynamically. This makes the configuration of the application more flexible. The application can configure and manage beans as needed.
+2. **Properties-based configuration**
+   + Some applications keep the configuration of various beans in properties files. `PropertiesBeanDefinitionReader` can load these files and turn the configuration into Spring bean definitions.
 
-### 八、常见问题
+### 8. FAQ
 
-1. **如何使用 `PropertiesBeanDefinitionReader`？**
-   + 使用 `PropertiesBeanDefinitionReader` 需要创建一个实例并与 Spring 的 Bean 工厂（如 `DefaultListableBeanFactory`）结合使用。然后，使用 `loadBeanDefinitions` 方法加载属性文件中的配置，并将 Bean 定义注册到容器中。
-2. **属性文件的格式是什么？**
-   + 属性文件的格式通常采用键值对（key=value）的形式，其中键表示 Bean 的名称，而值表示 Bean 的配置信息。属性文件中可以包含 Bean 的类、作用域、属性值等信息。
-3. **如何配置懒加载和作用域？**
-   + 在属性文件中，我们可以使用 `lazy-init` 和 `scope` 来配置懒加载和作用域。例如，`myBean.(lazy-init)=true` 可以配置一个 Bean 为懒加载，而 `myBean.(scope)=prototype` 可以配置 Bean 的作用域为原型。
-4. **什么是属性文件中的 Bean 名称？**
-   + 属性文件中的 Bean 名称通常与配置的键（key）一致。例如，`myBeanA=(class)=com.example.MyBean` 中的 Bean 名称是 "myBeanA"。
-5. **为什么使用 `PropertiesBeanDefinitionReader`？**
-   + `PropertiesBeanDefinitionReader` 可以使应用程序更加灵活，允许我们将配置信息从代码中分离出来，从而实现应用程序的可配置性。它还支持动态加载和管理 Bean，适用于需要动态配置的场景。
+1. **How do I use `PropertiesBeanDefinitionReader`?**
+   + Create an instance of `PropertiesBeanDefinitionReader` and use it with a Spring bean factory (such as `DefaultListableBeanFactory`). Then use the `loadBeanDefinitions` method to load the configuration from the properties file and register the bean definitions in the container.
+2. **What is the format of the properties file?**
+   + The properties file usually uses key-value pairs (key=value). The key is the bean name and the value is the bean configuration. The file can hold the bean class, scope, property values and so on.
+3. **How do I configure lazy initialization and scope?**
+   + In the properties file, use `lazy-init` and `scope`. For example, `myBean.(lazy-init)=true` makes a bean lazy, and `myBean.(scope)=prototype` sets the bean scope to prototype.
+4. **What is a bean name in the properties file?**
+   + The bean name in the properties file is usually the same as the key. For example, in `myBeanA=(class)=com.example.MyBean` the bean name is "myBeanA".
+5. **Why use `PropertiesBeanDefinitionReader`?**
+   + `PropertiesBeanDefinitionReader` makes the application more flexible. It lets us move configuration out of the code, so the application can be configured. It also supports loading and managing beans dynamically, which suits cases that need dynamic configuration.

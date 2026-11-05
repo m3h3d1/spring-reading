@@ -12,18 +12,18 @@ import java.io.IOException;
 
 /**
  * @author xcs
- * @date 2023年11月01日 11时21分
+ * @date 2023-11-01 11:21
  **/
 public class BeanDefinitionDemo {
     public static void main(String[] args) throws Exception {
         DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
         beanFactory.registerBeanDefinition("myBean", createBeanDefinition());
 
-        // 获取MyBean
+        // Get MyBean
         MyBean myChildBean = beanFactory.getBean("myBean", MyBean.class);
-        // 打印Bean对象
+        // Print the bean
         System.out.println("MyBean = " + myChildBean);
-        // 销毁myBean
+        // Destroy myBean
         beanFactory.destroySingleton("myBean");
     }
 

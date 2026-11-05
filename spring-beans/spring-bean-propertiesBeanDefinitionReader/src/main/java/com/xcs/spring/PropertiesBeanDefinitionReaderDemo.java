@@ -6,7 +6,7 @@ import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author xcs
- * @date 2023年11月06日 10时09分
+ * @date 2023-11-06 10:09
  **/
 public class PropertiesBeanDefinitionReaderDemo {
 
@@ -14,10 +14,10 @@ public class PropertiesBeanDefinitionReaderDemo {
         DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
         PropertiesBeanDefinitionReader reader = new PropertiesBeanDefinitionReader(beanFactory);
 
-        // 从properties文件加载bean定义
+        // Load bean definitions from the properties file
         reader.loadBeanDefinitions(new ClassPathResource("bean-definitions.properties"));
 
-        // 获取bean
+        // Get the bean
         System.out.println("myBean = " + beanFactory.getBean("myBean"));
         System.out.println("myBean = " + beanFactory.getBean("myBean"));
     }

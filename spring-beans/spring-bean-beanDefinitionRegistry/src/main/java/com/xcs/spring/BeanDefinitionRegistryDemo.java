@@ -8,43 +8,43 @@ import org.springframework.beans.factory.support.GenericBeanDefinition;
 
 /**
  * @author xcs
- * @date 2023年11月04日 11时28分
+ * @date 2023-11-04 11:28
  **/
 public class BeanDefinitionRegistryDemo {
 
     public static void main(String[] args) {
-        // 创建一个BeanFactory，它是BeanDefinitionRegistry
+        // Create a BeanFactory, which is a BeanDefinitionRegistry
         DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
-        // 创建一个Bean定义
+        // Create a bean definition
         GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
         beanDefinition.setBeanClass(MyBean.class);
 
-        // 注册Bean定义到BeanFactory
+        // Register the bean definition in the BeanFactory
         beanFactory.registerBeanDefinition("myBean", beanDefinition);
 
-        // 获取BeanDefinition
+        // Get the BeanDefinition
         BeanDefinition retrievedBeanDefinition = beanFactory.getBeanDefinition("myBean");
-        System.out.println("Bean定义的类名 = " + retrievedBeanDefinition.getBeanClassName());
+        System.out.println("Bean definition class name = " + retrievedBeanDefinition.getBeanClassName());
 
-        // 检查Bean定义是否存在
+        // Check whether the bean definition exists
         boolean containsBeanDefinition = beanFactory.containsBeanDefinition("myBean");
-        System.out.println("Bean定义是否包含(myBean) = " + containsBeanDefinition);
+        System.out.println("Contains bean definition (myBean) = " + containsBeanDefinition);
 
-        // 获取所有Bean定义的名称
+        // Get the names of all bean definitions
         String[] beanDefinitionNames = beanFactory.getBeanDefinitionNames();
-        System.out.println("Bean定义的名称 = " + String.join(", ", beanDefinitionNames));
+        System.out.println("Bean definition names = " + String.join(", ", beanDefinitionNames));
 
-        // 获取Bean定义的数量
+        // Get the number of bean definitions
         int beanDefinitionCount = beanFactory.getBeanDefinitionCount();
-        System.out.println("Bean定义的数量 = " + beanDefinitionCount);
+        System.out.println("Bean definition count = " + beanDefinitionCount);
 
-        // 检查Bean名称是否已被使用
+        // Check whether the bean name is in use
         boolean isBeanNameInUse = beanFactory.isBeanNameInUse("myBean");
-        System.out.println("Bean名称(myBean)是否被使用 = " + isBeanNameInUse);
+        System.out.println("Bean name (myBean) in use = " + isBeanNameInUse);
 
-        // 移除Bean定义
+        // Remove the bean definition
         beanFactory.removeBeanDefinition("myBean");
-        System.out.println("Bean定义已被移除(myBean)");
+        System.out.println("Bean definition removed (myBean)");
     }
 }

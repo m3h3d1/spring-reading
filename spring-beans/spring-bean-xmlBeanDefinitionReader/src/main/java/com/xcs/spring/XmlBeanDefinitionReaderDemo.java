@@ -7,20 +7,20 @@ import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author xcs
- * @date 2023年11月04日 15时51分
+ * @date 2023-11-04 15:51
  **/
 public class XmlBeanDefinitionReaderDemo {
 
     public static void main(String[] args) {
-        // 创建一个DefaultListableBeanFactory作为Spring容器
+        // Create a DefaultListableBeanFactory as the Spring container
         DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 
-        // 创建XmlBeanDefinitionReader实例用于解析XML配置
+        // Create an XmlBeanDefinitionReader to parse the XML configuration
         XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
-        // 加载XML配置文件
+        // Load the XML configuration file
         reader.loadBeanDefinitions(new ClassPathResource("beans.xml"));
 
-        // 获取并使用Bean
+        // Get and use the bean
         MyBean myBean = factory.getBean("myBean", MyBean.class);
         System.out.println("myBean = " + myBean);
     }

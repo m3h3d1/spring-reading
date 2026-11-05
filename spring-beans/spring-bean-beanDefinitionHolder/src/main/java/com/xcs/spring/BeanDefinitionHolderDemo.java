@@ -10,26 +10,26 @@ import java.util.Arrays;
 
 /**
  * @author xcs
- * @date 2023年11月03日 17时20分
+ * @date 2023-11-03 17:20
  **/
 public class BeanDefinitionHolderDemo {
 
     public static void main(String[] args) {
-        // 创建一个 DefaultListableBeanFactory，它是 BeanDefinitionRegistry 的一个实现
+        // Create a DefaultListableBeanFactory, an implementation of BeanDefinitionRegistry
         DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
-        // 创建一个新的 BeanDefinition 对象
+        // Create a new BeanDefinition
         GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
         beanDefinition.setBeanClass(MyBean.class);
 
-        // Bean名称
+        // Bean name
         String beanName = "myBean";
-        // 设置别名（aliases）
+        // Set aliases
         String[] aliases = {"myBeanX", "myBeanY"};
-        // 创建一个 BeanDefinitionHolder，将 BeanDefinition 与名称关联起来
+        // Create a BeanDefinitionHolder to link the BeanDefinition with its name
         BeanDefinitionHolder beanDefinitionHolder = new BeanDefinitionHolder(beanDefinition, beanName, aliases);
 
-        // 使用 BeanDefinitionReaderUtils 注册 BeanDefinitionHolder
+        // Register the BeanDefinitionHolder with BeanDefinitionReaderUtils
         BeanDefinitionReaderUtils.registerBeanDefinition(beanDefinitionHolder, beanFactory);
 
         System.out.println("myBean = " + beanFactory.getBean("myBean"));

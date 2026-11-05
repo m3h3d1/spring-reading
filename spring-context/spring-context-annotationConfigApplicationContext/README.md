@@ -1,43 +1,43 @@
 ## AnnotationConfigApplicationContext
 
 - [AnnotationConfigApplicationContext](#annotationconfigapplicationcontext)
-  - [一、基本信息](#一基本信息)
-  - [二、知识储备](#二知识储备)
-  - [三、基本描述](#三基本描述)
-  - [四、最佳实践](#四最佳实践)
-  - [五、时序图](#五时序图)
-  - [六、源码分析](#六源码分析)
+  - [1. Overview](#1-overview)
+  - [2. Background Knowledge](#2-background-knowledge)
+  - [3. Basic Description](#3-basic-description)
+  - [4. Best Practices](#4-best-practices)
+  - [5. Sequence Diagram](#5-sequence-diagram)
+  - [6. Source Code Analysis](#6-source-code-analysis)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、知识储备
+### 2. Background Knowledge
 
 + **ClassPathBeanDefinitionScanner**
-  + [ClassPathBeanDefinitionScanner](https://github.com/xuchengsheng/spring-reading/blob/master/spring-beans/spring-bean-classPathBeanDefinitionScanner/README.md) 类，用于在类路径上扫描指定包及其子包中的类，识别符合条件的类，并将其注册为 Spring Bean 的定义，从而实现组件扫描和自动装配，使我们能够方便地管理和配置应用程序中的 Bean。它允许我们定义过滤条件，以确定哪些类应被注册为 Bean，以及配合自动装配实现依赖注入，提高了应用程序的可维护性和扩展性。
+  + The [ClassPathBeanDefinitionScanner](https://github.com/xuchengsheng/spring-reading/blob/master/spring-beans/spring-bean-classPathBeanDefinitionScanner/README.md) class scans a package and its sub-packages on the classpath. It finds matching classes and registers them as bean definitions. This gives you component scanning and autowiring. You can set filters to decide which classes become beans. This makes the application easier to maintain and extend.
 + **AnnotatedBeanDefinitionReader**
-  + [AnnotatedBeanDefinitionReader](https://github.com/xuchengsheng/spring-reading/blob/master/spring-beans/spring-bean-annotatedBeanDefinitionReader/README.md)是一个用于读取和解析带有注解的Bean定义的类，它主要用于基于注解的配置方式，允许开发者将Java类标记为Spring组件，从而让Spring容器自动扫描和注册这些组件，而不需要显式配置这些组件的Bean定义。
+  + The [AnnotatedBeanDefinitionReader](https://github.com/xuchengsheng/spring-reading/blob/master/spring-beans/spring-bean-annotatedBeanDefinitionReader/README.md) class reads and parses annotated bean definitions. It is used for annotation-based configuration. You mark a Java class as a Spring component, and the container scans and registers it. You do not need to configure the bean definition by hand.
 
-### 三、基本描述
+### 3. Basic Description
 
-`AnnotationConfigApplicationContext` 提供了一种基于 Java 注解的轻量级、类型安全的方式来配置和管理 Spring 容器中的 bean。这种方式相对于传统的 XML 配置方式更加灵活，并且有助于减少配置文件的数量和复杂性。
+`AnnotationConfigApplicationContext` is a light, type-safe way to configure and manage beans in the Spring container with Java annotations. It is more flexible than traditional XML configuration. It also reduces the number and complexity of configuration files.
 
-### 四、最佳实践
+### 4. Best Practices
 
-通过`AnnotationConfigApplicationContext`容器，以手动注册和包扫描两种方式注册Bean定义，其中手动注册了单个Bean（`MyBean`类），并通过包扫描注册了指定包路径下的所有标有`@Component`及其派生注解的类。最后，通过打印输出了所有已注册的Bean定义的名称。
+With the `AnnotationConfigApplicationContext` container, bean definitions are registered in two ways: by hand and by package scanning. One bean (the `MyBean` class) is registered by hand. Package scanning registers all classes in the given package that have `@Component` or one of its derived annotations. At the end, the names of all registered bean definitions are printed.
 
 ```java
 public class RegisterBeanDefinitionApplication {
 
     public static void main(String[] args) {
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-        // 注册Bean
+        // Register the bean
         context.register(MyBean.class);
-        // 扫描包
+        // Scan the package
         context.scan("com.xcs.spring");
-        // 打印Bean定义
+        // Print the bean definitions
         for (String beanDefinitionName : context.getBeanDefinitionNames()) {
             System.out.println("beanDefinitionName = " + beanDefinitionName);
         }
@@ -45,7 +45,7 @@ public class RegisterBeanDefinitionApplication {
 }
 ```
 
-一个简单的Java类 `MyBean`，这个类没有任何注解或其他特殊标记。
+`MyBean` is a simple Java class. It has no annotations or other markers.
 
 ```java
 public class MyBean {
@@ -53,7 +53,7 @@ public class MyBean {
 }
 ```
 
-分别使用`@Controller`、`@Service`和`@Repository`。这些注解是Spring框架中用于标识不同层次组件的特殊注解。
+These classes use `@Controller`, `@Service` and `@Repository`. These are special Spring annotations that mark components in different layers.
 
 ```java
 @Controller
@@ -72,9 +72,9 @@ public class MyRepository {
 }
 ```
 
-运行结果发现，Spring应用上下文中成功加载了配置，并注册了各种Bean定义，包括手动注册和通过注解自动注册的。
+The result shows that the Spring application context loaded the configuration and registered all bean definitions, both the manual one and the annotated ones.
 
-PS：前面4个是Spring容器内部的注册的Bean定义。
+PS: The first four are bean definitions that Spring registers internally.
 
 ```java
 beanDefinitionName = org.springframework.context.annotation.internalConfigurationAnnotationProcessor
@@ -87,44 +87,44 @@ beanDefinitionName = myRepository
 beanDefinitionName = myService
 ```
 
-### 五、时序图
+### 5. Sequence Diagram
 
 ~~~mermaid
 sequenceDiagram
-Title: AnnotationConfigApplicationContext时序图
+Title: AnnotationConfigApplicationContext Sequence Diagram
 
 AnnotationConfigApplicationContextDemo->>AnnotationConfigApplicationContext: AnnotationConfigApplicationContext()
-Note over AnnotationConfigApplicationContextDemo,AnnotationConfigApplicationContext: 创建 AnnotationConfigApplicationContext 实例
+Note over AnnotationConfigApplicationContextDemo,AnnotationConfigApplicationContext: Create an AnnotationConfigApplicationContext instance
 
 AnnotationConfigApplicationContext->>AnnotatedBeanDefinitionReader: new AnnotatedBeanDefinitionReader(this)
-Note over AnnotationConfigApplicationContext,AnnotatedBeanDefinitionReader: 创建 AnnotatedBeanDefinitionReader 实例
+Note over AnnotationConfigApplicationContext,AnnotatedBeanDefinitionReader: Create an AnnotatedBeanDefinitionReader instance
 
-AnnotatedBeanDefinitionReader->>AnnotationConfigApplicationContext: 返回 AnnotatedBeanDefinitionReader
-Note over AnnotatedBeanDefinitionReader,AnnotationConfigApplicationContext: 获取 AnnotatedBeanDefinitionReader 实例
+AnnotatedBeanDefinitionReader->>AnnotationConfigApplicationContext: Return AnnotatedBeanDefinitionReader
+Note over AnnotatedBeanDefinitionReader,AnnotationConfigApplicationContext: Get the AnnotatedBeanDefinitionReader instance
 
 AnnotationConfigApplicationContext->>ClassPathBeanDefinitionScanner: new ClassPathBeanDefinitionScanner(this)
-Note over AnnotationConfigApplicationContext,ClassPathBeanDefinitionScanner: 创建 ClassPathBeanDefinitionScanner 实例
+Note over AnnotationConfigApplicationContext,ClassPathBeanDefinitionScanner: Create a ClassPathBeanDefinitionScanner instance
 
-ClassPathBeanDefinitionScanner->>AnnotationConfigApplicationContext: 返回 ClassPathBeanDefinitionScanner
-Note over ClassPathBeanDefinitionScanner,AnnotationConfigApplicationContext: 获取 ClassPathBeanDefinitionScanner 实例
+ClassPathBeanDefinitionScanner->>AnnotationConfigApplicationContext: Return ClassPathBeanDefinitionScanner
+Note over ClassPathBeanDefinitionScanner,AnnotationConfigApplicationContext: Get the ClassPathBeanDefinitionScanner instance
 
 AnnotationConfigApplicationContextDemo->>AnnotationConfigApplicationContext: register(componentClasses)
-Note over AnnotationConfigApplicationContextDemo,AnnotationConfigApplicationContext: 注册组件类
+Note over AnnotationConfigApplicationContextDemo,AnnotationConfigApplicationContext: Register component classes
 
 AnnotationConfigApplicationContext->>AnnotatedBeanDefinitionReader: this.reader.register(componentClasses)
-Note over AnnotationConfigApplicationContext,AnnotatedBeanDefinitionReader: 使用 AnnotatedBeanDefinitionReader 注册组件类
+Note over AnnotationConfigApplicationContext,AnnotatedBeanDefinitionReader: Register component classes with AnnotatedBeanDefinitionReader
 
 AnnotationConfigApplicationContextDemo->>AnnotationConfigApplicationContext: scan(basePackages)
-Note over AnnotationConfigApplicationContextDemo,AnnotationConfigApplicationContext: 扫描指定包
+Note over AnnotationConfigApplicationContextDemo,AnnotationConfigApplicationContext: Scan the given packages
 
 AnnotationConfigApplicationContext->>ClassPathBeanDefinitionScanner: this.scanner.scan(basePackages)
-Note over AnnotationConfigApplicationContext,ClassPathBeanDefinitionScanner: 使用 ClassPathBeanDefinitionScanner 扫描包
+Note over AnnotationConfigApplicationContext,ClassPathBeanDefinitionScanner: Scan packages with ClassPathBeanDefinitionScanner
 
 ~~~
 
-### 六、源码分析
+### 6. Source Code Analysis
 
-在`org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext()`方法中，初始化`AnnotationConfigApplicationContext`实例中的两个关键组件：`AnnotatedBeanDefinitionReader`和`ClassPathBeanDefinitionScanner`，这两者分别用于处理注解式Bean定义和类路径扫描注册Bean定义。
+In the `org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext()` method, two key components of the `AnnotationConfigApplicationContext` instance are created: `AnnotatedBeanDefinitionReader` and `ClassPathBeanDefinitionScanner`. The first handles annotated bean definitions. The second registers bean definitions by scanning the classpath.
 
 ```java
 public AnnotationConfigApplicationContext() {
@@ -135,9 +135,9 @@ public AnnotationConfigApplicationContext() {
 }
 ```
 
-在`org.springframework.context.annotation.AnnotationConfigApplicationContext#register`方法中，主要作用是通过`AnnotatedBeanDefinitionReader`注册一组组件类，将它们解析为Spring容器中的Bean定义。
+The `org.springframework.context.annotation.AnnotationConfigApplicationContext#register` method uses `AnnotatedBeanDefinitionReader` to register a set of component classes. It parses them into bean definitions in the Spring container.
 
->  **`this.reader.register(componentClasses)`方法的源码分析已经在另外一篇关于[AnnotatedBeanDefinitionReader](https://github.com/xuchengsheng/spring-reading/blob/master/spring-beans/spring-bean-annotatedBeanDefinitionReader/README.md)类的博客中详细分析了。**
+>  **The detailed source analysis of the `this.reader.register(componentClasses)` method is in another article about the [AnnotatedBeanDefinitionReader](https://github.com/xuchengsheng/spring-reading/blob/master/spring-beans/spring-bean-annotatedBeanDefinitionReader/README.md) class.**
 
 ```java
 @Override
@@ -150,9 +150,9 @@ public void register(Class<?>... componentClasses) {
 }
 ```
 
-在`org.springframework.context.annotation.AnnotationConfigApplicationContext#scan`方法中，主要作用是通过`ClassPathBeanDefinitionScanner`扫描指定的基础包路径下的类，将它们解析为Spring容器中的Bean定义。
+The `org.springframework.context.annotation.AnnotationConfigApplicationContext#scan` method uses `ClassPathBeanDefinitionScanner` to scan the given base packages. It parses the classes it finds into bean definitions in the Spring container.
 
-> **`this.scanner.scan(basePackages)`方法的源码分析已经在另外一篇关于[ClassPathBeanDefinitionScanner](https://github.com/xuchengsheng/spring-reading/blob/master/spring-beans/spring-bean-classPathBeanDefinitionScanner/README.md)类的博客中详细分析了。**
+> **The detailed source analysis of the `this.scanner.scan(basePackages)` method is in another article about the [ClassPathBeanDefinitionScanner](https://github.com/xuchengsheng/spring-reading/blob/master/spring-beans/spring-bean-classPathBeanDefinitionScanner/README.md) class.**
 
 ```java
 @Override

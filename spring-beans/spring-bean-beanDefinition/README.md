@@ -1,59 +1,59 @@
 ## BeanDefinition
 
 - [BeanDefinition](#beandefinition)
-  - [一、知识储备](#一知识储备)
-  - [二、基本描述](#二基本描述)
-  - [三、主要功能](#三主要功能)
-  - [四、接口源码](#四接口源码)
-  - [五、主要实现](#五主要实现)
-  - [六、最佳实践](#六最佳实践)
-  - [七、与其他组件的关系](#七与其他组件的关系)
-  - [八、常见问题](#八常见问题)
+  - [1. Background Knowledge](#1-background-knowledge)
+  - [2. Basic Description](#2-basic-description)
+  - [3. Main Features](#3-main-features)
+  - [4. Interface Source](#4-interface-source)
+  - [5. Main Implementations](#5-main-implementations)
+  - [6. Best Practices](#6-best-practices)
+  - [7. Relationship with Other Components](#7-relationship-with-other-components)
+  - [8. FAQ](#8-faq)
 
 
-### 一、知识储备
+### 1. Background Knowledge
 
 1. **`MetadataReader`**
-   + `MetadataReader` 是 Spring 提供的一个接口，用于读取类的元数据信息。它可以用于扫描类文件，获取类的基本信息，如类名、类的注解等。在注解驱动的开发中，`MetadataReader` 通常用于扫描包中的类，并从这些类中提取注解信息，以便配置 Spring Bean。[点击查看](https://github.com/xuchengsheng/spring-reading/tree/master/spring-metadata/spring-metadata-metadataReader)
+   + `MetadataReader` is a Spring interface that reads the metadata of a class. It can scan class files and get basic information such as the class name and the class annotations. In annotation-driven development, `MetadataReader` is usually used to scan the classes in a package and extract annotation information from them, to configure Spring beans. [View](https://github.com/xuchengsheng/spring-reading/tree/master/spring-metadata/spring-metadata-metadataReader)
 2. **`AnnotationMetadata.introspect`**
-   + `AnnotationMetadata` 接口中的 `introspect` 方法用于深入分析类的注解信息。它可以帮助我们获取类上的注解、类的方法上的注解、类的字段上的注解等。在 Spring 中，`introspect` 方法通常用于解析被 `@Component`, `@Configuration` 和其他注解标记的类，以确定它们如何被实例化并配置为 Spring Bean。[点击查看](https://github.com/xuchengsheng/spring-reading/tree/master/spring-metadata/spring-metadata-annotationMetadata)
+   + The `introspect` method of the `AnnotationMetadata` interface analyzes the annotations of a class in depth. It helps us get the annotations on the class, on its methods, on its fields and so on. In Spring, `introspect` is usually used to parse classes marked with `@Component`, `@Configuration` and other annotations, to decide how they are instantiated and configured as Spring beans. [View](https://github.com/xuchengsheng/spring-reading/tree/master/spring-metadata/spring-metadata-annotationMetadata)
 
-### 二、基本描述
+### 2. Basic Description
 
-`BeanDefinition` 是 Spring 框架中的关键构建块，它是一种配置元数据，用于详细描述和定义应用程序中的 Bean 对象，包括 Bean 的类名、作用域、依赖关系、构造函数参数、属性值、初始化方法、销毁方法等信息，从而允许 Spring 容器准确地实例化、配置和管理这些 Bean。通过`BeanDefinition`，我们可以灵活地配置应用程序中的组件，使其能够实现依赖注入、AOP 切面、作用域控制等核心功能，促进松耦合、可维护和可扩展的应用程序开发。
+`BeanDefinition` is a key building block of the Spring Framework. It is configuration metadata that describes and defines the bean objects of an application in detail. This includes the class name, scope, dependencies, constructor arguments, property values, initialization method, destroy method and so on. With it, the Spring container can instantiate, configure and manage these beans exactly. With `BeanDefinition`, we can configure the components of an application flexibly. This supports core features such as dependency injection, AOP aspects and scope control. It promotes loosely coupled, maintainable and extensible application development.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **定义 Bean 的类**
-   + 用于指定要实例化的 Bean 的类名。它告诉 Spring 容器要创建哪个 Java 类的对象。
-2. **定义 Bean 的作用域**
-   + 允许我们指定 Bean 的作用域，例如 singleton（单例）或 prototype（多例）。这影响了 Bean 在容器中的生命周期。
-3. **构造函数参数和属性值**
-   + 允许我们指定 Bean 的构造函数参数和属性值，以便在实例化 Bean 时传递参数或设置属性。
-4. **定义初始化和销毁方法**
-   + 定义 Bean 的初始化方法和销毁方法，以确保在 Bean 创建和销毁时执行特定的逻辑。
-5. **Bean 的延迟初始化**
-   + 允许我们设置 Bean 是否延迟初始化，即在第一次请求时创建 Bean 实例。
-6. **依赖关系**
-   + 允许我们指定 Bean 之间的依赖关系，以确保在创建 Bean 时正确注入依赖的其他 Bean。
-7. **描述 Bean 的角色**
-   + 允许我们为 Bean 指定一个角色（role），通常包括应用程序 Bean、基础设施 Bean、测试 Bean 等。
-8. **Bean 的属性覆盖**
-   + 允许我们使用属性覆盖机制，通过不同的配置源（如属性文件或环境变量）覆盖已定义的属性值。
-9. **Bean 的注解和元数据**
-   + 可以包含关于 Bean 的注解信息和元数据，这对于处理注解驱动的开发非常有用。
-10. **动态创建和注册 Bean**
-    + 允许我们在运行时动态创建和注册 Bean，而不仅仅是静态配置。
+1. **Define the bean class**
+   + Sets the class name of the bean to instantiate. It tells the Spring container which Java class to create an object of.
+2. **Define the bean scope**
+   + Lets us set the scope of the bean, such as singleton or prototype. This affects the lifecycle of the bean in the container.
+3. **Constructor arguments and property values**
+   + Lets us set the constructor arguments and property values of the bean, to pass arguments or set properties when the bean is instantiated.
+4. **Define initialization and destroy methods**
+   + Defines the initialization method and the destroy method of the bean, so that specific logic runs when the bean is created and destroyed.
+5. **Lazy initialization of the bean**
+   + Lets us set whether the bean is initialized lazily, that is, created on the first request.
+6. **Dependencies**
+   + Lets us set the dependencies between beans, so the other beans it depends on are injected correctly when the bean is created.
+7. **Describe the bean role**
+   + Lets us give the bean a role, usually an application bean, an infrastructure bean, a test bean and so on.
+8. **Property overriding**
+   + Lets us use the property overriding mechanism to override defined property values with different configuration sources (such as property files or environment variables).
+9. **Bean annotations and metadata**
+   + Can hold annotation information and metadata about the bean. This is useful for annotation-driven development.
+10. **Create and register beans dynamically**
+    + Lets us create and register beans dynamically at run time, not only through static configuration.
 
-### 四、接口源码
+### 4. Interface Source
 
-从`BeanDefinition` 接口源码来看，它描述和配置 Spring Bean 的各个方面。它包括了配置 Bean 的类名、作用域、初始化和销毁方法、构造函数参数、属性值等。
+The `BeanDefinition` interface describes and configures the many aspects of a Spring bean. This includes the class name, scope, initialization and destroy methods, constructor arguments, property values and so on.
 
 ```java
 /**
- * BeanDefinition 描述一个 Bean 实例，包括属性值、构造函数参数值以及具体实现提供的更多信息。
+ * A BeanDefinition describes a bean instance, including its property values, constructor argument values and more information provided by concrete implementations.
  *
- * 这只是一个最小的接口：主要意图是允许 BeanFactoryPostProcessor 检查和修改属性值以及其他 Bean 元数据。
+ * This is only a minimal interface: the main intent is to let a BeanFactoryPostProcessor inspect and change property values and other bean metadata.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -65,163 +65,163 @@
 public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
     /**
-     * 标准单例范围的范围标识符：value。
-     * 请注意，扩展的 Bean 工厂可能支持更多范围。
+     * Scope identifier for the standard singleton scope: value.
+     * Note that extended bean factories may support more scopes.
      * @see #setScope
      * @see ConfigurableBeanFactory#SCOPE_SINGLETON
      */
     String SCOPE_SINGLETON = ConfigurableBeanFactory.SCOPE_SINGLETON;
 
     /**
-     * 标准原型范围的范围标识符：value。
-     * 请注意，扩展的 Bean 工厂可能支持更多范围。
+     * Scope identifier for the standard prototype scope: value.
+     * Note that extended bean factories may support more scopes.
      * @see #setScope
      * @see ConfigurableBeanFactory#SCOPE_PROTOTYPE
      */
     String SCOPE_PROTOTYPE = ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
     /**
-     * 表示 BeanDefinition 是应用程序的主要部分的角色提示。
-     * 通常对应于用户定义的 Bean。
+     * Role hint that a BeanDefinition is a major part of the application.
+     * Usually it matches a user-defined bean.
      */
     int ROLE_APPLICATION = 0;
 
     /**
-     * 表示 BeanDefinition 是某个更大配置的支持部分的角色提示，通常是外部
-     * org.springframework.beans.factory.parsing.ComponentDefinition。
-     * 当在特定的 org.springframework.beans.factory.parsing.ComponentDefinition 上查看时，这些"SUPPORT" Bean 被认为足够重要，
-     * 但在查看应用程序的整体配置时，它们无关紧要。
+     * Role hint that a BeanDefinition is a supporting part of some larger configuration, usually an outer
+     * org.springframework.beans.factory.parsing.ComponentDefinition.
+     * When looked at in the context of a specific org.springframework.beans.factory.parsing.ComponentDefinition, these "SUPPORT" beans are considered important enough,
+     * but they are not relevant when looking at the overall configuration of the application.
      */
     int ROLE_SUPPORT = 1;
 
     /**
-     * 表示 BeanDefinition 提供了完全背景角色，与最终用户无关。
-     * 当注册完全属于 org.springframework.beans.factory.parsing.ComponentDefinition 内部工作的 Bean 时使用此提示。
+     * Role hint that a BeanDefinition has a completely background role and is not relevant to the end user.
+     * This hint is used when registering beans that belong entirely to the inner workings of a org.springframework.beans.factory.parsing.ComponentDefinition.
      */
     int ROLE_INFRASTRUCTURE = 2;
 
     /**
-     * 设置此 Bean 定义的父定义的名称，如果有的话。
+     * Set the name of the parent definition of this bean definition, if any.
      */
     void setParentName(@Nullable String parentName);
 
     /**
-     * 返回此 Bean 定义的父定义的名称，如果有的话。
+     * Return the name of the parent definition of this bean definition, if any.
      */
     @Nullable
     String getParentName();
 
     /**
-     * 指定此 Bean 定义的 Bean 类名称。
-     * 在 Bean 工厂后处理期间，可以修改类名，通常用解析后的类名替换原始类名。
+     * Specify the bean class name of this bean definition.
+     * The class name can be changed during bean factory post-processing, usually to replace the original class name with a resolved one.
      */
     void setBeanClassName(@Nullable String beanClassName);
 
     /**
-     * 返回此 Bean 定义的当前 Bean 类名。
-     * 请注意，这不一定是运行时实际使用的类名，在子定义从父定义继承类名的情况下。
-     * 此外，在工厂方法上调用的类可能为空。
-     * 因此，不要将其视为运行时的确定 Bean 类型，而只在个别 Bean 定义级别用于解析目的。
+     * Return the current bean class name of this bean definition.
+     * Note that this is not necessarily the class name used at run time, for example when a child definition inherits the class name from its parent.
+     * Also, the class called on a factory method may be empty.
+     * So do not treat it as the definite bean type at run time. Use it only at the level of individual bean definitions, for resolution purposes.
      */
     @Nullable
     String getBeanClassName();
 
     /**
-     * 覆盖此 Bean 的目标范围，指定新的范围名称。
+     * Override the target scope of this bean and specify a new scope name.
      * @see #SCOPE_SINGLETON
      * @see #SCOPE_PROTOTYPE
      */
     void setScope(@Nullable String scope);
 
     /**
-     * 返回此 Bean 的当前目标范围名称，如果尚未知，则返回 null。
+     * Return the current target scope name of this bean, or null if it is not known yet.
      */
     @Nullable
     String getScope();
 
     /**
-     * 设置此 Bean 是否应懒初始化。
-     * 如果为 false，则 Bean 将由执行单例的 Bean 工厂在启动时实例化。
+     * Set whether this bean should be lazily initialized.
+     * If false, the bean is instantiated at startup by bean factories that handle singletons.
      */
     void setLazyInit(boolean lazyInit);
 
     /**
-     * 返回此 Bean 是否应懒初始化，即不在启动时急切实例化。仅适用于单例 Bean。
+     * Return whether this bean should be lazily initialized, that is, not eagerly instantiated at startup. Only applies to singleton beans.
      */
     boolean isLazyInit();
 
     /**
-     * 设置此 Bean 依赖于初始化的 Bean 的名称。
-     * Bean 工厂将保证这些 Bean 首先得到初始化。
+     * Set the names of the beans that this bean depends on being initialized.
+     * The bean factory guarantees that these beans are initialized first.
      */
     void setDependsOn(@Nullable String... dependsOn);
 
     /**
-     * 返回此 Bean 依赖的 Bean 名称。
+     * Return the names of the beans that this bean depends on.
      */
     @Nullable
     String[] getDependsOn();
 
     /**
-     * 设置此 Bean 是否是自动装配候选 Bean。
-     * 请注意，此标志仅用于影响基于类型的自动装配。
-     * 它不影响名称上的显式引用，如果指定的 Bean 未标记为自动装配候选 Bean，则名称匹配仍然会注入 Bean。
+     * Set whether this bean is a candidate for autowiring.
+     * Note that this flag only affects type-based autowiring.
+     * It does not affect explicit references by name. Name matching still injects the bean even if the specified bean is not marked as an autowire candidate.
      */
     void setAutowireCandidate(boolean autowireCandidate);
 
     /**
-     * 返回此 Bean 是否是自动装配候选 Bean。
+     * Return whether this bean is a candidate for autowiring.
      */
     boolean isAutowireCandidate();
 
     /**
-     * 设置此 Bean 是否是主要自动装配候选 Bean。
-     * 如果多个匹配的候选 Bean 中有一个 Bean 的此值为 true，则它将作为补充选项。
+     * Set whether this bean is a primary autowire candidate.
+     * If exactly one of several matching candidates has this value set to true, it is used as a tie-breaker.
      */
     void setPrimary(boolean primary);
 
     /**
-     * 返回此 Bean 是否是主要自动装配候选 Bean。
+     * Return whether this bean is a primary autowire candidate.
      */
     boolean isPrimary();
 
     /**
-     * 指定要使用的工厂 Bean，如果有的话。
-     * 这是要调用指定工厂方法的 Bean 的名称。
+     * Specify the factory bean to use, if any.
+     * This is the name of the bean on which the specified factory method is called.
      * @see #setFactoryMethodName
      */
     void setFactoryBeanName(@Nullable String factoryBeanName);
 
     /**
-     * 返回工厂 Bean 名称，如果有的话。
+     * Return the factory bean name, if any.
      */
     @Nullable
     String getFactoryBeanName();
 
     /**
-     * 指定工厂方法，如果有的话。此方法将使用构造函数参数调用，
-     * 或者如果未指定参数，则使用没有参数调用。
-     * 该方法将在指定工厂 Bean 上调用，如果没有指定工厂 Bean，则在本地 Bean 类上调用。
+     * Specify the factory method, if any. This method is called with the constructor arguments,
+     * or with no arguments if none are specified.
+     * The method is called on the specified factory bean, or on the local bean class if no factory bean is specified.
      * @see #setFactoryBeanName
      * @see #setBeanClassName
      */
     void setFactoryMethodName(@Nullable String factoryMethodName);
 
     /**
-     * 返回工厂方法，如果有的话。
+     * Return the factory method, if any.
      */
     @Nullable
     String getFactoryMethodName();
 
     /**
-     * 返回此 Bean 的构造函数参数值。
-     * 返回的实例可以在 Bean 工厂后处理期间修改。
-     * @return 构造函数参数值对象（永不为 null）
+     * Return the constructor argument values of this bean.
+     * The returned instance can be changed during bean factory post-processing.
+     * @return the constructor argument values object (never null)
      */
     ConstructorArgumentValues getConstructorArgumentValues();
 
     /**
-     * 返回是否为此 Bean 定义定义了构造函数参数值。
+     * Return whether constructor argument values are defined for this bean definition.
      * @since 5.0.2
      */
     default boolean hasConstructorArgumentValues() {
@@ -229,14 +229,14 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
     }
 
     /**
-     * 返回要应用于 Bean 新实例的属性值。
-     * 返回的实例可以在 Bean 工厂后处理期间修改。
-     * @return 可变属性值对象（永不为 null）
+     * Return the property values to apply to a new instance of the bean.
+     * The returned instance can be changed during bean factory post-processing.
+     * @return the mutable property values object (never null)
      */
     MutablePropertyValues getPropertyValues();
 
     /**
-     * 返回是否为此 Bean 定义定义了属性值。
+     * Return whether property values are defined for this bean definition.
      * @since 5.0.2
      */
     default boolean hasPropertyValues() {
@@ -244,33 +244,33 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
     }
 
     /**
-     * 设置初始化方法的名称。
+     * Set the name of the initialization method.
      * @since 5.1
      */
     void setInitMethodName(@Nullable String initMethodName);
 
     /**
-     * 返回初始化方法的名称。
+     * Return the name of the initialization method.
      * @since 5.1
      */
     @Nullable
     String getInitMethodName();
 
     /**
-     * 设置销毁方法的名称。
+     * Set the name of the destroy method.
      * @since 5.1
      */
     void setDestroyMethodName(@Nullable String destroyMethodName);
 
     /**
-     * 返回销毁方法的名称。
+     * Return the name of the destroy method.
      * @since 5.1
      */
     @Nullable
     String getDestroyMethodName();
 
     /**
-     * 设置 BeanDefinition 的角色提示。角色提示提供框架和工具一个有关特定 BeanDefinition 的角色和重要性的指示。
+     * Set the role hint of this BeanDefinition. The role hint gives frameworks and tools an indication of the role and importance of a particular BeanDefinition.
      * @since 5.1
      * @see #ROLE_APPLICATION
      * @see #ROLE_SUPPORT
@@ -279,7 +279,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
     void setRole(int role);
 
     /**
-     * 获取 BeanDefinition 的角色提示。角色提示提供框架和工具一个有关特定 BeanDefinition 的角色和重要性的指示。
+     * Get the role hint of this BeanDefinition. The role hint gives frameworks and tools an indication of the role and importance of a particular BeanDefinition.
      * @see #ROLE_APPLICATION
      * @see #ROLE_SUPPORT
      * @see #ROLE_INFRASTRUCTURE
@@ -287,54 +287,54 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
     int getRole();
 
     /**
-     * 设置 BeanDefinition 的人类可读描述。
+     * Set a human-readable description of this BeanDefinition.
      * @since 5.1
      */
     void setDescription(@Nullable String description);
 
     /**
-     * 返回 BeanDefinition 的人类可读描述。
+     * Return a human-readable description of this BeanDefinition.
      */
     @Nullable
     String getDescription();
 
     /**
-     * 基于 Bean 类或其他特定元数据返回可解析的类型的类型。
-     * 这通常在运行时合并的 Bean 定义上完全解析，但不一定在配置时定义实例上解析。
-     * @return 可解析类型（可能为 ResolvableType#NONE）
+     * Return the resolvable type of this bean definition, based on the bean class or other specific metadata.
+     * This is usually fully resolved on a merged bean definition at run time, but not necessarily on an instance defined at configuration time.
+     * @return the resolvable type (possibly ResolvableType#NONE)
      * @since 5.2
      * @see ConfigurableBeanFactory#getMergedBeanDefinition
      */
     ResolvableType getResolvableType();
 
     /**
-     * 返回是否为Singleton，在所有调用上返回单个共享实例。
+     * Return whether this is a singleton, with a single shared instance returned on all calls.
      * @see #SCOPE_SINGLETON
      */
     boolean isSingleton();
 
     /**
-     * 返回是否为Prototype，每次调用都返回独立的实例。
+     * Return whether this is a prototype, with an independent instance returned on every call.
      * @since 3.0
      * @see #SCOPE_PROTOTYPE
      */
     boolean isPrototype();
 
     /**
-     * 返回此 Bean 是否是"抽象"的，即不应该被实例化。
+     * Return whether this bean is "abstract", that is, not meant to be instantiated.
      */
     boolean isAbstract();
 
     /**
- 	 * 返回此 Bean 定义所来自的资源的描述（以便在出现错误时显示上下文）。
+ 	 * Return a description of the resource that this bean definition came from (to show context when an error occurs).
 	 */
     @Nullable
     String getResourceDescription();
 
     /**
-     * 返回原始的 Bean 定义，如果没有则返回 {@code null}。
-     * 允许检索已装饰的 Bean 定义（如果有）。
-     * 请注意，此方法返回最直接的起源。遍历起源链以找到用户定义的原始 Bean 定义。
+     * Return the original bean definition, or {@code null} if there is none.
+     * Allows retrieving the decorated bean definition, if any.
+     * Note that this method returns the most direct origin. Walk the origin chain to find the original user-defined bean definition.
      */
     @Nullable
     BeanDefinition getOriginatingBeanDefinition();
@@ -342,32 +342,32 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 }
 ```
 
-### 五、主要实现
+### 5. Main Implementations
 
 1. **`GenericBeanDefinition`**
-   - 描述通用的 Bean 定义，可以用于大多数类型的 Bean。
-   - 具有灵活的属性配置，可以设置类名、作用域、初始化和销毁方法、构造函数参数、属性值等。
-   - 通常用于手动配置 Bean 或需要自定义 Bean 定义的情况。
+   - Describes a general bean definition. It can be used for most kinds of beans.
+   - Has flexible property configuration. You can set the class name, scope, initialization and destroy methods, constructor arguments, property values and so on.
+   - Usually used when you configure beans by hand or need a custom bean definition.
 2. **`RootBeanDefinition`**
-   - 用于表示独立的根级 Bean 定义，通常直接定义 Bean。
-   - 可以继承 `GenericBeanDefinition`，并支持配置 Bean 类的其他信息。
-   - 通常用于定义应用程序中的独立 Bean。
+   - Stands for an independent root-level bean definition. It usually defines a bean directly.
+   - Can extend `GenericBeanDefinition`, and supports configuring other information about the bean class.
+   - Usually used to define independent beans in the application.
 3. **`ChildBeanDefinition`**
-   - 用于表示派生的子级 Bean 定义，继承父级 Bean 定义的配置。
-   - 通常用于创建一个 Bean 的变体，继承父 Bean 的配置并进行部分覆盖或修改。
-   - 具有指向父 Bean 的引用。
+   - Stands for a derived child bean definition that inherits the configuration of its parent bean definition.
+   - Usually used to create a variant of a bean. It inherits the configuration of the parent bean and overrides or changes part of it.
+   - Has a reference to the parent bean.
 4. **`AnnotatedGenericBeanDefinition`**
-   - 用于基于注解的 Bean 定义，通常用于扫描组件和配置类。
-   - 可以表示使用注解定义的 Bean，支持类级别的注解配置。
-   - 通常用于自动扫描和注册组件。
+   - Used for annotation-based bean definitions, usually for scanning components and configuration classes.
+   - Can stand for a bean defined with annotations. It supports class-level annotation configuration.
+   - Usually used to scan and register components automatically.
 5. **`ConfigurationClassBeanDefinition`**
-   - 用于表示配置类（`@Configuration` 注解）的 Bean 定义，通常用于 Spring 配置。
-   - 表示配置类作为 Bean 定义，支持包含其他 Bean 定义的配置类。
-   - 通常由 Spring 容器自动创建，以支持 `@Configuration` 注解的配置。
+   - Stands for the bean definition of a configuration class (`@Configuration` annotation). It is usually used in Spring configuration.
+   - Stands for a configuration class as a bean definition. It supports configuration classes that contain other bean definitions.
+   - Usually created automatically by the Spring container to support `@Configuration` configuration.
 6. **`ScannedGenericBeanDefinition`**
-   - 用于表示扫描到的 Bean 的 Bean 定义，通常用于自动扫描组件。
-   - 通常在组件扫描过程中创建，表示被发现的组件类。
-   - 通常用于自动注册组件，如 `@Component` 注解的类。
+   - Stands for the bean definition of a scanned bean. It is usually used for automatic component scanning.
+   - Usually created during component scanning, to represent a component class that was found.
+   - Usually used to register components automatically, such as classes with the `@Component` annotation.
 
 ~~~mermaid
 classDiagram
@@ -419,9 +419,9 @@ classDiagram
 
 
 
-### 六、最佳实践
+### 6. Best Practices
 
-创建了一个Spring容器（`DefaultListableBeanFactory`），然后通过`createBeanDefinition()`方法创建并配置了一个自定义的Bean定义（`ScannedGenericBeanDefinition`），包括作用域、初始化方法、销毁方法、属性值等。接着，它注册这个Bean定义到容器中，并使用容器获取Bean实例，打印出Bean的内容。最后，它通过容器销毁这个Bean，调用其销毁方法。
+This example creates a Spring container (`DefaultListableBeanFactory`). Then the `createBeanDefinition()` method creates and configures a custom bean definition (`ScannedGenericBeanDefinition`), with the scope, initialization method, destroy method, property values and so on. Next, it registers the bean definition in the container, gets the bean instance from the container, and prints the bean. At the end, it destroys the bean through the container, which calls its destroy method.
 
 ```java
 public class BeanDefinitionDemo {
@@ -429,11 +429,11 @@ public class BeanDefinitionDemo {
         DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
         beanFactory.registerBeanDefinition("myBean", createBeanDefinition());
 
-        // 获取MyBean
+        // Get MyBean
         MyBean myChildBean = beanFactory.getBean("myBean", MyBean.class);
-        // 打印Bean对象
+        // Print the bean
         System.out.println("MyBean = " + myChildBean);
-        // 销毁myBean
+        // Destroy myBean
         beanFactory.destroySingleton("myBean");
     }
 
@@ -459,7 +459,7 @@ public class BeanDefinitionDemo {
 }
 ```
 
-`MyBean` 的Java类，代表了一个简单的Java Bean。
+`MyBean` is a simple Java class that represents a plain Java bean.
 
 ```java
 public class MyBean {
@@ -502,7 +502,7 @@ public class MyBean {
 }
 ```
 
-运行结果发现，与`BeanDefinition`配置相关，初始化方法和销毁方法的调用以及属性值的设置受`BeanDefinition`中相应的配置项影响，`BeanDefinition`用于定义和配置Bean的元信息，使Spring容器可以正确管理Bean的生命周期和属性。
+The result shows that the calls of the initialization and destroy methods and the property values depend on the matching settings in the `BeanDefinition`. `BeanDefinition` defines the metadata of a bean, so the Spring container can manage the lifecycle and properties of the bean correctly.
 
 ```java
 execute com.xcs.spring.bean.MyBean.init
@@ -510,34 +510,34 @@ MyBean = MyBean{name='lex', age='18'}
 execute com.xcs.spring.bean.MyBean.destroy
 ```
 
-### 七、与其他组件的关系
+### 7. Relationship with Other Components
 
 1. **`DefaultListableBeanFactory`**
-   + 负责管理Bean的创建、初始化和销毁，而`BeanDefinition`提供了描述Bean的元信息的方式，`DefaultListableBeanFactory`使用`BeanDefinition`来创建和管理Bean实例。
+   + It manages the creation, initialization and destruction of beans. `BeanDefinition` describes the metadata of a bean. `DefaultListableBeanFactory` uses `BeanDefinition` to create and manage bean instances.
 2. **`BeanPostProcessor`**
-   + 拦截Bean初始化过程的接口，它可以在Bean创建后、初始化前后对Bean进行处理。`BeanDefinition`的信息可以在`BeanPostProcessor`中使用，例如在初始化前修改Bean的属性值。
+   + An interface that intercepts the bean initialization process. It can process the bean after it is created and before and after initialization. The information in the `BeanDefinition` can be used in a `BeanPostProcessor`, for example to change the property values of the bean before initialization.
 3. **`BeanDefinitionRegistry`**
-   + 注册和管理`BeanDefinition`的接口，定义了`BeanDefinition`的注册和访问方法。`BeanFactory`和`ApplicationContext`实现了`BeanDefinitionRegistry`接口，通过它们可以注册和获取`BeanDefinition`。
+   + An interface that registers and manages `BeanDefinition`s. It defines the methods to register and access them. `BeanFactory` and `ApplicationContext` implement the `BeanDefinitionRegistry` interface, so `BeanDefinition`s can be registered and retrieved through them.
 4. **`BeanDefinitionReader`**
-   + 从外部配置文件（如`XML、YAML、Properties`文件）中读取`BeanDefinition`的工具。它将外部配置信息解析成`BeanDefinition`并注册到`BeanFactory`中。
+   + A tool that reads `BeanDefinition`s from external configuration files (such as `XML, YAML, Properties` files). It parses the external configuration into `BeanDefinition`s and registers them in the `BeanFactory`.
 
-### 八、常见问题
+### 8. FAQ
 
-1. **`BeanDefinition`的作用是什么？**
-   + 主要作用是定义和配置Bean的属性和行为，以便Spring容器可以根据这些信息动态地创建、初始化和管理Bean实例。
-2. **`BeanDefinition`的生命周期是怎样的？**
-   + 生命周期与Spring容器相同，它在容器启动时进行注册和解析，然后被用于创建和管理Bean实例的生命周期。
-3. **`BeanDefinition`如何注册？**
-   + 通过`BeanDefinitionRegistry`接口的实现类（如`DefaultListableBeanFactory`）进行注册，或者通过`BeanDefinitionReader`从外部配置文件中加载并注册。
-4. **`BeanDefinition`的属性有哪些？**
-   + 属性包括Bean的类名、作用域、初始化方法、销毁方法、属性值等。具体属性取决于Bean的配置需求。
-5. **`BeanDefinition`如何修改？**
-   + 可以在注册后通过编程方式进行修改，例如更改属性值、作用域、初始化方法、销毁方法等。
-6. **`BeanDefinition`的作用域有哪些？**
-   + 包括Singleton（单例）、Prototype（原型）、Request（请求）、Session（会话）、等等，可以根据需求选择合适的作用域。
-7. **`BeanDefinition`的注册和加载有什么区别？**
-   + 注册是将已创建的`BeanDefinition`添加到容器中，而加载是从外部配置文件中读取Bean的元信息并注册到容器中。
-8. **如何使用`BeanDefinition`来实现依赖注入？**
-   + 通过设置`BeanDefinition`中的属性，如构造函数参数、属性值、引用其他Bean的方式，可以实现依赖注入。
-9. **`BeanDefinition`是否可以动态生成？**
-   + 可以在运行时动态生成并注册到容器中，这在某些复杂的情况下非常有用，例如基于条件的Bean注册。
+1. **What is the role of `BeanDefinition`?**
+   + Its main role is to define and configure the properties and behavior of a bean, so the Spring container can create, initialize and manage bean instances dynamically from this information.
+2. **What is the lifecycle of `BeanDefinition`?**
+   + It has the same lifecycle as the Spring container. It is registered and parsed when the container starts, and then used to create and manage the lifecycle of bean instances.
+3. **How is a `BeanDefinition` registered?**
+   + It is registered through an implementation of the `BeanDefinitionRegistry` interface (such as `DefaultListableBeanFactory`), or loaded and registered from an external configuration file through a `BeanDefinitionReader`.
+4. **What properties does a `BeanDefinition` have?**
+   + The properties include the class name, scope, initialization method, destroy method, property values and so on. The exact properties depend on the configuration needs of the bean.
+5. **How can a `BeanDefinition` be changed?**
+   + It can be changed by code after registration, for example by changing the property values, scope, initialization method or destroy method.
+6. **What scopes does a `BeanDefinition` support?**
+   + Singleton, Prototype, Request, Session and so on. Choose the right scope for your needs.
+7. **What is the difference between registering and loading a `BeanDefinition`?**
+   + Registering adds an already created `BeanDefinition` to the container. Loading reads the metadata of a bean from an external configuration file and registers it in the container.
+8. **How do I use `BeanDefinition` for dependency injection?**
+   + Set properties in the `BeanDefinition`, such as constructor arguments, property values and references to other beans. This gives you dependency injection.
+9. **Can a `BeanDefinition` be created dynamically?**
+   + Yes. It can be created at run time and registered in the container. This is useful in some complex cases, such as conditional bean registration.

@@ -5,7 +5,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * @author xcs
- * @date 2023年11月23日 16时27分
+ * @date 2023-11-23 16:27
  **/
 public class ClassPathXmlApplicationContextDemo {
 

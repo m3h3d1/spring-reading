@@ -1,57 +1,57 @@
 ## BeanDefinitionRegistry
 
 - [BeanDefinitionRegistry](#beandefinitionregistry)
-  - [一、知识储备](#一知识储备)
-  - [二、基本描述](#二基本描述)
-  - [三、主要功能](#三主要功能)
-  - [四、接口源码](#四接口源码)
-  - [五、主要实现](#五主要实现)
-  - [六、最佳实践](#六最佳实践)
-  - [七、与其他组件的关系](#七与其他组件的关系)
-  - [八、常见问题](#八常见问题)
+  - [1. Background Knowledge](#1-background-knowledge)
+  - [2. Basic Description](#2-basic-description)
+  - [3. Main Features](#3-main-features)
+  - [4. Interface Source](#4-interface-source)
+  - [5. Main Implementations](#5-main-implementations)
+  - [6. Best Practices](#6-best-practices)
+  - [7. Relationship with Other Components](#7-relationship-with-other-components)
+  - [8. FAQ](#8-faq)
 
-### 一、知识储备
+### 1. Background Knowledge
 
-1. **Bean定义：**
-   - 理解什么是Bean定义，包括Bean的名称、类名、作用域、依赖关系等。
-   - 了解如何使用XML配置、注解或Java配置来定义Bean。
-   - 掌握Bean定义中的属性设置、构造函数注入、属性注入等相关概念。
+1. **Bean definition:**
+   - Understand what a bean definition is. It includes the bean name, class name, scope, dependencies and so on.
+   - Know how to define beans with XML configuration, annotations or Java configuration.
+   - Know the related concepts in a bean definition, such as property settings, constructor injection and property injection.
 
-### 二、基本描述
+### 2. Basic Description
 
-`BeanDefinitionRegistry`接口是Spring框架中的一个关键接口之一，用于管理和注册Bean定义（Bean definitions）。Bean定义是描述Spring容器中的对象（Bean）的元数据，包括Bean的类名、依赖关系、作用域等信息。
+The `BeanDefinitionRegistry` interface is a key interface in the Spring Framework. It manages and registers bean definitions. A bean definition is the metadata that describes an object (bean) in the Spring container. It includes the class name, dependencies, scope and so on.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **注册Bean定义**
-   + 通过 `BeanDefinitionRegistry` 接口，我们可以向Spring容器注册Bean定义。这意味着我们可以将Bean的元数据信息（如类名、作用域、属性等）添加到容器中，以便容器能够根据这些定义实例化和管理Bean对象。
-2. **移除Bean定义**
-   + 我们可以使用接口提供的方法来移除不再需要的Bean定义。这可以有助于释放资源和减轻容器的负担。通常，这是在运行时不再需要某些Bean定义时使用的功能。
-3. **检查Bean定义是否存在**
-   + 我们可以使用接口提供的方法来检查容器中是否存在特定名称的Bean定义。这可以帮助我们避免重复注册相同名称的Bean。
-4. **获取Bean定义信息**
-   + 通过接口，我们可以获取已注册的Bean定义的详细信息，包括Bean的类名、作用域、属性值等。这对于在运行时查看或修改Bean定义很有用。
-5. **批量操作**
-   + 除了单个Bean定义的操作，`BeanDefinitionRegistry` 还支持批量注册和移除操作。这对于在一次操作中注册多个Bean定义非常有用，以减少重复的操作。
-6. **层次性注册**
-   + Spring容器可以是层次性的，其中可以包含多个容器层次结构。`BeanDefinitionRegistry` 接口支持在这些容器层次结构中注册Bean定义。这对于分模块的应用程序非常有用。
-7. **自定义扩展**
-   + Spring框架允许通过自定义实现 `BeanDefinitionRegistry` 接口来创建自定义的Bean定义注册器，以满足特定的需求。这使得Spring框架具有高度的可扩展性。
+1. **Register bean definitions**
+   + With the `BeanDefinitionRegistry` interface, we can register bean definitions in the Spring container. This means we can add the metadata of a bean (such as class name, scope and properties) to the container, so the container can instantiate and manage bean objects from these definitions.
+2. **Remove bean definitions**
+   + We can use the methods of the interface to remove bean definitions that are no longer needed. This can free resources and reduce the load on the container. It is usually used when some bean definitions are no longer needed at run time.
+3. **Check whether a bean definition exists**
+   + We can use the methods of the interface to check whether the container has a bean definition with a given name. This helps us avoid registering the same name twice.
+4. **Get bean definition information**
+   + Through the interface, we can get the details of registered bean definitions, including the class name, scope and property values. This is useful for viewing or changing bean definitions at run time.
+5. **Batch operations**
+   + Besides operations on a single bean definition, `BeanDefinitionRegistry` also supports batch registration and removal. This is useful when you register several bean definitions in one operation, because it reduces repeated work.
+6. **Hierarchical registration**
+   + The Spring container can be hierarchical, with several container levels. The `BeanDefinitionRegistry` interface supports registering bean definitions in these hierarchies. This is useful for modular applications.
+7. **Custom extension**
+   + The Spring Framework lets you implement the `BeanDefinitionRegistry` interface yourself to create a custom bean definition registry for special needs. This makes the Spring Framework highly extensible.
 
-### 四、接口源码
+### 4. Interface Source
 
-`BeanDefinitionRegistry` 接口，用于管理和注册Bean定义。它允许我们注册、移除、检索Bean定义以及执行其他与Bean定义相关的操作。这个接口用于实现Spring的IOC容器，允许我们在应用程序中注册并管理Bean定义，使其能够进行依赖注入。
+The `BeanDefinitionRegistry` interface manages and registers bean definitions. It lets us register, remove and retrieve bean definitions and do other operations on them. The interface is used to implement the Spring IoC container. It lets an application register and manage bean definitions so that dependency injection can work.
 
 ```java
 /**
- * 用于持有Bean定义（例如RootBeanDefinition和ChildBeanDefinition实例）的注册表的接口。
- * 通常由与AbstractBeanDefinition层次结构内部一起工作的Bean工厂实现。
+ * Interface for registries that hold bean definitions (for example RootBeanDefinition and ChildBeanDefinition instances).
+ * Typically implemented by bean factories that work internally with the AbstractBeanDefinition hierarchy.
  *
- * 这是Spring的bean工厂包中唯一封装注册bean定义的接口。
- * 标准的BeanFactory接口只覆盖对完全配置的工厂实例的访问。
+ * This is the only interface in Spring's bean factory package that encapsulates the registration of bean definitions.
+ * The standard BeanFactory interface only covers access to a fully configured factory instance.
  *
- * Spring的Bean定义读取器希望在这个接口的实现上工作。
- * Spring核心中已知的实现者包括DefaultListableBeanFactory和GenericApplicationContext。
+ * Spring's bean definition readers expect to work on an implementation of this interface.
+ * Known implementors in Spring core include DefaultListableBeanFactory and GenericApplicationContext.
  *
  * @author Juergen Hoeller
  * @since 26.11.2003
@@ -67,13 +67,13 @@
 public interface BeanDefinitionRegistry extends AliasRegistry {
 
     /**
-     * 向此注册表注册一个新的Bean定义。
-     * 必须支持RootBeanDefinition和ChildBeanDefinition。
+     * Register a new bean definition with this registry.
+     * Must support RootBeanDefinition and ChildBeanDefinition.
      *
-     * @param beanName 要注册的Bean实例的名称
-     * @param beanDefinition 要注册的Bean实例的定义
-     * @throws BeanDefinitionStoreException 如果BeanDefinition无效
-     * @throws BeanDefinitionOverrideException 如果已经存在指定名称的BeanDefinition并且不允许覆盖
+     * @param beanName the name of the bean instance to register
+     * @param beanDefinition the definition of the bean instance to register
+     * @throws BeanDefinitionStoreException if the BeanDefinition is invalid
+     * @throws BeanDefinitionOverrideException if a BeanDefinition with the given name already exists and overriding is not allowed
      * @see GenericBeanDefinition
      * @see RootBeanDefinition
      * @see ChildBeanDefinition
@@ -82,63 +82,63 @@ public interface BeanDefinitionRegistry extends AliasRegistry {
             throws BeanDefinitionStoreException;
 
     /**
-     * 移除给定名称的BeanDefinition。
+     * Remove the BeanDefinition with the given name.
      *
-     * @param beanName 要注册的Bean实例的名称
-     * @throws NoSuchBeanDefinitionException 如果没有这样的Bean定义
+     * @param beanName the name of the bean instance to remove
+     * @throws NoSuchBeanDefinitionException if there is no such bean definition
      */
     void removeBeanDefinition(String beanName) throws NoSuchBeanDefinitionException;
 
     /**
-     * 返回给定Bean名称的BeanDefinition。
+     * Return the BeanDefinition for the given bean name.
      *
-     * @param beanName 要查找定义的Bean名称
-     * @return 给定名称的BeanDefinition（永远不为{@code null}）
-     * @throws NoSuchBeanDefinitionException 如果没有这样的Bean定义
+     * @param beanName the name of the bean to find a definition for
+     * @return the BeanDefinition for the given name (never {@code null})
+     * @throws NoSuchBeanDefinitionException if there is no such bean definition
      */
     BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException;
 
     /**
-     * 检查此注册表是否包含给定名称的Bean定义。
+     * Check whether this registry contains a bean definition with the given name.
      *
-     * @param beanName 要查找的Bean的名称
-     * @return 如果此注册表包含给定名称的Bean定义，则返回true
+     * @param beanName the name of the bean to look for
+     * @return true if this registry contains a bean definition with the given name
      */
     boolean containsBeanDefinition(String beanName);
 
     /**
-     * 返回此注册表中定义的所有Bean的名称。
+     * Return the names of all beans defined in this registry.
      *
-     * @return 此注册表中定义的所有Bean的名称数组，如果没有定义则返回空数组
+     * @return the names of all beans defined in this registry, or an empty array if there are none
      */
     String[] getBeanDefinitionNames();
 
     /**
-     * 返回注册表中定义的Bean数量。
+     * Return the number of beans defined in the registry.
      *
-     * @return 注册表中定义的Bean数量
+     * @return the number of beans defined in the registry
      */
     int getBeanDefinitionCount();
 
     /**
-     * 确定给定的Bean名称是否已在此注册表中使用，即是否已在此名称下注册了本地Bean或别名。
+     * Determine whether the given bean name is already in use within this registry, that is, whether a local bean or alias is registered under this name.
      *
-     * @param beanName 要检查的名称
-     * @return 给定的Bean名称是否已经在使用
+     * @param beanName the name to check
+     * @return whether the given bean name is already in use
      */
     boolean isBeanNameInUse(String beanName);
 
 }
 ```
 
-### 五、主要实现
+### 5. Main Implementations
 
 1. **`DefaultListableBeanFactory`**
-   + 这是Spring框架中最常用的`BeanDefinitionRegistry` 接口的实现之一。它是Spring的核心容器，负责管理Bean定义，实例化Bean对象以及提供依赖注入功能。通常，我们可以在XML配置文件中配置`DefaultListableBeanFactory`来定义和注册Bean。
+   + This is one of the most commonly used implementations of the `BeanDefinitionRegistry` interface in Spring. It is the core Spring container. It manages bean definitions, instantiates bean objects and provides dependency injection. Usually, we can configure `DefaultListableBeanFactory` in an XML file to define and register beans.
 2. **`GenericApplicationContext`** 
-   + `GenericApplicationContext` 是Spring的应用上下文的实现，它实现了 `BeanDefinitionRegistry` 接口。这个上下文是一个通用的应用程序上下文，可以用于在程序中注册和管理Bean定义。
+   + `GenericApplicationContext` is an implementation of the Spring application context and it implements the `BeanDefinitionRegistry` interface. It is a general-purpose application context. It can be used to register and manage bean definitions in code.
 3. **`SimpleBeanDefinitionRegistry`**
-   + `SimpleBeanDefinitionRegistry`提供了基本的`BeanDefinition`注册和管理功能，但它相对较简单，不支持高级特性，如XML配置解析等。它通常用于快速原型开发、单元测试和一些较为简单的应用程序中，以减少配置和复杂性。
+   + `SimpleBeanDefinitionRegistry` provides basic `BeanDefinition` registration and management. It is fairly simple and does not support advanced features such as XML configuration parsing. It is usually used for quick prototypes, unit tests and some simple applications, to reduce configuration and complexity.
 
 ~~~mermaid
 classDiagram
@@ -168,52 +168,52 @@ classDiagram
 
 ~~~
 
-### 六、最佳实践
+### 6. Best Practices
 
-我们使用Spring的`DefaultListableBeanFactory`和`BeanDefinitionRegistry`接口来注册、管理和操作Bean定义的过程，包括创建Bean定义、注册到容器、获取、检查是否存在、获取所有定义的名称和数量、检查名称是否已使用，以及移除Bean定义。这展示了Spring的IOC容器的核心功能，允许应用程序在运行时动态配置和管理Bean。
+This example uses the Spring `DefaultListableBeanFactory` and the `BeanDefinitionRegistry` interface to register, manage and operate on bean definitions. The steps are: create a bean definition, register it in the container, get it, check whether it exists, get the names and the count of all definitions, check whether a name is in use, and remove the bean definition. This shows the core features of the Spring IoC container. An application can configure and manage beans dynamically at run time.
 
 ```java
 public class BeanDefinitionRegistryDemo {
 
     public static void main(String[] args) {
-        // 创建一个BeanFactory，它是BeanDefinitionRegistry
+        // Create a BeanFactory, which is a BeanDefinitionRegistry
         DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
-        // 创建一个Bean定义
+        // Create a bean definition
         GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
         beanDefinition.setBeanClass(MyBean.class);
 
-        // 注册Bean定义到BeanFactory
+        // Register the bean definition in the BeanFactory
         beanFactory.registerBeanDefinition("myBean", beanDefinition);
 
-        // 获取BeanDefinition
+        // Get the BeanDefinition
         BeanDefinition retrievedBeanDefinition = beanFactory.getBeanDefinition("myBean");
-        System.out.println("Bean定义的类名 = " + retrievedBeanDefinition.getBeanClassName());
+        System.out.println("Bean definition class name = " + retrievedBeanDefinition.getBeanClassName());
 
-        // 检查Bean定义是否存在
+        // Check whether the bean definition exists
         boolean containsBeanDefinition = beanFactory.containsBeanDefinition("myBean");
-        System.out.println("Bean定义是否包含(myBean) = " + containsBeanDefinition);
+        System.out.println("Contains bean definition (myBean) = " + containsBeanDefinition);
 
-        // 获取所有Bean定义的名称
+        // Get the names of all bean definitions
         String[] beanDefinitionNames = beanFactory.getBeanDefinitionNames();
-        System.out.println("Bean定义的名称 = " + String.join(", ", beanDefinitionNames));
+        System.out.println("Bean definition names = " + String.join(", ", beanDefinitionNames));
 
-        // 获取Bean定义的数量
+        // Get the number of bean definitions
         int beanDefinitionCount = beanFactory.getBeanDefinitionCount();
-        System.out.println("Bean定义的数量 = " + beanDefinitionCount);
+        System.out.println("Bean definition count = " + beanDefinitionCount);
 
-        // 检查Bean名称是否已被使用
+        // Check whether the bean name is in use
         boolean isBeanNameInUse = beanFactory.isBeanNameInUse("myBean");
-        System.out.println("Bean名称(myBean)是否被使用 = " + isBeanNameInUse);
+        System.out.println("Bean name (myBean) in use = " + isBeanNameInUse);
 
-        // 移除Bean定义
+        // Remove the bean definition
         beanFactory.removeBeanDefinition("myBean");
-        System.out.println("Bean定义已被移除(myBean)");
+        System.out.println("Bean definition removed (myBean)");
     }
 }
 ```
 
-`MyBean` 的Java类，代表了一个简单的Java Bean。
+`MyBean` is a simple Java class that represents a plain Java bean.
 
 ```java
 public class MyBean {
@@ -221,45 +221,45 @@ public class MyBean {
 }
 ```
 
-运行结果发现，我们的各种操作已成功执行，包括注册、查询、操作和移除Bean定义。这展示了Spring的IoC容器的核心功能，使我们可以在运行时动态地管理Bean定义。
+The result shows that all our operations succeeded: registering, querying, operating on and removing bean definitions. This shows the core features of the Spring IoC container. We can manage bean definitions dynamically at run time.
 
 ```java
-Bean定义的类名 = com.xcs.spring.bean.MyBean
-Bean定义是否包含(myBean) = true
-Bean定义的名称 = myBean
-Bean定义的数量 = 1
-Bean名称(myBean)是否被使用 = true
-Bean定义已被移除(myBean)
+Bean definition class name = com.xcs.spring.bean.MyBean
+Contains bean definition (myBean) = true
+Bean definition names = myBean
+Bean definition count = 1
+Bean name (myBean) in use = true
+Bean definition removed (myBean)
 ```
 
-### 七、与其他组件的关系
+### 7. Relationship with Other Components
 
 1. **`DefaultListableBeanFactory`**
-   + `BeanDefinitionRegistry` 是`DefaultListableBeanFactory`的一个主要实现，它负责注册和管理Bean定义（`BeanDefinition`）。 `BeanFactory`是Spring的IOC容器，用于实例化和管理Bean对象。 `DefaultListableBeanFactory`可以通过 `BeanDefinitionRegistry` 来注册和获取Bean定义，然后使用这些定义来创建Bean实例。
+   + `BeanDefinitionRegistry` is a main interface implemented by `DefaultListableBeanFactory`. It registers and manages bean definitions (`BeanDefinition`). `BeanFactory` is the Spring IoC container, which instantiates and manages bean objects. `DefaultListableBeanFactory` can register and get bean definitions through `BeanDefinitionRegistry`, and then use the definitions to create bean instances.
 2. **`GenericApplicationContext`** 
-   + `GenericApplicationContext` 是`DefaultListableBeanFactory`的更高级别扩展，它不仅实现了 `DefaultListableBeanFactory` 的功能，还提供了应用程序级别的服务，如国际化、事件发布、资源加载等。 `DefaultListableBeanFactory` 通常使用 `BeanDefinitionRegistry` 来注册和管理Bean定义，以便在应用程序上下文中配置和管理Bean。
+   + `GenericApplicationContext` is a higher-level extension of `DefaultListableBeanFactory`. It has the features of `DefaultListableBeanFactory` and also gives application-level services such as internationalization, event publishing and resource loading. `DefaultListableBeanFactory` usually uses `BeanDefinitionRegistry` to register and manage bean definitions, so beans can be configured and managed in the application context.
 3. **`BeanDefinition`**
-   + `BeanDefinitionRegistry` 主要与Bean定义（`BeanDefinition`）相关联。它用于注册、查询和管理Bean定义，包括Bean的类名、作用域、依赖关系等元数据信息。 `BeanFactory` 和 `ApplicationContext` 使用这些Bean定义来创建和管理Bean实例。
+   + `BeanDefinitionRegistry` mainly works with bean definitions (`BeanDefinition`). It registers, queries and manages bean definitions, which hold metadata such as class name, scope and dependencies. `BeanFactory` and `ApplicationContext` use these bean definitions to create and manage bean instances.
 4. **`BeanPostProcessor`**
-   + `BeanPostProcessor` 是一个拦截Bean实例化的接口，`DefaultListableBeanFactory`和 `GenericApplicationContext` 中都可以使用。 `BeanDefinitionRegistry` 可以与 `BeanPostProcessor` 结合使用，以在Bean的实例化前后执行定制的处理逻辑。这允许我们在Bean创建过程中干预并定制Bean的初始化和销毁过程。
+   + `BeanPostProcessor` is an interface that intercepts bean instantiation. It can be used in `DefaultListableBeanFactory` and `GenericApplicationContext`. `BeanDefinitionRegistry` can be combined with `BeanPostProcessor` to run custom logic before and after bean instantiation. This lets us step in during bean creation and customize its initialization and destruction.
 
-### 八、常见问题
+### 8. FAQ
 
-1. **什么是 `BeanDefinitionRegistry`？**
-   - `BeanDefinitionRegistry` 是Spring框架中的一个接口，它用于注册和管理Bean定义。它是IOC容器的核心组成部分，用于将应用程序中的Bean定义注册到容器中，以便后续实例化和管理。
-2. **`BeanDefinitionRegistry` 与 `DefaultListableBeanFactory` 之间的关系是什么？**
-   - `DefaultListableBeanFactory` 是Spring的IOC容器，而 `BeanDefinitionRegistry` 是 `DefaultListableBeanFactory` 的一个具体实现。它允许 `DefaultListableBeanFactory` 在内部管理和访问Bean定义。 `DefaultListableBeanFactory` 实际上是一个包含了 `BeanDefinitionRegistry` 功能的IOC容器。
-3. **`BeanDefinition` 和 `BeanDefinitionRegistry` 之间的关系是什么？**
-   - `BeanDefinition` 是Bean定义的元数据，它描述了如何创建和配置Bean。 `BeanDefinitionRegistry` 用于注册和管理这些 `BeanDefinition`。 `BeanDefinitionRegistry` 允许我们注册Bean定义并在容器中实例化这些Bean。
-4. **如何使用 `BeanDefinitionRegistry` 注册Bean定义？**
-   - 我们可以创建一个实现了 `BeanDefinitionRegistry` 接口的容器（如 `DefaultListableBeanFactory` 或 `GenericApplicationContext`），然后使用其 `registerBeanDefinition` 方法来注册Bean定义。通常，我们需要提供Bean的名称和相应的 `BeanDefinition`。
-5. **可以注册多个相同名称的Bean吗？**
-   - 默认情况下，我们不能注册多个相同名称的Bean。如果尝试注册相同名称的Bean，通常会抛出 `BeanDefinitionOverrideException` 异常。但有些情况下，我们可以允许覆盖现有的Bean定义。
-6. **如何检查是否存在特定名称的Bean定义？**
-   - 我们可以使用 `containsBeanDefinition` 方法来检查是否存在特定名称的Bean定义。这个方法将返回一个布尔值，指示是否存在该Bean定义。
-7. **如何获取已注册的Bean定义的名称和数量？**
-   - 使用 `getBeanDefinitionNames` 方法可以获取所有已注册的Bean定义的名称数组，而使用 `getBeanDefinitionCount` 方法可以获取已注册的Bean定义的数量。
-8. **如何移除已注册的Bean定义？**
-   - 我们可以使用 `removeBeanDefinition` 方法来移除已注册的Bean定义。这将从容器中删除该Bean定义，使其不再可用。
-9. **`BeanDefinitionRegistry`与`BeanPostProcessor` 之间有什么关系？**
-   - `BeanPostProcessor` 是一个接口，用于在Bean实例化和初始化过程中进行处理。 `BeanDefinitionRegistry` 可以与 `BeanPostProcessor` 结合使用，以在Bean定义的创建和初始化过程中执行自定义逻辑。这允许我们在Bean创建时进行定制操作。
+1. **What is `BeanDefinitionRegistry`?**
+   - `BeanDefinitionRegistry` is an interface in the Spring Framework. It registers and manages bean definitions. It is a core part of the IoC container. It registers the bean definitions of the application in the container, for later instantiation and management.
+2. **What is the relationship between `BeanDefinitionRegistry` and `DefaultListableBeanFactory`?**
+   - `DefaultListableBeanFactory` is the Spring IoC container, and it is a concrete implementation of `BeanDefinitionRegistry`. This lets `DefaultListableBeanFactory` manage and access bean definitions internally. `DefaultListableBeanFactory` is in fact an IoC container that includes the `BeanDefinitionRegistry` features.
+3. **What is the relationship between `BeanDefinition` and `BeanDefinitionRegistry`?**
+   - `BeanDefinition` is the metadata of a bean. It describes how to create and configure the bean. `BeanDefinitionRegistry` registers and manages these `BeanDefinition`s. It lets us register bean definitions and instantiate these beans in the container.
+4. **How do I register a bean definition with `BeanDefinitionRegistry`?**
+   - We can create a container that implements the `BeanDefinitionRegistry` interface (such as `DefaultListableBeanFactory` or `GenericApplicationContext`) and use its `registerBeanDefinition` method. Usually, we need to give the bean name and the matching `BeanDefinition`.
+5. **Can I register several beans with the same name?**
+   - By default, no. If you try to register a bean with the same name, a `BeanDefinitionOverrideException` is usually thrown. In some cases, we can allow overriding existing bean definitions.
+6. **How do I check whether a bean definition with a given name exists?**
+   - Use the `containsBeanDefinition` method. It returns a boolean that tells whether the bean definition exists.
+7. **How do I get the names and the number of registered bean definitions?**
+   - The `getBeanDefinitionNames` method returns an array of the names of all registered bean definitions. The `getBeanDefinitionCount` method returns the number of registered bean definitions.
+8. **How do I remove a registered bean definition?**
+   - Use the `removeBeanDefinition` method. It removes the bean definition from the container, so it is no longer available.
+9. **What is the relationship between `BeanDefinitionRegistry` and `BeanPostProcessor`?**
+   - `BeanPostProcessor` is an interface that works during bean instantiation and initialization. `BeanDefinitionRegistry` can be combined with `BeanPostProcessor` to run custom logic while bean definitions are created and initialized. This lets us customize things when the bean is created.

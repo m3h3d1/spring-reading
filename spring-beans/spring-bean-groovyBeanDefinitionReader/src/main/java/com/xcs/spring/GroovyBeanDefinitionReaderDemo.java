@@ -8,23 +8,23 @@ import org.springframework.core.io.Resource;
 
 /**
  * @author xcs
- * @date 2023年11月07日 10时01分
+ * @date 2023-11-07 10:01
  **/
 public class GroovyBeanDefinitionReaderDemo {
 
     public static void main(String[] args) {
-        // 创建一个 Spring IOC 容器
+        // Create a Spring IoC container
         DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 
-        // 创建一个 GroovyBeanDefinitionReader
+        // Create a GroovyBeanDefinitionReader
         GroovyBeanDefinitionReader reader = new GroovyBeanDefinitionReader(factory);
 
-        // 加载 Groovy 文件并注册 Bean 定义
+        // Load the Groovy file and register bean definitions
         reader.loadBeanDefinitions(new ClassPathResource("my-beans.groovy"));
 
-        // 获取MyService
+        // Get MyService
         MyService myService = factory.getBean(MyService.class);
-        // 打印消息
+        // Print the message
         myService.showMessage();
     }
 }

@@ -1,111 +1,111 @@
 ## BeanDefinitionHolder
 
 - [BeanDefinitionHolder](#beandefinitionholder)
-  - [一、知识储备](#一知识储备)
-  - [二、基本描述](#二基本描述)
-  - [三、主要功能](#三主要功能)
-  - [四、接口源码](#四接口源码)
-  - [五、主要实现](#五主要实现)
-  - [六、最佳实践](#六最佳实践)
-  - [七、与其他组件的关系](#七与其他组件的关系)
-  - [八、常见问题](#八常见问题)
+  - [1. Background Knowledge](#1-background-knowledge)
+  - [2. Basic Description](#2-basic-description)
+  - [3. Main Features](#3-main-features)
+  - [4. Interface Source](#4-interface-source)
+  - [5. Main Implementations](#5-main-implementations)
+  - [6. Best Practices](#6-best-practices)
+  - [7. Relationship with Other Components](#7-relationship-with-other-components)
+  - [8. FAQ](#8-faq)
 
 
-### 一、知识储备
+### 1. Background Knowledge
 
-1. **Spring Framework 基础知识**
-   + 我们需要熟悉 Spring Framework 的基本概念，包括什么是 Bean，什么是 `BeanDefinition`，以及 Spring 容器是如何管理和实例化 Bean 的。
-2. **`BeanDefinition`的理解**
-   + 我们需要了解什么是 `BeanDefinition`，它包含了哪些信息，例如 Bean 的类名、作用域、属性、初始化方法、销毁方法等。这是理解 `BeanDefinitionHolder` 的基础。
-3. **Spring IOC 容器**
-   + 我们需要了解 Spring 的 IOC（Inversion of Control）容器，包括如何配置容器、如何加载 `BeanDefinition`，以及如何从容器中获取 Bean 实例。
+1. **Spring Framework basics**
+   + You should know the basic concepts of the Spring Framework. This includes what a bean is, what a `BeanDefinition` is, and how the Spring container manages and instantiates beans.
+2. **Understanding `BeanDefinition`**
+   + You should know what a `BeanDefinition` is and what it holds, such as the class name, scope, properties, initialization method and destroy method of a bean. This is the base for understanding `BeanDefinitionHolder`.
+3. **Spring IoC container**
+   + You should know the Spring IoC (Inversion of Control) container. This includes how to configure the container, how to load `BeanDefinition`s, and how to get bean instances from the container.
 
-### 二、基本描述
+### 2. Basic Description
 
-`BeanDefinitionHolder` 是 Spring Framework 中的一个类，用于持有一个 `BeanDefinition` 对象以及与之相关联的名称。它通常用于内部 Spring 操作，用于管理和操作 `BeanDefinition`。
+`BeanDefinitionHolder` is a class in the Spring Framework. It holds a `BeanDefinition` object and the names linked to it. It is mostly used inside Spring to manage and handle `BeanDefinition`s.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **持有 `BeanDefinition` 对象**
-   +  `BeanDefinitionHolder` 主要用于持有一个 `BeanDefinition` 对象，它包含有关 Bean 的元数据信息，如类名、作用域、属性、初始化方法等。
-2. **与名称相关联**
-   +  `BeanDefinitionHolder` 与一个 Bean 的名称相关联，以便可以轻松地标识和操作特定的 `BeanDefinition`。
-3. **包装`BeanDefinition`** 
-   + 它包装了 `BeanDefinition` 以及与之关联的名称，将它们组合在一起，形成一个单元，有助于更好地管理和处理 `BeanDefinition`。
-4. **提供额外的元数据**
-   + 除了 `BeanDefinition` 和名称，`BeanDefinitionHolder` 还可以包含其他元数据，如 `BeanDefinition` 的原始来源（通常是一个 Resource 对象）以及 `BeanDefinition` 的描述信息。
-5. **用于注册和管理 `BeanDefinition`**
-   +  `BeanDefinitionHolder` 可以与 `BeanDefinitionRegistry` 接口一起使用，用于在 Spring 容器中注册、修改和管理 `BeanDefinition`。
+1. **Holds a `BeanDefinition` object**
+   + `BeanDefinitionHolder` mainly holds a `BeanDefinition` object. It has the metadata of a bean, such as class name, scope, properties and initialization method.
+2. **Linked to names**
+   + `BeanDefinitionHolder` is linked to the name of a bean, so a specific `BeanDefinition` can be identified and handled easily.
+3. **Wraps the `BeanDefinition`**
+   + It wraps the `BeanDefinition` and its names into one unit. This helps to manage and handle the `BeanDefinition` better.
+4. **Provides extra metadata**
+   + Besides the `BeanDefinition` and the name, `BeanDefinitionHolder` can hold other metadata, such as the original source of the `BeanDefinition` (usually a Resource object) and its description.
+5. **Used to register and manage `BeanDefinition`s**
+   + `BeanDefinitionHolder` can be used with the `BeanDefinitionRegistry` interface to register, change and manage `BeanDefinition`s in the Spring container.
 
-### 四、接口源码
+### 4. Interface Source
 
- `BeanDefinitionHolder` 通常在 Spring 内部用于处理 `BeanDefinition` 注册和操作，提供了访问 `BeanDefinition`、Bean 名称和别名的方法。
+ `BeanDefinitionHolder` is usually used inside Spring to register and handle `BeanDefinition`s. It provides methods to access the `BeanDefinition`, the bean name and the aliases.
 
 ```java
 public class BeanDefinitionHolder implements BeanMetadataElement {
 
-    // 封装的 BeanDefinition 对象
+    // The wrapped BeanDefinition object
     private final BeanDefinition beanDefinition; 
     
-    // Bean 的名称
+    // The name of the bean
     private final String beanName;
     
-    // 别名数组
+    // The array of aliases
     @Nullable
     private final String[] aliases; 
 
     /**
-     * 创建一个新的 BeanDefinitionHolder。
-     * @param beanDefinition 要包装的 BeanDefinition
-     * @param beanName Bean 的名称，如在 Bean 定义中指定
+     * Create a new BeanDefinitionHolder.
+     * @param beanDefinition the BeanDefinition to wrap
+     * @param beanName the name of the bean, as specified in the bean definition
      */
     public BeanDefinitionHolder(BeanDefinition beanDefinition, String beanName) {
         this(beanDefinition, beanName, null);
     }
 
     /**
-     * 创建一个新的 BeanDefinitionHolder。
-     * @param beanDefinition 要包装的 BeanDefinition
-     * @param beanName Bean 的名称，如在 Bean 定义中指定
-     * @param aliases Bean 的别名，如果没有别名则为 null
+     * Create a new BeanDefinitionHolder.
+     * @param beanDefinition the BeanDefinition to wrap
+     * @param beanName the name of the bean, as specified in the bean definition
+     * @param aliases aliases of the bean, or null if there are none
      */
     public BeanDefinitionHolder(BeanDefinition beanDefinition, String beanName, @Nullable String[] aliases) {
-        Assert.notNull(beanDefinition, "BeanDefinition 必须不为 null");
-        Assert.notNull(beanName, "Bean 名称必须不为 null");
+        Assert.notNull(beanDefinition, "BeanDefinition must not be null");
+        Assert.notNull(beanName, "Bean name must not be null");
         this.beanDefinition = beanDefinition;
         this.beanName = beanName;
         this.aliases = aliases;
     }
 
     /**
-     * 复制构造函数：创建一个新的 BeanDefinitionHolder，其内容与给定的 BeanDefinitionHolder 实例相同。
-     * 注意：封装的 BeanDefinition 引用保持原样；不会进行深层复制。
-     * @param beanDefinitionHolder 要复制的 BeanDefinitionHolder 实例
+     * Copy constructor: create a new BeanDefinitionHolder with the same content as the given BeanDefinitionHolder instance.
+     * Note: the wrapped BeanDefinition reference is kept as is. No deep copy is made.
+     * @param beanDefinitionHolder the BeanDefinitionHolder instance to copy
      */
     public BeanDefinitionHolder(BeanDefinitionHolder beanDefinitionHolder) {
-        Assert.notNull(beanDefinitionHolder, "BeanDefinitionHolder 必须不为 null");
+        Assert.notNull(beanDefinitionHolder, "BeanDefinitionHolder must not be null");
         this.beanDefinition = beanDefinitionHolder.getBeanDefinition();
         this.beanName = beanDefinitionHolder.getBeanName();
         this.aliases = beanDefinitionHolder.getAliases();
     }
 
     /**
-     * 返回封装的 BeanDefinition。
+     * Return the wrapped BeanDefinition.
      */
     public BeanDefinition getBeanDefinition() {
         return this.beanDefinition;
     }
 
     /**
-     * 返回 Bean 的主要名称，如在 Bean 定义中指定。
+     * Return the primary name of the bean, as specified in the bean definition.
      */
     public String getBeanName() {
         return this.beanName;
     }
 
     /**
-     * 返回 Bean 的别名数组，如在 Bean 定义中直接指定。
-     * @return 别名数组，如果没有别名则为 null
+     * Return the array of aliases of the bean, as specified directly in the bean definition.
+     * @return the array of aliases, or null if there are none
      */
     @Nullable
     public String[] getAliases() {
@@ -113,7 +113,7 @@ public class BeanDefinitionHolder implements BeanMetadataElement {
     }
 
     /**
-     * 公开 Bean 定义的源对象。
+     * Expose the source object of the bean definition.
      * @see BeanDefinition#getSource()
      */
     @Override
@@ -123,7 +123,7 @@ public class BeanDefinitionHolder implements BeanMetadataElement {
     }
 
     /**
-     * 确定给定的候选名称是否与存储在该 Bean 定义中的 Bean 名称或别名匹配。
+     * Determine whether the given candidate name matches the bean name or an alias stored in this bean definition.
      */
     public boolean matchesName(@Nullable String candidateName) {
         return (candidateName != null && (candidateName.equals(this.beanName) ||
@@ -131,37 +131,37 @@ public class BeanDefinitionHolder implements BeanMetadataElement {
                 ObjectUtils.containsElement(this.aliases, candidateName)));
     }
     
-    // ... [部分代码省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-### 五、主要实现
+### 5. Main Implementations
 
-`BeanDefinitionHolder` 不是一个接口，也不需要其他实现类。它是一个具体的类，用于包装 `BeanDefinition` 对象、Bean 名称和别名，以便更好地管理和操作 `BeanDefinition`。
+`BeanDefinitionHolder` is not an interface and needs no other implementation class. It is a concrete class that wraps a `BeanDefinition` object, a bean name and aliases, so the `BeanDefinition` can be managed and handled better.
 
-### 六、最佳实践
+### 6. Best Practices
 
-使用 `BeanDefinitionHolder` 和 Spring IOC 容器，通过创建一个 `BeanDefinition` 对象定义了名为 "`myBean`" 的 Bean，然后给它指定了别名 "`myBeanX`" 和 "`myBeanY`"，并最终将这个 `BeanDefinition` 注册到容器中。随后，使用容器的 `getBean` 方法来检索这些 Bean，验证它们的正确注册和别名的设置。
+This example uses `BeanDefinitionHolder` and the Spring IoC container. It creates a `BeanDefinition` for a bean named "`myBean`", gives it the aliases "`myBeanX`" and "`myBeanY`", and registers the `BeanDefinition` in the container. Then the `getBean` method of the container retrieves the bean by these names. This checks that the registration and the aliases are correct.
 
 ```java
 public class BeanDefinitionHolderDemo {
 
     public static void main(String[] args) {
-        // 创建一个 DefaultListableBeanFactory，它是 BeanDefinitionRegistry 的一个实现
+        // Create a DefaultListableBeanFactory, an implementation of BeanDefinitionRegistry
         DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
-        // 创建一个新的 BeanDefinition 对象
+        // Create a new BeanDefinition
         GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
         beanDefinition.setBeanClass(MyBean.class);
 
-        // Bean名称
+        // Bean name
         String beanName = "myBean";
-        // 设置别名（aliases）
+        // Set aliases
         String[] aliases = {"myBeanX", "myBeanY"};
-        // 创建一个 BeanDefinitionHolder，将 BeanDefinition 与名称关联起来
+        // Create a BeanDefinitionHolder to link the BeanDefinition with its name
         BeanDefinitionHolder beanDefinitionHolder = new BeanDefinitionHolder(beanDefinition, beanName, aliases);
 
-        // 使用 BeanDefinitionReaderUtils 注册 BeanDefinitionHolder
+        // Register the BeanDefinitionHolder with BeanDefinitionReaderUtils
         BeanDefinitionReaderUtils.registerBeanDefinition(beanDefinitionHolder, beanFactory);
 
         System.out.println("myBean = " + beanFactory.getBean("myBean"));
@@ -171,7 +171,7 @@ public class BeanDefinitionHolderDemo {
 }
 ```
 
-`MyBean` 的Java类，代表了一个简单的Java Bean。
+`MyBean` is a simple Java class that represents a plain Java bean.
 
 ```java
 public class MyBean {
@@ -179,7 +179,7 @@ public class MyBean {
 }
 ```
 
-运行结果发现，我们可以使多个名称都引用同一个Bean定义，最终获取相同的Bean实例。
+The result shows that several names can refer to the same bean definition, and in the end we get the same bean instance.
 
 ```java
 myBean = com.xcs.spring.bean.MyBean@5bcea91b
@@ -187,30 +187,30 @@ myBeanX = com.xcs.spring.bean.MyBean@5bcea91b
 myBeanY = com.xcs.spring.bean.MyBean@5bcea91b
 ```
 
-### 七、与其他组件的关系
+### 7. Relationship with Other Components
 
 1. **`BeanDefinitionReaderUtils`** 
-   + Spring 提供了一个实用工具类 `BeanDefinitionReaderUtils`，用于帮助注册 `BeanDefinition`，它通常与 `BeanDefinitionHolder` 一起使用。`BeanDefinitionReaderUtils.registerBeanDefinition` 方法可用于将 `BeanDefinitionHolder` 注册到 `BeanDefinitionRegistry` 中。
-2. **`BeanDefinitionParser` 和自定义解析器** 
-   + 在 Spring XML 配置文件中，`BeanDefinition` 可以通过自定义的 `BeanDefinitionParser` 或 `NamespaceHandler` 解析器来解析并注册到容器中。这些解析器通常使用 `BeanDefinitionHolder` 来包装 `BeanDefinition`，并通过解析器注册到容器中。
-3. **组件扫描器**
-   + Spring 提供了不同的组件扫描器，如 `ClassPathBeanDefinitionScanner` 和 `AnnotatedBeanDefinitionReader`，用于扫描类路径或带有注解的类，并将它们注册为 `BeanDefinition`。这些扫描器通常使用 `BeanDefinitionHolder` 来包装扫描到的 `BeanDefinition`，并注册到容器中。
-4. **@Import 和相关机制**
-   + 在 Spring 中，`@Import` 注解以及相关的 `ImportBeanDefinitionRegistrar` 和 `ImportSelector` 接口用于导入其他配置类的 `BeanDefinition`。在这个过程中，`BeanDefinitionHolder` 可能用于包装被导入的 `BeanDefinition`，并将其注册到容器中。
+   + Spring provides a utility class, `BeanDefinitionReaderUtils`, to help register `BeanDefinition`s. It is usually used together with `BeanDefinitionHolder`. The `BeanDefinitionReaderUtils.registerBeanDefinition` method can register a `BeanDefinitionHolder` in a `BeanDefinitionRegistry`.
+2. **`BeanDefinitionParser` and custom parsers**
+   + In Spring XML configuration, a `BeanDefinition` can be parsed and registered in the container by a custom `BeanDefinitionParser` or `NamespaceHandler`. These parsers usually wrap the `BeanDefinition` in a `BeanDefinitionHolder` and register it in the container.
+3. **Component scanners**
+   + Spring provides component scanners such as `ClassPathBeanDefinitionScanner` and `AnnotatedBeanDefinitionReader`. They scan the classpath or annotated classes and register them as `BeanDefinition`s. These scanners usually wrap the scanned `BeanDefinition` in a `BeanDefinitionHolder` and register it in the container.
+4. **@Import and related mechanisms**
+   + In Spring, the `@Import` annotation and the related `ImportBeanDefinitionRegistrar` and `ImportSelector` interfaces import the `BeanDefinition`s of other configuration classes. In this process, `BeanDefinitionHolder` may wrap the imported `BeanDefinition` and register it in the container.
 
-### 八、常见问题
+### 8. FAQ
 
-1. **如何使用`BeanDefinitionHolder`？**
-   - `BeanDefinitionHolder` 通常在Spring内部用于处理`BeanDefinition`的注册和操作，但应用开发人员通常不需要直接与它交互（除非你是一个框架开发人员）。它可以在自定义`BeanDefinition`解析器、组件扫描、@Import导入等Spring配置的过程中被自动使用。
-2. **`BeanDefinitionHolder`和`BeanDefinition`之间的关系是什么？**
-   - `BeanDefinitionHolder` 是一个包装器，它包含一个`BeanDefinition`对象以及相关的名称和别名。它用于将`BeanDefinition`与名称关联起来，以便更好地管理和操作`BeanDefinition`。
-3. **如何为`BeanDefinition`设置别名？**
-   - 别名（aliases）是通过在`BeanDefinitionHolder`构造函数中传递字符串数组来设置的。在注册`BeanDefinitionHolder`时，别名将与`BeanDefinition`一起注册，从而使不同的名称都引用同一个`BeanDefinition`。
-4. **是否可以在运行时更改Bean的别名？**
-   - 通常情况下，一旦`BeanDefinition`注册到容器中，别名是固定的，不能在运行时更改。如果需要更改别名，通常需要重新注册`BeanDefinition`，使用不同的别名。
-5. **如何判断两个Bean是否有相同的别名？**
-   - 可以使用`BeanDefinitionHolder`的`matchesName`方法来判断给定的候选名称是否与Bean的名称或别名匹配。这个方法会检查给定的名称是否与Bean名称或别名中的任何一个匹配。
-6. **别名的作用是什么？**
-   - 别名提供了更多的灵活性，使您可以使用不同的名称来引用同一个Bean。这对于允许不同的组件、模块或配置使用不同的名称来访问Bean定义非常有用。
-7. **如何处理具有相同名称的多个`BeanDefinition`？**
-   - 如果多个`BeanDefinition`具有相同的名称，通常情况下，只有最后一个注册的`BeanDefinition`会生效。这可能会导致Bean覆盖的问题，因此在配置时要注意Bean名称的唯一性。
+1. **How do I use `BeanDefinitionHolder`?**
+   - `BeanDefinitionHolder` is usually used inside Spring to register and handle `BeanDefinition`s. Application developers normally do not need to use it directly (unless you build frameworks). It can be used automatically in Spring configuration, such as custom `BeanDefinition` parsers, component scanning and @Import.
+2. **What is the relationship between `BeanDefinitionHolder` and `BeanDefinition`?**
+   - `BeanDefinitionHolder` is a wrapper. It holds a `BeanDefinition` object and the related name and aliases. It links the `BeanDefinition` with its names, so the `BeanDefinition` can be managed and handled better.
+3. **How do I set aliases for a `BeanDefinition`?**
+   - Aliases are set by passing a string array to the `BeanDefinitionHolder` constructor. When the `BeanDefinitionHolder` is registered, the aliases are registered with the `BeanDefinition`. So different names refer to the same `BeanDefinition`.
+4. **Can I change the aliases of a bean at run time?**
+   - Usually, once the `BeanDefinition` is registered in the container, the aliases are fixed and cannot be changed at run time. To change them, you usually need to register the `BeanDefinition` again with different aliases.
+5. **How do I check whether two beans have the same alias?**
+   - Use the `matchesName` method of `BeanDefinitionHolder` to check whether a candidate name matches the name or an alias of the bean. The method checks the given name against the bean name and all aliases.
+6. **What are aliases for?**
+   - Aliases give more flexibility. You can refer to the same bean by different names. This is useful when different components, modules or configurations need to access the bean definition by different names.
+7. **How do I handle several `BeanDefinition`s with the same name?**
+   - If several `BeanDefinition`s have the same name, usually only the last registered one takes effect. This can cause bean overriding problems, so keep bean names unique in your configuration.

@@ -1,63 +1,63 @@
 ## ClassPathXmlApplicationContext
 
 - [ClassPathXmlApplicationContext](#classpathxmlapplicationcontext)
-  - [一、基本信息](#一基本信息)
-  - [二、知识储备](#二知识储备)
-  - [三、基本描述](#三基本描述)
-  - [四、主要功能](#四主要功能)
-  - [五、最佳实践](#五最佳实践)
-  - [六、时序图](#六时序图)
-  - [七、源码分析](#七源码分析)
+  - [1. Overview](#1-overview)
+  - [2. Background Knowledge](#2-background-knowledge)
+  - [3. Basic Description](#3-basic-description)
+  - [4. Main Features](#4-main-features)
+  - [5. Best Practices](#5-best-practices)
+  - [6. Sequence Diagram](#6-sequence-diagram)
+  - [7. Source Code Analysis](#7-source-code-analysis)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、知识储备
+### 2. Background Knowledge
 
 1. **XmlBeanDefinitionReader**
 
-   + [XmlBeanDefinitionReader](https://github.com/xuchengsheng/spring-reading/blob/master/spring-beans/spring-bean-xmlBeanDefinitionReader/README.md)是Spring Framework中的一个类，用于加载和解析XML格式的Bean定义配置文件，将配置文件中定义的Bean元数据信息提取为Spring容器内部的Bean定义对象，进而实现IOC容器的构建和管理。这类负责读取XML配置文件，解析Bean的定义信息（包括ID、类名、属性、依赖等），并将这些定义注册到Spring应用程序上下文，使我们能够方便地配置和管理应用程序中的各种Bean组件。
+   + The [XmlBeanDefinitionReader](https://github.com/xuchengsheng/spring-reading/blob/master/spring-beans/spring-bean-xmlBeanDefinitionReader/README.md) is a Spring class that loads and parses XML bean definition files. It turns the bean metadata in the file into internal bean definition objects. This is how the IoC container is built. The reader reads the XML file, parses the bean definitions (ID, class name, properties, dependencies and so on), and registers them in the application context. This makes it easy to configure and manage the beans of an application.
 
-### 三、基本描述
+### 3. Basic Description
 
-`ClassPathXmlApplicationContext` 是 Spring 框架中用于从类路径（classpath）加载 XML 配置文件并初始化 Spring 容器的一种方式。它是 `ApplicationContext` 接口的实现类之一，负责读取配置文件，解析配置信息，然后创建和管理 Spring 容器中的 bean 实例。
+`ClassPathXmlApplicationContext` loads XML configuration files from the classpath and initializes the Spring container. It is one of the implementations of the `ApplicationContext` interface. It reads the configuration files, parses the configuration, and then creates and manages the bean instances in the Spring container.
 
-### 四、主要功能
+### 4. Main Features
 
-1. **加载配置文件** 
+1. **Load configuration files**
 
-   + 主要功能是加载指定的 XML 配置文件，该配置文件包含了应用程序中各个组件（bean）的定义、依赖关系、配置信息等。
+   + Loads the given XML configuration files. These files hold the definitions, dependencies and settings of the components (beans) in the application.
 
-2. **容器初始化**
+2. **Container initialization**
 
-   + `ClassPathXmlApplicationContext` 在被实例化时，会读取并解析配置文件，然后初始化 Spring 容器。这个过程包括创建和管理 bean 实例、解决 bean 之间的依赖关系等。
+   + When `ClassPathXmlApplicationContext` is instantiated, it reads and parses the configuration files, and then initializes the Spring container. This includes creating and managing bean instances and resolving dependencies between beans.
 
-3. **获取 bean 实例**
+3. **Get bean instances**
 
-   + 通过容器的 `getBean` 方法，可以从容器中获取在配置文件中定义的 bean 实例。
+   + With the `getBean` method of the container, you can get the bean instances defined in the configuration files.
 
-4. **IoC（控制反转）** 
+4. **IoC (inversion of control)**
 
-   + `ClassPathXmlApplicationContext` 是 IoC 容器的一种实现，它负责管理和控制组件的生命周期。在容器初始化时，会根据配置文件中的信息实例化和装配 bean，而不是由应用程序代码直接创建对象。
+   + `ClassPathXmlApplicationContext` is an implementation of the IoC container. It manages and controls the lifecycle of components. When the container is initialized, it instantiates and wires beans from the configuration, instead of the application code creating the objects directly.
 
-5. **依赖注入** 
+5. **Dependency injection**
 
-   + 容器通过读取配置文件中的信息，自动解决 bean 之间的依赖关系。这意味着在配置文件中声明的 bean 可以通过属性注入或构造函数注入的方式获取其依赖的其他 bean。
+   + The container reads the configuration and resolves dependencies between beans automatically. A bean declared in the configuration file can get the other beans it depends on through property injection or constructor injection.
 
-6. **AOP（面向切面编程）**
+6. **AOP (aspect-oriented programming)**
 
-   +  `ClassPathXmlApplicationContext` 支持通过配置文件定义切面和通知，实现横切关注点的分离，使得应用程序的关注点更加清晰和模块化。
+   + `ClassPathXmlApplicationContext` supports defining aspects and advice in the configuration files. This separates cross-cutting concerns and keeps the application clearer and more modular.
 
-7. **事件传播**
+7. **Event propagation**
 
-   + Spring 容器支持事件机制，`ClassPathXmlApplicationContext` 可以发布应用程序中发生的事件，以便其他组件能够监听并作出相应的响应。
+   + The Spring container supports an event mechanism. `ClassPathXmlApplicationContext` can publish events that happen in the application, so other components can listen and respond.
 
 
-### 五、最佳实践
+### 5. Best Practices
 
-通过 `ClassPathXmlApplicationContext` 构造方法创建 Spring 容器的实例，加载类路径下的 "beans.xml" 配置文件。使用容器的 `getBean` 方法，通过指定 bean 的类型（`MyBean.class`）获取在配置文件中定义的 bean 实例，并将其打印出来。
+The `ClassPathXmlApplicationContext` constructor creates a Spring container and loads the "beans.xml" configuration file from the classpath. Then the `getBean` method gets the bean defined in the file by its type (`MyBean.class`), and the program prints it.
 
 ```java
 public class ClassPathXmlApplicationContextDemo {
@@ -69,7 +69,7 @@ public class ClassPathXmlApplicationContextDemo {
 }
 ```
 
-加载类路径下名为 "`classpath:beans.xml`" 的资源文件的内容。在我们的示例配置文件中，这个资源文件定义了一个名为 "`myBean`" 的 Spring Bean，该 Bean 具有一个属性 "message"，其值设置为 "Hello World"。
+This loads the content of the resource file "`classpath:beans.xml`". In our example, the file defines a Spring bean named "`myBean`". The bean has a property "message" with the value "Hello World".
 
 ```xml
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -83,7 +83,7 @@ public class ClassPathXmlApplicationContextDemo {
 </beans>
 ```
 
-`MyBean` 的Java类，代表了一个简单的Java Bean。
+`MyBean` is a simple Java class that represents a plain Java bean.
 
 ```java
 public class MyBean {
@@ -100,52 +100,52 @@ public class MyBean {
 }
 ```
 
-### 六、时序图
+### 6. Sequence Diagram
 
 ~~~mermaid
 sequenceDiagram
-Title: ClassPathXmlApplicationContext时序图
+Title: ClassPathXmlApplicationContext Sequence Diagram
 ClassPathXmlApplicationContextDemo->>ClassPathXmlApplicationContext:ClassPathXmlApplicationContext(configLocation)
-Note over ClassPathXmlApplicationContextDemo,ClassPathXmlApplicationContext: 创建ClassPathXmlApplicationContext实例
+Note over ClassPathXmlApplicationContextDemo,ClassPathXmlApplicationContext: Create a ClassPathXmlApplicationContext instance
 
 ClassPathXmlApplicationContext->>ClassPathXmlApplicationContext:ClassPathXmlApplicationContext(configLocations,refresh,parent)
-Note over ClassPathXmlApplicationContext: 通过多个配置文件路径、刷新标志和父上下文构造实例
+Note over ClassPathXmlApplicationContext: Construct the instance with config file paths, a refresh flag and a parent context
 
 ClassPathXmlApplicationContext->>AbstractApplicationContext:refresh()
-Note over ClassPathXmlApplicationContext,AbstractApplicationContext: 刷新应用程序上下文
+Note over ClassPathXmlApplicationContext,AbstractApplicationContext: Refresh the application context
 
 AbstractApplicationContext->>AbstractApplicationContext:obtainFreshBeanFactory()
-Note over AbstractApplicationContext: 获取刷新过的bean工厂
+Note over AbstractApplicationContext: Get the refreshed bean factory
 
 AbstractApplicationContext->>AbstractRefreshableApplicationContext:refreshBeanFactory()
-Note over AbstractApplicationContext,AbstractRefreshableApplicationContext: 调用子类的refreshBeanFactory()
+Note over AbstractApplicationContext,AbstractRefreshableApplicationContext: Call refreshBeanFactory() of the subclass
 
 AbstractRefreshableApplicationContext->>AbstractXmlApplicationContext:loadBeanDefinitions(beanFactory)
-Note over AbstractRefreshableApplicationContext,AbstractXmlApplicationContext: 调用子类的loadBeanDefinitions方法
+Note over AbstractRefreshableApplicationContext,AbstractXmlApplicationContext: Call loadBeanDefinitions of the subclass
 
 AbstractXmlApplicationContext->>XmlBeanDefinitionReader:new XmlBeanDefinitionReader(beanFactory)
-Note over AbstractXmlApplicationContext,XmlBeanDefinitionReader: 创建XmlBeanDefinitionReader实例
+Note over AbstractXmlApplicationContext,XmlBeanDefinitionReader: Create an XmlBeanDefinitionReader instance
 
-XmlBeanDefinitionReader->>AbstractXmlApplicationContext:返回Bean定义读取器
-Note over XmlBeanDefinitionReader,AbstractXmlApplicationContext: 返回Bean定义读取器
+XmlBeanDefinitionReader->>AbstractXmlApplicationContext:Return the bean definition reader
+Note over XmlBeanDefinitionReader,AbstractXmlApplicationContext: Return the bean definition reader
 
 AbstractXmlApplicationContext->>AbstractXmlApplicationContext:loadBeanDefinitions(reader)
-Note over AbstractXmlApplicationContext: 调用XmlBeanDefinitionReader的loadBeanDefinitions方法
+Note over AbstractXmlApplicationContext: Call loadBeanDefinitions of XmlBeanDefinitionReader
 
 AbstractXmlApplicationContext->>XmlBeanDefinitionReader:reader.loadBeanDefinitions(configLocations)
-Note over AbstractXmlApplicationContext,XmlBeanDefinitionReader: 加载配置文件中的Bean定义
+Note over AbstractXmlApplicationContext,XmlBeanDefinitionReader: Load the bean definitions from the configuration file
 
 AbstractApplicationContext->>AbstractRefreshableApplicationContext:getBeanFactory()
-Note over AbstractApplicationContext,AbstractRefreshableApplicationContext: 获取Bean工厂
+Note over AbstractApplicationContext,AbstractRefreshableApplicationContext: Get the bean factory
 
-AbstractRefreshableApplicationContext->>AbstractApplicationContext:返回Bean工厂
-Note over AbstractApplicationContext: 返回Bean工厂
+AbstractRefreshableApplicationContext->>AbstractApplicationContext:Return the bean factory
+Note over AbstractApplicationContext: Return the bean factory
 
 ~~~
 
-### 七、源码分析
+### 7. Source Code Analysis
 
-在`org.springframework.context.support.ClassPathXmlApplicationContext#ClassPathXmlApplicationContext(configLocation)`方法中，又调用了另外一个构造方法。
+The `org.springframework.context.support.ClassPathXmlApplicationContext#ClassPathXmlApplicationContext(configLocation)` method calls another constructor.
 
 ```java
 public ClassPathXmlApplicationContext(String configLocation) throws BeansException {
@@ -153,7 +153,7 @@ public ClassPathXmlApplicationContext(String configLocation) throws BeansExcepti
 }
 ```
 
-在`org.springframework.context.support.ClassPathXmlApplicationContext#ClassPathXmlApplicationContext(configLocations, refresh,parent)`方法中，首先设置了父应用程序上下文和配置文件位置，然后根据是否需要刷新，决定是否立即执行应用程序上下文的刷新操作。
+The `org.springframework.context.support.ClassPathXmlApplicationContext#ClassPathXmlApplicationContext(configLocations, refresh,parent)` method first sets the parent application context and the configuration file locations. Then, depending on the refresh flag, it decides whether to refresh the application context right away.
 
 ```java
 public ClassPathXmlApplicationContext(
@@ -168,21 +168,21 @@ public ClassPathXmlApplicationContext(
 }
 ```
 
-在`org.springframework.context.support.AbstractApplicationContext#refresh`方法中，调用 `obtainFreshBeanFactory` 方法来刷新内部的 bean 工厂，从而触发容器的初始化过程。
+The `org.springframework.context.support.AbstractApplicationContext#refresh` method calls `obtainFreshBeanFactory` to refresh the internal bean factory. This triggers the initialization of the container.
 
 ```java
 @Override
 public void refresh() throws BeansException, IllegalStateException {
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     
-    // 该方法由子类实现，用于刷新内部的 bean 工厂。
+    // Implemented by subclasses to refresh the internal bean factory.
     ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
     
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-在`org.springframework.context.support.AbstractApplicationContext#obtainFreshBeanFactory`方法中，首先调用 `refreshBeanFactory` 方法来刷新内部的 bean 工厂，并最终返回这个刷新过的 bean 工厂。
+The `org.springframework.context.support.AbstractApplicationContext#obtainFreshBeanFactory` method first calls `refreshBeanFactory` to refresh the internal bean factory. Then it returns the refreshed bean factory.
 
 ```java
 protected ConfigurableListableBeanFactory obtainFreshBeanFactory() {
@@ -191,73 +191,73 @@ protected ConfigurableListableBeanFactory obtainFreshBeanFactory() {
 }
 ```
 
-在`org.springframework.context.support.AbstractRefreshableApplicationContext#refreshBeanFactory`方法中，首先检查是否已存在 bean 工厂，如果存在则先销毁已有的 bean 并关闭 bean 工厂。接着，创建一个新的 `DefaultListableBeanFactory` 实例，设置其序列化 ID 为容器的 ID，然后调用 `customizeBeanFactory` 定制 bean 工厂。随后，通过 `loadBeanDefinitions` 加载 bean 的定义，包括读取配置文件、解析 bean 的定义等。
+The `org.springframework.context.support.AbstractRefreshableApplicationContext#refreshBeanFactory` method first checks whether a bean factory already exists. If it does, it destroys the existing beans and closes the factory. Then it creates a new `DefaultListableBeanFactory` and sets its serialization ID to the container ID. It calls `customizeBeanFactory` to customize the factory. Finally, it calls `loadBeanDefinitions` to load the bean definitions, which includes reading the configuration files and parsing the definitions.
 
 ```java
 @Override
 protected final void refreshBeanFactory() throws BeansException {
-   // 如果已经存在 bean 工厂，则销毁已有的 bean 并关闭 bean 工厂
+   // If a bean factory already exists, destroy its beans and close it
    if (hasBeanFactory()) {
       destroyBeans();
       closeBeanFactory();
    }
 
    try {
-      // 创建一个新的 DefaultListableBeanFactory 实例
+      // Create a new DefaultListableBeanFactory instance
       DefaultListableBeanFactory beanFactory = createBeanFactory();
-      // 设置 bean 工厂的序列化 ID 为容器的 ID
+      // Set the serialization ID of the bean factory to the container ID
       beanFactory.setSerializationId(getId());
-      // 定制 bean 工厂，由子类实现
+      // Customize the bean factory (implemented by subclasses)
       customizeBeanFactory(beanFactory);
-      // 加载 bean 的定义，包括读取配置文件、解析 bean 的定义等
+      // Load the bean definitions, including reading the configuration files and parsing the definitions
       loadBeanDefinitions(beanFactory);
-      // 将创建好的 bean 工厂赋值给容器
+      // Assign the new bean factory to the container
       this.beanFactory = beanFactory;
    } catch (IOException ex) {
-      // 如果在解析 bean 定义时发生 I/O 错误，则抛出 ApplicationContextException 异常
+      // If an I/O error occurs while parsing the bean definitions, throw ApplicationContextException
       throw new ApplicationContextException("I/O error parsing bean definition source for " + getDisplayName(), ex);
    }
 }
 ```
 
-在`org.springframework.context.support.AbstractXmlApplicationContext#loadBeanDefinitions(beanFactory)`方法中，首先创建了一个 `XmlBeanDefinitionReader` 对象，用于读取 XML 格式的 bean 定义。然后，配置了 bean 定义阅读器的环境、资源加载器和实体解析器等属性。接着，允许子类通过 `initBeanDefinitionReader` 提供自定义的初始化操作。最后，调用阅读器的加载方法，实际上读取配置文件，解析 bean 定义，将它们注册到 bean 工厂中。
+The `org.springframework.context.support.AbstractXmlApplicationContext#loadBeanDefinitions(beanFactory)` method first creates an `XmlBeanDefinitionReader` to read XML bean definitions. Then it sets the environment, resource loader and entity resolver of the reader. Next, it lets subclasses customize the reader with `initBeanDefinitionReader`. Finally, it calls the reader's load method, which reads the configuration files, parses the bean definitions and registers them in the bean factory.
 
 ```java
 protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory) throws BeansException, IOException {
-    // 为给定的 BeanFactory 创建一个新的 XmlBeanDefinitionReader
+    // Create a new XmlBeanDefinitionReader for the given BeanFactory
     XmlBeanDefinitionReader beanDefinitionReader = new XmlBeanDefinitionReader(beanFactory);
 
-    // 使用该上下文的资源加载环境配置 bean 定义阅读器
+    // Configure the reader with the resource loading environment of this context
     beanDefinitionReader.setEnvironment(this.getEnvironment());
-    // 将资源加载器设置为当前应用程序上下文
+    // Set the resource loader to the current application context
     beanDefinitionReader.setResourceLoader(this);
-    // 设置实体解析器为 ResourceEntityResolver，用于解析 bean 定义中的实体引用
+    // Set the entity resolver to ResourceEntityResolver to resolve entity references in bean definitions
     beanDefinitionReader.setEntityResolver(new ResourceEntityResolver(this));
 
-    // 允许子类提供对阅读器的自定义初始化，然后继续实际加载 bean 定义
+    // Let subclasses customize the reader, then load the bean definitions
     initBeanDefinitionReader(beanDefinitionReader);
-    // 调用阅读器的加载方法，实际上会读取配置文件，解析 bean 定义，将它们注册到 bean 工厂中
+    // Call the reader's load method, which reads the configuration files, parses the bean definitions and registers them in the bean factory
     loadBeanDefinitions(beanDefinitionReader);
 }
 
 ```
 
-在`org.springframework.context.support.AbstractXmlApplicationContext#loadBeanDefinitions(reader)`方法中，首先获取配置资源（`Resource`）数组，这些资源通过类路径方式加载的配置文件。如果配置资源不为空，则通过 `XmlBeanDefinitionReader` 对象加载这些资源中的 bean 定义。接着，获取配置文件路径数组，这些路径通过字符串形式指定的配置文件路径。如果配置文件路径不为空，则同样通过`XmlBeanDefinitionReader`来加载这些路径中的 bean 定义。
+The `org.springframework.context.support.AbstractXmlApplicationContext#loadBeanDefinitions(reader)` method first gets the array of configuration resources (`Resource`), which are configuration files loaded from the classpath. If the array is not empty, it loads the bean definitions from these resources with the `XmlBeanDefinitionReader`. Next, it gets the array of configuration file paths, which are given as strings. If the array is not empty, it loads the bean definitions from these paths in the same way.
 
-> **关于`reader.loadBeanDefinitions`方法的源码分析已经在另外一篇关于[XmlBeanDefinitionReader](https://github.com/xuchengsheng/spring-reading/blob/master/spring-beans/spring-bean-xmlBeanDefinitionReader/README.md)类的博客中详细分析了。**
+> **The detailed source analysis of the `reader.loadBeanDefinitions` method is in another article about the [XmlBeanDefinitionReader](https://github.com/xuchengsheng/spring-reading/blob/master/spring-beans/spring-bean-xmlBeanDefinitionReader/README.md) class.**
 
 ```java
 protected void loadBeanDefinitions(XmlBeanDefinitionReader reader) throws BeansException, IOException {
-    // 获取配置资源（Resource）数组，通常表示通过类路径或其他方式加载的配置文件
+    // Get the array of configuration resources (Resource), usually configuration files loaded from the classpath or elsewhere
     Resource[] configResources = getConfigResources();
-    // 如果配置资源不为空，则通过阅读器加载这些资源中的 bean 定义
+    // If the array is not empty, load the bean definitions from these resources with the reader
     if (configResources != null) {
         reader.loadBeanDefinitions(configResources);
     }
 
-    // 获取配置文件路径数组，通常表示通过字符串形式指定的配置文件路径
+    // Get the array of configuration file paths, usually given as strings
     String[] configLocations = getConfigLocations();
-    // 如果配置文件路径不为空，则通过阅读器加载这些路径中的 bean 定义
+    // If the array is not empty, load the bean definitions from these paths with the reader
     if (configLocations != null) {
         reader.loadBeanDefinitions(configLocations);
     }
