@@ -4,7 +4,7 @@ import org.springframework.beans.factory.DisposableBean;
 
 /**
  * @author xcs
- * @date 2023年10月09日 16时45分
+ * @date 2023-10-09 16:45
  **/
 public class BeanA implements DisposableBean {
 

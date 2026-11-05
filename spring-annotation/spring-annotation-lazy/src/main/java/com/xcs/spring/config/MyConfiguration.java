@@ -12,7 +12,7 @@ public class MyConfiguration {
     @Bean
     @Lazy
     public MyBean myBean(){
-        System.out.println("MyBean 初始化了!");
+        System.out.println("MyBean initialized!");
         return new MyBean();
     }
 

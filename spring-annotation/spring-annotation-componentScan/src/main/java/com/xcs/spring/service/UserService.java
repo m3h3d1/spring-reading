@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * @author xcs
- * @date 2023年10月07日 11时50分
+ * @date 2023-10-07 11:50
  **/
 @Service
 public class UserService {

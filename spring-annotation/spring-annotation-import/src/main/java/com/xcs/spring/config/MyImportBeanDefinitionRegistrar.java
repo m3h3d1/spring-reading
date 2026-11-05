@@ -8,7 +8,7 @@ import org.springframework.core.type.AnnotationMetadata;
 
 /**
  * @author xcs
- * @date 2023年08月28日 11时17分
+ * @date 2023-08-28 11:17
  **/
 public class MyImportBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar {
     @Override

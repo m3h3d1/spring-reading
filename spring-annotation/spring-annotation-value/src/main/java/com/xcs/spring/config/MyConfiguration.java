@@ -7,7 +7,7 @@ import org.springframework.context.annotation.PropertySource;
 
 /**
  * @author xcs
- * @date 2023年10月13日 14时54分
+ * @date 2023-10-13 14:54
  **/
 @Configuration
 @PropertySource("classpath:application.properties")

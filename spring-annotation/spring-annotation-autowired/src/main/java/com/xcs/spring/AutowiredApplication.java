@@ -6,7 +6,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 /**
  * @author xcs
- * @date 2023年08月07日 16时21分
+ * @date 2023-08-07 16:21
  **/
 public class AutowiredApplication {
 

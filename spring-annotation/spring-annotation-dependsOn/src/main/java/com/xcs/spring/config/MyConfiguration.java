@@ -9,7 +9,7 @@ import org.springframework.context.annotation.DependsOn;
 
 /**
  * @author xcs
- * @date 2023年08月07日 16时25分
+ * @date 2023-08-07 16:25
  **/
 @Configuration
 public class MyConfiguration {

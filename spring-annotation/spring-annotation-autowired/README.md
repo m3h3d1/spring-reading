@@ -1,69 +1,80 @@
 ## @Autowired
 
 - [@Autowired](#autowired)
-  - [一、基本信息](#一基本信息)
-  - [二、注解描述](#二注解描述)
-  - [三、接口源码](#三接口源码)
-  - [四、主要功能](#四主要功能)
-  - [五、最佳实践](#五最佳实践)
-  - [六、时序图](#六时序图)
-  - [七、源码分析](#七源码分析)
-    - [前置条件](#前置条件)
-    - [收集阶段](#收集阶段)
-    - [注入阶段](#注入阶段)
-  - [八、注意事项](#八注意事项)
-  - [九、总结](#九总结)
-    - [最佳实践总结](#最佳实践总结)
-    - [源码分析总结](#源码分析总结)
+  - [1. Overview](#1-overview)
+  - [2. Annotation Description](#2-annotation-description)
+  - [3. Annotation Source](#3-annotation-source)
+  - [4. Main Features](#4-main-features)
+  - [5. Best Practices](#5-best-practices)
+  - [6. Sequence Diagram](#6-sequence-diagram)
+  - [7. Source Code Analysis](#7-source-code-analysis)
+    - [Prerequisites](#prerequisites)
+    - [Collection Phase](#collection-phase)
+    - [Injection Phase](#injection-phase)
+  - [8. Notes](#8-notes)
+  - [9. Summary](#9-summary)
+    - [Best Practices Summary](#best-practices-summary)
+    - [Source Code Analysis Summary](#source-code-analysis-summary)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [我的CSDN](https://blog.csdn.net/duzhuang2399/article/details/133833938) 📚 **文章目录** - [所有文章](https://github.com/xuchengsheng/spring-reading) 🔗 **源码地址** - [@Autowired源码](https://github.com/xuchengsheng/spring-reading/tree/master/spring-annotation/spring-annotation-autowired)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN](https://blog.csdn.net/duzhuang2399/article/details/133833938) 📚 **Contents** - [All articles](https://github.com/xuchengsheng/spring-reading) 🔗 **Source code** - [@Autowired source](https://github.com/xuchengsheng/spring-reading/tree/master/spring-annotation/spring-annotation-autowired)
 
-### 二、注解描述
+### 2. Annotation Description
 
-`@Autowired` 注解，用于实现依赖注入（Dependency Injection, DI）。当我们在 Spring 中定义了一个 Bean 并想要使用另一个 Bean 时，可以使用 `@Autowired` 注解来自动注入所需的 Bean，而我们无需手动查找和配置它。
+The `@Autowired` annotation is used for dependency injection (DI). When one bean needs to use another bean in Spring, `@Autowired` injects the needed bean automatically. We do not have to look it up or configure it by hand.
 
-### 三、接口源码
+### 3. Annotation Source
 
-`@Autowired`注解是 Spring 框架自 2.5 版本开始引入的一个核心注解，该注解用于告知 Spring 框架的依赖注入工具自动注入所需的依赖。
+`@Autowired` is a core annotation introduced in Spring 2.5. It tells Spring's dependency injection machinery to inject the needed dependency automatically.
 
 ```java
 /**
- * 通过Spring的依赖注入机制标记构造函数、字段、setter方法或配置方法。
- * 这是JSR-330 Inject 注解的一种替代，增加了必需与可选的语义。
+ * Marks a constructor, field, setter method, or config method to be autowired
+ * by Spring's dependency injection facilities.
+ * This is an alternative to the JSR-330 Inject annotation, adding required-vs-optional semantics.
  *
- * 自动注入的构造函数：
- * 任何给定的bean类只有一个构造函数可以声明此注解，且其required属性设置为 true，
- * 表示当作为Spring bean使用时要自动注入的构造函数。如果required属性设置为true，
- * 则只能有一个构造函数被标记为Autowired。如果多个非必需的构造函数声明了这个注解，
- * 它们都会被视为自动注入的候选者。Spring会选择可以满足最多依赖的构造函数进行注入。如果没有一个候选者满足条件，
- * 则会使用默认的构造函数。如果一个类声明了多个构造函数，但没有一个使用Autowired，
- * 则会使用默认的构造函数。如果一个类从一开始就只声明了一个构造函数，它总是会被使用，即使没有被标记。被标记的构造函数不需要是public的。
+ * Autowired constructors:
+ * Only one constructor of any given bean class may declare this annotation with the
+ * required attribute set to true. It marks the constructor to autowire when used as a
+ * Spring bean. If required is true, only one constructor can be marked as Autowired.
+ * If multiple non-required constructors declare the annotation,
+ * they are all considered candidates for autowiring. Spring chooses the constructor
+ * whose dependencies can be satisfied the most. If none of the candidates qualify,
+ * the default constructor is used. If a class declares multiple constructors but none
+ * is annotated with Autowired, the default constructor is used.
+ * If a class declares only a single constructor from the start, it is always used, even if not annotated.
+ * An annotated constructor does not have to be public.
  *
- * 自动注入的字段：
- * 字段会在bean构造完成后注入，任何配置方法调用之前。配置字段不需要是public的。
+ * Autowired fields:
+ * Fields are injected right after construction of a bean, before any config methods are invoked.
+ * Such a config field does not have to be public.
  *
- * 自动注入的方法：
- * 配置方法可以有任意名称和任意数量的参数；其中每一个参数都会通过Spring容器中的一个匹配的bean进行自动注入。
- * Bean属性的setter方法在实质上只是这种通用配置方法的一个特例。这些配置方法不需要是public的。
+ * Autowired methods:
+ * Config methods may have an arbitrary name and any number of arguments. Each argument is
+ * autowired with a matching bean from the Spring container.
+ * Bean property setter methods are just a special case of such a general config method.
+ * Such config methods do not have to be public.
  *
- * 自动注入的参数：
- * 尽管从Spring 5.0开始Autowired可以在方法或构造函数的单独参数上声明，
- * 但框架的大部分都会忽略这样的声明。唯一支持自动注入参数的Spring核心部分是
- * spring-test模块中的JUnit Jupiter支持。
+ * Autowired parameters:
+ * Although Autowired can be declared on individual method or constructor parameters
+ * since Spring 5.0, most parts of the framework ignore such declarations.
+ * The only part of the core Spring Framework that actively supports autowired parameters is
+ * the JUnit Jupiter support in the spring-test module.
  *
- * 多参数与'required'语义：
- * 对于多参数的构造函数或方法，required属性适用于所有参数。
+ * Multiple arguments and 'required' semantics:
+ * For a constructor or method with multiple arguments, the required attribute applies to all arguments.
  *
- * 自动装配数组、集合和映射：
- * 对于数组、Collection或Map类型的依赖，容器会自动注入所有匹配声明的值类型的bean。
- * 对于这种目的，map的键必须声明为类型String，它会解析为相应的bean名称。
+ * Autowiring arrays, collections, and maps:
+ * For an array, Collection, or Map dependency type, the container autowires all beans
+ * matching the declared value type. For such purposes, the map keys must be declared
+ * as type String, which are resolved to the corresponding bean names.
  *
- * 在BeanPostProcessor或BeanFactoryPostProcessor中不支持：
- * 请注意，实际的注入是通过BeanPostProcessor执行的，这意味着我们不能使用Autowired在
- * BeanPostProcessor或BeanFactoryPostProcessor类型中进行注入。
+ * Not supported in BeanPostProcessor or BeanFactoryPostProcessor:
+ * Note that actual injection is performed through a BeanPostProcessor, which means
+ * you cannot use Autowired to inject references into
+ * BeanPostProcessor or BeanFactoryPostProcessor types.
  *
  * @author Juergen Hoeller
  * @author Mark Fisher
@@ -79,29 +90,29 @@
 public @interface Autowired {
 
     /**
-     * 声明注解的依赖是否是必需的。
-     * 默认值为true。
+     * Declares whether the annotated dependency is required.
+     * The default is true.
      */
     boolean required() default true;
 }
 ```
 
-### 四、主要功能
+### 4. Main Features
 
-1. **自动注入依赖**
-   + 不需要明确指定 bean 之间的关系，Spring 会自动找到并注入所需的依赖。
-2. **字段注入**
-   + 可以直接标记在类的字段上，使得该字段在 Bean 初始化时被自动注入。
-3. **构造函数注入**
-   + 当标记在构造函数上时，该构造函数会被用于创建 bean 实例并注入所需的依赖。
-4. **方法注入**
-   + 当标记在 setter 方法或其他方法上时，这些方法会在 Bean 初始化时被调用以注入依赖。
-5. **指定必需性**
-   + 通过 `required` 属性，可以指定某个依赖是否是必需的。如果标记为必需但没有找到相应的依赖，Spring 会抛出异常。
+1. **Inject dependencies automatically**
+   + You do not need to state the relations between beans. Spring finds and injects the needed dependencies.
+2. **Field injection**
+   + You can put it directly on a field. The field is injected when the bean is initialized.
+3. **Constructor injection**
+   + When placed on a constructor, that constructor is used to create the bean instance and inject the dependencies.
+4. **Method injection**
+   + When placed on a setter or another method, the method is called during bean initialization to inject the dependencies.
+5. **Set whether a dependency is required**
+   + The `required` attribute says whether a dependency is required. If it is required and no matching dependency is found, Spring throws an exception.
 
-### 五、最佳实践
+### 5. Best Practices
 
-首先来看看启动类入口，上下文环境使用`AnnotationConfigApplicationContext`（此类是使用Java注解来配置Spring容器的方式），构造参数我们给定了一个`MyConfiguration`组件类。然后从Spring上下文中获取一个`MyController`类型的bean并调用了`showService`方法，
+First, look at the entry class. The context is `AnnotationConfigApplicationContext` (a way to configure the Spring container with Java annotations). We pass the `MyConfiguration` class to its constructor. Then we get a `MyController` bean from the context and call its `showService` method.
 
 ```java
 public class AutowiredApplication {
@@ -114,7 +125,7 @@ public class AutowiredApplication {
 }
 ```
 
-在`MyConfiguration`类中，使用了`@ComponentScan("com.xcs.spring")`注解告诉 Spring 在指定的包（在这里是 "`com.xcs.spring`"）及其子包中搜索带有 `@Component`、`@Service`、`@Repository` 和 `@Controller` 等注解的类，并将它们自动注册为 beans。这样，spring就不必为每个组件明确写一个 bean 定义。Spring 会自动识别并注册它们。
+The `MyConfiguration` class uses `@ComponentScan("com.xcs.spring")`. It tells Spring to search the given package (here `com.xcs.spring`) and its sub-packages for classes annotated with `@Component`, `@Service`, `@Repository`, `@Controller`, and so on, and to register them as beans. So we do not need to write a bean definition for each component. Spring finds and registers them.
 
 ```java
 @Configuration
@@ -124,7 +135,7 @@ public class MyConfiguration {
 }
 ```
 
- Spring 容器在初始化 `MyController` 时自动注入一个 `MyService` 类型的 bean 到 `myService` 字段。
+When the Spring container initializes `MyController`, it injects a bean of type `MyService` into the `myService` field.
 
 ```java
 @Controller
@@ -139,7 +150,7 @@ public class MyController {
 }
 ```
 
-`MyService` 是一个简单的服务类，但我们没有定义任何方法或功能。
+`MyService` is a simple service class. It has no methods or features.
 
 ```java
 @Service
@@ -148,287 +159,287 @@ public class MyService {
 }
 ```
 
-运行结果发现，我们使用 `@Autowired` 注解的功能，在我们的 Spring 上下文中工作正常，并且它成功地自动注入了所需的依赖关系。
+The result shows that `@Autowired` works in our Spring context. It injected the needed dependency.
 
 ```java
 myService = com.xcs.spring.service.MyService@4a883b15
 ```
 
-### 六、时序图
+### 6. Sequence Diagram
 
 ~~~mermaid
 sequenceDiagram
-Title: @Autowired注解时序图
-AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:applyMergedBeanDefinitionPostProcessors(mbd,beanType,beanName)<br>应用Bean定义的后置处理器
-AbstractAutowireCapableBeanFactory->>AutowiredAnnotationBeanPostProcessor:postProcessMergedBeanDefinition(beanDefinition,beanType,beanName)<br>处理已合并的Bean定义
-AutowiredAnnotationBeanPostProcessor->>AutowiredAnnotationBeanPostProcessor:findAutowiringMetadata(beanName,clazz,pvs)<br>查找自动注入的元数据
-AutowiredAnnotationBeanPostProcessor->>AutowiredAnnotationBeanPostProcessor:buildAutowiringMetadata(clazz)<br>构建自动注入的元数据
-AutowiredAnnotationBeanPostProcessor->>ReflectionUtils:doWithLocalFields(clazz,fc)<br>处理类的本地字段
-ReflectionUtils->>AutowiredAnnotationBeanPostProcessor:解析有@Autowired注解的字段
-AutowiredAnnotationBeanPostProcessor->>ReflectionUtils:doWithLocalMethods(clazz,fc)<br>处理类的本地方法
-ReflectionUtils->>AutowiredAnnotationBeanPostProcessor:解析有@Autowired注解的方法
-AutowiredAnnotationBeanPostProcessor->>AutowiredAnnotationBeanPostProcessor:injectionMetadataCache.put(cacheKey, metadata)<br>将元数据存入缓存
-AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:populateBean(beanName,mbd,bw)<br>填充Bean的属性值
-AbstractAutowireCapableBeanFactory->>AutowiredAnnotationBeanPostProcessor:postProcessProperties(pvs,bean,beanName)<br>后处理Bean的属性
-AutowiredAnnotationBeanPostProcessor->>AutowiredAnnotationBeanPostProcessor:findAutowiringMetadata(beanName,clazz,pvs)<br>再次查找自动注入的元数据
-Note right of AutowiredAnnotationBeanPostProcessor:<br>从缓存中获取注入的元数据
-AutowiredAnnotationBeanPostProcessor->>InjectionMetadata:inject(bean, beanName, pvs)<br>执行实际的属性注入
-InjectionMetadata->>AutowiredFieldElement:inject(target, beanName, pvs)<br>注入特定的字段元素
-AutowiredFieldElement->>AutowiredFieldElement:resolveFieldValue(field,bean,beanName)<br>解析字段的值
-AutowiredFieldElement->>DefaultListableBeanFactory:resolveDependency(desc, beanName, autowiredBeanNames, typeConverter)<br>解析字段的依赖
-DefaultListableBeanFactory->>DefaultListableBeanFactory:doResolveDependency(descriptor, requestingBeanName, autowiredBeanNames, typeConverter)<br>解析指定的依赖关系
-DefaultListableBeanFactory->>DefaultListableBeanFactory:findAutowireCandidates(beanName, type, descriptor)<br>查找符合自动装配条件的候选 Bean
-DefaultListableBeanFactory->>DefaultListableBeanFactory:addCandidateEntry(result, candidate, descriptor, requiredType)<br>向结果集中添加候选 Bean
-DefaultListableBeanFactory->>AbstractBeanFactory:getType(name)<br>获取指定 Bean 的类型
-AbstractBeanFactory->>DefaultListableBeanFactory:返回被依赖Bean的类<br>返回依赖 Bean 的实际类
-DefaultListableBeanFactory->>DependencyDescriptor:resolveCandidate(beanName, requiredType, beanFactory)<br>解析候选的依赖 Bean
-DependencyDescriptor->>AbstractBeanFactory:getBean(name)<br>获取指定的 Bean 实例
-AbstractBeanFactory->>DependencyDescriptor:<br>返回具体的依赖 Bean 实例
-DependencyDescriptor->>DefaultListableBeanFactory:<br>返回依赖的 Bean 实例给工厂
-DefaultListableBeanFactory->>AutowiredFieldElement:<br>返回依赖的 Bean 给字段注入器
-AutowiredFieldElement->>Field:field.set(bean, value)<br>实际设置 Bean 的字段值
+Title: @Autowired sequence diagram
+AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:applyMergedBeanDefinitionPostProcessors(mbd,beanType,beanName)<br>Apply the bean definition post processors
+AbstractAutowireCapableBeanFactory->>AutowiredAnnotationBeanPostProcessor:postProcessMergedBeanDefinition(beanDefinition,beanType,beanName)<br>Process the merged bean definition
+AutowiredAnnotationBeanPostProcessor->>AutowiredAnnotationBeanPostProcessor:findAutowiringMetadata(beanName,clazz,pvs)<br>Find the autowiring metadata
+AutowiredAnnotationBeanPostProcessor->>AutowiredAnnotationBeanPostProcessor:buildAutowiringMetadata(clazz)<br>Build the autowiring metadata
+AutowiredAnnotationBeanPostProcessor->>ReflectionUtils:doWithLocalFields(clazz,fc)<br>Process the local fields of the class
+ReflectionUtils->>AutowiredAnnotationBeanPostProcessor:Resolve the fields with @Autowired
+AutowiredAnnotationBeanPostProcessor->>ReflectionUtils:doWithLocalMethods(clazz,fc)<br>Process the local methods of the class
+ReflectionUtils->>AutowiredAnnotationBeanPostProcessor:Resolve the methods with @Autowired
+AutowiredAnnotationBeanPostProcessor->>AutowiredAnnotationBeanPostProcessor:injectionMetadataCache.put(cacheKey, metadata)<br>Put the metadata into the cache
+AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:populateBean(beanName,mbd,bw)<br>Populate the bean properties
+AbstractAutowireCapableBeanFactory->>AutowiredAnnotationBeanPostProcessor:postProcessProperties(pvs,bean,beanName)<br>Post-process the bean properties
+AutowiredAnnotationBeanPostProcessor->>AutowiredAnnotationBeanPostProcessor:findAutowiringMetadata(beanName,clazz,pvs)<br>Find the autowiring metadata again
+Note right of AutowiredAnnotationBeanPostProcessor:<br>Get the injection metadata from the cache
+AutowiredAnnotationBeanPostProcessor->>InjectionMetadata:inject(bean, beanName, pvs)<br>Perform the actual property injection
+InjectionMetadata->>AutowiredFieldElement:inject(target, beanName, pvs)<br>Inject the specific field element
+AutowiredFieldElement->>AutowiredFieldElement:resolveFieldValue(field,bean,beanName)<br>Resolve the field value
+AutowiredFieldElement->>DefaultListableBeanFactory:resolveDependency(desc, beanName, autowiredBeanNames, typeConverter)<br>Resolve the field dependency
+DefaultListableBeanFactory->>DefaultListableBeanFactory:doResolveDependency(descriptor, requestingBeanName, autowiredBeanNames, typeConverter)<br>Resolve the given dependency
+DefaultListableBeanFactory->>DefaultListableBeanFactory:findAutowireCandidates(beanName, type, descriptor)<br>Find candidate beans that qualify for autowiring
+DefaultListableBeanFactory->>DefaultListableBeanFactory:addCandidateEntry(result, candidate, descriptor, requiredType)<br>Add a candidate bean to the result
+DefaultListableBeanFactory->>AbstractBeanFactory:getType(name)<br>Get the type of the given bean
+AbstractBeanFactory->>DefaultListableBeanFactory:Return the class of the dependent bean<br>Return the actual class of the dependent bean
+DefaultListableBeanFactory->>DependencyDescriptor:resolveCandidate(beanName, requiredType, beanFactory)<br>Resolve the candidate dependent bean
+DependencyDescriptor->>AbstractBeanFactory:getBean(name)<br>Get the given bean instance
+AbstractBeanFactory->>DependencyDescriptor:<br>Return the dependent bean instance
+DependencyDescriptor->>DefaultListableBeanFactory:<br>Return the dependent bean instance to the factory
+DefaultListableBeanFactory->>AutowiredFieldElement:<br>Return the dependent bean to the field injector
+AutowiredFieldElement->>Field:field.set(bean, value)<br>Set the bean into the field
 ~~~
 
-### 七、源码分析
+### 7. Source Code Analysis
 
-#### 前置条件
+#### Prerequisites
 
-在Spring中，`AutowiredAnnotationBeanPostProcessor`是处理`@Autowired`等注解的关键类，它实现了下述两个接口。因此，为了深入理解`@Autowired`的工作方式，研究这个类是非常有用的。简而言之，为了完全理解`@Autowired`的工作机制，了解下述接口确实是必要的。这两个接口提供了对bean生命周期中关键阶段的干预，从而允许进行属性注入和其他相关的操作。
+In Spring, `AutowiredAnnotationBeanPostProcessor` is the key class that handles `@Autowired` and similar annotations. It implements the two interfaces below. To understand how `@Autowired` works, it helps to study this class and these interfaces. They let you step into key stages of the bean lifecycle, which makes property injection and related work possible.
 
-1. `MergedBeanDefinitionPostProcessor`接口
-   - 此接口提供的`postProcessMergedBeanDefinition`方法允许后处理器修改合并后的bean定义。合并后的bean定义是一个已经考虑了所有父bean定义属性的bean定义。对于`@Autowired`注解的处理，这一步通常涉及到收集需要被解析的`@Autowired`注解信息并准备对其进行后续处理。
-   - 🔗 [MergedBeanDefinitionPostProcessor接口传送门](https://github.com/xuchengsheng/spring-reading/tree/master/spring-interface/spring-interface-mergedBeanDefinitionPostProcessor)
-2. `InstantiationAwareBeanPostProcessor`接口
-   - 此接口提供了几个回调方法，允许后处理器在bean实例化之前和实例化之后介入bean的创建过程。特别是，`postProcessProperties`方法允许后处理器对bean的属性进行操作。对于`@Autowired`注解，这通常需要在属性设置或依赖注入阶段对 bean 进行处理，并将解析得到的值注入到bean中。
-   - 🔗 [InstantiationAwareBeanPostProcessor接口传送门](https://github.com/xuchengsheng/spring-reading/tree/master/spring-interface/spring-interface-instantiationAwareBeanPostProcessor)
+1. `MergedBeanDefinitionPostProcessor` interface
+   - Its `postProcessMergedBeanDefinition` method lets a post processor change the merged bean definition. A merged bean definition is one that already includes the properties of all parent bean definitions. For `@Autowired`, this step usually collects the `@Autowired` information that must be resolved and prepares it for later processing.
+   - 🔗 [MergedBeanDefinitionPostProcessor interface link](https://github.com/xuchengsheng/spring-reading/tree/master/spring-interface/spring-interface-mergedBeanDefinitionPostProcessor)
+2. `InstantiationAwareBeanPostProcessor` interface
+   - It provides several callback methods that let a post processor step into bean creation before and after instantiation. In particular, `postProcessProperties` lets the post processor work on the bean properties. For `@Autowired`, this is where the bean is handled during property setting or dependency injection, and the resolved values are injected into the bean.
+   - 🔗 [InstantiationAwareBeanPostProcessor interface link](https://github.com/xuchengsheng/spring-reading/tree/master/spring-interface/spring-interface-instantiationAwareBeanPostProcessor)
 
-#### 收集阶段
+#### Collection Phase
 
-在`org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor#postProcessMergedBeanDefinition`方法中，主要确保给定的bean定义与其预期的自动装配元数据一致。
+In `org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor#postProcessMergedBeanDefinition`, the main job is to make sure the bean definition matches its expected autowiring metadata.
 
 ```java
 @Override
 public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
-    // 对于给定的bean名称和类型，它首先尝试查找相关的InjectionMetadata，这可能包含了该bean的字段和方法的注入信息
+    // For the given bean name and type, first look for the related InjectionMetadata, which may hold the injection info of the bean's fields and methods
     InjectionMetadata metadata = findAutowiringMetadata(beanName, beanType, null);
     
-    // 使用找到的InjectionMetadata来验证bean定义中的配置成员是否与预期的注入元数据匹配。
+    // Use the found InjectionMetadata to check that the config members in the bean definition match the expected injection metadata.
     metadata.checkConfigMembers(beanDefinition);
 }
 ```
 
-在`org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor#findAutowiringMetadata`方法中，确保了始终为给定的bean名称和类获取最新和相关的`InjectionMetadata`，并利用缓存机制优化性能。
+In `org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor#findAutowiringMetadata`, the method always gets up-to-date and relevant `InjectionMetadata` for the given bean name and class. It uses a cache to improve performance.
 
 ```java
 private InjectionMetadata findAutowiringMetadata(String beanName, Class<?> clazz, @Nullable PropertyValues pvs) {
-    // 如果beanName为空，则使用类名作为缓存键。
+    // If beanName is empty, use the class name as the cache key.
     String cacheKey = (StringUtils.hasLength(beanName) ? beanName : clazz.getName());
-    // 首先尝试从并发缓存中获取InjectionMetadata。
+    // First try to get the InjectionMetadata from the concurrent cache.
     InjectionMetadata metadata = this.injectionMetadataCache.get(cacheKey);
-    // 检查获取到的元数据是否需要刷新。
+    // Check whether the metadata needs a refresh.
     if (InjectionMetadata.needsRefresh(metadata, clazz)) {
-        // 使用双重检查锁定确保线程安全。
+        // Use double-checked locking to stay thread safe.
         synchronized (this.injectionMetadataCache) {
             metadata = this.injectionMetadataCache.get(cacheKey);
             if (InjectionMetadata.needsRefresh(metadata, clazz)) {
-                // 如果有旧的元数据，清除它。
+                // If there is old metadata, clear it.
                 if (metadata != null) {
                     metadata.clear(pvs);
                 }
-                // 为给定的类构建新的InjectionMetadata。
+                // Build new InjectionMetadata for the given class.
                 metadata = buildAutowiringMetadata(clazz);
-                // 将新构建的元数据更新到缓存中。
+                // Put the newly built metadata into the cache.
                 this.injectionMetadataCache.put(cacheKey, metadata);
             }
         }
     }
-    // 返回找到的或新构建的元数据。
+    // Return the found or newly built metadata.
     return metadata;
 }
 ```
 
-在`org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor#buildAutowiringMetadata`方法中，查找类及其所有父类中的字段和方法，以找出所有带有自动装配注解的字段和方法，并为它们创建一个统一的`InjectionMetadata`对象。
+In `org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor#buildAutowiringMetadata`, the method scans the fields and methods of the class and all its parent classes. It finds those with autowiring annotations and creates one `InjectionMetadata` object for them.
 
 ```java
 private InjectionMetadata buildAutowiringMetadata(final Class<?> clazz) {
-    // 检查类是否含有自动装配注解，若无则直接返回空的InjectionMetadata。
+    // Check whether the class has autowiring annotations. If not, return an empty InjectionMetadata.
     if (!AnnotationUtils.isCandidateClass(clazz, this.autowiredAnnotationTypes)) {
         return InjectionMetadata.EMPTY;
     }
 
-    // 初始化存放注入元素的列表。
+    // Create the list that holds the injected elements.
     List<InjectionMetadata.InjectedElement> elements = new ArrayList<>();
     Class<?> targetClass = clazz;
 
     do {
-        // 当前类中要注入的元素列表。
+        // The list of elements to inject in the current class.
         final List<InjectionMetadata.InjectedElement> currElements = new ArrayList<>();
 
-        // 处理类中的所有字段。
+        // Process all fields of the class.
         ReflectionUtils.doWithLocalFields(targetClass, field -> {
-            // 查找字段上的自动装配注解。
+            // Look for an autowiring annotation on the field.
             MergedAnnotation<?> ann = findAutowiredAnnotation(field);
             if (ann != null) {
                 
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
                 
                 boolean required = determineRequiredStatus(ann);
-                // 创建一个新的AutowiredFieldElement并加入到列表。
+                // Create a new AutowiredFieldElement and add it to the list.
                 currElements.add(new AutowiredFieldElement(field, required));
             }
         });
 
-        // 处理类中的所有方法。
+        // Process all methods of the class.
         ReflectionUtils.doWithLocalMethods(targetClass, method -> {
             Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
             if (!BridgeMethodResolver.isVisibilityBridgeMethodPair(method, bridgedMethod)) {
                 return;
             }
-            // 查找方法上的自动装配注解。
+            // Look for an autowiring annotation on the method.
             MergedAnnotation<?> ann = findAutowiredAnnotation(bridgedMethod);
             if (ann != null && method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
                 
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
                 
                 boolean required = determineRequiredStatus(ann);
                 PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
-                // 创建一个新的AutowiredMethodElement并加入到列表。
+                // Create a new AutowiredMethodElement and add it to the list.
                 currElements.add(new AutowiredMethodElement(method, required, pd));
             }
         });
 
-        // 将当前类的注入元素加入到总的注入元素列表的开头。
+        // Add the elements of the current class to the front of the overall list.
         elements.addAll(0, currElements);
-        // 处理父类。
+        // Move on to the parent class.
         targetClass = targetClass.getSuperclass();
     }
-    // 循环直至Object类。
+    // Loop until the Object class.
     while (targetClass != null && targetClass != Object.class);
 
-    // 返回为元素列表创建的新的InjectionMetadata。
+    // Return a new InjectionMetadata created for the element list.
     return InjectionMetadata.forElements(elements, clazz);
 }
 ```
 
-在`org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor#autowiredAnnotationTypes`字段中，主要的用途是告诉`AutowiredAnnotationBeanPostProcessor`哪些注解它应该处理。当Spring容器解析bean定义并创建bean实例时，如果这个bean的字段、方法或构造函数上的注解被包含在这个`autowiredAnnotationTypes`集合中，那么`AutowiredAnnotationBeanPostProcessor`就会对它进行处理。
+The `org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor#autowiredAnnotationTypes` field tells `AutowiredAnnotationBeanPostProcessor` which annotations to handle. When the Spring container parses a bean definition and creates the bean instance, `AutowiredAnnotationBeanPostProcessor` handles any field, method, or constructor annotation that is in the `autowiredAnnotationTypes` set.
 
 ```java
 public AutowiredAnnotationBeanPostProcessor() {
    this.autowiredAnnotationTypes.add(Autowired.class);
-   // ... [代码部分省略以简化]
+   // ... [code omitted for brevity]
 }
 ```
 
-#### 注入阶段
+#### Injection Phase
 
-在`org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor#postProcessProperties`方法中，用于处理bean属性的后处理，特别是通过`@Autowired`等注解进行的属性注入。
+The `org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor#postProcessProperties` method post-processes bean properties. It is mainly used for property injection through annotations such as `@Autowired`.
 
 ```java
 @Override
 public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
-    // 获取与bean名称和类相关的InjectionMetadata。
-    // 这包括该bean需要进行注入的所有字段和方法。
+    // Get the InjectionMetadata for the bean name and class.
+    // It holds all fields and methods of this bean that need injection.
     InjectionMetadata metadata = findAutowiringMetadata(beanName, bean.getClass(), pvs);
     
     try {
-        // 使用获取到的InjectionMetadata，实际进行属性的注入。
+        // Use the InjectionMetadata to do the actual property injection.
         metadata.inject(bean, beanName, pvs);
     }
-    // 如果在注入过程中出现BeanCreationException，直接抛出。
+    // If a BeanCreationException occurs during injection, rethrow it.
     catch (BeanCreationException ex) {
         throw ex;
     }
-    // 捕获其他异常，并以BeanCreationException的形式抛出，提供详细的错误信息。
+    // Catch other exceptions and throw them as a BeanCreationException with a detailed message.
     catch (Throwable ex) {
         throw new BeanCreationException(beanName, "Injection of autowired dependencies failed", ex);
     }
-    // 返回原始的PropertyValues，因为这个方法主要关注依赖注入而不是修改属性。
+    // Return the original PropertyValues, because this method focuses on dependency injection, not on changing properties.
     return pvs;
 }
 ```
 
-在`org.springframework.beans.factory.annotation.InjectionMetadata#inject`方法中，主要目的是将所有需要注入的元素（例如带有`@Autowired`等注解的字段或方法）注入到目标bean中。
+The `org.springframework.beans.factory.annotation.InjectionMetadata#inject` method injects all elements that need injection (for example, fields or methods with `@Autowired`) into the target bean.
 
 ```java
 public void inject(Object target, @Nullable String beanName, @Nullable PropertyValues pvs) throws Throwable {
-    // 获取已经检查的元素。通常，在初始化阶段，所有的元素都会被检查一次。
+    // Get the checked elements. Usually all elements are checked once during initialization.
     Collection<InjectedElement> checkedElements = this.checkedElements;
 
-    // 如果已经有检查过的元素，则使用它们，否则使用所有注入的元素。
+    // If there are checked elements, use them. Otherwise use all injected elements.
     Collection<InjectedElement> elementsToIterate =
         (checkedElements != null ? checkedElements : this.injectedElements);
 
-    // 如果有需要注入的元素...
+    // If there are elements to inject...
     if (!elementsToIterate.isEmpty()) {
-        // 遍历每个元素并注入到目标bean中。
+        // Go through each element and inject it into the target bean.
         for (InjectedElement element : elementsToIterate) {
-            // 对每个元素（字段或方法）执行注入操作。
+            // Inject each element (field or method).
             element.inject(target, beanName, pvs);
         }
     }
 }
 ```
 
-在`org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.AutowiredFieldElement#inject`方法中，首先检查字段的值是否已经被缓存。如果已缓存，则从缓存中获取，否则重新解析。然后，它确保字段是可访问的（特别是对于私有字段），并将解析的值设置到目标bean的相应字段中。
+In `org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.AutowiredFieldElement#inject`, the method first checks whether the field value is cached. If it is, it takes the value from the cache. Otherwise it resolves the value again. Then it makes sure the field is accessible (especially for private fields) and sets the resolved value on the matching field of the target bean.
 
 ```java
 @Override
 protected void inject(Object bean, @Nullable String beanName, @Nullable PropertyValues pvs) throws Throwable {
-    // 步骤1. 获取代表带有@Autowired注解的字段的Field对象。
+    // Step 1. Get the Field object of the field annotated with @Autowired.
     Field field = (Field) this.member;
 
     Object value;
-    // 步骤2. 如果字段的值已经被缓存（即先前已解析过），则尝试从缓存中获取。
+    // Step 2. If the field value is already cached (resolved before), try to get it from the cache.
     if (this.cached) {
         try {
-            // 从缓存中获取已解析的字段值。
+            // Get the resolved field value from the cache.
             value = resolvedCachedArgument(beanName, this.cachedFieldValue);
         }
         catch (NoSuchBeanDefinitionException ex) {
-            // 如果缓存中的bean已被意外删除 -> 重新解析。
+            // The cached bean was removed unexpectedly -> resolve again.
             value = resolveFieldValue(field, bean, beanName);
         }
     }
     else {
-        // 步骤3. 如果字段值未被缓存，直接解析。
+        // Step 3. If the field value is not cached, resolve it directly.
         value = resolveFieldValue(field, bean, beanName);
     }
 
-    // 步骤4. 如果解析到的值不为null...
+    // Step 4. If the resolved value is not null...
     if (value != null) {
-        // 步骤4.1. 使字段可访问，这是必要的，特别是当字段是private时。
+        // Step 4.1. Make the field accessible. This is needed especially when the field is private.
         ReflectionUtils.makeAccessible(field);
-        // 步骤4.2. 实际将解析的值注入到目标bean的字段中。
+        // Step 4.2. Inject the resolved value into the field of the target bean.
         field.set(bean, value);
     }
 }
 ```
 
-首先来到`org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.AutowiredFieldElement#inject`方法中的步骤3。在`org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.AutowiredFieldElement#resolveFieldValue`方法中，通过`beanFactory.resolveDependency`方法从Spring的bean工厂中解析字段的值。
+Start with step 3 in `AutowiredFieldElement#inject`. In `org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.AutowiredFieldElement#resolveFieldValue`, the field value is resolved from Spring's bean factory through `beanFactory.resolveDependency`.
 
 ```java
 @Nullable
 private Object resolveFieldValue(Field field, Object bean, @Nullable String beanName) {
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     Object value;
     try {
-        // 通过`beanFactory.resolveDependency`方法从Spring的bean工厂中解析字段的值
+        // Resolve the field value from Spring's bean factory through `beanFactory.resolveDependency`
         value = beanFactory.resolveDependency(desc, beanName, autowiredBeanNames, typeConverter);
     }
     catch (BeansException ex) {
         throw new UnsatisfiedDependencyException(null, beanName, new InjectionPoint(field), ex);
     }
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     return value;
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultListableBeanFactory#resolveDependency`方法中，首先尝试获取一个延迟解析代理。如果无法获得，它会进一步尝试解析依赖。`doResolveDependency` 是实际进行解析工作的方法。
+In `org.springframework.beans.factory.support.DefaultListableBeanFactory#resolveDependency`, the method first tries to get a lazy resolution proxy. If it cannot, it goes on to resolve the dependency. `doResolveDependency` does the actual resolving.
 
 ```java
 public Object resolveDependency(DependencyDescriptor descriptor, @Nullable String requestingBeanName,
                                 @Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter) throws BeansException {
-	// ... [代码部分省略以简化]
+	// ... [code omitted for brevity]
     
     Object result = getAutowireCandidateResolver().getLazyResolutionProxyIfNecessary(
         descriptor, requestingBeanName);
@@ -439,33 +450,33 @@ public Object resolveDependency(DependencyDescriptor descriptor, @Nullable Strin
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultListableBeanFactory#doResolveDependency`方法中，尝试解析一个特定的依赖，首先查找所有可能的匹配的 bean，然后选择一个最佳匹配的 bean。如果存在多个匹配的 bean 或没有找到匹配的 bean，它会进行相应的处理。
+In `org.springframework.beans.factory.support.DefaultListableBeanFactory#doResolveDependency`, the method resolves one dependency. It first finds all possible matching beans, then picks the best match. If there are several matches, or none, it handles each case.
 
 ```java
 public Object doResolveDependency(DependencyDescriptor descriptor, @Nullable String beanName,
 			@Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter) throws BeansException {
 
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
     try {
-        // 如果存在快捷解决依赖的方法，使用它
+        // If there is a shortcut to resolve the dependency, use it
         Object shortcut = descriptor.resolveShortcut(this);
         if (shortcut != null) {
             return shortcut;
         }
 
-        // 获取依赖的类型
+        // Get the type of the dependency
         Class<?> type = descriptor.getDependencyType();
         
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
 
-        // 步骤1. 根据依赖描述符查找匹配的bean
+        // Step 1. Find matching beans for the dependency descriptor
         Map<String, Object> matchingBeans = findAutowireCandidates(beanName, type, descriptor);
         
-        // 如果没有找到匹配的bean
+        // If no matching bean is found
         if (matchingBeans.isEmpty()) {
             if (isRequired(descriptor)) {
-                // 如果依赖是必需的，抛出异常
+                // If the dependency is required, throw an exception
                 raiseNoMatchingBeanFound(type, descriptor.getResolvableType(), descriptor);
             }
             return null;
@@ -474,13 +485,13 @@ public Object doResolveDependency(DependencyDescriptor descriptor, @Nullable Str
         String autowiredBeanName;
         Object instanceCandidate;
 
-        // 当找到多个匹配的bean
+        // When several matching beans are found
         if (matchingBeans.size() > 1) {
-            // 确定最佳的自动装配候选者
+            // Determine the best autowire candidate
             autowiredBeanName = determineAutowireCandidate(matchingBeans, descriptor);
             if (autowiredBeanName == null) {
                 if (isRequired(descriptor) || !indicatesMultipleBeans(type)) {
-                    // 如果不能确定唯一的bean，尝试解析不唯一的依赖
+                    // If a single bean cannot be determined, try to resolve the non-unique dependency
                     return descriptor.resolveNotUnique(descriptor.getResolvableType(), matchingBeans);
                 }
                 else {
@@ -490,71 +501,71 @@ public Object doResolveDependency(DependencyDescriptor descriptor, @Nullable Str
             instanceCandidate = matchingBeans.get(autowiredBeanName);
         }
         else {
-            // 只找到一个匹配的bean
+            // Only one matching bean is found
             Map.Entry<String, Object> entry = matchingBeans.entrySet().iterator().next();
             autowiredBeanName = entry.getKey();
             instanceCandidate = entry.getValue();
         }
 
-        // 添加自动装配的bean名到集合
+        // Add the autowired bean name to the collection
         if (autowiredBeanNames != null) {
             autowiredBeanNames.add(autowiredBeanName);
         }
 
-        // 步骤2. 如果候选者是一个类，实例化它
+        // Step 2. If the candidate is a class, instantiate it
         if (instanceCandidate instanceof Class) {
             instanceCandidate = descriptor.resolveCandidate(autowiredBeanName, type, this);
         }
         
         Object result = instanceCandidate;
         
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
         
         return result;
     }
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-我们来到在`org.springframework.beans.factory.support.DefaultListableBeanFactory#doResolveDependency`方法中的步骤1。在`org.springframework.beans.factory.support.DefaultListableBeanFactory#findAutowireCandidates`方法中，首先基于给定的类型获取所有可能的bean名。接着，对于每一个可能的候选bean，它检查该bean是否是一个合适的自动注入候选，如果是，它将这个bean添加到结果集中。最后，方法返回找到的所有合适的候选bean。
+Now step 1 in `DefaultListableBeanFactory#doResolveDependency`. In `org.springframework.beans.factory.support.DefaultListableBeanFactory#findAutowireCandidates`, the method first gets all possible bean names for the given type. Then, for each candidate bean, it checks whether the bean is a suitable autowire candidate. If so, it adds the bean to the result. At the end, it returns all suitable candidate beans.
 
 ```java
 protected Map<String, Object> findAutowireCandidates(
 			@Nullable String beanName, Class<?> requiredType, DependencyDescriptor descriptor) {
 
-    // 根据所需的类型，包括所有父工厂中的bean，获取所有可能的bean名
+    // Get all possible bean names for the required type, including beans in parent factories
     String[] candidateNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
         this, requiredType, true, descriptor.isEager());
 
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
-    // 遍历所有候选bean名
+    // Go through all candidate bean names
     for (String candidate : candidateNames) {
-        // 如果候选bean不是正在查找的bean本身并且它是一个合适的自动注入候选
+        // If the candidate is not the bean being looked up and it is a suitable autowire candidate
         if (!isSelfReference(beanName, candidate) && isAutowireCandidate(candidate, descriptor)) {
-            // 添加这个候选bean到结果中
+            // Add this candidate bean to the result
             addCandidateEntry(result, candidate, descriptor, requiredType);
         }
     }
 
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
-    // 返回找到的所有候选bean
+    // Return all candidate beans found
     return result; 
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultListableBeanFactory#addCandidateEntry`方法中，主要获取候选bean的类型，并将其添加到候选bean的集合中。
+In `org.springframework.beans.factory.support.DefaultListableBeanFactory#addCandidateEntry`, the method gets the type of the candidate bean and adds it to the candidate collection.
 
 ```java
 private void addCandidateEntry(Map<String, Object> candidates, String candidateName,
 			DependencyDescriptor descriptor, Class<?> requiredType) {
-	// ... [代码部分省略以简化]
+	// ... [code omitted for brevity]
     candidates.put(candidateName, getType(candidateName));
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractBeanFactory#getType(name)`方法中，通过bean的名字来获取对应bean的类型。
+In `org.springframework.beans.factory.support.AbstractBeanFactory#getType(name)`, the method gets the type of a bean from its name.
 
 ```java
 public Class<?> getType(String name) throws NoSuchBeanDefinitionException {
@@ -562,7 +573,7 @@ public Class<?> getType(String name) throws NoSuchBeanDefinitionException {
 }
 ```
 
-我们来到在`org.springframework.beans.factory.support.DefaultListableBeanFactory#doResolveDependency`方法中的步骤2。在`org.springframework.beans.factory.config.DependencyDescriptor#resolveCandidate`方法中，最后发现`@Autowired` 的整个流程最终还是从Spring容器中获取一个bean实例并注入到相应的字段或构造函数参数中。
+Now step 2 in `DefaultListableBeanFactory#doResolveDependency`. In `org.springframework.beans.factory.config.DependencyDescriptor#resolveCandidate`, we see that the whole `@Autowired` flow ends by getting a bean instance from the Spring container and injecting it into the matching field or constructor parameter.
 
 ```java
 public Object resolveCandidate(String beanName, Class<?> requiredType, BeanFactory beanFactory)
@@ -572,120 +583,120 @@ public Object resolveCandidate(String beanName, Class<?> requiredType, BeanFacto
 }
 ```
 
-最后我们来到`org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.AutowiredFieldElement#inject`方法中的步骤4.2。在 `AutowiredFieldElement#inject` 方法内部，通过`resolveFieldValue(field, bean, beanName)`方法，来确定了正确的bean值并满足某个字段的 `@Autowired` 注解，将使用反射来实际设置这个值。具体地说，它会使用 `Field` 类的 `set` 方法来为目标对象的这个字段设置相应的值。这就是 `@Autowired` 在字段上使用时如何使得Spring能够自动为这个字段注入值的背后原理。
+Finally, we come back to step 4.2 in `AutowiredAnnotationBeanPostProcessor.AutowiredFieldElement#inject`. Inside `AutowiredFieldElement#inject`, `resolveFieldValue(field, bean, beanName)` finds the right bean value for the `@Autowired` field. Spring then sets the value by reflection, using the `set` method of the `Field` class. This is how `@Autowired` on a field makes Spring inject a value into it.
 
 ```java
-// 步骤4. 如果解析到的值不为null...
+// Step 4. If the resolved value is not null...
 if (value != null) {
-    // 步骤4.1. 使字段可访问，这是必要的，特别是当字段是private时。
+    // Step 4.1. Make the field accessible. This is needed especially when the field is private.
     ReflectionUtils.makeAccessible(field);
-    // 步骤4.2. 实际将解析的值注入到目标bean的字段中。
+    // Step 4.2. Inject the resolved value into the field of the target bean.
     field.set(bean, value);
 }
 ```
 
-### 八、注意事项
+### 8. Notes
 
-1. **默认情况下，依赖是必需的**
-   - 如果Spring找不到匹配的bean来注入，它会抛出一个异常。我们可以通过将 `required` 属性设置为 `false` 来使其变为非必需：`@Autowired(required=false)`。
-2. **类型匹配**
-   - 默认情况下，Spring使用类型匹配来解析依赖。如果有多个匹配的bean，它会抛出一个异常。
-3. **使用 `@Qualifier`**
-   - 如果有多个相同类型的bean，我们可以使用 `@Qualifier` 注解来指定bean的名称，以解决歧义。
-4. **循环依赖**
-   - `@Autowired` 可能导致循环依赖的问题。例如，A依赖于B，而B依赖于A。Spring有一定的机制来处理单例作用域的bean的循环依赖，但对于原型作用域的bean，循环依赖会导致异常。
-5. **注入位置**
-   - 我们可以在字段、构造函数、或setter方法上使用 `@Autowired`。但是，推荐的做法是在构造函数上使用它，这样可以确保所有的依赖在对象创建时都已经注入。
-6. **影响范围**
-   - 使用 `@Autowired` 时，请注意不要在大范围的bean（例如单例）中注入小范围的bean（例如原型），除非我们清楚地知道自己在做什么。
-7. **考虑使用构造函数注入**
-   - 使用构造函数注入可以确保bean在构造时已完全初始化，从而使bean处于不变的状态。这也有助于在单元测试中模拟依赖关系。
-8. **私有字段注入**
-   - 尽管可以将 `@Autowired` 应用于私有字段，但这意味着Spring通过反射绕过了正常的Java访问控制来注入字段，这可能不是最佳实践。
-9. **不支持静态字段**
-   + `@Autowired` 不能用于静态字段。这是因为静态字段属于类而不是实例，而Spring是通过实例进行依赖注入的。
-10. **不支持静态方法**
-    + `@Autowired` 也不能用于静态setter方法或其他静态方法
+1. **Dependencies are required by default**
+   - If Spring cannot find a matching bean to inject, it throws an exception. You can make the dependency optional by setting `required` to `false`: `@Autowired(required=false)`.
+2. **Type matching**
+   - By default, Spring resolves dependencies by type. If several beans match, it throws an exception.
+3. **Use `@Qualifier`**
+   - If there are several beans of the same type, use `@Qualifier` to give the bean name and remove the ambiguity.
+4. **Circular dependency**
+   - `@Autowired` can cause circular dependency problems. For example, A depends on B, and B depends on A. Spring has a way to handle circular dependencies of singleton beans, but for prototype beans a circular dependency causes an exception.
+5. **Injection point**
+   - You can use `@Autowired` on fields, constructors, or setter methods. The recommended way is the constructor. This makes sure all dependencies are injected when the object is created.
+6. **Scope**
+   - Be careful not to inject a bean with a short scope (for example, prototype) into a bean with a long scope (for example, singleton), unless you know exactly what you are doing.
+7. **Consider constructor injection**
+   - Constructor injection makes sure the bean is fully initialized when it is constructed, so the bean stays in an unchanging state. It also helps to mock dependencies in unit tests.
+8. **Private field injection**
+   - You can apply `@Autowired` to private fields. But then Spring uses reflection to skip the normal Java access control. This may not be a best practice.
+9. **Static fields are not supported**
+   + `@Autowired` cannot be used on static fields. A static field belongs to the class, not to an instance, and Spring injects dependencies into instances.
+10. **Static methods are not supported**
+    + `@Autowired` also cannot be used on static setters or other static methods.
 
-### 九、总结
+### 9. Summary
 
-#### 最佳实践总结
+#### Best Practices Summary
 
-1. **上下文初始化**
-   - 当我们创建 `AnnotationConfigApplicationContext` 并提供 `MyConfiguration` 类作为参数时，Spring 开始初始化上下文。这意味着它会加载所有的bean定义并准备创建实例。
-2. **组件扫描**
-   - 在 `MyConfiguration` 类中，我们使用了 `@ComponentScan` 注解指定了扫描的包路径。这使得Spring扫描指定包和其子包中的所有类，并查找标记为 `@Component`、`@Service`、`@Repository` 和 `@Controller` 等注解的类。找到后，Spring 会自动将这些类注册为bean。
-3. **依赖解析**
-   - 在 `MyController` 类中，我们在 `myService` 字段上使用了 `@Autowired` 注解。这告诉Spring，当创建 `MyController` bean时，需要找到一个 `MyService` 类型的bean，并自动注入到该字段中。
-4. **实例化并注入**
-   - 当我们从上下文中请求 `MyController` 类型的bean时，Spring会先创建 `MyController` 的一个实例。但在此之前，它会查看所有带有 `@Autowired` 注解的字段，然后为这些字段找到匹配的bean并注入。
-   - 在我们的例子中，Spring找到了 `MyService` 类型的bean并将其注入到了 `myService` 字段中。
-5. **执行业务逻辑**
-   - 在 `showService` 方法被调用时，它简单地打印了 `myService` 字段。由于这个字段已经被成功地自动注入，所以我们看到了预期的输出，证明 `@Autowired` 功能正常。
-6. **结果**
-   - 最终输出显示了 `myService` 已经被成功地注入到 `MyController` 中，并显示了其实例的内存地址。
+1. **Context initialization**
+   - When we create `AnnotationConfigApplicationContext` with the `MyConfiguration` class, Spring starts to initialize the context. It loads all bean definitions and prepares to create instances.
+2. **Component scanning**
+   - In `MyConfiguration`, we use `@ComponentScan` to give the package to scan. Spring scans that package and its sub-packages for classes annotated with `@Component`, `@Service`, `@Repository`, `@Controller`, and so on. It registers the classes it finds as beans.
+3. **Dependency resolution**
+   - In `MyController`, we put `@Autowired` on the `myService` field. This tells Spring that when it creates the `MyController` bean, it must find a bean of type `MyService` and inject it into the field.
+4. **Instantiation and injection**
+   - When we ask the context for a `MyController` bean, Spring first creates an instance of `MyController`. Before that, it looks at all fields with `@Autowired`, finds a matching bean for each, and injects it.
+   - In our example, Spring finds the `MyService` bean and injects it into the `myService` field.
+5. **Running the business logic**
+   - When `showService` is called, it simply prints the `myService` field. The field was injected successfully, so we see the expected output. This shows that `@Autowired` works.
+6. **Result**
+   - The output shows that `myService` was injected into `MyController`. It also shows the memory address of the instance.
 
-#### 源码分析总结
+#### Source Code Analysis Summary
 
-1. **核心后处理器**
+1. **Core post processor**
 
-   - `AutowiredAnnotationBeanPostProcessor`是处理`@Autowired`等注解的主要后处理器。它实现了两个关键的接口，`MergedBeanDefinitionPostProcessor`和`InstantiationAwareBeanPostProcessor`，这两个接口允许在bean的生命周期中的关键阶段进行干预，为属性注入提供了机制。
+   - `AutowiredAnnotationBeanPostProcessor` is the main post processor that handles `@Autowired` and similar annotations. It implements two key interfaces, `MergedBeanDefinitionPostProcessor` and `InstantiationAwareBeanPostProcessor`. They let it step into key stages of the bean lifecycle and give it the means to inject properties.
 
-2. **收集阶段**
+2. **Collection phase**
 
-   + 检索Autowired的元数据
+   + Get the Autowired metadata
 
-     - Spring首先使用`postProcessMergedBeanDefinition`方法确保给定的bean定义与其预期的自动装配元数据一致。
+     - Spring first uses `postProcessMergedBeanDefinition` to make sure the bean definition matches its expected autowiring metadata.
 
-     - 在该方法中, Spring会尝试查找与给定bean名称和类型相关的`InjectionMetadata`。这可能包括了该bean的字段和方法的注入信息。
+     - In this method, Spring tries to find the `InjectionMetadata` for the given bean name and type. It may hold the injection info of the bean's fields and methods.
 
-   + 寻找匹配的Autowiring元数据
-     - 在`findAutowiringMetadata`中，Spring确保始终为给定的bean名称和类获取最新和相关的`InjectionMetadata`。Spring也利用了缓存机制，以提高性能。
+   + Find the matching autowiring metadata
+     - In `findAutowiringMetadata`, Spring makes sure it always gets up-to-date and relevant `InjectionMetadata` for the given bean name and class. Spring also uses a cache to improve performance.
 
-   + 构建Autowiring元数据
+   + Build the autowiring metadata
 
-     - 在`buildAutowiringMetadata`方法中，Spring会查找类及其所有父类中的字段和方法，以找出所有带有自动装配注解的字段和方法。
+     - In `buildAutowiringMetadata`, Spring scans the fields and methods of the class and all its parent classes, and finds those with autowiring annotations.
 
-     - 然后，为这些字段和方法创建一个统一的`InjectionMetadata`对象。
+     - Then it creates one `InjectionMetadata` object for these fields and methods.
 
-   + 检查注解类型
-     - 在`AutowiredAnnotationBeanPostProcessor`的构造方法中，主要的目的是告诉这个后处理器它应该处理哪些注解。例如, `@Autowired`就是这些注解之一。
+   + Check the annotation types
+     - The constructor of `AutowiredAnnotationBeanPostProcessor` tells the post processor which annotations to handle. For example, `@Autowired` is one of them.
 
-3. **注入阶段**
+3. **Injection phase**
 
-   + 处理bean属性的后处理
+   + Post-process the bean properties
 
-     - 在`postProcessProperties`中，Spring用于处理bean属性的后处理，特别是通过`@Autowired`进行的属性注入。
+     - In `postProcessProperties`, Spring post-processes the bean properties, especially property injection through `@Autowired`.
 
-     - 这涉及到实际将解析得到的值注入到bean中。
+     - This includes injecting the resolved values into the bean.
 
-   + 注入元数据的实际注入操作
+   + The actual injection with the injection metadata
 
-     - 在`InjectionMetadata#inject`方法中，这里会对bean进行属性的实际注入。
+     - The `InjectionMetadata#inject` method does the actual property injection into the bean.
 
-     - Spring会遍历每一个需要注入的元素，并执行实际的注入操作。
+     - Spring goes through each element that needs injection and injects it.
 
-   + 字段的实际注入
+   + Field injection
 
-     - 在`AutowiredFieldElement#inject`中，Spring首先会检查字段的值是否已经被缓存。如果已缓存，则从缓存中获取，否则重新解析。
+     - In `AutowiredFieldElement#inject`, Spring first checks whether the field value is cached. If it is, Spring takes it from the cache. Otherwise it resolves the value again.
 
-     - 然后，它确保字段是可访问的，并将解析的值设置到目标bean的相应字段中。
+     - Then it makes sure the field is accessible and sets the resolved value on the matching field of the target bean.
 
-   + 解析依赖
+   + Resolve the dependency
 
-     - 在`doResolveDependency`方法中，Spring开始尝试解析一个特定的依赖。
+     - In `doResolveDependency`, Spring starts to resolve one dependency.
 
-     - 首先，基于给定的类型，Spring会查找所有匹配的bean。
+     - First, Spring finds all beans that match the given type.
 
-     - 如果找到多个匹配的bean，它会尝试确定哪一个是最佳的自动装配候选。
+     - If several beans match, it tries to decide which one is the best autowire candidate.
 
-   + 获取bean的类型
+   + Get the bean type
 
-     - 在`addCandidateEntry`方法中，Spring主要获取候选bean的类型，并将其添加到候选bean的集合中。
+     - In `addCandidateEntry`, Spring gets the type of the candidate bean and adds it to the candidate collection.
 
-     - 使用`getType`方法，Spring可以通过bean的名字来获取对应bean的类型。
+     - With the `getType` method, Spring gets the type of a bean from its name.
 
-   + 从Spring容器中获取bean实例
-     - 在`resolveCandidate`中，即从Spring容器中获取一个bean实例并注入到相应的字段或构造函数参数中。
-   + 反射注入
-     + 通过`field.set(bean, value)`来完成实际字段注入的步骤，将解析出的bean实例（value）注入到目标bean的对应字段上。这是整个`@Autowired`流程的最终步骤
+   + Get the bean instance from the Spring container
+     - In `resolveCandidate`, a bean instance is taken from the Spring container and injected into the matching field or constructor parameter.
+   + Injection by reflection
+     + The actual field injection is done with `field.set(bean, value)`. It sets the resolved bean instance (value) on the matching field of the target bean. This is the final step of the whole `@Autowired` flow.

@@ -6,7 +6,7 @@ import org.springframework.core.type.AnnotationMetadata;
 
 /**
  * @author xcs
- * @date 2023年08月29日 11时08分
+ * @date 2023-08-29 11:08
  **/
 public class MyDeferredImportSelector implements DeferredImportSelector {
 

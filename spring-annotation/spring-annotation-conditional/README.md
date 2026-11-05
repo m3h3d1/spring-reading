@@ -1,53 +1,54 @@
 ## @Conditional
 
 - [@Conditional](#conditional)
-  - [一、基本信息](#一基本信息)
-  - [二、注解描述](#二注解描述)
-  - [三、注解源码](#三注解源码)
-  - [四、主要功能](#四主要功能)
-  - [五、最佳实践](#五最佳实践)
-    - [在@Bean上使用](#在bean上使用)
-    - [在@Configuration上使用](#在configuration上使用)
-    - [自定义组合注解](#自定义组合注解)
-  - [六、时序图](#六时序图)
-  - [七、源码分析](#七源码分析)
-  - [八、注意事项](#八注意事项)
-  - [九、总结](#九总结)
-    - [最佳实践总结](#最佳实践总结)
-    - [源码分析总结](#源码分析总结)
+  - [1. Overview](#1-overview)
+  - [2. Annotation Description](#2-annotation-description)
+  - [3. Annotation Source](#3-annotation-source)
+  - [4. Main Features](#4-main-features)
+  - [5. Best Practices](#5-best-practices)
+    - [Use on @Bean](#use-on-bean)
+    - [Use on @Configuration](#use-on-configuration)
+    - [Custom Composed Annotation](#custom-composed-annotation)
+  - [6. Sequence Diagram](#6-sequence-diagram)
+  - [7. Source Code Analysis](#7-source-code-analysis)
+  - [8. Notes](#8-notes)
+  - [9. Summary](#9-summary)
+    - [Best Practices Summary](#best-practices-summary)
+    - [Source Code Analysis Summary](#source-code-analysis-summary)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [我的CSDN](https://blog.csdn.net/duzhuang2399/article/details/133800722) 📚 **文章目录** - [所有文章](https://github.com/xuchengsheng/spring-reading) 🔗 **源码地址** - [@Conditional源码](https://github.com/xuchengsheng/spring-reading/tree/master/spring-annotation/spring-annotation-conditional)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN](https://blog.csdn.net/duzhuang2399/article/details/133800722) 📚 **Contents** - [All articles](https://github.com/xuchengsheng/spring-reading) 🔗 **Source code** - [@Conditional source code](https://github.com/xuchengsheng/spring-reading/tree/master/spring-annotation/spring-annotation-conditional)
 
-### 二、注解描述
+### 2. Annotation Description
 
-`@Conditional`注解，是用来基于满足某些特定条件来决定一个Bean是否应该被注册到Spring容器的。这提供了一种灵活的方式来根据环境、配置或其他因素来决定是否激活或者创建某个Bean。
+The `@Conditional` annotation decides whether a bean is registered in the Spring container, based on some condition. It gives a flexible way to turn a bean on or off depending on the environment, configuration, or other factors.
 
-### 三、注解源码
+### 3. Annotation Source
 
-`@Conditional`注解是 Spring 框架自 3.0 版本开始引入的一个核心注解，用于指示一个组件只在所有指定条件匹配时才能被注册。
+`@Conditional` has been part of Spring since version 3.0. It says a component can be registered only when all the given conditions match.
 
 ```java
 /**
- * 表明只有当所有指定的条件都满足时，组件才有资格被注册。
+ * Indicates that a component is only eligible for registration when all specified conditions match.
  *
- * 条件是可以在bean定义被注册前以编程方式确定的任何状态（参考 Condition 获取详情）。
+ * A condition is any state that can be determined programmatically before the bean definition
+ * is due to be registered (see Condition for details).
  *
- * @Conditional 注解可以以下列方式使用：
+ * The @Conditional annotation may be used in any of the following ways:
  * 
- * 作为直接或间接使用 @Component 注解的任何类的类型级别注解，包括 Configuration @Configuration 类
- * 作为元注解，用于组合自定义的范型注解
- * 作为任何 Bean @Bean 方法的方法级别注解
+ * as a type-level annotation on any class directly or indirectly annotated with @Component, including Configuration @Configuration classes
+ * as a meta-annotation, for the purpose of composing custom stereotype annotations
+ * as a method-level annotation on any Bean @Bean method
  * 
  *
- * 如果一个 @Configuration 类标记为 @Conditional，与该类关联的所有 @Bean 方法、Import @Import 注解，
- * 和 ComponentScan @ComponentScan 注解都将受到这些条件的限制。
+ * If a @Configuration class is marked with @Conditional, all of the @Bean methods, Import @Import annotations,
+ * and ComponentScan @ComponentScan annotations associated with that class will be subject to the conditions.
  *
- * 注意：不支持 @Conditional 注解的继承；任何从超类或从被覆盖的方法继承的条件都不会被考虑。
- * 为了强制这些语义，@Conditional 本身未声明为 java.lang.annotation.Inherited @Inherited；
- * 此外，任何用  @Conditional 作为元注解的自定义组成注解也不应声明为 @Inherited。
+ * NOTE: Inheritance of @Conditional annotations is not supported; any conditions from superclasses or from overridden methods will not be considered.
+ * In order to enforce these semantics, @Conditional itself is not declared as a java.lang.annotation.Inherited @Inherited;
+ * furthermore, any custom composed annotation that is meta-annotated with @Conditional must not be declared as @Inherited.
  *
  * @author Phillip Webb
  * @author Sam Brannen
@@ -60,32 +61,32 @@
 public @interface Conditional {
 
 	/**
-	 * 所有必须满足的 {@link Condition} 类，以便组件可以被注册。
+	 * All {@link Condition} classes that must match in order for the component to be registered.
 	 */
 	Class<? extends Condition>[] value();
 }
 ```
 
-### 四、主要功能
+### 4. Main Features
 
-1. **条件化 Bean 注册**
-   + 可以根据特定的条件来决定是否创建并注册一个 Bean。这允许我们根据环境、配置或其他因素动态地选择哪些 Bean 需要被实例化。
-2. **条件化配置类**
-   + 不仅可以对单个 Bean 使用，还可以对整个配置类使用。如果配置类上的条件不满足，那么该配置类中定义的所有 Beans 都不会被注册。
-3. **灵活性**
-   + 与一个实现了 `Condition` 接口的类一起使用。这个接口允许我们定义自己的条件逻辑，使得其可以非常灵活地根据各种场景来决定是否注册 Bean。
-4. **与其他注解组合**
-   + 除了与 `@Bean` 和 `@Configuration` 注解一起使用外，`@Conditional` 还可以作为元注解，用于创建自定义的组合注解，这些组合注解内部使用 `@Conditional` 来应用条件逻辑。
-5. **对整个配置类的影响**
-   + 当 `@Conditional` 用于配置类时，不仅仅是该类，还有与该类关联的所有 `@Bean` 方法、`@Import` 注解和 `@ComponentScan` 注解都将受到条件的影响。
-6. **不支持继承**
-   + `@Conditional` 注解本身不是继承的，因此，从父类或接口继承的条件不会被子类考虑。
+1. **Conditional bean registration**
+   + You can decide whether to create and register a bean based on specific conditions. This lets you choose which beans are instantiated depending on the environment, configuration, or other factors.
+2. **Conditional configuration classes**
+   + It works on a single bean and also on a whole configuration class. If the condition on a configuration class is not met, none of the beans defined in it are registered.
+3. **Flexibility**
+   + It is used with a class that implements the `Condition` interface. This interface lets you write your own condition logic, so you can decide whether to register a bean in many different situations.
+4. **Combining with other annotations**
+   + Besides `@Bean` and `@Configuration`, `@Conditional` can be used as a meta-annotation to build your own composed annotations. These annotations use `@Conditional` inside to apply the condition logic.
+5. **Effect on a whole configuration class**
+   + When `@Conditional` is used on a configuration class, the condition affects the class itself and also its `@Bean` methods, `@Import` annotations, and `@ComponentScan` annotations.
+6. **No inheritance**
+   + `@Conditional` itself is not inherited. So conditions from a parent class or interface are not considered by subclasses.
 
-### 五、最佳实践
+### 5. Best Practices
 
-#### 在@Bean上使用
+#### Use on @Bean
 
-首先来看看启动类入口，首先设置一个系统属性`enable.bean`为`true`，然后上下文环境使用`AnnotationConfigApplicationContext`（此类是使用Java注解来配置Spring容器的方式），构造参数我们给定了一个`MyConfiguration`组件类，最后打印了Spring上下文中所有的bean定义名称。
+First, the entry class. It sets the system property `enable.bean` to `true`. Then it uses `AnnotationConfigApplicationContext` (a way to configure the Spring container with Java annotations) with the `MyConfiguration` class as the argument. Finally, it prints the names of all bean definitions in the Spring context.
 
 ```java
 public class ConditionBeanApplication {
@@ -100,7 +101,7 @@ public class ConditionBeanApplication {
 }
 ```
 
-`MyBeanConfiguration`，其中定义了两个bean：`user1`和`user2`。`user1` bean的创建是基于条件的，具体取决于`BeanPropertyCondition`条件的结果。而`user2` bean则无条件创建。
+`MyBeanConfiguration` defines two beans: `user1` and `user2`. The `user1` bean is created only if `BeanPropertyCondition` matches. The `user2` bean is always created.
 
 ```java
 @Configuration
@@ -119,7 +120,7 @@ public class MyBeanConfiguration {
 }
 ```
 
-`BeanPropertyCondition`。这个实现会根据`enable.bean`属性的值决定是否满足条件。具体来说：如果环境属性`enable.bean`的值是`true`，则`user1` bean会被创建并添加到Spring容器。如果`enable.bean`不是`true`（或者没有设置这个属性），`user1` bean不会被创建。
+`BeanPropertyCondition` decides whether the condition is met from the value of `enable.bean`. If the environment property `enable.bean` is `true`, the `user1` bean is created and added to the Spring container. If `enable.bean` is not `true` (or is not set), the `user1` bean is not created.
 
 ```java
 public class BeanPropertyCondition implements Condition {
@@ -130,7 +131,7 @@ public class BeanPropertyCondition implements Condition {
 }
 ```
 
-定义两个简单的Java类：`User1`和`User2`。
+Two simple Java classes: `User1` and `User2`.
 
 ```java
 public class User1 {
@@ -142,7 +143,7 @@ public class User2 {
 }
 ```
 
-当`enable.bean`为`true`运行结果发现，根据`enable.bean`属性的值来注册`user1` bean，而`user2` bean则不受此属性的影响。
+When `enable.bean` is `true`, the result shows that the `user1` bean is registered because of the property value. The `user2` bean is not affected by this property.
 
 ```java
 beanDefinitionName = myBeanConfiguration
@@ -150,16 +151,16 @@ beanDefinitionName = user1
 beanDefinitionName = user2
 ```
 
-当`enable.bean`为`false`运行结果发现，`enable.bean`值为`false`，所以条件不满足。因此`user1`bean不会被注册，`user2` bean不受任何条件的影响。
+When `enable.bean` is `false`, the condition is not met. So the `user1` bean is not registered. The `user2` bean is not affected by any condition.
 
 ```java
 beanDefinitionName = myBeanConfiguration
 beanDefinitionName = user2
 ```
 
-#### 在@Configuration上使用
+#### Use on @Configuration
 
-首先来看看启动类入口，首先设置一个系统属性`enable.config`为`true`，然后上下文环境使用`AnnotationConfigApplicationContext`（此类是使用Java注解来配置Spring容器的方式），构造参数我们给定了一个`MyConfiguration`组件类，最后打印了Spring上下文中所有的bean定义名称。
+First, the entry class. It sets the system property `enable.config` to `true`. Then it uses `AnnotationConfigApplicationContext` (a way to configure the Spring container with Java annotations) with the `MyConfiguration` class as the argument. Finally, it prints the names of all bean definitions in the Spring context.
 
 ```java
 public class ConditionConfigurationApplication {
@@ -174,7 +175,7 @@ public class ConditionConfigurationApplication {
 }
 ```
 
-`MyConfigConfiguration`，其中定义了两个bean：`user3`和`user4`。当`ConfigPropertyCondition`条件不满足时`MyConfigConfiguration`配置类不被激活，该配置类中定义的`user3`和`user4`不会被注册。
+`MyConfigConfiguration` defines two beans: `user3` and `user4`. When `ConfigPropertyCondition` is not met, the `MyConfigConfiguration` class is not activated. Then `user3` and `user4` are not registered.
 
 ```java
 @Configuration
@@ -193,7 +194,7 @@ public class MyConfigConfiguration {
 }
 ```
 
-`ConfigPropertyCondition`。这个实现会根据`enable.config`属性的值决定是否满足条件。具体来说：当`enable.config`设置为`true`，`ConfigPropertyCondition`满足，`MyConfigConfiguration`配置类被激活，`user3`和`user4` beans都将被注册到Spring上下文。当`enable.config`设置为`false`或未设置，`ConfigPropertyCondition`不满足，`MyConfigConfiguration`配置类不被激活，`user3`和`user4` beans都不会被注册。
+`ConfigPropertyCondition` decides whether the condition is met from the value of `enable.config`. When `enable.config` is `true`, `ConfigPropertyCondition` matches. The `MyConfigConfiguration` class is activated, and both `user3` and `user4` are registered in the Spring context. When `enable.config` is `false` or not set, `ConfigPropertyCondition` does not match. The `MyConfigConfiguration` class is not activated, and neither `user3` nor `user4` is registered.
 
 ```java
 public class ConfigPropertyCondition implements Condition {
@@ -204,7 +205,7 @@ public class ConfigPropertyCondition implements Condition {
 }
 ```
 
-定义两个简单的Java类：`User3`和`User4`。
+Two simple Java classes: `User3` and `User4`.
 
 ```java
 public class User3 {
@@ -216,7 +217,7 @@ public class User4 {
 }
 ```
 
-当`enable.config`为`true`运行结果发现，`MyConfigConfiguration`中的`user3`和`user4`都被注册了。
+When `enable.config` is `true`, the result shows that both `user3` and `user4` in `MyConfigConfiguration` are registered.
 
 ```java
 beanDefinitionName = myConfigConfiguration
@@ -224,15 +225,15 @@ beanDefinitionName = user3
 beanDefinitionName = user4
 ```
 
-当`enable.config`为`false`运行结果发现，我们不会看到任何与 `MyConfigConfiguration` （包括它自己）相关的 beans 被注册了。
+When `enable.config` is `false`, no bean related to `MyConfigConfiguration` (including itself) is registered.
 
 ```java
-无任何bean
+No beans
 ```
 
-#### 自定义组合注解
+#### Custom Composed Annotation
 
-首先来看看启动类入口，首先设置一个系统属性`enable.custom`为`true`，然后上下文环境使用`AnnotationConfigApplicationContext`（此类是使用Java注解来配置Spring容器的方式），构造参数我们给定了一个`MyConfiguration`组件类，最后打印了Spring上下文中所有的bean定义名称。
+First, the entry class. It sets the system property `enable.custom` to `true`. Then it uses `AnnotationConfigApplicationContext` (a way to configure the Spring container with Java annotations) with the `MyConfiguration` class as the argument. Finally, it prints the names of all bean definitions in the Spring context.
 
 ```java
 public class ConditionCustomApplication {
@@ -247,7 +248,7 @@ public class ConditionCustomApplication {
 }
 ```
 
-`MyCustomConfiguration`，其中定义了两个bean：`user5`和`user6`。如果`@ConditionalOnCustomActive`的条件满足，`MyCustomConfiguration`配置类将被激活，在此配置类中定义`user5`和`user6`将被注册到Spring容器中。如果`@ConditionalOnCustomActive`的条件不满足，`MyCustomConfiguration`配置类将不被激活。`user5`和`user6` beans都不会被注册。
+`MyCustomConfiguration` defines two beans: `user5` and `user6`. If the condition of `@ConditionalOnCustomActive` is met, the `MyCustomConfiguration` class is activated, and `user5` and `user6` are registered in the Spring container. If the condition is not met, the `MyCustomConfiguration` class is not activated. Neither `user5` nor `user6` is registered.
 
 ```java
 @Configuration
@@ -266,7 +267,7 @@ public class MyCustomConfiguration {
 }
 ```
 
-`@ConditionalOnCustomActive`定义了一个组合注解，并通过`@Conditional`元注解将其关联到`CustomActiveCondition`。
+`@ConditionalOnCustomActive` is a composed annotation. It uses the `@Conditional` meta-annotation to link to `CustomActiveCondition`.
 
 ```java
 @Target({ElementType.TYPE, ElementType.METHOD})
@@ -277,7 +278,7 @@ public @interface ConditionalOnCustomActive {
 }
 ```
 
-`CustomActiveCondition`。这个实现会根据`enable.custom`属性的值决定是否满足条件。具体来说：当`enable.custom`设置为`true`，`CustomActiveCondition`满足条件，因为`matches`方法会返回`true`，`MyCustomConfiguration`配置类由于带有`@ConditionalOnCustomActive`注解（该注解内部引用了`CustomActiveCondition`）将被激活，在该配置类中定义的`user5`和`user6`将被注册到Spring容器中。当`enable.custom`设置为`false`或未设置`CustomActiveCondition`不满足条件，因为`matches`方法会返回`false`，由于`MyCustomConfiguration`带有`@ConditionalOnCustomActive`注解，该配置类不被激活。`user5`和`user6` beans都不会被注册。
+`CustomActiveCondition` decides whether the condition is met from the value of `enable.custom`. When `enable.custom` is `true`, `CustomActiveCondition` matches because the `matches` method returns `true`. The `MyCustomConfiguration` class has `@ConditionalOnCustomActive` (which refers to `CustomActiveCondition`), so it is activated, and `user5` and `user6` are registered in the Spring container. When `enable.custom` is `false` or not set, `CustomActiveCondition` does not match because `matches` returns `false`. Since `MyCustomConfiguration` has `@ConditionalOnCustomActive`, the class is not activated. Neither `user5` nor `user6` is registered.
 
 ```java
 public class CustomActiveCondition implements Condition {
@@ -288,7 +289,7 @@ public class CustomActiveCondition implements Condition {
 }
 ```
 
-定义两个简单的Java类：`User5`和`User6`。
+Two simple Java classes: `User5` and `User6`.
 
 ```java
 public class User5 {
@@ -300,7 +301,7 @@ public class User6 {
 }
 ```
 
-当`enable.custom`为`true`运行结果发现，我们的组合注解 `@ConditionalOnCustomActive` 和相应的条件 `CustomActiveCondition` 正常工作，正确地根据 `enable.custom` 系统属性的值来激活 `MyCustomConfiguration` 配置类。
+When `enable.custom` is `true`, the result shows that our composed annotation `@ConditionalOnCustomActive` and its condition `CustomActiveCondition` work. They activate the `MyCustomConfiguration` class based on the `enable.custom` system property.
 
 ```java
 beanDefinitionName = myCustomConfiguration
@@ -308,37 +309,37 @@ beanDefinitionName = user5
 beanDefinitionName = user6
 ```
 
-当`enable.custom`为`false`运行结果发现，与 `MyCustomConfiguration` 相关的任何 beans（包括它自己）都不会被注册到 Spring 容器中。
+When `enable.custom` is `false`, no bean related to `MyCustomConfiguration` (including itself) is registered in the Spring container.
 
 ```java
-无任何bean
+No beans
 ```
 
-### 六、时序图
+### 6. Sequence Diagram
 
 ~~~mermaid
 sequenceDiagram 
-ConditionCustomApplication->>AnnotationConfigApplicationContext: AnnotationConfigApplicationContext(componentClasses)<br>启动上下文
-AnnotationConfigApplicationContext-->>ConfigurationApplication: 返回context<br>返回上下文实例
-AnnotationConfigApplicationContext->>AnnotationConfigApplicationContext: register(componentClasses)<br>注册组件类
-AnnotationConfigApplicationContext->>AnnotatedBeanDefinitionReader: register(componentClasses)<br>读取器注册类
-AnnotatedBeanDefinitionReader-->>AnnotatedBeanDefinitionReader: registerBean(beanClass)<br>注册Bean类
-AnnotatedBeanDefinitionReader-->>AnnotatedBeanDefinitionReader: doRegisterBean(beanClass,name,qualifiers, supplier,customizers)<br>执行Bean注册
+ConditionCustomApplication->>AnnotationConfigApplicationContext: AnnotationConfigApplicationContext(componentClasses)<br>Start context
+AnnotationConfigApplicationContext-->>ConfigurationApplication: Return context<br>Return the context instance
+AnnotationConfigApplicationContext->>AnnotationConfigApplicationContext: register(componentClasses)<br>Register component classes
+AnnotationConfigApplicationContext->>AnnotatedBeanDefinitionReader: register(componentClasses)<br>Reader registers classes
+AnnotatedBeanDefinitionReader-->>AnnotatedBeanDefinitionReader: registerBean(beanClass)<br>Register bean class
+AnnotatedBeanDefinitionReader-->>AnnotatedBeanDefinitionReader: doRegisterBean(beanClass,name,qualifiers, supplier,customizers)<br>Do bean registration
 AnnotatedBeanDefinitionReader->>ConditionEvaluator:shouldSkip(metadata)
 ConditionEvaluator->>ConditionEvaluator:shouldSkip(metadata,phase)
 ConditionEvaluator->>ConditionEvaluator:getConditionClasses(metadata)
-Note right of ConditionEvaluator: 返回 List<String[]>
+Note right of ConditionEvaluator: Returns List<String[]>
 ConditionEvaluator->>ConditionEvaluator:getCondition(conditionClassName,classloader)
 ConditionEvaluator->>AnnotationAwareOrderComparator:sort(conditions)
 ConditionEvaluator->>CustomActiveCondition:matches(context,metadata)
-CustomActiveCondition->>ConditionEvaluator:返回true or false
-ConditionEvaluator->>AnnotatedBeanDefinitionReader:返回true or false
-AnnotatedBeanDefinitionReader->>AnnotatedBeanDefinitionReader:如果shouldSkip返回是true,跳过Bean的注册
+CustomActiveCondition->>ConditionEvaluator:Return true or false
+ConditionEvaluator->>AnnotatedBeanDefinitionReader:Return true or false
+AnnotatedBeanDefinitionReader->>AnnotatedBeanDefinitionReader:If shouldSkip returns true, skip bean registration
 ~~~
 
-### 七、源码分析
+### 7. Source Code Analysis
 
-首先来看看启动类入口，首先设置一个系统属性`enable.custom`为`true`，然后上下文环境使用`AnnotationConfigApplicationContext`（此类是使用Java注解来配置Spring容器的方式），构造参数我们给定了一个`MyConfiguration`组件类，最后打印了Spring上下文中所有的bean定义名称。
+First, the entry class. It sets the system property `enable.custom` to `true`. Then it uses `AnnotationConfigApplicationContext` (a way to configure the Spring container with Java annotations) with the `MyConfiguration` class as the argument. Finally, it prints the names of all bean definitions in the Spring context.
 
 ```java
 public class ConditionCustomApplication {
@@ -353,7 +354,7 @@ public class ConditionCustomApplication {
 }
 ```
 
-在`org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext`构造函数中，执行了三个步骤，我们重点关注`refresh()`方法。
+The `org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext` constructor does three steps. We focus on the `refresh()` method.
 
 ```java
 public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
@@ -363,7 +364,7 @@ public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
 }
 ```
 
-在`org.springframework.context.annotation.AnnotationConfigApplicationContext#register`方法中，主要是允许我们注册一个或多个组件类（例如，那些使用 `@Component`, `@Service`, `@Repository`, `@Controller`, `@Configuration` 等注解的类）到Spring容器。
+The `org.springframework.context.annotation.AnnotationConfigApplicationContext#register` method lets us register one or more component classes (for example, classes annotated with `@Component`, `@Service`, `@Repository`, `@Controller`, or `@Configuration`) in the Spring container.
 
 ```java
 @Override
@@ -376,7 +377,7 @@ public void register(Class<?>... componentClasses) {
 }
 ```
 
-在`org.springframework.context.annotation.AnnotatedBeanDefinitionReader#register`方法中，遍历每一个传入的组件类，并逐一调用另一个方法来完成实际的注册工作。
+The `org.springframework.context.annotation.AnnotatedBeanDefinitionReader#register` method goes through each component class and calls another method to do the real registration.
 
 ```java
 public void register(Class<?>... componentClasses) {
@@ -386,7 +387,7 @@ public void register(Class<?>... componentClasses) {
 }
 ```
 
-在`org.springframework.context.annotation.AnnotatedBeanDefinitionReader#registerBean(beanClass)`方法中，主要目的是快速注册一个 bean 类型，而不需要指定其他详细的配置或参数。
+The `org.springframework.context.annotation.AnnotatedBeanDefinitionReader#registerBean(beanClass)` method is a quick way to register a bean type without any other detailed settings or arguments.
 
 ```java
 public void registerBean(Class<?> beanClass) {
@@ -394,27 +395,27 @@ public void registerBean(Class<?> beanClass) {
 }
 ```
 
-在`org.springframework.context.annotation.AnnotatedBeanDefinitionReader#doRegisterBean`方法中，主要用于条件性注册 bean 的逻辑，只有当特定的条件满足时，bean 才会被注册。
+The `org.springframework.context.annotation.AnnotatedBeanDefinitionReader#doRegisterBean` method holds the logic for conditional registration. A bean is registered only when its conditions are met.
 
 ```java
 private <T> void doRegisterBean(Class<T> beanClass, @Nullable String name,
 			@Nullable Class<? extends Annotation>[] qualifiers, @Nullable Supplier<T> supplier,
 			@Nullable BeanDefinitionCustomizer[] customizers) {
 
-    // 基于给定的 bean 类创建一个带注解的 bean 定义。
+    // Create an annotated bean definition from the given bean class.
     AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(beanClass);
 
-    // 利用条件评估器检查是否应该跳过当前 bean 的注册。
-    // 如果 bean 不满足指定的条件，那么将直接返回，不继续执行后续的注册逻辑。
+    // Use the condition evaluator to check whether registration of this bean should be skipped.
+    // If the bean does not meet the conditions, return right away and skip the rest of the registration.
     if (this.conditionEvaluator.shouldSkip(abd.getMetadata())) {
         return;
     }
 
-	// ... [代码部分省略以简化]
+	// ... [code omitted for brevity]
 }
 ```
 
-在`org.springframework.context.annotation.ConditionEvaluator#shouldSkip(metadata)`方法中，又委托给另一个版本的 `shouldSkip` 方法，并为第二个参数传入 `null`。
+The `org.springframework.context.annotation.ConditionEvaluator#shouldSkip(metadata)` method calls the other version of `shouldSkip` and passes `null` as the second argument.
 
 ```java
 public boolean shouldSkip(AnnotatedTypeMetadata metadata) {
@@ -422,34 +423,34 @@ public boolean shouldSkip(AnnotatedTypeMetadata metadata) {
 }
 ```
 
-在`org.springframework.context.annotation.ConditionEvaluator#shouldSkip(metadata,phase)`方法中，主要目的是决定是否应根据给定的条件（通常由 `@Conditional` 注解定义）跳过某个配置类或 bean 的注册。
+The `org.springframework.context.annotation.ConditionEvaluator#shouldSkip(metadata,phase)` method decides whether to skip the registration of a configuration class or bean, based on the given conditions (usually defined by `@Conditional`).
 
 ```java
 /**
- * 根据提供的元数据和配置阶段判断是否应跳过某个操作或逻辑。
+ * Decide whether to skip an operation or logic, based on the given metadata and configuration phase.
  *
- * @param metadata 元数据，与注解相关。
- * @param phase    当前的配置阶段，可能为 null。
- * @return 如果应跳过，则返回 true；否则返回 false。
+ * @param metadata The metadata, related to annotations.
+ * @param phase    The current configuration phase, may be null.
+ * @return true if it should be skipped; false otherwise.
  */
 public boolean shouldSkip(@Nullable AnnotatedTypeMetadata metadata, @Nullable ConfigurationPhase phase) {
-    // 如果元数据为空或未标注 @Conditional 注解，则不跳过。
+    // If the metadata is null or has no @Conditional annotation, do not skip.
     if (metadata == null || !metadata.isAnnotated(Conditional.class.getName())) {
         return false;
     }
 
-    // 如果没有指定配置阶段，确定正确的配置阶段。
+    // If no configuration phase is given, work out the right one.
     if (phase == null) {
-        // 如果元数据是注解元数据，并且是配置候选项，则选择 PARSE_CONFIGURATION 阶段。
+        // If the metadata is annotation metadata and is a configuration candidate, use the PARSE_CONFIGURATION phase.
         if (metadata instanceof AnnotationMetadata &&
             ConfigurationClassUtils.isConfigurationCandidate((AnnotationMetadata) metadata)) {
             return shouldSkip(metadata, ConfigurationPhase.PARSE_CONFIGURATION);
         }
-        // 否则选择 REGISTER_BEAN 阶段。
+        // Otherwise use the REGISTER_BEAN phase.
         return shouldSkip(metadata, ConfigurationPhase.REGISTER_BEAN);
     }
 
-    // 获取所有的条件，并从相关的条件类实例化它们。
+    // Get all conditions and instantiate them from the related condition classes.
     List<Condition> conditions = new ArrayList<>();
     for (String[] conditionClasses : getConditionClasses(metadata)) {
         for (String conditionClass : conditionClasses) {
@@ -458,16 +459,16 @@ public boolean shouldSkip(@Nullable AnnotatedTypeMetadata metadata, @Nullable Co
         }
     }
 
-    // 对条件进行排序。
+    // Sort the conditions.
     AnnotationAwareOrderComparator.sort(conditions);
 
-    // 遍历所有条件，检查它们是否与当前配置阶段匹配。
+    // Go through all conditions and check whether they match the current configuration phase.
     for (Condition condition : conditions) {
         ConfigurationPhase requiredPhase = null;
         if (condition instanceof ConfigurationCondition) {
             requiredPhase = ((ConfigurationCondition) condition).getConfigurationPhase();
         }
-        // 如果条件不匹配上下文和元数据，则跳过。
+        // If the condition does not match the context and metadata, skip.
         if ((requiredPhase == null || requiredPhase == phase) && !condition.matches(this.context, metadata)) {
             return true;
         }
@@ -477,118 +478,118 @@ public boolean shouldSkip(@Nullable AnnotatedTypeMetadata metadata, @Nullable Co
 }
 ```
 
-在`org.springframework.context.annotation.ConditionEvaluator#getConditionClasses`方法中，从提供的注解元数据中获取与 `@Conditional` 注解关联的条件类的名称。
+The `org.springframework.context.annotation.ConditionEvaluator#getConditionClasses` method gets the names of the condition classes linked to the `@Conditional` annotation from the given annotation metadata.
 
 ```java
 /**
- * 从提供的注解元数据中获取与 @Conditional 注解关联的条件类的名称。
+ * Get the names of the condition classes linked to the @Conditional annotation from the given annotation metadata.
  *
- * @param metadata 元数据，通常与某个 bean 或配置类的注解相关。
- * @return 一个列表，其中包含与 @Conditional 注解关联的条件类的名称。如果没有相关的条件类，则返回一个空列表。
+ * @param metadata The metadata, usually related to the annotations of a bean or configuration class.
+ * @return A list with the names of the condition classes linked to @Conditional. If there are none, an empty list is returned.
  */
 private List<String[]> getConditionClasses(AnnotatedTypeMetadata metadata) {
-    // 获取 @Conditional 注解的所有属性值。
+    // Get all attribute values of the @Conditional annotation.
     MultiValueMap<String, Object> attributes = metadata.getAllAnnotationAttributes(Conditional.class.getName(), true);
     
-    // 试图从属性值中获取 "value"，它应该是一个指向条件类名称的引用。
+    // Try to get "value" from the attributes. It should point to the condition class names.
     Object values = (attributes != null ? attributes.get("value") : null);
 
-    // 返回条件类名称的列表，或者如果没有条件类，则返回一个空列表。
+    // Return the list of condition class names, or an empty list if there are none.
     return (List<String[]>) (values != null ? values : Collections.emptyList());
 }
 ```
 
-在`org.springframework.context.annotation.ConditionEvaluator#getCondition`方法中，根据给定的条件类名称和类加载器实例化一个 `Condition` 对象。
+The `org.springframework.context.annotation.ConditionEvaluator#getCondition` method creates a `Condition` object from the given condition class name and class loader.
 
 ```java
 /**
- * 根据提供的条件类名称和类加载器实例化一个 Condition 对象。
+ * Create a Condition object from the given condition class name and class loader.
  *
- * @param conditionClassName 条件类的完全限定名。
- * @param classloader 用于加载条件类的类加载器，可以为 null。
- * @return 实例化的 Condition 对象。
+ * @param conditionClassName The fully qualified name of the condition class.
+ * @param classloader The class loader used to load the condition class, may be null.
+ * @return The created Condition object.
  */
 private Condition getCondition(String conditionClassName, @Nullable ClassLoader classloader) {
-    // 使用类加载器解析并加载指定的条件类。
+    // Use the class loader to resolve and load the given condition class.
     Class<?> conditionClass = ClassUtils.resolveClassName(conditionClassName, classloader);
     
-    // 实例化解析的条件类并返回。
+    // Create an instance of the resolved condition class and return it.
     return (Condition) BeanUtils.instantiateClass(conditionClass);
 }
 ```
 
-### 八、注意事项
+### 8. Notes
 
-1. **实现 `Condition` 接口**
-   + 为了使用 `@Conditional`, 我们需要实现 `Condition` 接口。该接口只有一个方法，`matches(ConditionContext context, AnnotatedTypeMetadata metadata)`，我们需要在这里放置我们的条件逻辑。
-2. **类级别和方法级别**：
-   - `@Conditional` 可以应用于 `@Bean` 方法，用于控制特定 bean 的创建。
-   - 也可以应用于 `@Configuration` 类，控制整个配置类的加载。
-3. **组合多个条件**
-   + 可以使用 `@Conditional` 注解的数组形式来组合多个条件，所有条件都必须满足才能创建 bean。
-4. **与其他注解的组合**
-   + `@Conditional` 可以与其他注解一起使用，如 `@Profile`。但是注意他们之间的交互效果。例如，如果一个 bean 标记为特定的 `@Profile` 并且使用 `@Conditional`，那么两者都必须为 true 才能创建该 bean。
-5. **避免复杂的逻辑**
-   + 虽然 `Condition` 允许我们编写任意的条件逻辑，但最好避免过于复杂。简单明了的逻辑更易于理解和维护。
-6. **性能**
-   + `matches` 方法可能会在应用的生命周期中被多次调用，因此应确保其执行效率，避免在此方法中进行高开销的操作。
-7. **配合 `ConditionContext`**:
-   + `ConditionContext` 提供了关于当前应用上下文、环境属性、系统属性等的信息，可以使我们的条件判断更加具体和强大。
-8. **自定义条件注解**
-   + 为了重用或组合多个条件，我们可以创建自己的条件注解。例如，我们可以创建一个 `@ConditionalOnCustomActive` 注解，它封装了检查`enable.custom`的条件。
-9. **注意与 `@Profile` 的区别**
-   + 虽然 `@Conditional` 和 `@Profile` 在某些情况下可以达到相同的效果，但它们的目的不同。`@Profile` 基于环境，而 `@Conditional` 更加通用，允许我们基于任意条件创建 bean。
+1. **Implement the `Condition` interface**
+   + To use `@Conditional`, we need to implement the `Condition` interface. It has one method, `matches(ConditionContext context, AnnotatedTypeMetadata metadata)`. Our condition logic goes there.
+2. **Class level and method level**:
+   - `@Conditional` can be applied to a `@Bean` method to control the creation of a specific bean.
+   - It can also be applied to a `@Configuration` class to control the loading of the whole configuration class.
+3. **Combining several conditions**
+   + You can pass several conditions to `@Conditional` as an array. All conditions must be met for the bean to be created.
+4. **Combining with other annotations**
+   + `@Conditional` can be used with other annotations such as `@Profile`. But watch how they interact. For example, if a bean has a specific `@Profile` and also `@Conditional`, both must be true for the bean to be created.
+5. **Avoid complex logic**
+   + `Condition` lets us write any condition logic, but it is best to keep it simple. Simple logic is easier to understand and maintain.
+6. **Performance**
+   + The `matches` method may be called many times during the application lifecycle. Make sure it runs fast, and avoid expensive work in it.
+7. **Using `ConditionContext`**:
+   + `ConditionContext` gives information about the current application context, environment properties, system properties, and more. This makes our conditions more specific and powerful.
+8. **Custom condition annotations**
+   + To reuse or combine several conditions, we can create our own condition annotations. For example, we can create a `@ConditionalOnCustomActive` annotation that wraps the check of `enable.custom`.
+9. **Difference from `@Profile`**
+   + `@Conditional` and `@Profile` can give the same result in some cases, but they have different purposes. `@Profile` is based on the environment. `@Conditional` is more general and lets us create beans based on any condition.
 
-### 九、总结
+### 9. Summary
 
-#### 最佳实践总结
+#### Best Practices Summary
 
-1. **基于`@Bean`的条件配置**
+1. **Conditional configuration with `@Bean`**
 
-   - **场景描述**
-  - 在单个bean的创建上应用条件。
-   - **实现方法**
-  - 通过在`@Bean`注解方法上直接使用`@Conditional`。
-   - **结果**：
-     - 当条件满足（如`enable.bean`为`true`），特定的bean（如`user1`）会被注册。
-     - 当条件不满足，该bean不会被注册。
+   - **Scenario**
+  - Apply a condition to the creation of a single bean.
+   - **How**
+  - Use `@Conditional` directly on the `@Bean` method.
+   - **Result**:
+     - When the condition is met (for example, `enable.bean` is `true`), the specific bean (such as `user1`) is registered.
+     - When the condition is not met, the bean is not registered.
 
-2. **基于`@Configuration`的条件配置**
+2. **Conditional configuration with `@Configuration`**
 
-   - **场景描述**
-  - 控制整个配置类的激活状态，从而影响该配置中定义的所有beans。
-   - **实现方法**
-  - 在`@Configuration`注解的类上直接使用`@Conditional`。
-   - **结果**：
-     - 当条件满足（如`enable.config`为`true`），配置类被激活，其内部的所有beans（如`user3`和`user4`）都会被注册。
-     - 当条件不满足，配置类及其内部定义的所有beans都不会被注册。
+   - **Scenario**
+  - Control whether a whole configuration class is active, which affects all beans defined in it.
+   - **How**
+  - Use `@Conditional` directly on the `@Configuration` class.
+   - **Result**:
+     - When the condition is met (for example, `enable.config` is `true`), the configuration class is active and all beans inside it (such as `user3` and `user4`) are registered.
+     - When the condition is not met, neither the configuration class nor the beans defined in it are registered.
 
-3. **使用自定义组合注解**
+3. **Using a custom composed annotation**
 
-   - **场景描述**
-     - 创建自己的条件注解，以提供更清晰、更简洁的语法，或为特定的业务逻辑封装条件逻辑。
-   - **实现方法**
-     - 定义一个新的注解（如`@ConditionalOnCustomActive`），并使用`@Conditional`元注解将其关联到特定的条件类。
-   - **结果**：
-     - 当条件满足（如`enable.custom`为`true`），带有`@ConditionalOnCustomActive`注解的配置类或bean会被注册。
-     - 当条件不满足，它们不会被注册。
+   - **Scenario**
+     - Create your own condition annotation to get a clearer and shorter syntax, or to wrap condition logic for specific business needs.
+   - **How**
+     - Define a new annotation (such as `@ConditionalOnCustomActive`) and use the `@Conditional` meta-annotation to link it to a specific condition class.
+   - **Result**:
+     - When the condition is met (for example, `enable.custom` is `true`), the configuration class or bean with `@ConditionalOnCustomActive` is registered.
+     - When the condition is not met, they are not registered.
 
-#### 源码分析总结
+#### Source Code Analysis Summary
 
-1. **初始化与启动**
-   - 通过 `AnnotationConfigApplicationContext` 构造函数初始化 Spring 上下文，并通过 `register` 和 `refresh` 方法完成 bean 的注册和容器的刷新。
+1. **Initialization and startup**
+   - The Spring context is initialized through the `AnnotationConfigApplicationContext` constructor. The `register` and `refresh` methods register the beans and refresh the container.
 
-2. **注册组件类**
-   + 使用 `AnnotatedBeanDefinitionReader` 来注册组件类。在 `register` 方法中，每一个组件类都会通过 `registerBean` 方法进行注册。
+2. **Registering component classes**
+   + `AnnotatedBeanDefinitionReader` registers the component classes. In its `register` method, each component class is registered through `registerBean`.
 
-3. **条件检查**
-   + 在 `doRegisterBean` 方法中，执行了核心的条件检查逻辑。使用 `ConditionEvaluator` 来评估与给定 bean 或配置类关联的条件是否满足。
+3. **Condition check**
+   + The core condition check runs in `doRegisterBean`. It uses `ConditionEvaluator` to check whether the conditions linked to a bean or configuration class are met.
 
-4. **元数据检查**
-   + `ConditionEvaluator` 会首先检查提供的元数据（通常与特定的 bean 或配置类的注解关联）是否包含 `@Conditional` 注解。如果没有，直接进行下一步。如果存在，继续检查条件是否满足。
+4. **Metadata check**
+   + `ConditionEvaluator` first checks whether the given metadata (usually linked to the annotations of a specific bean or configuration class) has a `@Conditional` annotation. If not, it moves on. If it does, it goes on to check the conditions.
 
-5. **条件匹配**
-   + `ConditionEvaluator` 获取与 `@Conditional` 注解关联的所有条件类，并为每一个条件类创建一个实例。随后，它会遍历所有的条件，并检查它们是否满足。这是通过调用每一个条件的 `matches` 方法来完成的。如果任何一个条件不满足，整个条件检查逻辑返回 `false`，表示不应注册与 `@Conditional` 注解关联的 bean 或配置类。
+5. **Condition matching**
+   + `ConditionEvaluator` gets all condition classes linked to `@Conditional` and creates an instance of each. Then it goes through all conditions and checks each one by calling its `matches` method. If any condition is not met, the whole check returns `false`. This means the bean or configuration class with `@Conditional` should not be registered.
 
-6. **条件实例化**
-   + 通过 `getCondition` 方法，`ConditionEvaluator` 能够根据提供的条件类名称和类加载器实例化一个 `Condition` 对象。
+6. **Condition instantiation**
+   + `ConditionEvaluator` creates a `Condition` object in the `getCondition` method, from the given condition class name and class loader.

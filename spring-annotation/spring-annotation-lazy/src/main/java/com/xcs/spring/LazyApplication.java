@@ -6,19 +6,19 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 /**
  * @author xcs
- * @date 2023年08月07日 16时21分
+ * @date 2023-08-07 16:21
  **/
 public class LazyApplication {
 
     public static void main(String[] args) {
-        System.out.println("启动 Spring ApplicationContext...");
+        System.out.println("Starting Spring ApplicationContext...");
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(MyConfiguration.class);
-        System.out.println("启动完成 Spring ApplicationContext...");
+        System.out.println("Spring ApplicationContext started...");
 
-        System.out.println("获取MyService...");
+        System.out.println("Getting MyService...");
         MyService myService = context.getBean(MyService.class);
 
-        System.out.println("调用show方法...");
+        System.out.println("Calling show method...");
         myService.show();
     }
 }
