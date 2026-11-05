@@ -5,7 +5,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 /**
  * @author xcs
- * @date 2023年10月18日 14时17分
+ * @date 2023-10-18 14:17
  **/
 public class PostConstructApplication {
 

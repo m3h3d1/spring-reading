@@ -8,11 +8,11 @@ import javax.annotation.PreDestroy;
 public class MyService {
 
     public MyService(){
-        System.out.println("执行MyService构造函数");
+        System.out.println("Executing MyService constructor");
     }
 
     @PreDestroy
     public void preDestroy(){
-        System.out.println("执行@PreDestroy方法");
+        System.out.println("Executing @PreDestroy method");
     }
 }

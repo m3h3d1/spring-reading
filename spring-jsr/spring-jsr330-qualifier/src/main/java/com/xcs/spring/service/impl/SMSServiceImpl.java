@@ -7,7 +7,7 @@ import javax.inject.Named;
 
 /**
  * @author xcs
- * @date 2023年10月20日 14时57分
+ * @date 2023-10-20 14:57
  **/
 @SMS
 @Named

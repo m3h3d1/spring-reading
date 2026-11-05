@@ -1,33 +1,32 @@
 ## @PreDestroy
 
 - [@PreDestroy](#predestroy)
-  - [一、基本信息](#一基本信息)
-  - [二、接口描述](#二接口描述)
-  - [三、接口源码](#三接口源码)
-  - [四、主要功能](#四主要功能)
-  - [五、最佳实践](#五最佳实践)
-  - [六、时序图](#六时序图)
-  - [七、源码分析](#七源码分析)
-    - [前置条件](#前置条件)
-    - [收集阶段](#收集阶段)
-    - [销毁阶段](#销毁阶段)
-  - [八、注意事项](#八注意事项)
-  - [九、总结](#九总结)
-    - [最佳实践总结](#最佳实践总结)
-    - [源码分析总结](#源码分析总结)
+  - [1. Overview](#1-overview)
+  - [2. Interface Description](#2-interface-description)
+  - [3. Interface Source](#3-interface-source)
+  - [4. Main Features](#4-main-features)
+  - [5. Best Practices](#5-best-practices)
+  - [6. Sequence Diagram](#6-sequence-diagram)
+  - [7. Source Code Analysis](#7-source-code-analysis)
+    - [Prerequisites](#prerequisites)
+    - [Collection Phase](#collection-phase)
+    - [Destruction Phase](#destruction-phase)
+  - [8. Notes](#8-notes)
+  - [9. Summary](#9-summary)
+    - [Best Practices Summary](#best-practices-summary)
+    - [Source Code Analysis Summary](#source-code-analysis-summary)
 
+### 1. Overview
 
-### 一、基本信息
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN](https://blog.csdn.net/duzhuang2399/article/details/133911656) 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-✒️ **作者** - Lex 📝 **博客** - [我的CSDN](https://blog.csdn.net/duzhuang2399/article/details/133911656) 📚 **文章目录** - [所有文章](https://github.com/xuchengsheng/spring-reading) 🔗 **源码地址** - [@PreDestroy源码](https://github.com/xuchengsheng/spring-reading/tree/master/spring-jsr/spring-jsr250-preDestroy)
+### 2. Interface Description
 
-### 二、接口描述
+The `@PreDestroy` annotation comes from JSR-250 (Java Specification Request 250). This specification defines some common Java EE annotations. They give a platform-independent way to define lifecycle events, such as a method that runs when a bean is destroyed.
 
-`@PreDestroy` 注解来源于 JSR-250（Java Specification Request 250），这是一个定义了一些常用的Java EE注解的规范。这些注解的目的是提供一个与平台无关的方式，允许我们定义一些生命周期事件，比如在bean销毁之后要执行的方法。
+### 3. Interface Source
 
-### 三、接口源码
-
-`@PreDestroy` 是 Java EE 提供的一个标准注解，表示被标记的方法应该在对象销毁后立即执行。
+`@PreDestroy` is a standard Java EE annotation. It marks a method that should run right before the object is destroyed.
 
 ```java
 @Documented
@@ -38,24 +37,24 @@ public @interface PreDestroy {
 }
 ```
 
-### 四、主要功能
+### 4. Main Features
 
-1. **资源释放**
-   + 例如，如果我们的 bean 打开了文件、数据库连接或网络连接，可以在 `@PreDestroy` 方法中关闭这些连接，确保资源被正确释放。
-2. **清理工作**
-   + 如果 bean 在其生命周期中创建了临时文件或临时数据结构，并且在 bean 销毁前需要删除或清除，可以在 `@PreDestroy` 方法中执行这些清理操作。
-3. **日志和通知**
-   + 在某些应用中，我们可能希望在 bean 的生命周期结束时记录日志或发送通知。可以使用 `@PreDestroy` 方法来实现这一点。
-4. **状态存储**
-   + 如果 bean 有状态，并且我们希望在其生命周期结束时保存这个状态，可以在 `@PreDestroy` 方法中做这个工作。
-5. **与其他组件断开连接**
-   + 如果 bean 在其生命周期中注册到了其他组件或服务，并且需要在销毁前从这些组件或服务中注销，可以在 `@PreDestroy` 方法中执行此操作。
-6. **无需 XML 配置**
-   + 与传统的 `destroy-method` XML 属性相比，使用 `@PreDestroy` 注解使代码更清晰，因为清理逻辑和 bean 代码位于同一位置，而无需查看 XML 配置文件。
+1. **Resource release**
+   + For example, if your bean opens files, database connections, or network connections, you can close them in a `@PreDestroy` method. This makes sure the resources are released correctly.
+2. **Cleanup**
+   + If the bean creates temporary files or temporary data structures during its lifecycle, and they must be deleted or cleared before the bean is destroyed, you can do this cleanup in a `@PreDestroy` method.
+3. **Logging and notification**
+   + In some applications, you may want to write a log or send a notification when the bean's lifecycle ends. You can do this with a `@PreDestroy` method.
+4. **Saving state**
+   + If the bean has state, and you want to save it when the lifecycle ends, you can do this in a `@PreDestroy` method.
+5. **Disconnect from other components**
+   + If the bean registered itself with other components or services during its lifecycle, and it must unregister before it is destroyed, you can do this in a `@PreDestroy` method.
+6. **No XML configuration needed**
+   + Compared with the traditional `destroy-method` XML attribute, `@PreDestroy` makes the code clearer. The cleanup logic is in the same place as the bean code, so you do not need to look at an XML configuration file.
 
-### 五、最佳实践
+### 5. Best Practices
 
-首先来看看启动类入口，上下文环境使用`AnnotationConfigApplicationContext`（此类是使用Java注解来配置Spring容器的方式），构造参数我们给定了一个`MyConfiguration`组件类，最后调用`context.close()`方法关闭容器。
+First, look at the entry class. The context is `AnnotationConfigApplicationContext` (this class configures the Spring container with Java annotations). We pass the `MyConfiguration` component class as the constructor argument. At the end, we call `context.close()` to close the container.
 
 ```java
 public class PreDestroyApplication {
@@ -67,7 +66,7 @@ public class PreDestroyApplication {
 }
 ```
 
-在`MyConfiguration`类中，使用了`@ComponentScan("com.xcs.spring")`注解告诉 Spring 在指定的包（在这里是 "`com.xcs.spring`"）及其子包中搜索带有 `@Component`、`@Service`、`@Repository` 和 `@Controller` 等注解的类，并将它们自动注册为 beans。这样，spring就不必为每个组件明确写一个 bean 定义。Spring 会自动识别并注册它们。
+The `MyConfiguration` class uses `@ComponentScan("com.xcs.spring")`. This tells Spring to search the given package ("`com.xcs.spring`") and its sub-packages for classes with annotations such as `@Component`, `@Service`, `@Repository`, and `@Controller`. Spring registers them as beans automatically. So you do not need to write a bean definition for each component.
 
 ```java
 @Configuration
@@ -77,114 +76,114 @@ public class MyConfiguration {
 }
 ```
 
-`MyService` 的 Spring Service 类。这个类有一个无参构造函数和一个使用 `@PreDestroy` 注解的方法。
+`MyService` is a Spring service class. It has a no-arg constructor and a method annotated with `@PreDestroy`.
 
 ```java
 @Service
 public class MyService {
 
     public MyService(){
-        System.out.println("执行MyService构造函数");
+        System.out.println("Executing MyService constructor");
     }
 
     @PreDestroy
     public void preDestroy(){
-        System.out.println("执行@PreDestroy方法");
+        System.out.println("Executing @PreDestroy method");
     }
 }
 ```
 
-运行结果发现，关闭上下文时 `@PreDestroy` 方法会被调用。
+When the context is closed, the `@PreDestroy` method is called.
 
 ```java
-执行MyService构造函数
-执行@PreDestroy方法
+Executing MyService constructor
+Executing @PreDestroy method
 ```
 
-### 六、时序图
+### 6. Sequence Diagram
 
 ~~~mermaid
 sequenceDiagram
-Title: @PreDestroy注解时序图
-AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:applyMergedBeanDefinitionPostProcessors(mbd,beanType,beanName)<br>开始应用 BeanDefinition 的后置处理器。
-AbstractAutowireCapableBeanFactory->>CommonAnnotationBeanPostProcessor:postProcessMergedBeanDefinition(beanDefinition,beanType,beanName)<br>处理 Bean 的通用注解。
-CommonAnnotationBeanPostProcessor->>InitDestroyAnnotationBeanPostProcessor:super.postProcessMergedBeanDefinition(beanDefinition, beanType, beanName)<br>为生命周期注解（如 @PreDestroy）处理已合并的 Bean 定义。
-InitDestroyAnnotationBeanPostProcessor->>InitDestroyAnnotationBeanPostProcessor:findLifecycleMetadata(clazz)<br>查找类的生命周期元数据。
-InitDestroyAnnotationBeanPostProcessor->>InitDestroyAnnotationBeanPostProcessor:buildLifecycleMetadata(clazz)<br>构建类的生命周期元数据。
-InitDestroyAnnotationBeanPostProcessor->>ReflectionUtils:doWithLocalMethods(clazz,fc)<br>处理类的所有本地方法。
-ReflectionUtils->>InitDestroyAnnotationBeanPostProcessor:<br>解析那些有 @PreDestroy 注解的方法。
-InitDestroyAnnotationBeanPostProcessor->>LifecycleElement:new LifecycleElement(member,ae,pd)<br>创建新的生命周期元素，代表 @PreDestroy 方法。
-InitDestroyAnnotationBeanPostProcessor->>LifecycleMetadata:new LifecycleMetadata(clazz, initMethods, destroyMethods)<br>创建存储生命周期方法（初始化和销毁）的元数据。
-InitDestroyAnnotationBeanPostProcessor->>InitDestroyAnnotationBeanPostProcessor:this.lifecycleMetadataCache.put(clazz, metadata)<br>将构建的生命周期元数据缓存起来，方便后续访问。
-AbstractAutowireCapableBeanFactory->>InitDestroyAnnotationBeanPostProcessor:doClose()<br>此处省略上下文关闭的步骤
+Title: @PreDestroy annotation sequence diagram
+AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:applyMergedBeanDefinitionPostProcessors(mbd,beanType,beanName)<br>Start applying the BeanDefinition post-processors.
+AbstractAutowireCapableBeanFactory->>CommonAnnotationBeanPostProcessor:postProcessMergedBeanDefinition(beanDefinition,beanType,beanName)<br>Handle the common annotations of the bean.
+CommonAnnotationBeanPostProcessor->>InitDestroyAnnotationBeanPostProcessor:super.postProcessMergedBeanDefinition(beanDefinition, beanType, beanName)<br>Handle the merged bean definition for lifecycle annotations (such as @PreDestroy).
+InitDestroyAnnotationBeanPostProcessor->>InitDestroyAnnotationBeanPostProcessor:findLifecycleMetadata(clazz)<br>Find the lifecycle metadata of the class.
+InitDestroyAnnotationBeanPostProcessor->>InitDestroyAnnotationBeanPostProcessor:buildLifecycleMetadata(clazz)<br>Build the lifecycle metadata of the class.
+InitDestroyAnnotationBeanPostProcessor->>ReflectionUtils:doWithLocalMethods(clazz,fc)<br>Process all local methods of the class.
+ReflectionUtils->>InitDestroyAnnotationBeanPostProcessor:<br>Find the methods that have the @PreDestroy annotation.
+InitDestroyAnnotationBeanPostProcessor->>LifecycleElement:new LifecycleElement(member,ae,pd)<br>Create a new lifecycle element for the @PreDestroy method.
+InitDestroyAnnotationBeanPostProcessor->>LifecycleMetadata:new LifecycleMetadata(clazz, initMethods, destroyMethods)<br>Create the metadata that holds the lifecycle methods (initialization and destruction).
+InitDestroyAnnotationBeanPostProcessor->>InitDestroyAnnotationBeanPostProcessor:this.lifecycleMetadataCache.put(clazz, metadata)<br>Cache the lifecycle metadata for later access.
+AbstractAutowireCapableBeanFactory->>InitDestroyAnnotationBeanPostProcessor:doClose()<br>The steps of closing the context are omitted here
 InitDestroyAnnotationBeanPostProcessor->>InitDestroyAnnotationBeanPostProcessor:postProcessBeforeDestruction(bean,beanName)
 InitDestroyAnnotationBeanPostProcessor->>LifecycleMetadata:invokeDestroyMethods(target,beanName)
 LifecycleMetadata->>LifecycleElement:invoke(target)
 LifecycleElement->>Method:this.method.invoke(target, (Object[]) null)
 ~~~
 
-### 七、源码分析
+### 7. Source Code Analysis
 
-#### 前置条件
+#### Prerequisites
 
-在Spring中，`InitDestroyAnnotationBeanPostProcessor`是处理`@PreDestroy`等注解的关键类，它实现了下述两个接口。因此，为了深入理解`@PreDestroy`的工作方式，研究这个类是非常有用的。简而言之，为了完全理解`@PreDestroy`的工作机制，了解下述接口确实是必要的。这两个接口提供了对bean生命周期中关键阶段的干预，从而允许进行方法执行和其他相关的操作。
+In Spring, `InitDestroyAnnotationBeanPostProcessor` is the key class that handles annotations such as `@PreDestroy`. It implements the two interfaces below. To understand how `@PreDestroy` works, you need to know these interfaces. They let you step into key stages of the bean lifecycle, so methods can be run and other related work can be done.
 
-1. `MergedBeanDefinitionPostProcessor`接口
-   - 此接口提供的`postProcessMergedBeanDefinition`方法允许后处理器修改合并后的bean定义。合并后的bean定义是一个已经考虑了所有父bean定义属性的bean定义。对于`@PreDestroy`注解的处理，这一步通常涉及到收集需要被解析的`@PreDestroy`注解信息并准备对其进行后续处理。
-   - 🔗 [MergedBeanDefinitionPostProcessor接口传送门](https://github.com/xuchengsheng/spring-reading/tree/master/spring-interface/spring-interface-mergedBeanDefinitionPostProcessor)
-2. `DestructionAwareBeanPostProcessor`接口
-   - 此接口提供了专门处理 bean 的销毁阶段。
-   - 对于 `@PreDestroy` 注解，`InitDestroyAnnotationBeanPostProcessor` 在这个方法中确保标注了 `@PreDestroy` 的方法在 bean 被销毁之前被执行。
-   - 🔗 [DestructionAwareBeanPostProcessor接口传送门](https://github.com/xuchengsheng/spring-reading/tree/master/spring-interface/spring-interface-destructionAwareBeanPostProcessor)
+1. `MergedBeanDefinitionPostProcessor` interface
+   - Its `postProcessMergedBeanDefinition` method lets a post-processor change the merged bean definition. A merged bean definition already includes all properties from parent bean definitions. For `@PreDestroy`, this step usually collects the `@PreDestroy` information to parse and prepares it for later processing.
+   - 🔗 [MergedBeanDefinitionPostProcessor interface link](https://github.com/xuchengsheng/spring-reading/tree/master/spring-interface/spring-interface-mergedBeanDefinitionPostProcessor)
+2. `DestructionAwareBeanPostProcessor` interface
+   - This interface handles the destruction stage of a bean.
+   - For `@PreDestroy`, `InitDestroyAnnotationBeanPostProcessor` uses this interface to make sure the methods marked with `@PreDestroy` run before the bean is destroyed.
+   - 🔗 [DestructionAwareBeanPostProcessor interface link](https://github.com/xuchengsheng/spring-reading/tree/master/spring-interface/spring-interface-destructionAwareBeanPostProcessor)
 
-#### 收集阶段
+#### Collection Phase
 
-在`org.springframework.context.annotation.CommonAnnotationBeanPostProcessor#postProcessMergedBeanDefinition`方法中，首先调用了 `super.postProcessMergedBeanDefinition`，即调用了父类或接口默认的实现。
+In the `org.springframework.context.annotation.CommonAnnotationBeanPostProcessor#postProcessMergedBeanDefinition` method, `super.postProcessMergedBeanDefinition` is called first. This calls the default implementation of the parent class or interface.
 
 ```java
 @Override
 public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
     super.postProcessMergedBeanDefinition(beanDefinition, beanType, beanName);
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-在`org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor#postProcessMergedBeanDefinition`方法中，主要是处理与 `@PreDestroy` 注解相关的资源注入元数据，并在bean定义合并后对这些元数据进行进一步的处理或验证。这是Spring在处理JSR-250 `@PreDestroy` 注解时的处理入口。
+The `org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor#postProcessMergedBeanDefinition` method handles the metadata related to `@PreDestroy`. After the bean definition is merged, it processes or checks this metadata. This is the entry point where Spring handles the JSR-250 `@PreDestroy` annotation.
 
 ```java
 @Override
 public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
-    // 根据给定的bean类型查找与其相关的生命周期元数据。
+    // Find the lifecycle metadata for the given bean type.
     LifecycleMetadata metadata = findLifecycleMetadata(beanType);
     
-    // 使用找到的生命周期元数据来检查并可能修改给定的bean定义。
+    // Use the lifecycle metadata to check (and possibly change) the given bean definition.
     metadata.checkConfigMembers(beanDefinition);
 }
 ```
 
-在`org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor#findLifecycleMetadata`方法中，首先尝试从缓存中获取 `LifecycleMetadata`，如果它不存在或需要刷新，则会创建新的 `LifecycleMetadata` 并将其存入缓存。这种缓存策略可以提高效率，避免对同一类型的类反复构建注入元数据。
+In the `org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor#findLifecycleMetadata` method, it first tries to get the `LifecycleMetadata` from the cache. If it does not exist or needs a refresh, it creates a new `LifecycleMetadata` and stores it in the cache. This cache avoids building the metadata again and again for the same class.
 
 ```java
 private LifecycleMetadata findLifecycleMetadata(Class<?> clazz) {
     
-    // 检查生命周期元数据缓存是否为空，这可能发生在反序列化或销毁阶段。
+    // Check if the lifecycle metadata cache is null. This can happen during deserialization or destruction.
     if (this.lifecycleMetadataCache == null) {
         return buildLifecycleMetadata(clazz);
     }
     
-    // 首先，在并发映射中进行快速检查，以最小的锁定。
+    // First, do a quick check in the concurrent map with minimal locking.
     LifecycleMetadata metadata = this.lifecycleMetadataCache.get(clazz);
     
-    // 如果缓存中没有找到元数据，则构建元数据并放入缓存。
+    // If no metadata is found in the cache, build it and put it in the cache.
     if (metadata == null) {
         synchronized (this.lifecycleMetadataCache) {
             metadata = this.lifecycleMetadataCache.get(clazz);
             
-            // 双重检查锁定模式，确保只有一个线程构建和缓存元数据。
+            // Double-checked locking: make sure only one thread builds and caches the metadata.
             if (metadata == null) {
-                // 根据给定的类构建生命周期元数据。
+                // Build the lifecycle metadata for the given class.
                 metadata = buildLifecycleMetadata(clazz);
-                // 将新构建的元数据缓存，以便后续请求可以快速从缓存中检索。
+                // Cache the new metadata so later requests can get it quickly.
                 this.lifecycleMetadataCache.put(clazz, metadata);
             }
             return metadata;
@@ -195,30 +194,30 @@ private LifecycleMetadata findLifecycleMetadata(Class<?> clazz) {
 }
 ```
 
-在`org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor#buildLifecycleMetadata`方法中，这个方法首先查看类是否有`@PreDestroy`注解，然后遍历类的方法以找到标记为生命周期方法的那些带有 `@PreDestroy` 注解的方法。找到的方法被存储在列表中，并在结束时根据这些方法构建一个 `LifecycleMetadata` 对象。
+The `org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor#buildLifecycleMetadata` method first checks whether the class has the `@PreDestroy` annotation. Then it goes through the methods of the class to find those marked as lifecycle methods with `@PreDestroy`. The methods it finds are stored in a list. At the end, it builds a `LifecycleMetadata` object from them.
 
 ```java
 private LifecycleMetadata buildLifecycleMetadata(final Class<?> clazz) {
-    // 判断给定的类是否有@PreDestroy注解。
+    // Check if the given class has the @PreDestroy annotation.
     if (!AnnotationUtils.isCandidateClass(clazz, Arrays.asList(this.initAnnotationType, this.destroyAnnotationType))) {
         return this.emptyLifecycleMetadata;
     }
 
-    // 存储识别出的初始化和销毁方法的列表。
+    // Lists to store the init and destroy methods that are found.
 	List<LifecycleElement> destroyMethods = new ArrayList<>();
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     Class<?> targetClass = clazz;
 
-    // 遍历目标类及其所有父类，直到达到Object类。
+    // Go through the target class and all its parent classes, until the Object class.
     do {
         final List<LifecycleElement> currInitMethods = new ArrayList<>();
         final List<LifecycleElement> currDestroyMethods = new ArrayList<>();
 
-        // 使用反射处理类的所有本地方法。
+        // Use reflection to process all local methods of the class.
         ReflectionUtils.doWithLocalMethods(targetClass, method -> {
-            // ... [代码部分省略以简化]
+            // ... [code omitted for brevity]
             
-            // 查找标有@PreDestroy注解的方法。
+            // Find methods marked with the @PreDestroy annotation.
             if (this.destroyAnnotationType != null && method.isAnnotationPresent(this.destroyAnnotationType)) {
                 currDestroyMethods.add(new LifecycleElement(method));
                 if (logger.isTraceEnabled()) {
@@ -227,41 +226,41 @@ private LifecycleMetadata buildLifecycleMetadata(final Class<?> clazz) {
             }
         });
 
-        // 将当前类的生命周期方法添加到总列表中。
+        // Add the lifecycle methods of the current class to the total list.
         destroyMethods.addAll(currDestroyMethods);
 
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
         targetClass = targetClass.getSuperclass();
     }
     while (targetClass != null && targetClass != Object.class);
 
-    // 如果没有找到任何生命周期方法，则返回一个空的生命周期元数据对象；否则，返回新构建的元数据对象。
+    // If no lifecycle methods are found, return an empty lifecycle metadata object. Otherwise, return the newly built one.
     return (initMethods.isEmpty() && destroyMethods.isEmpty() ? this.emptyLifecycleMetadata :
             new LifecycleMetadata(clazz, initMethods, destroyMethods));
 }
 ```
 
-在`org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor.LifecycleElement#LifecycleElement`方法中，它用于封装与生命周期相关的方法（如 `@PreDestroy` 注解的方法）。
+The `org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor.LifecycleElement#LifecycleElement` constructor wraps a lifecycle-related method (such as a method annotated with `@PreDestroy`).
 
 ```java
 public LifecycleElement(Method method) {
-    // 检查提供的方法是否是无参数的。生命周期方法（如@PreDestroy）需要是无参数方法。
+    // Check that the given method has no parameters. Lifecycle methods (such as @PreDestroy) must be no-arg methods.
     if (method.getParameterCount() != 0) {
         throw new IllegalStateException("Lifecycle method annotation requires a no-arg method: " + method);
     }
     
-    // 存储提供的方法。
+    // Store the given method.
     this.method = method;
 
-    // 根据方法的修饰符（如private）确定唯一标识符。如果方法是私有的，我们使用完全限定名，否则只使用方法名。
+    // Decide the unique identifier from the method modifiers (such as private). For a private method, use the fully qualified name. Otherwise, use only the method name.
     this.identifier = (Modifier.isPrivate(method.getModifiers()) ?
                        ClassUtils.getQualifiedMethodName(method) : method.getName());
 }
 ```
 
-#### 销毁阶段
+#### Destruction Phase
 
-在`org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor#postProcessBeforeDestruction`方法中，实现了 `postProcessBeforeDestruction` 方法，它是 Spring 的 `DestructionAwareBeanPostProcessor` 接口的一部分，用于bean销毁之后要执行的方法。这个特定的实现与处理 `@PreDestroy`注解相关。
+The `org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor#postProcessBeforeDestruction` method is part of Spring's `DestructionAwareBeanPostProcessor` interface. It runs the methods that must be called when a bean is destroyed. This implementation handles the `@PreDestroy` annotation.
 
 ```java
 @Override
@@ -271,37 +270,37 @@ public void postProcessBeforeDestruction(Object bean, String beanName) throws Be
         metadata.invokeDestroyMethods(bean, beanName);
     }
     catch (InvocationTargetException ex) {
-       // ... [代码部分省略以简化]
+       // ... [code omitted for brevity]
     }
     catch (Throwable ex) {
-       // ... [代码部分省略以简化]
+       // ... [code omitted for brevity]
     }
 }
 ```
 
-在`org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor#findLifecycleMetadata`方法中，首先`InitDestroyAnnotationBeanPostProcessor#postProcessMergedBeanDefinition` 元数据收集阶段，`findLifecycleMetadata` 被调用以处理和缓存与 `@PreDestroy`和其他相关注解的 `LifecycleMetadata`。这意味着，在`postProcessBeforeDestruction`阶段再次调用 `findLifecycleMetadata` 时，会直接从缓存中获取已处理的 `LifecycleMetadata`，而不需要重新构建它。
+In the `org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor#findLifecycleMetadata` method, the first call happens in the metadata collection phase, `InitDestroyAnnotationBeanPostProcessor#postProcessMergedBeanDefinition`. There, `findLifecycleMetadata` processes and caches the `LifecycleMetadata` for `@PreDestroy` and other related annotations. So when `findLifecycleMetadata` is called again in the `postProcessBeforeDestruction` phase, it returns the cached `LifecycleMetadata`. It does not need to build it again.
 
 ```java
 private LifecycleMetadata findLifecycleMetadata(Class<?> clazz) {
     
-    // 检查生命周期元数据缓存是否为空，这可能发生在反序列化或销毁阶段。
+    // Check if the lifecycle metadata cache is null. This can happen during deserialization or destruction.
     if (this.lifecycleMetadataCache == null) {
         return buildLifecycleMetadata(clazz);
     }
     
-    // 首先，在并发映射中进行快速检查，以最小的锁定。
+    // First, do a quick check in the concurrent map with minimal locking.
     LifecycleMetadata metadata = this.lifecycleMetadataCache.get(clazz);
     
-    // 如果缓存中没有找到元数据，则构建元数据并放入缓存。
+    // If no metadata is found in the cache, build it and put it in the cache.
     if (metadata == null) {
         synchronized (this.lifecycleMetadataCache) {
             metadata = this.lifecycleMetadataCache.get(clazz);
             
-            // 双重检查锁定模式，确保只有一个线程构建和缓存元数据。
+            // Double-checked locking: make sure only one thread builds and caches the metadata.
             if (metadata == null) {
-                // 根据给定的类构建生命周期元数据。
+                // Build the lifecycle metadata for the given class.
                 metadata = buildLifecycleMetadata(clazz);
-                // 将新构建的元数据缓存，以便后续请求可以快速从缓存中检索。
+                // Cache the new metadata so later requests can get it quickly.
                 this.lifecycleMetadataCache.put(clazz, metadata);
             }
             return metadata;
@@ -312,97 +311,95 @@ private LifecycleMetadata findLifecycleMetadata(Class<?> clazz) {
 }
 ```
 
-在`org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor.LifecycleMetadata#invokeDestroyMethods`方法中，主要负责在一个 bean 实例上调用销毁方法的地方。它基于预先确定的生命周期元素集合（这里是销毁方法集合）进行迭代，并对每个元素（方法）进行调用。
+The `org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor.LifecycleMetadata#invokeDestroyMethods` method calls the destroy methods on a bean instance. It goes through a predetermined collection of lifecycle elements (here, the destroy methods) and calls each element (method).
 
 ```java
 public void invokeDestroyMethods(Object target, String beanName) throws Throwable {
-    // 获取已经检查过的销毁方法集合
+    // Get the collection of destroy methods that were already checked.
     Collection<LifecycleElement> checkedDestroyMethods = this.checkedDestroyMethods;
-    // 根据是否存在已检查的销毁方法，选择要使用的销毁方法集合
+    // Choose which destroy methods to use, depending on whether checked destroy methods exist.
     Collection<LifecycleElement> destroyMethodsToUse =
         (checkedDestroyMethods != null ? checkedDestroyMethods : this.destroyMethods);
 
-    // 判断是否有销毁方法需要执行
+    // Check if there are destroy methods to run.
     if (!destroyMethodsToUse.isEmpty()) {
-        // 遍历销毁方法集合
+        // Go through the destroy methods.
         for (LifecycleElement element : destroyMethodsToUse) {
-            // 如果日志级别为 TRACE，记录正在调用的销毁方法信息
+            // If the log level is TRACE, log the destroy method that is being called.
             if (logger.isTraceEnabled()) {
                 logger.trace("Invoking destroy method on bean '" + beanName + "': " + element.getMethod());
             }
-            // 在目标 bean 上调用当前的销毁方法
+            // Call the current destroy method on the target bean.
             element.invoke(target);
         }
     }
 }
 ```
 
-在`org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor.LifecycleElement#invoke`方法中，使用反射调用目标对象上的特定方法。
+The `org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor.LifecycleElement#invoke` method uses reflection to call the specific method on the target object.
 
 ```java
 public void invoke(Object target) throws Throwable {
-    // 确保封装的方法是可访问的，特别是如果它是私有的。
+    // Make sure the wrapped method is accessible, especially if it is private.
     ReflectionUtils.makeAccessible(this.method);
 
-    // 使用反射实际调用方法。由于该方法没有参数，所以传递一个null作为参数列表。
+    // Call the method with reflection. The method has no parameters, so pass null as the argument list.
     this.method.invoke(target, (Object[]) null);
 }
 ```
 
-### 八、注意事项
+### 8. Notes
 
-1. **无参数方法**
-   + 标记为 `@PreDestroy` 的方法不应该有参数，并且应该是无返回值的（即返回 `void`）。
-2. **异常处理**
-   + 标记为 `@PreDestroy` 的方法不应该抛出受检异常。如果在执行方法时出现任何错误或异常，建议在方法内部处理，以避免可能的未预期的行为。
-3. **访问修饰符**
-   + 虽然可以在 private、protected 或 public 方法上使用 `@PreDestroy`，但最好确保方法是可访问的，特别是在子类或不同的包中。
-4. **原型 Bean 的限制**
-   + 对于原型作用域的 bean，`@PreDestroy` 方法不会被 Spring 容器调用，因为 Spring 不管理原型 bean 的完整生命周期。因此，不要依赖 `@PreDestroy` 来清理原型 bean 的资源。
-5. **多个销毁方法**
-   + 如果一个 bean 既有 `@PreDestroy` 注解的方法又有通过 XML `destroy-method` 属性指定的方法，那么 `@PreDestroy` 注解的方法将首先被调用，然后是 `destroy-method` 指定的方法。
-6. **依赖关系**
-   + 如果我们的 bean 依赖于其他 bean，并且这些依赖关系在销毁过程中仍然重要，那么我们需要确保这些依赖关系在 `@PreDestroy` 方法执行时仍然满足。
-7. **执行顺序**
-   + Spring 不保证 `@PreDestroy` 方法的执行顺序，尤其是跨多个 bean 的情况。如果销毁方法之间的执行顺序很重要，我们可能需要考虑其他方法来协调这些销毁动作。
-8. **JSR-250 依赖**
-   + `@PreDestroy` 是 JSR-250 规范的一部分。要使用它，确保有适当的库依赖（尽管大多数现代 Spring 项目都会有）。
-9. **与 Bean 的生命周期配合**
-   + 只有当 bean 真正被 Spring 容器管理其生命周期时，`@PreDestroy` 才会被调用。这意味着，例如，如果我们手动创建一个 bean 的实例（而不是从 Spring 容器中获取），`@PreDestroy` 方法不会被自动调用。
+1. **Method signature**
+   + A method marked with `@PreDestroy` should take no parameters and should return nothing (`void`).
+2. **Exception handling**
+   + A method marked with `@PreDestroy` should not throw checked exceptions. If an error or exception can happen in the method, handle it inside the method. This avoids unexpected behavior.
+3. **Access modifier**
+   + You can use `@PreDestroy` on private, protected, or public methods. But it is better to make sure the method is accessible, especially in subclasses or in different packages.
+4. **Limit of prototype beans**
+   + For prototype-scoped beans, the Spring container does not call the `@PreDestroy` method, because Spring does not manage the full lifecycle of prototype beans. So do not rely on `@PreDestroy` to clean up resources of a prototype bean.
+5. **Multiple destroy methods**
+   + If a bean has both a `@PreDestroy` method and a method set by the XML `destroy-method` attribute, the `@PreDestroy` method is called first. Then the `destroy-method` method is called.
+6. **Dependencies**
+   + If your bean depends on other beans, and these dependencies still matter during destruction, make sure they are still available when the `@PreDestroy` method runs.
+7. **Execution order**
+   + Spring does not guarantee the order of `@PreDestroy` methods, especially across several beans. If the order of destroy methods matters, consider other ways to coordinate the destroy actions.
+8. **JSR-250 dependency**
+   + `@PreDestroy` is part of the JSR-250 specification. To use it, make sure you have the right library dependency (most modern Spring projects already have it).
+9. **Works with the bean lifecycle**
+   + `@PreDestroy` is called only when the Spring container really manages the bean lifecycle. For example, if you create a bean instance by hand (instead of getting it from the Spring container), the `@PreDestroy` method is not called automatically.
 
-### 九、总结
+### 9. Summary
 
-#### 最佳实践总结
+#### Best Practices Summary
 
-1. **启动类入口**
-   - `PreDestroyApplication` 类的 `main` 方法中，使用 `AnnotationConfigApplicationContext` 初始化Spring容器，该方法使用Java注解来配置Spring。我们将 `MyConfiguration` 作为参数传递，意味着我们希望从这个类开始加载Spring的配置。
-2. **配置类**
-   - `MyConfiguration` 被标记为一个配置类（通过 `@Configuration` 注解）。其中的 `@ComponentScan` 注解告诉Spring应该在哪些包里搜索组件。在这个例子中，Spring将会扫描 "`com.xcs.spring`" 包以及其子包，寻找例如 `@Component`、`@Service`、`@Repository` 和 `@Controller` 的注解，以此自动地注册bean。
-3. **服务类**
-   - 当Spring扫描 "`com.xcs.spring`" 包时，它找到了 `MyService` 类，这个类被标记为一个Service（通过 `@Service` 注解）。因此，Spring会为这个类创建一个bean实例。
-4. **关闭上下文**
-   - 当应用上下文被关闭（`context.close()`），所有的单例 beans 将被销毁。在这个过程中，任何带有 `@PreDestroy` 注解的方法都将被调用。所以，`MyService` 类中的 `preDestroy` 方法被执行，打印 "执行@PreDestroy方法"。
+1. **Entry class**
+   - In the `main` method of `PreDestroyApplication`, `AnnotationConfigApplicationContext` initializes the Spring container. It uses Java annotations to configure Spring. We pass `MyConfiguration` as the argument, so Spring loads its configuration from this class.
+2. **Configuration class**
+   - `MyConfiguration` is marked as a configuration class (with `@Configuration`). The `@ComponentScan` annotation tells Spring which packages to search for components. In this example, Spring scans the "`com.xcs.spring`" package and its sub-packages for annotations such as `@Component`, `@Service`, `@Repository`, and `@Controller`, and registers beans automatically.
+3. **Service class**
+   - When Spring scans the "`com.xcs.spring`" package, it finds the `MyService` class, which is marked as a service (with `@Service`). So Spring creates a bean instance of this class.
+4. **Closing the context**
+   - When the application context is closed (`context.close()`), all singleton beans are destroyed. During this, every method with `@PreDestroy` is called. So the `preDestroy` method in `MyService` runs and prints "Executing @PreDestroy method".
 
-#### 源码分析总结
+#### Source Code Analysis Summary
 
-1. **前置条件**
-   - `@PreDestroy`注解的执行依赖于两个核心接口：`MergedBeanDefinitionPostProcessor`和`DestructionAwareBeanPostProcessor`。
-   - 这两个接口允许Spring在bean生命周期的关键阶段进行干预，如属性注入后，销毁前等。
+1. **Prerequisites**
+   - The execution of `@PreDestroy` depends on two core interfaces: `MergedBeanDefinitionPostProcessor` and `DestructionAwareBeanPostProcessor`.
+   - These interfaces let Spring step into key stages of the bean lifecycle, such as after property injection and before destruction.
 
-2. **收集阶段**
+2. **Collection phase**
 
-   - 当Spring处理一个Bean的定义并且这个Bean可能有`@PreDestroy`注解时，`InitDestroyAnnotationBeanPostProcessor`的`postProcessMergedBeanDefinition`方法会被调用。
+   - When Spring processes a bean definition and the bean may have `@PreDestroy`, the `postProcessMergedBeanDefinition` method of `InitDestroyAnnotationBeanPostProcessor` is called.
 
-   - 在此方法中，与bean相关的`LifecycleMetadata`（包括`@PreDestroy`方法信息）被收集并缓存起来，以便后续使用。
+   - In this method, the `LifecycleMetadata` of the bean (including the `@PreDestroy` method information) is collected and cached for later use.
 
-3. **销毁阶段**
+3. **Destruction phase**
 
-   - 当 Spring 上下文关闭时（如调用 `context.close()`），所有的单例 beans 将被销毁。
-   - `postProcessBeforeDestruction` 方法是 `DestructionAwareBeanPostProcessor` 接口的一部分，它会被调用来处理每一个需要销毁的 bean。
-   - 在这个方法中，再次调用 `findLifecycleMetadata` 方法从缓存中获取 `LifecycleMetadata`。
-   - 之后，`invokeDestroyMethods` 方法会遍历所有销毁方法并在目标 bean 上调用它们。
+   - When the Spring context is closed (for example by calling `context.close()`), all singleton beans are destroyed.
+   - The `postProcessBeforeDestruction` method is part of the `DestructionAwareBeanPostProcessor` interface. It is called for every bean that must be destroyed.
+   - In this method, `findLifecycleMetadata` is called again to get the `LifecycleMetadata` from the cache.
+   - After that, the `invokeDestroyMethods` method goes through all destroy methods and calls them on the target bean.
 
-   - 执行是通过查找bean的`LifecycleMetadata`（在之前的收集阶段中已经构建），然后迭代这些元数据中的方法，并使用反射来调用它们。
-
-4. **实际方法调用**
-   - 当需要调用具体的`@PreDestroy`方法时，会使用`LifecycleElement`类的`invoke`方法，该方法再次使用反射来确保方法是可访问的，并实际调用它。
+4. **Actual method call**
+   - When a specific `@PreDestroy` method must be called, the `invoke` method of the `LifecycleElement` class is used. It uses reflection again to make sure the method is accessible, and then calls it.

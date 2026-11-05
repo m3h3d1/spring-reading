@@ -1,38 +1,38 @@
 ## @Resource
 
 - [@Resource](#resource)
-  - [一、基本信息](#一基本信息)
-  - [二、接口描述](#二接口描述)
-  - [三、接口源码](#三接口源码)
-  - [四、主要功能](#四主要功能)
-  - [五、最佳实践](#五最佳实践)
-  - [六、时序图](#六时序图)
-  - [七、源码分析](#七源码分析)
-    - [前置条件](#前置条件)
-    - [收集阶段](#收集阶段)
-    - [注入阶段](#注入阶段)
-  - [八、注意事项](#八注意事项)
-  - [九、总结](#九总结)
-    - [最佳实践总结](#最佳实践总结)
-    - [源码分析总结](#源码分析总结)
+  - [1. Overview](#1-overview)
+  - [2. Interface Description](#2-interface-description)
+  - [3. Interface Source](#3-interface-source)
+  - [4. Main Features](#4-main-features)
+  - [5. Best Practices](#5-best-practices)
+  - [6. Sequence Diagram](#6-sequence-diagram)
+  - [7. Source Code Analysis](#7-source-code-analysis)
+    - [Prerequisites](#prerequisites)
+    - [Collection Phase](#collection-phase)
+    - [Injection Phase](#injection-phase)
+  - [8. Notes](#8-notes)
+  - [9. Summary](#9-summary)
+    - [Best Practices Summary](#best-practices-summary)
+    - [Source Code Analysis Summary](#source-code-analysis-summary)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [我的CSDN](https://blog.csdn.net/duzhuang2399/article/details/133887864) 📚 **文章目录** - [所有文章](https://github.com/xuchengsheng/spring-reading) 🔗 **源码地址** - [@Resource源码](https://github.com/xuchengsheng/spring-reading/blob/master/spring-jsr/spring-jsr250-resource)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN](https://blog.csdn.net/duzhuang2399/article/details/133887864) 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、接口描述
+### 2. Interface Description
 
-`@Resource` 注解是由 JSR-250: Common Annotations for the Java Platform 规范定义的。这个规范定义了一组跨多个 Java 技术（如 Java EE 和 Java SE）的公共注解。
+The `@Resource` annotation is defined by the JSR-250 specification, Common Annotations for the Java Platform. This specification defines a set of common annotations used across several Java technologies (such as Java EE and Java SE).
 
-### 三、接口源码
+### 3. Interface Source
 
-`@Resource` 注解的目的是为了声明和注入应用程序所需的外部资源，从而允许容器在运行时为应用程序组件提供这些资源。
+The `@Resource` annotation declares and injects the external resources an application needs. The container then provides these resources to application components at runtime.
 
 ```java
 /**
- * 标注需要注入的资源的注解。
- * 这个注解可以用于类、字段和方法上，指示容器为其注入资源。
+ * Annotation that marks a resource to be injected.
+ * It can be used on classes, fields, and methods. It tells the container to inject the resource.
  */
 @Target({ElementType.TYPE, ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
@@ -40,58 +40,58 @@
 public @interface Resource {
 
     /**
-     * 资源的 JNDI 名称。
+     * The JNDI name of the resource.
      *
-     * @return 资源名称。
+     * @return the resource name.
      */
     String name() default "";
 
     /**
-     * JNDI 查询名称，用于运行时查找资源。
+     * The JNDI lookup name, used to find the resource at runtime.
      *
-     * @return JNDI 查询名称。
+     * @return the JNDI lookup name.
      */
     String lookup() default "";
 
     /**
-     * 资源的期望类型。默认为 Object，意味着类型不特定。
+     * The expected type of the resource. The default is Object, which means no specific type.
      *
-     * @return 资源类型。
+     * @return the resource type.
      */
     Class<?> type() default Object.class;
 
     /**
-     * 资源的身份验证类型。
+     * The authentication type of the resource.
      *
-     * @return 身份验证类型。
+     * @return the authentication type.
      */
     Resource.AuthenticationType authenticationType() default Resource.AuthenticationType.CONTAINER;
 
     /**
-     * 标示资源是否可以被多个客户端共享。
+     * Shows whether the resource can be shared by several clients.
      *
-     * @return 如果资源可以被共享则返回 true，否则返回 false。
+     * @return true if the resource can be shared, otherwise false.
      */
     boolean shareable() default true;
 
     /**
-     * 与资源环境引用关联的产品特定的名称。
+     * A product-specific name linked to the resource environment reference.
      *
-     * @return 映射名称。
+     * @return the mapped name.
      */
     String mappedName() default "";
 
     /**
-     * 对资源的简要描述。
+     * A short description of the resource.
      *
-     * @return 资源描述。
+     * @return the resource description.
      */
     String description() default "";
 
     /**
-     * 身份验证类型的枚举。
-     * CONTAINER: 容器管理身份验证。
-     * APPLICATION: 应用程序管理身份验证。
+     * Enum of authentication types.
+     * CONTAINER: authentication is managed by the container.
+     * APPLICATION: authentication is managed by the application.
      */
     public static enum AuthenticationType {
         CONTAINER,
@@ -100,24 +100,24 @@ public @interface Resource {
 }
 ```
 
-### 四、主要功能
+### 4. Main Features
 
-1. **资源定位**
-   + 通过 `name` 和 `lookup` 属性，`@Resource` 可以定位到特定的资源，如 JNDI 中的一个数据库连接。
-2. **类型指定**
-   + 通过 `type` 属性，它允许指定所需资源的具体Java类型，确保注入的资源与预期类型匹配，从而提供类型安全。
-3. **身份验证策略**
-   + `authenticationType` 属性允许我们选择资源的身份验证方式，决定是由容器还是应用程序来进行身份验证。
-4. **共享策略**
-   + 通过 `shareable` 属性，它指定资源是否可以在多个客户端或组件之间共享。
-5. **供应商特定名称**
-   + `mappedName` 属性可以提供与资源关联的供应商或平台特定的名称，增加部署的灵活性。
-6. **描述信息**
-   + 通过 `description` 属性，为资源提供了简要描述，有助于我们和系统管理员理解其用途。
+1. **Resource lookup**
+   + With the `name` and `lookup` attributes, `@Resource` can find a specific resource, such as a database connection in JNDI.
+2. **Type setting**
+   + The `type` attribute sets the exact Java type of the resource. This makes sure the injected resource matches the expected type, so it is type safe.
+3. **Authentication strategy**
+   + The `authenticationType` attribute lets you choose how the resource is authenticated: by the container or by the application.
+4. **Sharing strategy**
+   + The `shareable` attribute sets whether the resource can be shared between several clients or components.
+5. **Vendor-specific name**
+   + The `mappedName` attribute can give a vendor-specific or platform-specific name for the resource. This makes deployment more flexible.
+6. **Description**
+   + The `description` attribute gives a short description of the resource. It helps developers and system administrators understand what it is for.
 
-### 五、最佳实践
+### 5. Best Practices
 
-首先来看看启动类入口，上下文环境使用`AnnotationConfigApplicationContext`（此类是使用Java注解来配置Spring容器的方式），构造参数我们给定了一个`MyConfiguration`组件类。然后从Spring上下文中获取一个`MyController`类型的bean并调用了`showService`方法，
+First, look at the entry class. The context is `AnnotationConfigApplicationContext` (this class configures the Spring container with Java annotations). We pass the `MyConfiguration` component class as the constructor argument. Then we get a bean of type `MyController` from the Spring context and call its `showService` method.
 
 ```java
 public class ResourceApplication {
@@ -130,7 +130,7 @@ public class ResourceApplication {
 }
 ```
 
-在`MyConfiguration`类中，使用了`@ComponentScan("com.xcs.spring")`注解告诉 Spring 在指定的包（在这里是 "`com.xcs.spring`"）及其子包中搜索带有 `@Component`、`@Service`、`@Repository` 和 `@Controller` 等注解的类，并将它们自动注册为 beans。这样，spring就不必为每个组件明确写一个 bean 定义。Spring 会自动识别并注册它们。
+The `MyConfiguration` class uses `@ComponentScan("com.xcs.spring")`. This tells Spring to search the given package ("`com.xcs.spring`") and its sub-packages for classes with annotations such as `@Component`, `@Service`, `@Repository`, and `@Controller`. Spring registers them as beans automatically. So you do not need to write a bean definition for each component.
 
 ```java
 @Configuration
@@ -140,7 +140,7 @@ public class MyConfiguration {
 }
 ```
 
-Spring 容器在初始化 `MyController` 时，我们使用了`@Resource`注解，会自动注入一个 `MyService` 类型的 bean 到 `myService` 字段。
+When the Spring container initializes `MyController`, the `@Resource` annotation injects a bean of type `MyService` into the `myService` field.
 
 ```java
 @Controller
@@ -155,7 +155,7 @@ public class MyController {
 }
 ```
 
-`MyService` 是一个简单的服务类，但我们没有定义任何方法或功能。
+`MyService` is a simple service class. It has no methods or features.
 
 ```java
 @Service
@@ -164,131 +164,131 @@ public class MyService {
 }
 ```
 
-运行结果发现，我们使用 `@Resource` 注解的功能，在我们的 Spring 上下文中工作正常，并且它成功地自动注入了所需的依赖关系。
+The result shows that `@Resource` works well in our Spring context. It injects the required dependency successfully.
 
 ```java
 myService = com.xcs.spring.service.MyService@f0c8a99
 ```
 
-### 六、时序图
+### 6. Sequence Diagram
 
 ~~~mermaid
 sequenceDiagram
-Title: @Resource注解时序图
-AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:applyMergedBeanDefinitionPostProcessors(mbd,beanType,beanName)<br>应用Bean定义的后置处理器
-AbstractAutowireCapableBeanFactory->>CommonAnnotationBeanPostProcessor:postProcessMergedBeanDefinition(beanDefinition,beanType,beanName)<br>处理已合并的Bean定义
+Title: @Resource annotation sequence diagram
+AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:applyMergedBeanDefinitionPostProcessors(mbd,beanType,beanName)<br>Apply the bean definition post-processors
+AbstractAutowireCapableBeanFactory->>CommonAnnotationBeanPostProcessor:postProcessMergedBeanDefinition(beanDefinition,beanType,beanName)<br>Handle the merged bean definition
 CommonAnnotationBeanPostProcessor->>CommonAnnotationBeanPostProcessor:findResourceMetadata(beanName,clazz,pvs)
 CommonAnnotationBeanPostProcessor->>CommonAnnotationBeanPostProcessor:buildResourceMetadata(clazz)
-CommonAnnotationBeanPostProcessor->>ReflectionUtils:doWithLocalFields(clazz,fc)<br>处理类的本地字段
-ReflectionUtils->>CommonAnnotationBeanPostProcessor:解析有@Resource注解的字段
+CommonAnnotationBeanPostProcessor->>ReflectionUtils:doWithLocalFields(clazz,fc)<br>Process the local fields of the class
+ReflectionUtils->>CommonAnnotationBeanPostProcessor:Find fields with the @Resource annotation
 CommonAnnotationBeanPostProcessor->>ResourceElement:ResourceElement(member,ae,pd)
-CommonAnnotationBeanPostProcessor->>ReflectionUtils:doWithLocalMethods(clazz,fc)<br>处理类的本地方法
-ReflectionUtils->>CommonAnnotationBeanPostProcessor:解析有@Resource注解的方法
+CommonAnnotationBeanPostProcessor->>ReflectionUtils:doWithLocalMethods(clazz,fc)<br>Process the local methods of the class
+ReflectionUtils->>CommonAnnotationBeanPostProcessor:Find methods with the @Resource annotation
 CommonAnnotationBeanPostProcessor->>ResourceElement:ResourceElement(member,ae,pd)
-CommonAnnotationBeanPostProcessor->>CommonAnnotationBeanPostProcessor:injectionMetadataCache.put(cacheKey, metadata)<br>将元数据存入缓存
-AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:populateBean(beanName,mbd,bw)<br>填充Bean的属性值
-AbstractAutowireCapableBeanFactory->>CommonAnnotationBeanPostProcessor:postProcessProperties(pvs,bean,beanName)<br>后处理Bean的属性
+CommonAnnotationBeanPostProcessor->>CommonAnnotationBeanPostProcessor:injectionMetadataCache.put(cacheKey, metadata)<br>Put the metadata into the cache
+AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:populateBean(beanName,mbd,bw)<br>Fill in the property values of the bean
+AbstractAutowireCapableBeanFactory->>CommonAnnotationBeanPostProcessor:postProcessProperties(pvs,bean,beanName)<br>Post-process the properties of the bean
 CommonAnnotationBeanPostProcessor->>CommonAnnotationBeanPostProcessor:findResourceMetadata(beanName,clazz,pvs)
-Note right of CommonAnnotationBeanPostProcessor:<br>从缓存中获取注入的元数据
+Note right of CommonAnnotationBeanPostProcessor:<br>Get the injection metadata from the cache
 CommonAnnotationBeanPostProcessor->>InjectionMetadata:inject(target,beanName,pvs)
 InjectionMetadata->>InjectedElement:inject(target,requestingBeanName,pvs)
 InjectedElement->>ResourceElement:getResourceToInject(target,requestingBeanName)
 ResourceElement->>CommonAnnotationBeanPostProcessor:getResource(element,requestingBeanName)
 CommonAnnotationBeanPostProcessor->>CommonAnnotationBeanPostProcessor:autowireResource(factory,element,requestingBeanName)
 CommonAnnotationBeanPostProcessor->>AbstractAutowireCapableBeanFactory:resolveBeanByName(name,descriptor)
-AbstractAutowireCapableBeanFactory->>CommonAnnotationBeanPostProcessor:返回被依赖的Bean
-CommonAnnotationBeanPostProcessor->>ResourceElement:返回被依赖的Bean
-ResourceElement->>InjectedElement:返回被依赖的Bean
-InjectedElement->>Field:field.set(target, 返回被依赖的Bean)
+AbstractAutowireCapableBeanFactory->>CommonAnnotationBeanPostProcessor:Return the dependent bean
+CommonAnnotationBeanPostProcessor->>ResourceElement:Return the dependent bean
+ResourceElement->>InjectedElement:Return the dependent bean
+InjectedElement->>Field:field.set(target, dependent bean)
 ~~~
 
-### 七、源码分析
+### 7. Source Code Analysis
 
-#### 前置条件
+#### Prerequisites
 
-在Spring中，`CommonAnnotationBeanPostProcessor`是处理`@Inject`等注解的关键类，它实现了下述两个接口。因此，为了深入理解`@Inject`的工作方式，研究这个类是非常有用的。简而言之，为了完全理解`@Inject`的工作机制，了解下述接口确实是必要的。这两个接口提供了对bean生命周期中关键阶段的干预，从而允许进行属性注入和其他相关的操作。
+In Spring, `CommonAnnotationBeanPostProcessor` is the key class that handles annotations such as `@Inject`. It implements the two interfaces below. To understand how `@Inject` works, you need to know these interfaces. They let you step into key stages of the bean lifecycle, so property injection and other related work can be done.
 
-1. `MergedBeanDefinitionPostProcessor`接口
-   - 此接口提供的`postProcessMergedBeanDefinition`方法允许后处理器修改合并后的bean定义。合并后的bean定义是一个已经考虑了所有父bean定义属性的bean定义。对于`@Inject`注解的处理，这一步通常涉及到收集需要被解析的`@Inject`注解信息并准备对其进行后续处理。
-   - 🔗 [MergedBeanDefinitionPostProcessor接口传送门](https://github.com/xuchengsheng/spring-reading/tree/master/spring-interface/spring-interface-mergedBeanDefinitionPostProcessor)
-2. `InstantiationAwareBeanPostProcessor`接口
-   - 此接口提供了几个回调方法，允许后处理器在bean实例化之前和实例化之后介入bean的创建过程。特别是，`postProcessProperties`方法允许后处理器对bean的属性进行操作。对于`@Inject`注解，这通常需要在属性设置或依赖注入阶段对 bean 进行处理，并将解析得到的值注入到bean中。
-   - 🔗 [InstantiationAwareBeanPostProcessor接口传送门](https://github.com/xuchengsheng/spring-reading/tree/master/spring-interface/spring-interface-instantiationAwareBeanPostProcessor)
+1. `MergedBeanDefinitionPostProcessor` interface
+   - Its `postProcessMergedBeanDefinition` method lets a post-processor change the merged bean definition. A merged bean definition already includes all properties from parent bean definitions. For `@Inject`, this step usually collects the `@Inject` information to parse and prepares it for later processing.
+   - 🔗 [MergedBeanDefinitionPostProcessor interface link](https://github.com/xuchengsheng/spring-reading/tree/master/spring-interface/spring-interface-mergedBeanDefinitionPostProcessor)
+2. `InstantiationAwareBeanPostProcessor` interface
+   - This interface has several callback methods. They let a post-processor step into the bean creation process before and after instantiation. The `postProcessProperties` method lets a post-processor work on the properties of the bean. For `@Inject`, the bean usually needs to be processed during property setting or dependency injection, and the resolved value is injected into the bean.
+   - 🔗 [InstantiationAwareBeanPostProcessor interface link](https://github.com/xuchengsheng/spring-reading/tree/master/spring-interface/spring-interface-instantiationAwareBeanPostProcessor)
 
-#### 收集阶段
+#### Collection Phase
 
-在`org.springframework.context.annotation.CommonAnnotationBeanPostProcessor#postProcessMergedBeanDefinition`方法中，主要是处理与 `@Resource` 注解相关的资源注入元数据，并在bean定义合并后对这些元数据进行进一步的处理或验证。这是Spring在处理JSR-250 `@Resource` 注解时的处理入口。
+The `org.springframework.context.annotation.CommonAnnotationBeanPostProcessor#postProcessMergedBeanDefinition` method handles the resource injection metadata related to `@Resource`. After the bean definition is merged, it processes or checks this metadata. This is the entry point where Spring handles the JSR-250 `@Resource` annotation.
 
 ```java
 @Override
 public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
-    // 调用父类的 postProcessMergedBeanDefinition 方法，确保继承的处理逻辑得到执行
+    // Call the parent postProcessMergedBeanDefinition method, so the inherited logic also runs
     super.postProcessMergedBeanDefinition(beanDefinition, beanType, beanName);
     
-    // 根据给定的 bean 名称和类型查找相关的资源注入元数据
+    // Find the resource injection metadata for the given bean name and type
     InjectionMetadata metadata = findResourceMetadata(beanName, beanType, null);
     
-    // 使用找到的资源注入元数据对bean定义进行进一步的处理或验证
+    // Use the resource injection metadata to process or check the bean definition
     metadata.checkConfigMembers(beanDefinition);
 }
 ```
 
-在`org.springframework.context.annotation.CommonAnnotationBeanPostProcessor#findResourceMetadata`方法中，首先尝试从缓存中获取 `InjectionMetadata`，如果它不存在或需要刷新，则会创建新的 `InjectionMetadata` 并将其存入缓存。这种缓存策略可以提高效率，避免对同一类型的类反复构建注入元数据。
+In the `org.springframework.context.annotation.CommonAnnotationBeanPostProcessor#findResourceMetadata` method, it first tries to get the `InjectionMetadata` from the cache. If it does not exist or needs a refresh, it creates a new `InjectionMetadata` and stores it in the cache. This cache avoids building the injection metadata again and again for the same class.
 
 ```java
 private InjectionMetadata findResourceMetadata(String beanName, final Class<?> clazz, @Nullable PropertyValues pvs) {
     
-    // 若 beanName 有值，则使用 beanName 作为缓存键；否则，使用类名作为缓存键。
-    // 这也为那些自定义调用提供了向后兼容性。
+    // If beanName has a value, use it as the cache key. Otherwise, use the class name as the cache key.
+    // This also keeps backward compatibility for custom calls.
     String cacheKey = (StringUtils.hasLength(beanName) ? beanName : clazz.getName());
     
-    // 首先进行一个快速检查在并发Map中的缓存，以最小化锁定。
+    // First, do a quick check in the concurrent map cache, to keep locking to a minimum.
     InjectionMetadata metadata = this.injectionMetadataCache.get(cacheKey);
     
-    // 检查当前的 metadata 是否需要刷新，例如它可能是过时的或不再适用。
+    // Check if the current metadata needs a refresh, for example if it is out of date or no longer fits.
     if (InjectionMetadata.needsRefresh(metadata, clazz)) {
-         // 对缓存进行同步处理以确保线程安全
+         // Synchronize on the cache to be thread safe
         synchronized (this.injectionMetadataCache) { 
             metadata = this.injectionMetadataCache.get(cacheKey);
             if (InjectionMetadata.needsRefresh(metadata, clazz)) {
                 if (metadata != null) {
-                    // 清除旧的 metadata
+                    // Clear the old metadata
                     metadata.clear(pvs);  
                 }
-                // 构建新的资源注入元数据
+                // Build the new resource injection metadata
                 metadata = buildResourceMetadata(clazz);
-                // 将新的 metadata 放入缓存
+                // Put the new metadata into the cache
                 this.injectionMetadataCache.put(cacheKey, metadata);
             }
         }
     }
-    // 返回找到或创建的资源注入元数据
+    // Return the resource injection metadata that was found or created
     return metadata;  
 }
 ```
 
-在`org.springframework.context.annotation.CommonAnnotationBeanPostProcessor#buildResourceMetadata`方法中，目的是检查给定类及其所有超类中的所有字段和方法，查找标有 `@Resource` 和其他相关注解的元素，并据此创建一个 `InjectionMetadata` 对象。这个对象会包含了`ResourceElement`类，此类会处理如何注入这些资源的所有必要信息。
+The `org.springframework.context.annotation.CommonAnnotationBeanPostProcessor#buildResourceMetadata` method checks all fields and methods of the given class and all its superclasses. It looks for elements marked with `@Resource` and other related annotations, and creates an `InjectionMetadata` object from them. This object holds `ResourceElement` objects. Each one has all the information needed to inject the resource.
 
 ```java
 private InjectionMetadata buildResourceMetadata(final Class<?> clazz) {
     
-    // 判断给定的类是否可能包含任何资源注解。
+    // Check if the given class may contain any resource annotations.
     if (!AnnotationUtils.isCandidateClass(clazz, resourceAnnotationTypes)) {
-        return InjectionMetadata.EMPTY;  // 如果不是，返回一个空的元数据。
+        return InjectionMetadata.EMPTY;  // If not, return empty metadata.
     }
 
     List<InjectionMetadata.InjectedElement> elements = new ArrayList<>();
     Class<?> targetClass = clazz;
 
-    // 开始遍历给定类及其所有超类
+    // Start going through the given class and all its superclasses
     do {
         final List<InjectionMetadata.InjectedElement> currElements = new ArrayList<>();
 
-        // 检查类的所有局部字段上的注解
+        // Check the annotations on all local fields of the class
         ReflectionUtils.doWithLocalFields(targetClass, field -> {
-            // ... (此处的代码检查各种注解，例如@WebServiceRef, @EJB 和 @Resource，并据此创建对应的元素)
+            // ... (this code checks several annotations, such as @WebServiceRef, @EJB, and @Resource, and creates the matching elements)
             
-            // ... [代码部分省略以简化]
+            // ... [code omitted for brevity]
             
             if (field.isAnnotationPresent(Resource.class)) {
                 if (Modifier.isStatic(field.getModifiers())) {
@@ -300,11 +300,11 @@ private InjectionMetadata buildResourceMetadata(final Class<?> clazz) {
             }
         });
 
-        // 检查类的所有局部方法上的注解
+        // Check the annotations on all local methods of the class
         ReflectionUtils.doWithLocalMethods(targetClass, method -> {
-            // ... (与字段相似，此处的代码检查各种注解，并据此创建对应的元素)
+            // ... (like for fields, this code checks several annotations and creates the matching elements)
             
-            // ... [代码部分省略以简化]
+            // ... [code omitted for brevity]
             if (bridgedMethod.isAnnotationPresent(Resource.class)) {
                 if (Modifier.isStatic(method.getModifiers())) {
                     throw new IllegalStateException("@Resource annotation is not supported on static methods");
@@ -320,130 +320,129 @@ private InjectionMetadata buildResourceMetadata(final Class<?> clazz) {
             }
         });
 
-        // 将当前类找到的元素添加到总列表的开头
+        // Add the elements found in the current class to the start of the total list
         elements.addAll(0, currElements);
-        // 移动到下一个超类进行处理
+        // Move to the next superclass
         targetClass = targetClass.getSuperclass();
     }
-    // 持续处理，直到没有超类或达到 Object 类为止
+    // Keep going until there is no superclass or the Object class is reached
     while (targetClass != null && targetClass != Object.class);
-
-    // 根据收集到的注入元素创建并返回一个 InjectionMetadata 实例
+    // Create and return an InjectionMetadata instance from the collected injection elements
     return InjectionMetadata.forElements(elements, clazz);
 }
 ```
 
-在`org.springframework.context.annotation.CommonAnnotationBeanPostProcessor.ResourceElement#ResourceElement`方法中，主要基于 `@Resource` 注解和其他相关信息（如字段或方法名、`@Lazy` 注解等）初始化了一个 `ResourceElement` 实例，该实例将包含有关如何查找和注入特定资源的所有必要信息。
+The `org.springframework.context.annotation.CommonAnnotationBeanPostProcessor.ResourceElement#ResourceElement` constructor creates a `ResourceElement` instance. It uses the `@Resource` annotation and other information (such as the field or method name and the `@Lazy` annotation). The instance holds all the information needed to find and inject a specific resource.
 
-PS：在`ResourceElement`实现中，Spring只关心了`@Resource` 注解的 `name`, `type`, `lookup` 和 `mappedName` 这四个属性，这是因为这些属性与Spring的DI（依赖注入）机制最直接相关。其他的属性，如 `authenticationType`, `shareable`, 和 `description`，在Spring的上下文中并没有实际的用途或者没有被实现。
+PS: In the `ResourceElement` implementation, Spring only uses four attributes of `@Resource`: `name`, `type`, `lookup`, and `mappedName`. This is because these attributes are the most closely related to Spring's DI (dependency injection) mechanism. The other attributes, such as `authenticationType`, `shareable`, and `description`, have no real use in Spring or are not implemented.
 
 ```java
 public ResourceElement(Member member, AnnotatedElement ae, @Nullable PropertyDescriptor pd) {
     
-    // 调用父类的构造函数，传入成员和属性描述符
+    // Call the parent constructor with the member and the property descriptor
     super(member, pd);
 
-    // 从给定的注解元素（字段或方法）获取 @Resource 注解
+    // Get the @Resource annotation from the given annotated element (field or method)
     Resource resource = ae.getAnnotation(Resource.class);
 
-    // 获取资源的名称和类型
+    // Get the name and type of the resource
     String resourceName = resource.name();
     Class<?> resourceType = resource.type();
 
-    // 判断资源名称是否为默认名称（即没有明确指定）
+    // Check if the resource name is the default name (not set explicitly)
     this.isDefaultName = !StringUtils.hasLength(resourceName);
     
     if (this.isDefaultName) {
-        // 如果资源名称是默认的，使用成员的名称作为资源名称
+        // If the resource name is the default, use the name of the member as the resource name
         resourceName = this.member.getName();
-        // 如果这是一个setter方法，可能会提取属性名称作为资源名称
+        // If this is a setter method, the property name may be taken as the resource name
         if (this.member instanceof Method && resourceName.startsWith("set") && resourceName.length() > 3) {
             resourceName = Introspector.decapitalize(resourceName.substring(3));
         }
     }
-    // 解析可能的占位符或表达式
+    // Resolve possible placeholders or expressions
     else if (embeddedValueResolver != null) {
         resourceName = embeddedValueResolver.resolveStringValue(resourceName);
     }
 
-    // 如果资源类型明确指定，则验证该类型
+    // If the resource type is set explicitly, check that type
     if (Object.class != resourceType) {
         checkResourceType(resourceType);
     }
     else {
-        // 如果没有明确指定资源类型，根据成员类型推断资源类型
+        // If the resource type is not set explicitly, work it out from the type of the member
         resourceType = getResourceType();
     }
     
     this.name = (resourceName != null ? resourceName : "");
     this.lookupType = resourceType;
     
-    // 获取查找值或映射名称
+    // Get the lookup value or the mapped name
     String lookupValue = resource.lookup();
     this.mappedName = (StringUtils.hasLength(lookupValue) ? lookupValue : resource.mappedName());
 
-    // 检查是否存在 @Lazy 注解，并据此设置lazyLookup属性
+    // Check if the @Lazy annotation exists, and set the lazyLookup attribute from it
     Lazy lazy = ae.getAnnotation(Lazy.class);
     this.lazyLookup = (lazy != null && lazy.value());
 }
 ```
 
-#### 注入阶段
+#### Injection Phase
 
-在`org.springframework.context.annotation.CommonAnnotationBeanPostProcessor#postProcessProperties`方法中，实现了 `postProcessProperties` 方法，它是 Spring 的 `InstantiationAwareBeanPostProcessor` 接口的一部分，用于在实例化 bean 之后但在属性注入之前进行操作。这个特定的实现与处理 `@Resource` 注解相关。
+The `org.springframework.context.annotation.CommonAnnotationBeanPostProcessor#postProcessProperties` method is part of Spring's `InstantiationAwareBeanPostProcessor` interface. It works after the bean is instantiated and before the properties are injected. This implementation handles the `@Resource` annotation.
 
 ```java
 @Override
 public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
     
-    // 根据bean的名称和类找到相应的资源注入元数据
+    // Find the resource injection metadata from the bean name and class
     InjectionMetadata metadata = findResourceMetadata(beanName, bean.getClass(), pvs);
 
     try {
-        // 尝试使用找到的元数据对给定的bean进行注入
+        // Try to inject into the given bean with the metadata that was found
         metadata.inject(bean, beanName, pvs);
     }
-    // 如果在注入过程中出现任何问题，抛出一个Bean创建异常
+    // If anything goes wrong during injection, throw a bean creation exception
     catch (Throwable ex) {
         throw new BeanCreationException(beanName, "Injection of resource dependencies failed", ex);
     }
 
-    // 返回处理后的属性值
+    // Return the processed property values
     return pvs;
 }
 ```
 
-在`org.springframework.context.annotation.CommonAnnotationBeanPostProcessor#findResourceMetadata`方法中，首先`CommonAnnotationBeanPostProcessor#postProcessMergedBeanDefinition` 元数据收集阶段，`findResourceMetadata` 被调用以处理和缓存与 `@Resource` 和其他相关注解相关的 `InjectionMetadata`。这意味着，在`postProcessProperties`阶段之后的其他生命周期方法中，当再次调用 `findResourceMetadata` 时，会直接从缓存中获取已处理的 `InjectionMetadata`，而不需要重新构建它。
+In the `org.springframework.context.annotation.CommonAnnotationBeanPostProcessor#findResourceMetadata` method, the first call happens in the metadata collection phase, `CommonAnnotationBeanPostProcessor#postProcessMergedBeanDefinition`. There, `findResourceMetadata` processes and caches the `InjectionMetadata` for `@Resource` and other related annotations. So when `findResourceMetadata` is called again in later lifecycle steps such as `postProcessProperties`, it returns the cached `InjectionMetadata`. It does not need to build it again.
 
 ```java
 private InjectionMetadata findResourceMetadata(String beanName, final Class<?> clazz, @Nullable PropertyValues pvs) {
     
-    // 如果 beanName 存在则使用它作为缓存键，否则使用类名。这也确保了与自定义调用者的向后兼容性。
+    // If beanName exists, use it as the cache key. Otherwise, use the class name. This also keeps backward compatibility for custom callers.
     String cacheKey = (StringUtils.hasLength(beanName) ? beanName : clazz.getName());
     
-    // 首先在并发 Map 中进行快速检查，尽量减少锁的使用。
+    // First, do a quick check in the concurrent map, to keep locking to a minimum.
     InjectionMetadata metadata = this.injectionMetadataCache.get(cacheKey);
     
-    // 检查当前的 metadata 是否需要刷新。例如，它可能是过时的或不再适用。
+    // Check if the current metadata needs a refresh. For example, it may be out of date or no longer fit.
     if (InjectionMetadata.needsRefresh(metadata, clazz)) {
-        synchronized (this.injectionMetadataCache) {  // 对缓存进行同步处理以确保线程安全
+        synchronized (this.injectionMetadataCache) {  // Synchronize on the cache to be thread safe
             metadata = this.injectionMetadataCache.get(cacheKey);
             if (InjectionMetadata.needsRefresh(metadata, clazz)) {
                 if (metadata != null) {
-                    metadata.clear(pvs);  // 清除旧的 metadata
+                    metadata.clear(pvs);  // Clear the old metadata
                 }
-                // 构建新的资源注入元数据
+                // Build the new resource injection metadata
                 metadata = buildResourceMetadata(clazz);
-                // 将新的 metadata 放入缓存
+                // Put the new metadata into the cache
                 this.injectionMetadataCache.put(cacheKey, metadata);
             }
         }
     }
-    return metadata;  // 返回找到或创建的资源注入元数据
+    return metadata;  // Return the resource injection metadata that was found or created
 }
 ```
 
-在`org.springframework.beans.factory.annotation.InjectionMetadata#inject`方法中，首先是遍历 `InjectedElement` 集合，并为给定的目标对象执行实际的注入操作。
+The `org.springframework.beans.factory.annotation.InjectionMetadata#inject` method goes through the `InjectedElement` collection and does the actual injection into the given target object.
 
 ```java
 public void inject(Object target, @Nullable String beanName, @Nullable PropertyValues pvs) throws Throwable {
@@ -458,80 +457,79 @@ public void inject(Object target, @Nullable String beanName, @Nullable PropertyV
 }
 ```
 
-在`org.springframework.beans.factory.annotation.InjectionMetadata.InjectedElement#inject`方法中，主要根据注入点的类型（字段或方法）执行实际的资源注入操作。对于字段，它直接设置字段的值。对于方法，它调用该方法并将资源作为参数传递，从而实现注入。
+The `org.springframework.beans.factory.annotation.InjectionMetadata.InjectedElement#inject` method does the actual resource injection, depending on the type of the injection point (field or method). For a field, it sets the field value directly. For a method, it calls the method and passes the resource as the argument.
 
 ```java
 protected void inject(Object target, @Nullable String requestingBeanName, @Nullable PropertyValues pvs)
 				throws Throwable {
 
-    // 如果注入点是一个字段
+    // If the injection point is a field
     if (this.isField) {
-        Field field = (Field) this.member; // 获取字段信息
-        ReflectionUtils.makeAccessible(field); // 确保字段是可访问的，即使它是私有的
-        // 实际将资源设置/注入到目标对象的字段中
+        Field field = (Field) this.member; // Get the field
+        ReflectionUtils.makeAccessible(field); // Make sure the field is accessible, even if it is private
+        // Actually set/inject the resource into the field of the target object
         field.set(target, getResourceToInject(target, requestingBeanName));
     }
-    else { // 如果注入点是一个方法（例如setter方法）
-        // 检查是否应跳过属性注入，可能基于提供的属性值（pvs）
+    else { // If the injection point is a method (for example a setter method)
+        // Check if the property injection should be skipped, possibly based on the given property values (pvs)
         if (checkPropertySkipping(pvs)) {
             return;
         }
         try {
-            Method method = (Method) this.member; // 获取方法信息
-            ReflectionUtils.makeAccessible(method); // 确保方法是可访问的，即使它是私有的
-            // 通过方法调用实际将资源注入到目标对象中
+            Method method = (Method) this.member; // Get the method
+            ReflectionUtils.makeAccessible(method); // Make sure the method is accessible, even if it is private
+            // Actually inject the resource into the target object by calling the method
             method.invoke(target, getResourceToInject(target, requestingBeanName));
         }
         catch (InvocationTargetException ex) {
-            // 如果调用方法时发生异常，抛出实际的目标异常
+            // If an exception happens when calling the method, throw the real target exception
             throw ex.getTargetException();
         }
     }
 }
 ```
 
-在`org.springframework.context.annotation.CommonAnnotationBeanPostProcessor.ResourceElement#getResourceToInject`方法中，首先根据 `lazyLookup` 属性来决定是否为资源构建一个懒加载代理。如果 `lazyLookup` 为 `true`，则返回一个代表懒加载资源的代理对象；否则，它直接返回资源实例。
+In the `org.springframework.context.annotation.CommonAnnotationBeanPostProcessor.ResourceElement#getResourceToInject` method, the `lazyLookup` attribute decides whether to build a lazy proxy for the resource. If `lazyLookup` is `true`, it returns a proxy object for the lazy resource. Otherwise, it returns the resource instance directly.
 
 ```java
 @Override
 protected Object getResourceToInject(Object target, @Nullable String requestingBeanName) {
-    // 检查资源是否应该懒加载
+    // Check if the resource should be loaded lazily
     return (this.lazyLookup ? 
-            // 如果是懒加载，则构建一个资源的懒加载代理
-            buildLazyResourceProxy(this, requestingBeanName) :
-            // 如果不是懒加载，则直接获取资源
+            // If lazy, build a lazy proxy for the resource
+            // If not lazy, get the resource directly
             getResource(this, requestingBeanName));
 }
 ```
 
-在`org.springframework.context.annotation.CommonAnnotationBeanPostProcessor#getResource`方法中，首先尝试从 JNDI 中获取资源，如果 JNDI 不可用或不适用，它会尝试从 Spring 上下文中自动装配资源。如果两者都不可用，它会抛出异常。
+The `org.springframework.context.annotation.CommonAnnotationBeanPostProcessor#getResource` method first tries to get the resource from JNDI. If JNDI is not available or does not apply, it tries to autowire the resource from the Spring context. If neither works, it throws an exception.
 
 ```java
 protected Object getResource(LookupElement element, @Nullable String requestingBeanName)
 			throws NoSuchBeanDefinitionException {
 
-    // 如果 LookupElement 的 'mappedName' 属性有值
+    // If the 'mappedName' attribute of the LookupElement has a value
     if (StringUtils.hasLength(element.mappedName)) {
-        // 从 JNDI 中获取与 'mappedName' 匹配的资源
+        // Get the resource that matches 'mappedName' from JNDI
         return this.jndiFactory.getBean(element.mappedName, element.lookupType);
     }
-    // 如果配置为总是使用 JNDI 查找
+    // If it is configured to always use JNDI lookup
     if (this.alwaysUseJndiLookup) {
-        // 使用 LookupElement 的 'name' 属性从 JNDI 中获取资源
+        // Use the 'name' attribute of the LookupElement to get the resource from JNDI
         return this.jndiFactory.getBean(element.name, element.lookupType);
     }
-    // 如果没有配置 resourceFactory（例如，一个 Spring ApplicationContext）
+    // If no resourceFactory is configured (for example, a Spring ApplicationContext)
     if (this.resourceFactory == null) {
-        // 抛出异常，因为无法从 Spring 上下文中获取资源
+        // Throw an exception, because the resource cannot be taken from the Spring context
         throw new NoSuchBeanDefinitionException(element.lookupType,
                                                 "No resource factory configured - specify the 'resourceFactory' property");
     }
-    // 从 Spring ApplicationContext 中自动装配资源
+    // Autowire the resource from the Spring ApplicationContext
     return autowireResource(this.resourceFactory, element, requestingBeanName);
 }
 ```
 
-在`org.springframework.context.annotation.CommonAnnotationBeanPostProcessor#autowireResource`方法中，首先根据 `LookupElement` 提供的描述自动装配资源。它可以根据类型匹配来解析依赖，或者直接根据名称来解析。对于被自动装配的资源，如果`BeanFactory`是`ConfigurableBeanFactory`，会为每个自动装配的bean名称注册依赖关系。
+The `org.springframework.context.annotation.CommonAnnotationBeanPostProcessor#autowireResource` method first autowires the resource from the description given by the `LookupElement`. It can resolve the dependency by type match, or directly by name. For autowired resources, if the `BeanFactory` is a `ConfigurableBeanFactory`, it registers a dependency for each autowired bean name.
 
 ```java
 protected Object autowireResource(BeanFactory factory, LookupElement element, @Nullable String requestingBeanName)
@@ -541,12 +539,12 @@ protected Object autowireResource(BeanFactory factory, LookupElement element, @N
     Set<String> autowiredBeanNames;
     String name = element.name;
 
-    // 如果工厂支持自动装配能力
+    // If the factory supports autowiring
     if (factory instanceof AutowireCapableBeanFactory) {
         AutowireCapableBeanFactory beanFactory = (AutowireCapableBeanFactory) factory;
         DependencyDescriptor descriptor = element.getDependencyDescriptor();
         
-        // 当资源的名称为默认值，且在BeanFactory中没有与这个名字匹配的bean时
+        // When the resource name is the default, and the BeanFactory has no bean with this name
         if (this.fallbackToDefaultTypeMatch && element.isDefaultName && !factory.containsBean(name)) {
             autowiredBeanNames = new LinkedHashSet<>();
             resource = beanFactory.resolveDependency(descriptor, requestingBeanName, autowiredBeanNames, null);
@@ -554,19 +552,19 @@ protected Object autowireResource(BeanFactory factory, LookupElement element, @N
                 throw new NoSuchBeanDefinitionException(element.getLookupType(), "No resolvable resource object");
             }
         }
-        // 否则，通过名称解析资源
+        // Otherwise, resolve the resource by name
         else {
             resource = beanFactory.resolveBeanByName(name, descriptor);
             autowiredBeanNames = Collections.singleton(name);
         }
     }
-    // 如果不支持自动装配，则直接使用名称和类型从BeanFactory获取资源
+    // If autowiring is not supported, get the resource from the BeanFactory with the name and type
     else {
         resource = factory.getBean(name, element.lookupType);
         autowiredBeanNames = Collections.singleton(name);
     }
 
-    // 如果BeanFactory是可配置的，为每一个自动装配的bean名注册一个依赖bean
+    // If the BeanFactory is configurable, register a dependent bean for each autowired bean name
     if (factory instanceof ConfigurableBeanFactory) {
         ConfigurableBeanFactory beanFactory = (ConfigurableBeanFactory) factory;
         for (String autowiredBeanName : autowiredBeanNames) {
@@ -580,57 +578,57 @@ protected Object autowireResource(BeanFactory factory, LookupElement element, @N
 }
 ```
 
-### 八、注意事项
+### 8. Notes
 
-1. **来源**
-   + `@Resource` 注解来自 Java 的 JSR-250 规范，而不是 Spring 核心。尽管如此，Spring 提供了对此注解的全面支持。
-2. **默认名称**
-   + 如果不指定名称，`@Resource` 默认会按照属性名或方法名来寻找匹配的 bean。比如，`@Resource private MyService myService;` 会查找名为 "myService" 的 bean。
-3. **类型 vs 名称**
-   + `@Resource` 默认是基于名称进行自动装配的。如果没有找到名称匹配的bean，它会回退到类型匹配。这与 `@Autowired` 不同，后者默认基于类型进行自动装配。
-4. **指定名称**
-   + 我们可以通过 `name` 属性明确指定要注入的 bean 的名称：`@Resource(name = "myService")`。
-5. **处理冲突**
-   + 在一个上下文中，如果有多个相同类型的 bean，为避免冲突，最好使用 `name` 属性明确指定想要注入的 bean。
-6. **与其他注解的结合**
-   + 不建议在同一个字段或setter上同时使用 `@Resource` 和 `@Autowired` 或 `@Inject`。
-7. **静态字段**
-   + `@Resource` 不支持静态字段。静态字段不属于任何实例，因此无法注入依赖关系。
-8. **必需性**
-   + 默认情况下，`@Resource` 注解的依赖是必需的，即如果没有找到相应的 bean，会抛出异常。如果某些情况下允许依赖项为 null 或不存在，必须结合其他配置来实现，例如使用 `@Autowired(required = false)`。
-9. **懒加载**
-   + 在Spring中，如果我们希望延迟资源的初始化并在首次请求时加载它，可以结合 `@Lazy` 注解使用。
+1. **Source**
+   + The `@Resource` annotation comes from the Java JSR-250 specification, not from Spring core. Still, Spring fully supports it.
+2. **Default name**
+   + If you do not give a name, `@Resource` looks for a matching bean by the field name or method name. For example, `@Resource private MyService myService;` looks for a bean named "myService".
+3. **Type vs name**
+   + `@Resource` autowires by name by default. If no bean with a matching name is found, it falls back to matching by type. This is different from `@Autowired`, which autowires by type by default.
+4. **Set the name**
+   + You can set the name of the bean to inject with the `name` attribute: `@Resource(name = "myService")`.
+5. **Handle conflicts**
+   + If a context has several beans of the same type, use the `name` attribute to say which bean you want. This avoids conflicts.
+6. **Use with other annotations**
+   + Do not use `@Resource` together with `@Autowired` or `@Inject` on the same field or setter.
+7. **Static fields**
+   + `@Resource` does not support static fields. A static field does not belong to any instance, so dependencies cannot be injected into it.
+8. **Required**
+   + By default, a dependency marked with `@Resource` is required. If no matching bean is found, an exception is thrown. If you want to allow a dependency to be null or missing, you need other configuration, for example `@Autowired(required = false)`.
+9. **Lazy loading**
+   + In Spring, if you want to delay the initialization of a resource and load it on the first request, use it together with the `@Lazy` annotation.
 
-### 九、总结
+### 9. Summary
 
-#### 最佳实践总结
+#### Best Practices Summary
 
-1. **启动类入口**
-   + `ResourceApplication` 类作为应用程序的入口。它创建了一个基于注解的 Spring 应用上下文，`AnnotationConfigApplicationContext`，并为其提供了一个配置类 `MyConfiguration`。
-2. **上下文初始化**
-   + 通过 `AnnotationConfigApplicationContext`，Spring 上下文初始化并加载配置类，同时扫描指定的包及其子包中的组件。
-3. **组件扫描**
-   + `MyConfiguration` 类使用 `@ComponentScan` 注解指定 Spring 搜索 "`com.xcs.spring`" 包及其子包。Spring 在这些包中搜索带有 `@Component`、`@Service`、`@Repository` 和 `@Controller` 等注解的类，并自动注册它们作为 beans。
-4. **依赖注入**
-   + 在 `MyController` 类中，一个名为 `myService` 的字段使用 `@Resource` 注解。这告诉 Spring，当创建 `MyController` 的实例时，它需要为 `myService` 字段注入一个类型为 `MyService` 的 bean。并且，由于指定了 `name="myService"`，Spring 将按名称而不是类型进行注入。
-5. **服务创建**
-   + `MyService` 类被标注为 `@Service`，这意味着 Spring 会自动创建其实例并将其注册到上下文中。在后续的依赖注入过程中，它被注入到了 `MyController` 的 `myService` 字段中。
-6. **方法调用**
-   + 在 `ResourceApplication` 的 `main` 方法中，从上下文中获取了 `MyController` 的 bean 并调用了其 `showService` 方法，从而输出了 `myService` 的实例信息，证明了注入过程是成功的。
-7. **输出结果**
-   + 应用程序输出了 `myService` 实例的信息，证明了 `@Resource` 注解成功地完成了依赖注入，并且整个过程工作得很好。
+1. **Entry class**
+   + The `ResourceApplication` class is the entry point of the application. It creates an annotation-based Spring application context, `AnnotationConfigApplicationContext`, and gives it the configuration class `MyConfiguration`.
+2. **Context initialization**
+   + With `AnnotationConfigApplicationContext`, the Spring context starts, loads the configuration class, and scans the given package and its sub-packages for components.
+3. **Component scan**
+   + The `MyConfiguration` class uses `@ComponentScan` to tell Spring to search the "`com.xcs.spring`" package and its sub-packages. Spring looks for classes with annotations such as `@Component`, `@Service`, `@Repository`, and `@Controller`, and registers them as beans automatically.
+4. **Dependency injection**
+   + In the `MyController` class, a field named `myService` uses the `@Resource` annotation. This tells Spring that when it creates an instance of `MyController`, it must inject a bean of type `MyService` into the `myService` field. Because `name="myService"` is set, Spring injects by name, not by type.
+5. **Service creation**
+   + The `MyService` class is marked with `@Service`. Spring creates its instance automatically and registers it in the context. During dependency injection, it is injected into the `myService` field of `MyController`.
+6. **Method call**
+   + In the `main` method of `ResourceApplication`, the `MyController` bean is taken from the context and its `showService` method is called. This prints the `myService` instance. It shows that the injection worked.
+7. **Output**
+   + The application prints the `myService` instance. This shows that `@Resource` completed the dependency injection, and the whole process works well.
 
-#### 源码分析总结
+#### Source Code Analysis Summary
 
-1. **前置条件**
-   + `CommonAnnotationBeanPostProcessor`是处理`@Resource`和其他相关注解的核心类。为了完全理解`@Resource`的工作机制，我们关注了`MergedBeanDefinitionPostProcessor`和`InstantiationAwareBeanPostProcessor`两个接口。这两个接口提供了对bean生命周期中的关键阶段的干预，从而允许进行属性注入和其他相关操作。
-2. **收集阶段**
-   - `postProcessMergedBeanDefinition`方法：在bean定义合并后，对`@Resource`相关的资源注入元数据进行进一步处理。
-   - `findResourceMetadata`方法：尝试从缓存中获取与`@Resource`相关的`InjectionMetadata`。如果它不存在或需要刷新，创建一个新的`InjectionMetadata`并将其加入缓存。
-   - `buildResourceMetadata`方法：检查类及其所有超类，查找带有`@Resource`等相关注解的字段和方法，为这些元素创建一个新的`InjectionMetadata`对象。
-3. **注入阶段**
-   - `postProcessProperties`方法：在实例化bean之后但在属性注入之前，用于处理与`@Resource`注解相关的注入。
-   - `inject`方法：遍历`InjectedElement`集合，并为给定的目标对象执行实际的注入操作。
-   - `getResourceToInject`方法：根据`lazyLookup`属性决定是为资源构建一个懒加载代理还是直接返回资源实例。
-   - `getResource`方法：首先尝试从JNDI中获取资源。如果JNDI不可用或不适用，尝试从Spring上下文中自动装配资源。
-   - `autowireResource`方法：根据`LookupElement`描述自动装配资源。它可以通过类型匹配来解析依赖，或者直接通过名称来解析。
+1. **Prerequisites**
+   + `CommonAnnotationBeanPostProcessor` is the core class that handles `@Resource` and other related annotations. To understand how `@Resource` works, we looked at two interfaces: `MergedBeanDefinitionPostProcessor` and `InstantiationAwareBeanPostProcessor`. They let Spring step into key stages of the bean lifecycle, so property injection and other related work can be done.
+2. **Collection phase**
+   - `postProcessMergedBeanDefinition` method: after the bean definition is merged, it processes the resource injection metadata related to `@Resource`.
+   - `findResourceMetadata` method: tries to get the `InjectionMetadata` for `@Resource` from the cache. If it does not exist or needs a refresh, it creates a new `InjectionMetadata` and adds it to the cache.
+   - `buildResourceMetadata` method: checks the class and all its superclasses for fields and methods with `@Resource` and other related annotations, and creates a new `InjectionMetadata` object for these elements.
+3. **Injection phase**
+   - `postProcessProperties` method: works after the bean is instantiated and before the properties are injected. It handles the injection related to `@Resource`.
+   - `inject` method: goes through the `InjectedElement` collection and does the actual injection into the given target object.
+   - `getResourceToInject` method: uses the `lazyLookup` attribute to decide whether to build a lazy proxy for the resource or return the resource instance directly.
+   - `getResource` method: first tries to get the resource from JNDI. If JNDI is not available or does not apply, it tries to autowire the resource from the Spring context.
+   - `autowireResource` method: autowires the resource from the `LookupElement` description. It can resolve the dependency by type match, or directly by name.

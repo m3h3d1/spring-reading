@@ -6,7 +6,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 /**
  * @author xcs
- * @date 2023年10月20日 14时56分
+ * @date 2023-10-20 14:56
  **/
 public class QualifierApplication {
 

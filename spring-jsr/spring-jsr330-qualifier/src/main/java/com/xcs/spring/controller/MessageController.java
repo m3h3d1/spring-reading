@@ -9,7 +9,7 @@ import javax.inject.Inject;
 
 /**
  * @author xcs
- * @date 2023年10月20日 14时59分
+ * @date 2023-10-20 14:59
  **/
 @Controller
 public class MessageController {

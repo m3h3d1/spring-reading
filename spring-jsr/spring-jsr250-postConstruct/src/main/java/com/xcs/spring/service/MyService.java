@@ -8,11 +8,11 @@ import javax.annotation.PostConstruct;
 public class MyService {
 
     public MyService(){
-        System.out.println("执行MyService构造函数");
+        System.out.println("Executing MyService constructor");
     }
 
     @PostConstruct
     public void postConstruct(){
-        System.out.println("执行@PostConstruct方法");
+        System.out.println("Executing @PostConstruct method");
     }
 }

@@ -4,7 +4,7 @@ import javax.inject.Named;
 
 /**
  * @author xcs
- * @date 2023年10月19日 16时43分
+ * @date 2023-10-19 16:43
  **/
 @Named("myServiceB")
 public class MyServiceB extends MyService{

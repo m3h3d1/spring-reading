@@ -1,36 +1,36 @@
 ## @Qualifier
 
 - [@Qualifier](#qualifier)
-  - [一、基本信息](#一基本信息)
-  - [二、注解描述](#二注解描述)
-  - [三、注解源码](#三注解源码)
-  - [四、主要功能](#四主要功能)
-  - [五、最佳实践](#五最佳实践)
-  - [六、时序图](#六时序图)
-    - [@Qualifier注册](#qualifier注册)
-    - [@Qualifier解析](#qualifier解析)
-  - [七、源码分析](#七源码分析)
-    - [@Qualifier注册](#qualifier注册-1)
-    - [@Qualifier解析](#qualifier解析-1)
-      - [前置条件](#前置条件)
-      - [解析入口](#解析入口)
-  - [八、注意事项](#八注意事项)
-  - [九、总结](#九总结)
-    - [最佳实践总结](#最佳实践总结)
-    - [源码分析总结](#源码分析总结)
+  - [1. Overview](#1-overview)
+  - [2. Annotation Description](#2-annotation-description)
+  - [3. Annotation Source](#3-annotation-source)
+  - [4. Main Features](#4-main-features)
+  - [5. Best Practices](#5-best-practices)
+  - [6. Sequence Diagram](#6-sequence-diagram)
+    - [@Qualifier Registration](#qualifier-registration)
+    - [@Qualifier Resolution](#qualifier-resolution)
+  - [7. Source Code Analysis](#7-source-code-analysis)
+    - [@Qualifier Registration](#qualifier-registration-1)
+    - [@Qualifier Resolution](#qualifier-resolution-1)
+      - [Prerequisites](#prerequisites)
+      - [Resolution Entry](#resolution-entry)
+  - [8. Notes](#8-notes)
+  - [9. Summary](#9-summary)
+    - [Best Practices Summary](#best-practices-summary)
+    - [Source Code Analysis Summary](#source-code-analysis-summary)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [我的CSDN]() 📚 **文章目录** - [所有文章](https://github.com/xuchengsheng/spring-reading) 🔗 **源码地址** - [@Qualifier源码](https://github.com/xuchengsheng/spring-reading/tree/master/spring-jsr/spring-jsr330-qualifier)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、注解描述
+### 2. Annotation Description
 
-`@Qualifier` 注解是 Java 的标准注解，来源于 JSR 330: Dependency Injection for Java。主要用于解决依赖注入中的歧义性，当有多个同类型的 bean 或实例可供选择时，指导容器明确选择哪一个进行注入。
+The `@Qualifier` annotation is a standard Java annotation from JSR 330: Dependency Injection for Java. It is mainly used to remove ambiguity in dependency injection. When there are several beans or instances of the same type to choose from, it tells the container clearly which one to inject.
 
-### 三、注解源码
+### 3. Annotation Source
 
-`@Qualifier` 表示它是一个基础注解，主要用于创建其他的自定义注解，这些新的注解通常用于限定和解决依赖注入时的歧义性。这与 Spring 和 JSR 330 中 `@Qualifier` 的定义和目的是一致的。
+`@Qualifier` is a base annotation. It is mainly used to create other custom annotations. These new annotations are usually used to qualify an injection and remove ambiguity. This matches the definition and purpose of `@Qualifier` in Spring and JSR 330.
 
 ```java
 @Target({ElementType.ANNOTATION_TYPE})
@@ -41,21 +41,21 @@ public @interface Qualifier {
 }
 ```
 
-### 四、主要功能
+### 4. Main Features
 
-1. **解决歧义性**
-   + 当容器中存在多个同一类型的 bean 时，`@Qualifier` 用于指定哪一个具体的 bean 应该被注入。
-2. **与 `@Autowired` 和 `@Inject` 配合使用**
-   - 在 Spring 中，`org.springframework.beans.factory.annotation.Qualifier` 通常与 `org.springframework.beans.factory.annotation.Autowired` 配合使用。这是为了从Spring容器中解析bean时解决歧义。
-   - 而在 JSR 330 规范（例如在 CDI 中）中，`javax.inject.Qualifier` 是一个元注解，用于定义新的注解作为限定符。这些自定义的限定符注解然后可以与 `javax.inject.Inject` 配合使用，以解决歧义。
-3. **自定义限定符注解**
-   + 尤其在 JSR 330 规范中，`@Qualifier` 用于创建其他自定义注解，这些新定义的注解随后可以用作限定符。
-4. **提高代码的语义清晰度**
-   + 通过使用 `@Qualifier` 或基于它的自定义注解，代码更具有描述性，更容易理解应注入哪个特定的 bean。
+1. **Remove ambiguity**
+   + When the container has several beans of the same type, `@Qualifier` says which specific bean should be injected.
+2. **Use with `@Autowired` and `@Inject`**
+   - In Spring, `org.springframework.beans.factory.annotation.Qualifier` is usually used with `org.springframework.beans.factory.annotation.Autowired`. This removes ambiguity when a bean is resolved from the Spring container.
+   - In the JSR 330 specification (for example in CDI), `javax.inject.Qualifier` is a meta-annotation. It is used to define new annotations as qualifiers. These custom qualifier annotations can then be used with `javax.inject.Inject` to remove ambiguity.
+3. **Custom qualifier annotations**
+   + Especially in JSR 330, `@Qualifier` is used to create other custom annotations. These new annotations can then be used as qualifiers.
+4. **Clearer code**
+   + With `@Qualifier` or a custom annotation based on it, the code is more descriptive. It is easier to see which specific bean should be injected.
 
-### 五、最佳实践
+### 5. Best Practices
 
-首先来看看启动类入口，上下文环境使用`AnnotationConfigApplicationContext`（此类是使用Java注解来配置Spring容器的方式），构造参数我们给定了一个`MyConfiguration`组件类。然后从Spring上下文中获取一个`MyController`类型的bean并调用了`showMessage`方法。
+First, look at the entry class. The context is `AnnotationConfigApplicationContext` (this class configures the Spring container with Java annotations). We pass the `MyConfiguration` component class as the constructor argument. Then we get a bean of type `MessageController` from the Spring context and call its `showMessage` method.
 
 ```java
 public class QualifierApplication {
@@ -68,7 +68,7 @@ public class QualifierApplication {
 }
 ```
 
-在`MyConfiguration`类中，使用了`@ComponentScan("com.xcs.spring")`注解告诉 Spring 在指定的包（在这里是 "`com.xcs.spring`"）及其子包中搜索带有 `@Component`、`@Service`、`@Repository` 和 `@Controller` 等注解的类，并将它们自动注册为 beans。这样，spring就不必为每个组件明确写一个 bean 定义。Spring 会自动识别并注册它们。
+The `MyConfiguration` class uses `@ComponentScan("com.xcs.spring")`. This tells Spring to search the given package ("`com.xcs.spring`") and its sub-packages for classes with annotations such as `@Component`, `@Service`, `@Repository`, and `@Controller`. Spring registers them as beans automatically. So you do not need to write a bean definition for each component.
 
 ```java
 @Configuration
@@ -78,7 +78,7 @@ public class MyConfiguration {
 }
 ```
 
-我们定义了两个自定义注解，`@Email` 和 `@SMS`，它们都被标记为 `@Qualifier`。这意味着它们都可以被用作限定符注解。
+We define two custom annotations, `@Email` and `@SMS`. Both are marked with `@Qualifier`. This means both can be used as qualifier annotations.
 
 ```java
 @Qualifier
@@ -94,7 +94,7 @@ public @interface SMS {
 }
 ```
 
-`EmailServiceImpl` & `SMSServiceImpl`这两个类都实现了 `MessageService` 接口，但分别带有 `@Email` 和 `@SMS` 限定符注解，意味着它们在被注入时可以被明确区分。
+`EmailServiceImpl` and `SMSServiceImpl` both implement the `MessageService` interface. They have the qualifier annotations `@Email` and `@SMS`. So they can be told apart clearly when they are injected.
 
 ```java
 public interface MessageService {
@@ -120,7 +120,7 @@ public class SMSServiceImpl implements MessageService {
 }
 ```
 
-`MessageController` 注入了两种 `MessageService` 的实现：一种用于Email，另一种用于SMS。通过使用自定义的限定符注解 `@Email` 和 `@SMS`，确保了正确的服务实现被注入到对应的字段中。`showMessage` 方法用于显示这两个服务实现返回的消息。
+`MessageController` injects two implementations of `MessageService`: one for Email and one for SMS. The custom qualifier annotations `@Email` and `@SMS` make sure the right service implementation is injected into each field. The `showMessage` method shows the messages returned by these two service implementations.
 
 ```java
 @Controller
@@ -141,88 +141,88 @@ public class MessageController {
 }
 ```
 
-运行结果发现，`@Email` 限定符确保了 `EmailServiceImpl` 被注入到 `emailService` 字段。`@SMS` 限定符确保了 `SMSServiceImpl` 被注入到 `smsService` 字段。`@Qualifier` 注解在这里起到了关键的作用，确保了正确的服务实现被注入，从而使得运行结果符合预期。
+The result shows that the `@Email` qualifier makes sure `EmailServiceImpl` is injected into the `emailService` field. The `@SMS` qualifier makes sure `SMSServiceImpl` is injected into the `smsService` field. The `@Qualifier` annotation plays a key role here. It makes sure the right service implementation is injected, so the result is as expected.
 
 ```java
 EmailService: Email message
 SMSService: SMS message
 ```
 
-### 六、时序图
+### 6. Sequence Diagram
 
-#### @Qualifier注册
+#### @Qualifier Registration
 
 ~~~mermaid
 sequenceDiagram
-Title: @Qualifier注册时序图
+Title: @Qualifier registration sequence diagram
 
 QualifierApplication->>AnnotationConfigApplicationContext:AnnotationConfigApplicationContext(componentClasses)
-Note over AnnotationConfigApplicationContext: 上下文初始化开始，传入了一些组件类
+Note over AnnotationConfigApplicationContext: Context initialization starts, with some component classes passed in
 AnnotationConfigApplicationContext->>AnnotationConfigApplicationContext:AnnotationConfigApplicationContext()
-Note over AnnotationConfigApplicationContext: 上下文构造器调用
+Note over AnnotationConfigApplicationContext: The context constructor is called
 AnnotationConfigApplicationContext->>AnnotatedBeanDefinitionReader:AnnotatedBeanDefinitionReader(registry)
-Note over AnnotatedBeanDefinitionReader: 为给定的注册中心创建一个Bean定义读取器
+Note over AnnotatedBeanDefinitionReader: Create a bean definition reader for the given registry
 AnnotatedBeanDefinitionReader->>AnnotatedBeanDefinitionReader:AnnotatedBeanDefinitionReader(registry,environment)
-Note over AnnotatedBeanDefinitionReader: 读取器构造器使用特定的环境设置
+Note over AnnotatedBeanDefinitionReader: The reader constructor uses a specific environment
 AnnotatedBeanDefinitionReader->>AnnotationConfigUtils:registerAnnotationConfigProcessors(registry)
-Note over AnnotationConfigUtils: 注册注解配置处理器
+Note over AnnotationConfigUtils: Register the annotation config processors
 AnnotationConfigUtils->>AnnotationConfigUtils:registerAnnotationConfigProcessors(registry,source)
-Note right of AnnotationConfigUtils: 注册注解配置处理器
+Note right of AnnotationConfigUtils: Register the annotation config processors
 AnnotationConfigUtils->>QualifierAnnotationAutowireCandidateResolver:QualifierAnnotationAutowireCandidateResolver()
-Note over QualifierAnnotationAutowireCandidateResolver: 创建一个新的限定符自动装配候选解析器
+Note over QualifierAnnotationAutowireCandidateResolver: Create a new qualifier autowire candidate resolver
 QualifierAnnotationAutowireCandidateResolver->>QualifierAnnotationAutowireCandidateResolver:this.qualifierTypes.add("javax.inject.Qualifier");
-Note right of QualifierAnnotationAutowireCandidateResolver: 添加javax.inject.Qualifier到限定符类型列表
-QualifierAnnotationAutowireCandidateResolver->>AnnotationConfigUtils:返回Resolver
-Note right of AnnotationConfigUtils: 解析器创建完毕，现在返回给调用者
+Note right of QualifierAnnotationAutowireCandidateResolver: Add javax.inject.Qualifier to the list of qualifier types
+QualifierAnnotationAutowireCandidateResolver->>AnnotationConfigUtils:Return Resolver
+Note right of AnnotationConfigUtils: The resolver is created and is now returned to the caller
 AnnotationConfigUtils->>DefaultListableBeanFactory:setAutowireCandidateResolver(autowireCandidateResolver)
-Note over DefaultListableBeanFactory: 在Bean工厂中设置自动装配候选解析器
+Note over DefaultListableBeanFactory: Set the autowire candidate resolver in the bean factory
 ~~~
 
-#### @Qualifier解析
+#### @Qualifier Resolution
 
 ~~~mermaid
 sequenceDiagram
-Title: @Qualifier解析时序图
+Title: @Qualifier resolution sequence diagram
 
 InjectionMetadata->>AutowiredFieldElement:inject(bean,beanName,pvs)
-Note over AutowiredFieldElement: 开始注入字段
+Note over AutowiredFieldElement: Start injecting the field
 
 AutowiredFieldElement->>AutowiredFieldElement:resolveFieldValue(field, bean, beanName)
-Note over AutowiredFieldElement: 尝试解析字段的值
+Note over AutowiredFieldElement: Try to resolve the value of the field
 
 AutowiredFieldElement->>DefaultListableBeanFactory:resolveDependency(desc,beanName,autowiredBeanNames,typeConverter)
-Note over DefaultListableBeanFactory: 解决字段的依赖关系
+Note over DefaultListableBeanFactory: Resolve the dependency of the field
 
 DefaultListableBeanFactory->>DefaultListableBeanFactory:doResolveDependency(descriptor,requestingBeanName,autowiredBeanNames,typeConverter)
-Note over DefaultListableBeanFactory: 执行依赖解析
+Note over DefaultListableBeanFactory: Do the dependency resolving
 
 DefaultListableBeanFactory->>DefaultListableBeanFactory:findAutowireCandidates(beanName,type,descriptor)
-Note over DefaultListableBeanFactory: 查找可能的自动装配候选者
+Note over DefaultListableBeanFactory: Find possible autowire candidates
 
 DefaultListableBeanFactory->>DefaultListableBeanFactory:isAutowireCandidate(candidate,descriptor)
-Note over DefaultListableBeanFactory: 检查候选bean是否是合适的自动装配候选者
+Note over DefaultListableBeanFactory: Check if the candidate bean is a suitable autowire candidate
 
 DefaultListableBeanFactory->>DefaultListableBeanFactory:isAutowireCandidate(beanName,descriptor,resolver)
-Note right of DefaultListableBeanFactory: 进一步检查，使用解析器
+Note right of DefaultListableBeanFactory: Check further, with the resolver
 
 DefaultListableBeanFactory->>DefaultListableBeanFactory:isAutowireCandidate(beanName,mbd,descriptor,resolver)
-Note right of DefaultListableBeanFactory: 使用给定的bean定义进一步检查
+Note right of DefaultListableBeanFactory: Check further, with the given bean definition
 
 DefaultListableBeanFactory->>QualifierAnnotationAutowireCandidateResolver:isAutowireCandidate(holder, descriptor)
-Note over QualifierAnnotationAutowireCandidateResolver: 判断是否根据@Qualifier注解是自动装配的候选者
+Note over QualifierAnnotationAutowireCandidateResolver: Decide whether it is an autowire candidate based on the @Qualifier annotation
 
 QualifierAnnotationAutowireCandidateResolver->>QualifierAnnotationAutowireCandidateResolver:checkQualifiers(bdHolder,annotationsToSearch)
-Note over QualifierAnnotationAutowireCandidateResolver: 检查所有相关的限定符注解
+Note over QualifierAnnotationAutowireCandidateResolver: Check all related qualifier annotations
 
 QualifierAnnotationAutowireCandidateResolver->>QualifierAnnotationAutowireCandidateResolver:isQualifier(annotationType)
-Note over QualifierAnnotationAutowireCandidateResolver: 判断给定的注解类型是否是一个有效的限定符
+Note over QualifierAnnotationAutowireCandidateResolver: Check if the given annotation type is a valid qualifier
 ~~~
 
-### 七、源码分析
+### 7. Source Code Analysis
 
-#### @Qualifier注册
+#### @Qualifier Registration
 
-首先来看看启动类入口，上下文环境使用`AnnotationConfigApplicationContext`（此类是使用Java注解来配置Spring容器的方式），构造参数我们给定了一个`MyConfiguration`组件类。然后从Spring上下文中获取一个`MyController`类型的bean并调用了`showMessage`方法。
+First, look at the entry class. The context is `AnnotationConfigApplicationContext` (this class configures the Spring container with Java annotations). We pass the `MyConfiguration` component class as the constructor argument. Then we get a bean of type `MessageController` from the Spring context and call its `showMessage` method.
 
 ```java
 public class QualifierApplication {
@@ -235,7 +235,7 @@ public class QualifierApplication {
 }
 ```
 
-在`org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext`构造函数中，执行了三个步骤，我们本次重点关注`this()`。
+The `org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext` constructor does three steps. This time we focus on `this()`.
 
 ```java
 public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
@@ -244,7 +244,7 @@ public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
     refresh();
 ```
 
-在`org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext()`方法中，初始化了的两个核心组件，一个用于读取注解定义的bean (`AnnotatedBeanDefinitionReader`)也是本次重点分析的内容，另一个用于扫描类路径并自动检测bean组件 (`ClassPathBeanDefinitionScanner`)。
+The `org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext()` method initializes two core components. One reads bean definitions from annotations (`AnnotatedBeanDefinitionReader`), which is the focus of this analysis. The other scans the classpath and detects bean components automatically (`ClassPathBeanDefinitionScanner`).
 
 ```java
 public AnnotationConfigApplicationContext() {
@@ -255,7 +255,7 @@ public AnnotationConfigApplicationContext() {
 }
 ```
 
-在`org.springframework.context.annotation.AnnotatedBeanDefinitionReader#AnnotatedBeanDefinitionReader(registry)`方法中，又调用了另一个构造函数。
+The `org.springframework.context.annotation.AnnotatedBeanDefinitionReader#AnnotatedBeanDefinitionReader(registry)` method calls another constructor.
 
 ```java
 public AnnotatedBeanDefinitionReader(BeanDefinitionRegistry registry) {
@@ -263,7 +263,7 @@ public AnnotatedBeanDefinitionReader(BeanDefinitionRegistry registry) {
 }
 ```
 
-在`org.springframework.context.annotation.AnnotatedBeanDefinitionReader#AnnotatedBeanDefinitionReader(registry,environment)`方法中，这是一个重要的调用`registerAnnotationConfigProcessors`，会向容器注册一系列的后置处理器，这些后置处理器对于处理各种注解（如 `@Inject`, `@Qualifier`等）至关重要。
+In the `org.springframework.context.annotation.AnnotatedBeanDefinitionReader#AnnotatedBeanDefinitionReader(registry,environment)` method, there is an important call, `registerAnnotationConfigProcessors`. It registers a series of post-processors in the container. These post-processors are key to handle various annotations (such as `@Inject` and `@Qualifier`).
 
 ```java
 public AnnotatedBeanDefinitionReader(BeanDefinitionRegistry registry, Environment environment) {
@@ -275,7 +275,7 @@ public AnnotatedBeanDefinitionReader(BeanDefinitionRegistry registry, Environmen
 }
 ```
 
-在`org.springframework.context.annotation.AnnotationConfigUtils#registerAnnotationConfigProcessors(registry)`方法中，又调用了另外一个重载的方法。
+The `org.springframework.context.annotation.AnnotationConfigUtils#registerAnnotationConfigProcessors(registry)` method calls another overloaded method.
 
 ```java
 public static void registerAnnotationConfigProcessors(BeanDefinitionRegistry registry) {
@@ -283,7 +283,7 @@ public static void registerAnnotationConfigProcessors(BeanDefinitionRegistry reg
 }
 ```
 
-在`org.springframework.context.annotation.AnnotationConfigUtils#registerAnnotationConfigProcessors(registry,source)`方法中，在 Spring 的自动装配机制中，当有多个候选bean可以被注入到某个位置时，需要有一个方式来解决哪个bean是最佳的候选者。`AutowireCandidateResolver` 就是用来做这个决策的。
+In the `org.springframework.context.annotation.AnnotationConfigUtils#registerAnnotationConfigProcessors(registry,source)` method: in the Spring autowiring mechanism, when several candidate beans can be injected at one place, there must be a way to decide which bean is the best candidate. `AutowireCandidateResolver` makes this decision.
 
 ```java
 public static Set<BeanDefinitionHolder> registerAnnotationConfigProcessors(
@@ -291,21 +291,21 @@ public static Set<BeanDefinitionHolder> registerAnnotationConfigProcessors(
 
     DefaultListableBeanFactory beanFactory = unwrapDefaultListableBeanFactory(registry);
     if (beanFactory != null) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
         if (!(beanFactory.getAutowireCandidateResolver() instanceof ContextAnnotationAutowireCandidateResolver)) {
             beanFactory.setAutowireCandidateResolver(new ContextAnnotationAutowireCandidateResolver());
         }
     }
 
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-在`org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver#QualifierAnnotationAutowireCandidateResolver()`方法中，目的是为解析器设置一些基本配置。其中最重要的部分是尝试加载 JSR-330 的 `@Qualifier` 注解，并将其添加到 `qualifierTypes` 集合中，以便在后续的依赖注入过程中能够正确处理这个注解。如果 JSR-330 不可用，解析器会简单地跳过这个步骤。
+The `org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver#QualifierAnnotationAutowireCandidateResolver()` constructor sets some basic configuration for the resolver. The most important part is that it tries to load the JSR-330 `@Qualifier` annotation and adds it to the `qualifierTypes` set. This way the annotation is handled correctly in later dependency injection. If JSR-330 is not available, the resolver simply skips this step.
 
 ```java
 public QualifierAnnotationAutowireCandidateResolver() {
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     try {
         this.qualifierTypes.add((Class<? extends Annotation>) ClassUtils.forName("javax.inject.Qualifier",
                  		QualifierAnnotationAutowireCandidateResolver.class.getClassLoader()));
@@ -316,24 +316,24 @@ public QualifierAnnotationAutowireCandidateResolver() {
 }
 ```
 
-#### @Qualifier解析
+#### @Qualifier Resolution
 
-##### 前置条件
+##### Prerequisites
 
-在Spring中，`AutowiredAnnotationBeanPostProcessor` 负责处理多种依赖注入注解，包括 JSR-330 的 `@Inject` 注解。为了深入了解 `@Inject` 注解及其与 `@Qualifier` 注解的结合方式，研究这个后处理器是至关重要的。简而言之，为了完全掌握 `@Inject` 和 `@Qualifier` 的协同工作原理，深入阅读 `@Inject` 博客是非常必要的。这些博客为我们提供了对如何在 bean 生命周期中的关键阶段处理这些注解的深入理解。
+In Spring, `AutowiredAnnotationBeanPostProcessor` handles many dependency injection annotations, including the JSR-330 `@Inject` annotation. To understand `@Inject` and how it works with `@Qualifier`, it is important to study this post-processor. In short, to fully understand how `@Inject` and `@Qualifier` work together, reading the `@Inject` article is necessary. It gives a deep understanding of how these annotations are handled at the key stages of the bean lifecycle.
 
-1. **@Inject注解源码分析**:
-   - 在这篇博客中，我们会深入了解 `@Inject` 注解的背后原理。从 JSR-330 规范的引入，到如何在 Spring 中正确使用，以及与其他注解如 `@Autowired` 的差异，这篇博客为我们提供了全面的视角。
-   - 🔗 [@Inject注解传送门](https://github.com/xuchengsheng/spring-reading/blob/master/spring-jsr/spring-jsr330-inject)
+1. **@Inject annotation source analysis**:
+   - This article explains how the `@Inject` annotation works. It starts from the introduction of the JSR-330 specification, then shows how to use it correctly in Spring, and how it differs from other annotations such as `@Autowired`. It gives a full view.
+   - 🔗 [@Inject annotation link](https://github.com/xuchengsheng/spring-reading/blob/master/spring-jsr/spring-jsr330-inject)
 
-##### 解析入口
+##### Resolution Entry
 
-在`org.springframework.beans.factory.support.DefaultListableBeanFactory#resolveDependency`方法中，首先尝试获取一个延迟解析代理。如果无法获得，它会进一步尝试解析依赖。`doResolveDependency` 是实际进行解析工作的方法。
+The `org.springframework.beans.factory.support.DefaultListableBeanFactory#resolveDependency` method first tries to get a lazy resolution proxy. If it cannot, it goes on to resolve the dependency. `doResolveDependency` is the method that does the actual resolving.
 
 ```java
 public Object resolveDependency(DependencyDescriptor descriptor, @Nullable String requestingBeanName,
                                 @Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter) throws BeansException {
-	// ... [代码部分省略以简化]
+	// ... [code omitted for brevity]
     
     Object result = getAutowireCandidateResolver().getLazyResolutionProxyIfNecessary(
         descriptor, requestingBeanName);
@@ -344,66 +344,65 @@ public Object resolveDependency(DependencyDescriptor descriptor, @Nullable Strin
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultListableBeanFactory#doResolveDependency`方法中，主要目的是解析给定的依赖描述符 (`DependencyDescriptor`)，并尝试找到一个合适的 bean 来满足这个依赖。
+The main goal of the `org.springframework.beans.factory.support.DefaultListableBeanFactory#doResolveDependency` method is to resolve the given dependency descriptor (`DependencyDescriptor`) and try to find a suitable bean for this dependency.
 
 ```java
 public Object doResolveDependency(DependencyDescriptor descriptor, @Nullable String beanName,
 			@Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter) throws BeansException {
 
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
     try {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
 
-        // 步骤1. 根据依赖描述符查找匹配的bean
+        // Step 1. Find the matching beans from the dependency descriptor
         Map<String, Object> matchingBeans = findAutowireCandidates(beanName, type, descriptor);
         
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultListableBeanFactory#findAutowireCandidates`方法中，首先基于给定的类型获取所有可能的bean名。接着，对于每一个可能的候选bean，它检查该bean是否是一个合适的自动注入候选，如果是，它将这个bean添加到结果集中。最后，方法返回找到的所有合适的候选bean。
+The `org.springframework.beans.factory.support.DefaultListableBeanFactory#findAutowireCandidates` method first gets all possible bean names for the given type. Then, for each possible candidate bean, it checks whether the bean is a suitable autowire candidate. If it is, the bean is added to the result. At the end, the method returns all suitable candidate beans that were found.
 
 ```java
 protected Map<String, Object> findAutowireCandidates(
 			@Nullable String beanName, Class<?> requiredType, DependencyDescriptor descriptor) {
 
-    // 根据所需的类型，包括所有父工厂中的bean，获取所有可能的bean名
+    // Get all possible bean names for the required type, including beans in all parent factories
     String[] candidateNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
         this, requiredType, true, descriptor.isEager());
 
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
-    // 遍历所有候选bean名
+    // Go through all candidate bean names
     for (String candidate : candidateNames) {
-        // 如果候选bean不是正在查找的bean本身并且它是一个合适的自动注入候选
+        // If the candidate bean is not the bean being looked up itself, and it is a suitable autowire candidate
         if (!isSelfReference(beanName, candidate) && isAutowireCandidate(candidate, descriptor)) {
-            // 添加这个候选bean到结果中
+            // Add this candidate bean to the result
             addCandidateEntry(result, candidate, descriptor, requiredType);
         }
     }
 
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
-    // 返回找到的所有候选bean
+    // Return all candidate beans that were found
     return result; 
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultListableBeanFactory#isAutowireCandidate(beanName, descriptor)`方法中，首先是调用 `getAutowireCandidateResolver()` 方法时，我们会得到这里设置的那个解析器，会根据其实现来决定哪个 bean 是自动装配的候选者，尤其当存在多个可能的候选者时，会考虑到 `@Qualifier` 和其他相关的注解，然后会进一步调用 `isAutowireCandidate` 的另一个重载版本，并且会传入解析器。
+In the `org.springframework.beans.factory.support.DefaultListableBeanFactory#isAutowireCandidate(beanName, descriptor)` method, first `getAutowireCandidateResolver()` is called. It returns the resolver that was set earlier. The resolver decides which bean is an autowire candidate. Especially when there are several possible candidates, it takes `@Qualifier` and other related annotations into account. Then the method calls another overloaded version of `isAutowireCandidate` and passes the resolver.
 
 ```java
 @Override
 public boolean isAutowireCandidate(String beanName, DependencyDescriptor descriptor)
     throws NoSuchBeanDefinitionException {
-
     return isAutowireCandidate(beanName, descriptor, getAutowireCandidateResolver());
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultListableBeanFactory#isAutowireCandidate(beanName,descriptor,resolver)`方法中，首先是调用`getMergedLocalBeanDefinition(bdName)`来获取被依赖Bean的定义， 然后会进一步调用 `isAutowireCandidate` 的另一个重载版本，并且会传入合并的 bean 定义。
+In the `org.springframework.beans.factory.support.DefaultListableBeanFactory#isAutowireCandidate(beanName,descriptor,resolver)` method, first `getMergedLocalBeanDefinition(bdName)` is called to get the definition of the dependent bean. Then the method calls another overloaded version of `isAutowireCandidate` and passes the merged bean definition.
 
 ```java
 protected boolean isAutowireCandidate(
@@ -414,17 +413,17 @@ protected boolean isAutowireCandidate(
     if (containsBeanDefinition(bdName)) {
         return isAutowireCandidate(beanName, getMergedLocalBeanDefinition(bdName), descriptor, resolver);
     }
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultListableBeanFactory#isAutowireCandidate(beanName, mbd,descriptor, resolver)`方法中，首先是初始化了一个`BeanDefinitionHolder`，这是一个方便的数据结构，用于同时持有 `BeanDefinition`, bean 的名称和别名。这对于解析自动装配候选项很有用，因为有时我们需要知道 bean 的名称和别名，然后会进一步调用解析器的 `isAutowireCandidate` 方法，并且会传入`BeanDefinitionHolder`与依赖描述符 。
+In the `org.springframework.beans.factory.support.DefaultListableBeanFactory#isAutowireCandidate(beanName, mbd,descriptor, resolver)` method, first a `BeanDefinitionHolder` is created. It is a handy data structure that holds a `BeanDefinition`, the bean name, and the aliases at the same time. This is useful when resolving autowire candidates, because sometimes we need to know the name and aliases of a bean. Then the method calls the `isAutowireCandidate` method of the resolver, and passes the `BeanDefinitionHolder` and the dependency descriptor.
 
 ```java
 protected boolean isAutowireCandidate(String beanName, RootBeanDefinition mbd,
 			DependencyDescriptor descriptor, AutowireCandidateResolver resolver) {
 
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     BeanDefinitionHolder holder = (beanName.equals(bdName) ?
                                    this.mergedBeanDefinitionHolders.computeIfAbsent(beanName,
                                                                                     key -> new BeanDefinitionHolder(mbd, beanName, getAliases(bdName))) :
@@ -433,28 +432,28 @@ protected boolean isAutowireCandidate(String beanName, RootBeanDefinition mbd,
 }
 ```
 
-在`org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver#isAutowireCandidate`方法中，主要目的是增强了对 `@Qualifier` 注解的支持。如果一个bean或依赖被 `@Qualifier` 注解，并指定了一个bean的名称，那么只有名称匹配的bean会被认为是自动装配的候选者。如果没有指定名称，但指定了其他属性或元注解，那么只有匹配这些属性或元注解的bean会被认为是自动装配的候选者。
+The main goal of the `org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver#isAutowireCandidate` method is to add stronger support for the `@Qualifier` annotation. If a bean or dependency has `@Qualifier` and it sets a bean name, only the bean with the matching name is seen as an autowire candidate. If no name is set but other attributes or meta-annotations are set, only the beans that match these attributes or meta-annotations are seen as autowire candidates.
 
 ```java
 @Override
 public boolean isAutowireCandidate(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
-    // 首先通过父类的方法进行基本的匹配检查。
+    // First do the basic match check with the method of the parent class.
     boolean match = super.isAutowireCandidate(bdHolder, descriptor);
     
-    // 如果基本检查通过，则进一步检查 bdHolder 和 descriptor 中的注解是否匹配。
+    // If the basic check passes, check further whether the annotations in bdHolder and descriptor match.
     if (match) {
-        // 检查候选bean的资格符与依赖描述符的注解是否匹配。
+        // Check if the qualifiers of the candidate bean match the annotations of the dependency descriptor.
         match = checkQualifiers(bdHolder, descriptor.getAnnotations());
         
         if (match) {
-            // 获取与依赖相关的方法参数（如果有的话，例如当依赖是一个setter方法的参数时）。
+            // Get the method parameter related to the dependency (if any, for example when the dependency is a parameter of a setter method).
             MethodParameter methodParam = descriptor.getMethodParameter();
             
-            // 如果有关联的方法参数，则进行进一步的检查。
+            // If there is a related method parameter, check further.
             if (methodParam != null) {
                 Method method = methodParam.getMethod();
                 
-                // 如果方法是void返回类型（如setter方法），则检查它的注解与候选bean的资格符是否匹配。
+                // If the method returns void (such as a setter method), check if its annotations match the qualifiers of the candidate bean.
                 if (method == null || void.class == method.getReturnType()) {
                     match = checkQualifiers(bdHolder, methodParam.getMethodAnnotations());
                 }
@@ -462,16 +461,16 @@ public boolean isAutowireCandidate(BeanDefinitionHolder bdHolder, DependencyDesc
         }
     }
     
-    // 返回最终的匹配结果。
+    // Return the final match result.
     return match;
 }
 ```
 
-在`org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver#checkQualifiers`方法中，主要目的是确保待注入的bean与所有相关的 `@Qualifier` 注解和元注解匹配。如果其中一个注解或元注解与bean定义不匹配，那么这个bean就不是当前注入点的合适候选。
+The main goal of the `org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver#checkQualifiers` method is to make sure the bean to inject matches all related `@Qualifier` annotations and meta-annotations. If one annotation or meta-annotation does not match the bean definition, the bean is not a suitable candidate for the current injection point.
 
 ```java
 protected boolean checkQualifiers(BeanDefinitionHolder bdHolder, Annotation[] annotationsToSearch) {
-    // 如果注解数组为空，直接返回 true
+    // If the annotation array is empty, return true directly
     if (ObjectUtils.isEmpty(annotationsToSearch)) {
         return true;
     }
@@ -482,117 +481,117 @@ protected boolean checkQualifiers(BeanDefinitionHolder bdHolder, Annotation[] an
         boolean checkMeta = true;
         boolean fallbackToMeta = false;
         
-        // 检查当前注解是否是 @Qualifier 或自定义的资格符注解
+        // Check if the current annotation is @Qualifier or a custom qualifier annotation
         if (isQualifier(type)) {
-            // 如果是，并且与bean定义匹配
+            // If it is, and it matches the bean definition
             if (!checkQualifier(bdHolder, annotation, typeConverter)) {
-                // 不匹配则可能需要检查元注解
+                // If it does not match, the meta-annotations may need to be checked
                 fallbackToMeta = true; 
             } else {
-                // 匹配则不需要进一步检查元注解
+                // If it matches, no further check of the meta-annotations is needed
                 checkMeta = false; 
             }
         }
         
-        // 如果不是资格符注解或与bean定义不匹配，但有元注解是资格符注解
+        // If it is not a qualifier annotation or does not match the bean definition, but has a meta-annotation that is a qualifier annotation
         if (checkMeta) {
             boolean foundMeta = false;
             for (Annotation metaAnn : type.getAnnotations()) {
                 Class<? extends Annotation> metaType = metaAnn.annotationType();
-                // 检查元注解是否是资格符注解
+                // Check if the meta-annotation is a qualifier annotation
                 if (isQualifier(metaType)) {
                     foundMeta = true;
-                    // 只有当 @Qualifier 注解有值或其他条件满足时，才会接受元注解的匹配
+                    // Accept the match of the meta-annotation only if the @Qualifier annotation has a value or other conditions are met
                     if ((fallbackToMeta && ObjectUtils.isEmpty(AnnotationUtils.getValue(metaAnn))) ||
                         !checkQualifier(bdHolder, metaAnn, typeConverter)) {
-                        // 元注解不匹配
+                        // The meta-annotation does not match
                         return false; 
                     }
                 }
             }
             if (fallbackToMeta && !foundMeta) {
-                return false; // 需要元注解，但没有找到
+                return false; // A meta-annotation is needed, but none was found
             }
         }
     }
     
-    // 所有注解都匹配
+    // All annotations match
     return true;
 }
 ```
 
-在`org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver#isQualifier`方法中，主要目的是确定给定的注解是否为一个"资格符"注解，也就是我们通常所说的限定符注解，如`@Qualifier`。这是通过检查注解是否存在于已知的`qualifierTypes`集合中，或者它是否带有这些资格符注解来完成的。
+The main goal of the `org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver#isQualifier` method is to decide whether the given annotation is a "qualifier" annotation, such as `@Qualifier`. It does this by checking whether the annotation is in the known `qualifierTypes` set, or whether it carries one of these qualifier annotations.
 
 ```java
 protected boolean isQualifier(Class<? extends Annotation> annotationType) {
-    // 遍历已知的资格符注解类型
+    // Go through the known qualifier annotation types
     for (Class<? extends Annotation> qualifierType : this.qualifierTypes) {
-        // 如果给定的注解是已知的资格符注解，或者它带有这样的元注解
+        // If the given annotation is a known qualifier annotation, or it carries such a meta-annotation
         if (annotationType.equals(qualifierType) || annotationType.isAnnotationPresent(qualifierType)) {
-            return true; // 是资格符注解
+            return true; // It is a qualifier annotation
         }
     }
-    return false; // 不是资格符注解
+    return false; // It is not a qualifier annotation
 }
 ```
 
-### 八、注意事项
+### 8. Notes
 
-1. **确保正确的依赖注入**
-   + 使用 `@Qualifier` 主要是为了解决Spring容器中有多个同类型Bean的问题。没有 `@Qualifier`，Spring将无法决定注入哪一个Bean。但使用 `@Qualifier` 时，我们需要确保给定的资格符名称确实存在，否则Spring会抛出异常。
-2. **与其他注解组合**
-   +  `@Qualifier` 通常与 `@Autowired` 或 `@Inject` 一起使用。确保在正确的地方使用它（字段、setter方法或构造函数）。
-3. **自定义资格符注解**
-   + 我们可以创建自己的注解，并使用 `@Qualifier` 作为元注解。这样，我们可以创建具有特定命名或其他语义的资格符注解，使代码更具可读性。
-4. **使用字符串名称**
-   +  `@Qualifier` 默认使用字符串值来指定Bean的名称。这意味着，如果我们重命名了Bean或更改了其名称，我们也需要更改所有使用这个Bean名称的 `@Qualifier` 注解。
-5. **与Java配置一起使用**
-   + 当使用Java配置创建Beans时，可以使用 `@Bean` 的方法名称作为资格符名称。这使得使用Java配置和 `@Qualifier` 更为一致。
-6. **与 `@Primary` 的关系**
-   + 如果我们同时使用了 `@Primary` 和 `@Qualifier`，则 `@Qualifier` 的优先级更高。也就是说，如果一个Bean被标记为 `@Primary`，但在注入点使用了 `@Qualifier`，则会使用 `@Qualifier` 指定的Bean。
-7. **名称和类型的匹配**
-   + 尽管 `@Qualifier` 主要用于通过名称进行匹配，但Spring仍然会验证匹配的Bean类型。所以，如果Bean名称匹配但类型不匹配，仍然会出现异常。
-8. **与JSR-330的兼容性**
-   + Spring的 `@Qualifier` 注解与JSR-330（Java的依赖注入规范）中的 `javax.inject.Qualifier` 注解兼容。但是，当使用JSR-330标准时，确保依赖注入提供程序（如Spring）正确支持它。
+1. **Make sure the injection is correct**
+   + `@Qualifier` is mainly used to solve the problem of several beans of the same type in the Spring container. Without `@Qualifier`, Spring cannot decide which bean to inject. When you use `@Qualifier`, make sure the given qualifier name really exists. Otherwise, Spring throws an exception.
+2. **Use with other annotations**
+   +  `@Qualifier` is usually used with `@Autowired` or `@Inject`. Make sure you use it in the right place (field, setter method, or constructor).
+3. **Custom qualifier annotations**
+   + You can create your own annotations and use `@Qualifier` as a meta-annotation. This way you can create qualifier annotations with a specific name or other meaning, which makes the code easier to read.
+4. **String names**
+   +  `@Qualifier` uses a string value to set the name of the bean by default. This means that if you rename a bean or change its name, you must also change all `@Qualifier` annotations that use this bean name.
+5. **Use with Java configuration**
+   + When you create beans with Java configuration, you can use the name of the `@Bean` method as the qualifier name. This makes Java configuration and `@Qualifier` more consistent.
+6. **Relation to `@Primary`**
+   + If you use both `@Primary` and `@Qualifier`, `@Qualifier` has the higher priority. That is, if a bean is marked with `@Primary` but an injection point uses `@Qualifier`, the bean set by `@Qualifier` is used.
+7. **Name and type matching**
+   + `@Qualifier` is mainly used to match by name, but Spring still checks the type of the matching bean. So if the bean name matches but the type does not, you still get an exception.
+8. **Compatibility with JSR-330**
+   + The Spring `@Qualifier` annotation is compatible with the `javax.inject.Qualifier` annotation in JSR-330 (the Java dependency injection specification). But when you use the JSR-330 standard, make sure the dependency injection provider (such as Spring) supports it correctly.
 
-### 九、总结
+### 9. Summary
 
-#### 最佳实践总结
+#### Best Practices Summary
 
-1. **明确的配置**
-   + 使用 `AnnotationConfigApplicationContext` 作为Spring容器，并通过构造参数指定配置类，使得Spring容器初始化过程清晰明了。
-2. **利用组件扫描**
-   + 通过 `@ComponentScan` 注解，自动扫描指定包及其子包中的组件，减少了手动注册bean的工作，使代码更简洁、高效。
-3. **自定义资格符注解**
-   + 为了解决多个同类型Bean的问题，定义了 `@Email` 和 `@SMS` 两个自定义限定符注解。这使得代码更有可读性，并提供了更明确的注入意图。
-4. **准确的服务注入**
-   + 在 `MessageController` 中，使用了自定义的 `@Email` 和 `@SMS` 注解与 `@Inject` 组合，确保了正确的 `MessageService` 实现被注入到相应的字段。
-5. **清晰的输出**
-   + 通过 `showMessage` 方法的输出，我们可以清晰地看到 `@Qualifier` 的作用，确保了不同的服务实现被正确注入。
-6. **充分利用Java配置**
-   + 通过 `@Configuration` 和 `@ComponentScan`，结合Java配置，Spring容器的初始化和bean的注册过程都变得更加直观和简洁。
-7. **注解的扩展性**
-   + 通过使用 `@Qualifier` 作为元注解，自定义注解的方式体现了Spring的灵活性和注解的扩展性。
-8. **保持代码整洁和模块化**
-   + 每个类和接口都有明确的职责，并且代码被组织得清晰、模块化，这不仅使代码更易于维护，还提高了代码的可读性和可复用性。
+1. **Clear configuration**
+   + Use `AnnotationConfigApplicationContext` as the Spring container and give the configuration class as the constructor argument. This makes the container initialization clear.
+2. **Use component scan**
+   + With `@ComponentScan`, components in the given package and its sub-packages are scanned automatically. This reduces the work of registering beans by hand and makes the code shorter and more efficient.
+3. **Custom qualifier annotations**
+   + To solve the problem of several beans of the same type, two custom qualifier annotations are defined: `@Email` and `@SMS`. This makes the code easier to read and shows the injection intent more clearly.
+4. **Accurate service injection**
+   + In `MessageController`, the custom `@Email` and `@SMS` annotations are used together with `@Inject`. This makes sure the right `MessageService` implementation is injected into each field.
+5. **Clear output**
+   + The output of the `showMessage` method clearly shows the effect of `@Qualifier`. It makes sure the different service implementations are injected correctly.
+6. **Make good use of Java configuration**
+   + With `@Configuration` and `@ComponentScan` in Java configuration, the container initialization and bean registration are more direct and simple.
+7. **Extensibility of annotations**
+   + Using `@Qualifier` as a meta-annotation for custom annotations shows the flexibility of Spring and the extensibility of annotations.
+8. **Keep the code clean and modular**
+   + Each class and interface has a clear job, and the code is organized in a clear and modular way. This makes the code easier to maintain, read, and reuse.
 
-#### 源码分析总结
+#### Source Code Analysis Summary
 
-1. **应用启动及上下文初始化**
-   + 当创建`AnnotationConfigApplicationContext`时，它接收一个配置类（如`MyConfiguration`）作为参数，用于初始化Spring上下文。启动时，会从Spring上下文中获取并使用相应的Bean。
-2. **AnnotationConfigApplicationContext的构造过程**
-   + 在其构造函数中，`AnnotationConfigApplicationContext`执行了几个关键步骤，其中最核心的是`this()`，该方法初始化了两个组件：`AnnotatedBeanDefinitionReader`（负责读取注解定义的bean）和`ClassPathBeanDefinitionScanner`（负责扫描类路径并自动检测bean组件）。
-3. **AnnotatedBeanDefinitionReader的初始化**
-   + `AnnotatedBeanDefinitionReader`在其构造函数中调用`registerAnnotationConfigProcessors`，此方法向容器注册了一系列的后置处理器，这些后置处理器对于处理各种注解（如`@Inject`, `@Qualifier`等）是关键。
-4. **Qualifier注解的注册**
-   + 当创建`QualifierAnnotationAutowireCandidateResolver`实例时，它会尝试加载JSR-330的`@Qualifier`注解，并将其添加到`qualifierTypes`集合中。这使得在后续的依赖注入过程中，Spring可以正确处理这个注解。
-5. **依赖解析过程**
-   + 当Spring尝试解析某个依赖时，它会进入`DefaultListableBeanFactory#resolveDependency`。此方法首先尝试获取一个延迟解析代理，如果不能获得，则会尝试解析依赖，此过程涉及到`doResolveDependency`方法。
-6. **自动装配候选检查**
-   + 在`findAutowireCandidates`中，Spring首先找出所有可能的bean名称，然后检查每一个可能的候选bean，看看它是否是一个合适的自动装配候选。此检查涉及到`isAutowireCandidate`方法。
-7. **利用AutowireCandidateResolver判断是否为自动装配候选者**
-   + `isAutowireCandidate`方法的工作是判断某个bean是否是自动装配的候选者。在有多个可能的候选bean时，`AutowireCandidateResolver`（这里的实例是`QualifierAnnotationAutowireCandidateResolver`）会被用来做决策，考虑到`@Qualifier`和其他相关的注解。
-8. **处理@Qualifier注解**
-   + `QualifierAnnotationAutowireCandidateResolver`的主要任务是增强对`@Qualifier`注解的支持。它确保待注入的bean与所有相关的`@Qualifier`注解和元注解匹配。如果其中一个注解或元注解与bean定义不匹配，那么这个bean就不是当前注入点的合适候选。
-9. **资格符检查**
-   + `isQualifier`方法则用来确定给定的注解是否为一个资格符注解（限定符注解），例如`@Qualifier`。这是通过检查注解是否存在于已知的`qualifierTypes`集合中或它是否带有这些资格符注解来完成的。
+1. **Application startup and context initialization**
+   + When `AnnotationConfigApplicationContext` is created, it takes a configuration class (such as `MyConfiguration`) as the argument to initialize the Spring context. At startup, the beans are taken from the Spring context and used.
+2. **Construction of AnnotationConfigApplicationContext**
+   + In its constructor, `AnnotationConfigApplicationContext` does several key steps. The most important is `this()`. It initializes two components: `AnnotatedBeanDefinitionReader` (reads bean definitions from annotations) and `ClassPathBeanDefinitionScanner` (scans the classpath and detects bean components automatically).
+3. **Initialization of AnnotatedBeanDefinitionReader**
+   + In its constructor, `AnnotatedBeanDefinitionReader` calls `registerAnnotationConfigProcessors`. This method registers a series of post-processors in the container. These post-processors are key to handle various annotations (such as `@Inject` and `@Qualifier`).
+4. **Registration of the Qualifier annotation**
+   + When a `QualifierAnnotationAutowireCandidateResolver` instance is created, it tries to load the JSR-330 `@Qualifier` annotation and adds it to the `qualifierTypes` set. This way Spring can handle this annotation correctly in later dependency injection.
+5. **Dependency resolving**
+   + When Spring tries to resolve a dependency, it enters `DefaultListableBeanFactory#resolveDependency`. This method first tries to get a lazy resolution proxy. If it cannot, it tries to resolve the dependency. This involves the `doResolveDependency` method.
+6. **Autowire candidate check**
+   + In `findAutowireCandidates`, Spring first finds all possible bean names, and then checks each possible candidate bean to see if it is a suitable autowire candidate. This check involves the `isAutowireCandidate` method.
+7. **Use AutowireCandidateResolver to decide on an autowire candidate**
+   + The `isAutowireCandidate` method decides whether a bean is an autowire candidate. When there are several possible candidate beans, `AutowireCandidateResolver` (here, the instance is `QualifierAnnotationAutowireCandidateResolver`) makes the decision. It takes `@Qualifier` and other related annotations into account.
+8. **Handling the @Qualifier annotation**
+   + The main job of `QualifierAnnotationAutowireCandidateResolver` is to add stronger support for the `@Qualifier` annotation. It makes sure the bean to inject matches all related `@Qualifier` annotations and meta-annotations. If one annotation or meta-annotation does not match the bean definition, the bean is not a suitable candidate for the current injection point.
+9. **Qualifier check**
+   + The `isQualifier` method decides whether the given annotation is a qualifier annotation, such as `@Qualifier`. It does this by checking whether the annotation is in the known `qualifierTypes` set, or whether it carries one of these qualifier annotations.

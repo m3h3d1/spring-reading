@@ -1,36 +1,36 @@
 ## @Named
 
 - [@Named](#named)
-  - [一、基本信息](#一基本信息)
-  - [二、注解描述](#二注解描述)
-  - [三、注解源码](#三注解源码)
-  - [四、主要功能](#四主要功能)
-  - [五、最佳实践](#五最佳实践)
-  - [六、时序图](#六时序图)
-    - [@Named注册默认过滤器](#named注册默认过滤器)
-    - [@Named扫描组件](#named扫描组件)
-  - [七、源码分析](#七源码分析)
-    - [@Named注册默认过滤器](#named注册默认过滤器-1)
-    - [@Named扫描组件](#named扫描组件-1)
-      - [前置条件](#前置条件)
-      - [扫描入口](#扫描入口)
-    - [@Named依赖注入](#named依赖注入)
-  - [八、注意事项](#八注意事项)
-  - [九、总结](#九总结)
-    - [最佳实践总结](#最佳实践总结)
-    - [源码分析总结](#源码分析总结)
+  - [1. Overview](#1-overview)
+  - [2. Annotation Description](#2-annotation-description)
+  - [3. Annotation Source](#3-annotation-source)
+  - [4. Main Features](#4-main-features)
+  - [5. Best Practices](#5-best-practices)
+  - [6. Sequence Diagram](#6-sequence-diagram)
+    - [@Named Default Filter Registration](#named-default-filter-registration)
+    - [@Named Component Scan](#named-component-scan)
+  - [7. Source Code Analysis](#7-source-code-analysis)
+    - [@Named Default Filter Registration](#named-default-filter-registration-1)
+    - [@Named Component Scan](#named-component-scan-1)
+      - [Prerequisites](#prerequisites)
+      - [Scan Entry](#scan-entry)
+    - [@Named Dependency Injection](#named-dependency-injection)
+  - [8. Notes](#8-notes)
+  - [9. Summary](#9-summary)
+    - [Best Practices Summary](#best-practices-summary)
+    - [Source Code Analysis Summary](#source-code-analysis-summary)
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [我的CSDN](https://blog.csdn.net/duzhuang2399/article/details/133945784) 📚 **文章目录** - [所有文章](https://github.com/xuchengsheng/spring-reading) 🔗 **源码地址** - [@Named源码](https://github.com/xuchengsheng/spring-reading/blob/master/spring-jsr/spring-jsr330-named)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN](https://blog.csdn.net/duzhuang2399/article/details/133945784) 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、注解描述
+### 2. Annotation Description
 
-`@Named` 注解是 Java 的标准注解，来源于 JSR 330: Dependency Injection for Java。它的主要目的是提供一种标准化的方式在 Java 平台上实现依赖注入。
+The `@Named` annotation is a standard Java annotation from JSR 330: Dependency Injection for Java. Its main goal is to give a standard way to do dependency injection on the Java platform.
 
-### 三、注解源码
+### 3. Annotation Source
 
-`@Named` 是 JSR-330 中定义的一个注解，用于指定依赖注入的资格标识。其主要用途是在存在多个同类型的 bean 实例时，提供一个明确的名称或标识，以消除歧义。该注解具有一个 `value` 属性，允许用户指定 bean 的名称，默认值为空字符串。`@Named` 携带了一个重要的元注解：`@Qualifier` 表明其可以作为资格提供者此注解在 Java 的依赖注入场景中，尤其是解决注入歧义性时，起到了关键作用。
+`@Named` is an annotation defined in JSR-330. It sets a qualifier for dependency injection. It is mainly used when there are several beans of the same type. It gives a clear name or identifier, so the choice is not ambiguous. The annotation has a `value` attribute, which lets you set the name of the bean. The default value is an empty string. `@Named` carries an important meta-annotation, `@Qualifier`, which shows that it can be used as a qualifier. In Java dependency injection, especially when you need to remove ambiguity, this annotation plays a key role.
 
 ```java
 @Qualifier
@@ -42,18 +42,18 @@ public @interface Named {
 
 ```
 
-### 四、主要功能
+### 4. Main Features
 
-1. **Bean标识**
-   + `@Named` 注解可以为一个类提供一个名称，使得这个类可以被识别并管理为一个bean。这样，这个bean就可以在其他地方通过这个名称被引用和注入。
-2. **替代默认命名**
-   + 默认情况下，没有具体指定名称的bean会使用其类名的首字母小写形式作为其名称。使用 `@Named`，我们可以`value`属性来覆盖这个默认名称。
-3. **解决歧义性**
-   + 在依赖注入中，有时候可能有多个bean都符合某个注入点的要求。在这种情况下，`@Named` 可以与 `@Inject` 注解结合使用，明确指定哪个bean应该被注入。
+1. **Bean identifier**
+   + The `@Named` annotation gives a name to a class, so the class can be recognized and managed as a bean. Then the bean can be referred to and injected elsewhere by this name.
+2. **Replace the default name**
+   + By default, a bean without a specific name uses its class name with a lowercase first letter. With `@Named`, you can use the `value` attribute to override this default name.
+3. **Remove ambiguity**
+   + In dependency injection, several beans may fit one injection point. In this case, `@Named` can be used together with `@Inject` to say clearly which bean should be injected.
 
-### 五、最佳实践
+### 5. Best Practices
 
-首先来看看启动类入口，上下文环境使用`AnnotationConfigApplicationContext`（此类是使用Java注解来配置Spring容器的方式），构造参数我们给定了一个`MyConfiguration`组件类。然后从Spring上下文中获取一个`MyController`类型的bean并调用了`showService`方法。
+First, look at the entry class. The context is `AnnotationConfigApplicationContext` (this class configures the Spring container with Java annotations). We pass the `MyConfiguration` component class as the constructor argument. Then we get a bean of type `MyController` from the Spring context and call its `showService` method.
 
 ```java
 public class NamedApplication {
@@ -66,7 +66,7 @@ public class NamedApplication {
 }
 ```
 
-在`MyConfiguration`类中，使用了`@ComponentScan("com.xcs.spring")`注解告诉 Spring 在指定的包（在这里是 "`com.xcs.spring`"）及其子包中搜索带有 `@Component`、`@Service`、`@Repository` 和 `@Controller` 等注解的类，并将它们自动注册为 beans。这样，spring就不必为每个组件明确写一个 bean 定义。Spring 会自动识别并注册它们。
+The `MyConfiguration` class uses `@ComponentScan("com.xcs.spring")`. This tells Spring to search the given package ("`com.xcs.spring`") and its sub-packages for classes with annotations such as `@Component`, `@Service`, `@Repository`, and `@Controller`. Spring registers them as beans automatically. So you do not need to write a bean definition for each component.
 
 ```java
 @Configuration
@@ -76,7 +76,7 @@ public class MyConfiguration {
 }
 ```
 
-`MyController` 由 `@Controller` 注解标记。该类依赖于一个类型为 `MyService` 的服务。通过使用 `@Inject` 注解，我们表示希望这个服务被注入，而 `@Named("myServiceB")` 注解则指定了具体要注入的服务实例的名称，即 "`myServiceB`"。`showService()` 方法简单地打印出当前注入的服务实例。
+`MyController` is marked with `@Controller`. This class depends on a service of type `MyService`. With the `@Inject` annotation, we say we want this service injected. The `@Named("myServiceB")` annotation sets the name of the service instance to inject, which is "`myServiceB`". The `showService()` method simply prints the service instance that was injected.
 
 ```java
 @Controller
@@ -92,7 +92,7 @@ public class MyController {
 }
 ```
 
-`MyService` 是一个基础类。`MyServiceA` 是 `MyService` 的一个子类，它被 `@Named("myServiceA")` 注解标记，意味着在依赖注入容器中，这个类的实例将被识别为 "myServiceA"。类似地，`MyServiceB` 也是 `MyService` 的一个子类，并被 `@Named("myServiceB")` 注解标记，在依赖注入容器中，这个类的实例将被识别为 "myServiceB"。
+`MyService` is a base class. `MyServiceA` is a subclass of `MyService`. It is marked with `@Named("myServiceA")`, so in the dependency injection container, an instance of this class is known as "myServiceA". In the same way, `MyServiceB` is also a subclass of `MyService`. It is marked with `@Named("myServiceB")`, so in the dependency injection container, an instance of this class is known as "myServiceB".
 
 ```java
 public class MyService {
@@ -110,71 +110,71 @@ public class MyServiceB extends MyService{
 }
 ```
 
-运行结果发现，通过`@Named("myServiceB")`注解，成功地注入了一个 `MyServiceB` 类型的实例。
+The result shows that the `@Named("myServiceB")` annotation injected an instance of type `MyServiceB`.
 
 ```
 myService = com.xcs.spring.service.MyServiceB@2e8c1c9b
 ```
 
-### 六、时序图
+### 6. Sequence Diagram
 
-#### @Named注册默认过滤器
+#### @Named Default Filter Registration
 
 ~~~mermaid
 sequenceDiagram
-Title: @Named注解注册默认过滤器时序图
+Title: @Named annotation default filter registration sequence diagram
 
-Note right of NamedApplication: 初始化应用
+Note right of NamedApplication: Initialize the application
 NamedApplication->>AnnotationConfigApplicationContext: AnnotationConfigApplicationContext(componentClasses)
-Note right of AnnotationConfigApplicationContext: 初始化Spring上下文
+Note right of AnnotationConfigApplicationContext: Initialize the Spring context
 AnnotationConfigApplicationContext->>AnnotationConfigApplicationContext: AnnotationConfigApplicationContext()
-Note right of AnnotationConfigApplicationContext: 创建Bean定义扫描器
+Note right of AnnotationConfigApplicationContext: Create the bean definition scanner
 AnnotationConfigApplicationContext->>ClassPathBeanDefinitionScanner: ClassPathBeanDefinitionScanner(registry)
-Note right of ClassPathBeanDefinitionScanner: 设置是否使用默认过滤器
+Note right of ClassPathBeanDefinitionScanner: Set whether to use the default filters
 ClassPathBeanDefinitionScanner->>ClassPathBeanDefinitionScanner: ClassPathBeanDefinitionScanner(registry,useDefaultFilters)
-Note right of ClassPathBeanDefinitionScanner: 获取或创建环境配置
+Note right of ClassPathBeanDefinitionScanner: Get or create the environment
 ClassPathBeanDefinitionScanner->>ClassPathBeanDefinitionScanner: getOrCreateEnvironment(registry)
-Note right of ClassPathBeanDefinitionScanner: 使用指定环境初始化扫描器
+Note right of ClassPathBeanDefinitionScanner: Initialize the scanner with the given environment
 ClassPathBeanDefinitionScanner->>ClassPathBeanDefinitionScanner: ClassPathBeanDefinitionScanner(registry,useDefaultFilters,environment)
-Note right of ClassPathBeanDefinitionScanner: 最终初始化扫描器
+Note right of ClassPathBeanDefinitionScanner: Finish initializing the scanner
 ClassPathBeanDefinitionScanner->>ClassPathBeanDefinitionScanner: ClassPathBeanDefinitionScanner(registry,useDefaultFilters,environment,resourceLoader)
-Note right of ClassPathBeanDefinitionScanner: 注册默认的注解过滤器
+Note right of ClassPathBeanDefinitionScanner: Register the default annotation filters
 ClassPathBeanDefinitionScanner->>ClassPathScanningCandidateComponentProvider: registerDefaultFilters()
-Note right of ClassPathScanningCandidateComponentProvider: 加入 @Named 过滤器
+Note right of ClassPathScanningCandidateComponentProvider: Add the @Named filter
 ClassPathScanningCandidateComponentProvider->>ClassPathScanningCandidateComponentProvider: this.includeFilters.add("javax.inject.Named");
 ~~~
 
-#### @Named扫描组件
+#### @Named Component Scan
 
 ~~~mermaid
 sequenceDiagram
-Title: @Named注解扫描组件时序图
+Title: @Named annotation component scan sequence diagram
 ComponentScanAnnotationParser->>ClassPathBeanDefinitionScanner: doScan(basePackages)
-Note right of ClassPathBeanDefinitionScanner: 查找候选组件
+Note right of ClassPathBeanDefinitionScanner: Find candidate components
 ClassPathBeanDefinitionScanner->>ClassPathScanningCandidateComponentProvider: findCandidateComponents(basePackage)
-Note right of ClassPathScanningCandidateComponentProvider: 扫描候选组件
+Note right of ClassPathScanningCandidateComponentProvider: Scan candidate components
 ClassPathScanningCandidateComponentProvider->>ClassPathScanningCandidateComponentProvider: scanCandidateComponents(basePackage)
-Note right of ClassPathScanningCandidateComponentProvider: 判断是否是候选组件
+Note right of ClassPathScanningCandidateComponentProvider: Check if it is a candidate component
 ClassPathScanningCandidateComponentProvider->>ClassPathScanningCandidateComponentProvider: isCandidateComponent(metadataReader)
-Note right of ClassPathScanningCandidateComponentProvider: 过滤器匹配检查
+Note right of ClassPathScanningCandidateComponentProvider: Filter match check
 ClassPathScanningCandidateComponentProvider->>AbstractTypeHierarchyTraversingFilter: match(metadataReader,metadataReaderFactory)
-Note right of AbstractTypeHierarchyTraversingFilter: 检查注解匹配
+Note right of AbstractTypeHierarchyTraversingFilter: Check the annotation match
 AbstractTypeHierarchyTraversingFilter->>AnnotationTypeFilter: matchSelf(metadataReader)
-Note right of ClassPathScanningCandidateComponentProvider: 返回Bean定义结果
-ClassPathScanningCandidateComponentProvider-->>ClassPathBeanDefinitionScanner: 返回BeanDefinition
-Note right of ClassPathBeanDefinitionScanner: 注册Bean定义
+Note right of ClassPathScanningCandidateComponentProvider: Return the bean definition result
+ClassPathScanningCandidateComponentProvider-->>ClassPathBeanDefinitionScanner: Return BeanDefinition
+Note right of ClassPathBeanDefinitionScanner: Register the bean definition
 ClassPathBeanDefinitionScanner->>ClassPathBeanDefinitionScanner: registerBeanDefinition(definitionHolder,registry)
-Note right of ClassPathBeanDefinitionScanner: 辅助工具注册Bean
+Note right of ClassPathBeanDefinitionScanner: The helper utility registers the bean
 ClassPathBeanDefinitionScanner->>BeanDefinitionReaderUtils: registerBeanDefinition(definitionHolder, registry)
-Note right of BeanDefinitionReaderUtils: 在Bean工厂中注册Bean
+Note right of BeanDefinitionReaderUtils: Register the bean in the bean factory
 BeanDefinitionReaderUtils->>DefaultListableBeanFactory: registerBeanDefinition(beanName,beanDefinition)
 ~~~
 
-### 七、源码分析
+### 7. Source Code Analysis
 
-#### @Named注册默认过滤器
+#### @Named Default Filter Registration
 
-首先来看看启动类入口，上下文环境使用`AnnotationConfigApplicationContext`（此类是使用Java注解来配置Spring容器的方式），构造参数我们给定了一个`MyConfiguration`组件类。然后从Spring上下文中获取一个`MyController`类型的bean并调用了`showService`方法。
+First, look at the entry class. The context is `AnnotationConfigApplicationContext` (this class configures the Spring container with Java annotations). We pass the `MyConfiguration` component class as the constructor argument. Then we get a bean of type `MyController` from the Spring context and call its `showService` method.
 
 ```java
 public class NamedApplication {
@@ -187,7 +187,7 @@ public class NamedApplication {
 }
 ```
 
-在`org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext`构造函数中，执行了三个步骤，我们本次重点关注`this()`。
+The `org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext` constructor does three steps. This time we focus on `this()`.
 
 ```java
 public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
@@ -196,7 +196,7 @@ public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
     refresh();
 ```
 
-在`org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext()`方法中，初始化了的两个核心组件，一个用于读取注解定义的bean (`AnnotatedBeanDefinitionReader`)，另一个用于扫描类路径并自动检测bean组件 (`ClassPathBeanDefinitionScanner`)，也是本次重点分析的内容。
+The `org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext()` method initializes two core components. One reads bean definitions from annotations (`AnnotatedBeanDefinitionReader`). The other scans the classpath and detects bean components automatically (`ClassPathBeanDefinitionScanner`). This is also the focus of this analysis.
 
 ```java
 public AnnotationConfigApplicationContext() {
@@ -207,7 +207,7 @@ public AnnotationConfigApplicationContext() {
 }
 ```
 
-在`org.springframework.context.annotation.ClassPathBeanDefinitionScanner#ClassPathBeanDefinitionScanner(registry)`方法中，又调用了另一个构造函数。
+The `org.springframework.context.annotation.ClassPathBeanDefinitionScanner#ClassPathBeanDefinitionScanner(registry)` method calls another constructor.
 
 ```java
 public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry) {
@@ -215,7 +215,7 @@ public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry) {
 }
 ```
 
-在`org.springframework.context.annotation.ClassPathBeanDefinitionScanner#ClassPathBeanDefinitionScanner(registry, useDefaultFilters)`方法中，又调用了另一个构造函数。
+The `org.springframework.context.annotation.ClassPathBeanDefinitionScanner#ClassPathBeanDefinitionScanner(registry, useDefaultFilters)` method calls another constructor.
 
 ```java
 public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, boolean useDefaultFilters) {
@@ -223,7 +223,7 @@ public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, boolean u
 }
 ```
 
-在`org.springframework.context.annotation.ClassPathBeanDefinitionScanner#ClassPathBeanDefinitionScanner(registry, useDefaultFilters,environment)`方法中，最后，又调用另一个构造函数，使用所有这些参数进行实际的初始化工作。
+The `org.springframework.context.annotation.ClassPathBeanDefinitionScanner#ClassPathBeanDefinitionScanner(registry, useDefaultFilters,environment)` method calls one more constructor. It does the actual initialization with all these arguments.
 
 ```java
 public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, boolean useDefaultFilters,
@@ -234,25 +234,25 @@ public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, boolean u
 }
 ```
 
-在`org.springframework.context.annotation.ClassPathBeanDefinitionScanner#ClassPathBeanDefinitionScanner(registry, useDefaultFilters,environment,resourceLoader)`方法中， `useDefaultFilters` 为 `true` 时，除了常见的如 `@Component`, `@Service`, `@Repository` 等注解外，Spring也会自动注册JSR-330规范中的 `@Named` 注解作为一个默认的过滤器。这是Spring为了支持JSR-330注入规范而做的集成。
+In the `org.springframework.context.annotation.ClassPathBeanDefinitionScanner#ClassPathBeanDefinitionScanner(registry, useDefaultFilters,environment,resourceLoader)` method, when `useDefaultFilters` is `true`, Spring registers the JSR-330 `@Named` annotation as a default filter. It does this besides the usual annotations such as `@Component`, `@Service`, and `@Repository`. This is how Spring supports the JSR-330 injection specification.
 
 ```java
 public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, boolean useDefaultFilters,
 			Environment environment, @Nullable ResourceLoader resourceLoader) {
 
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     if (useDefaultFilters) {
         registerDefaultFilters();
     }
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-在`org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider#registerDefaultFilters`方法中，识别和处理带有 `@Named` 注解的组件，前提是该注解存在于类路径上。如果JSR-330库不在类路径上，Spring会优雅地跳过这一步，而不是导致失败。到此`@Named`注解的注册默认过滤器已经完成，待后续扫描组件过程中，会使用到此过滤器。
+The `org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider#registerDefaultFilters` method finds and handles components with the `@Named` annotation, if the annotation is on the classpath. If the JSR-330 library is not on the classpath, Spring skips this step quietly instead of failing. With this, the registration of the default filter for `@Named` is done. The filter is used later, when components are scanned.
 
 ```java
 protected void registerDefaultFilters() {
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     try {
         this.includeFilters.add(new AnnotationTypeFilter(
             ((Class<? extends Annotation>) ClassUtils.forName("javax.inject.Named", cl)), false));
@@ -264,147 +264,147 @@ protected void registerDefaultFilters() {
 }
 ```
 
-#### @Named扫描组件
+#### @Named Component Scan
 
-##### 前置条件
+##### Prerequisites
 
-在Spring中，为了充分理解`@Named`注解的工作机制，需要深入研究组件扫描和bean定义注册过程。特别地，下述注解和接口为`@Named`的识别、解析和注册提供了基础支持。简而言之，为了完全理解`@Named`如何在Spring中工作，深入了解以下组件是关键的。
+To fully understand how the `@Named` annotation works in Spring, you need to look at component scanning and bean definition registration. The annotation and interface below give the basic support for finding, parsing, and registering `@Named`. To understand how `@Named` works in Spring, it is important to know these parts.
 
-1. **`@ComponentScan` 注解**
-   - `@ComponentScan` 注解用于配置类，指定Spring框架在哪些包中查找带有`@Component`, `@Service`, `@Repository`, `@Controller`和`@Named`等注解的类。这些被发现的组件将被自动注册为Spring应用上下文中的beans。特别地，`@Named`注解的组件会因此被扫描并注册。
-   - 🔗 [@ComponentScan注解传送门](https://github.com/xuchengsheng/spring-reading/blob/master/spring-annotation/spring-annotation-componentScan)
-2. **`BeanDefinitionRegistryPostProcessor` 接口**
-   - 其中的`postProcessBeanDefinitionRegistry`方法允许在所有其他bean定义被加载之后、但在任何bean实例化之前，修改或添加bean定义。特定于组件扫描，当解析到`@ComponentScan`注解时，相应的`BeanDefinitionRegistryPostProcessor`实现（如`ConfigurationClassPostProcessor`）会被触发，负责处理组件扫描并注册相应的bean定义。
-   - 🔗 [BeanDefinitionRegistryPostProcessor接口传送门](https://github.com/xuchengsheng/spring-reading/blob/master/spring-interface/spring-interface-beanDefinitionRegistryPostProcessor)
+1. **`@ComponentScan` annotation**
+   - The `@ComponentScan` annotation is used on a configuration class. It tells the Spring framework which packages to search for classes with annotations such as `@Component`, `@Service`, `@Repository`, `@Controller`, and `@Named`. The components that are found are registered automatically as beans in the Spring application context. So components with `@Named` are scanned and registered too.
+   - 🔗 [@ComponentScan annotation link](https://github.com/xuchengsheng/spring-reading/blob/master/spring-annotation/spring-annotation-componentScan)
+2. **`BeanDefinitionRegistryPostProcessor` interface**
+   - Its `postProcessBeanDefinitionRegistry` method lets you change or add bean definitions after all other bean definitions are loaded, but before any bean is instantiated. For component scanning, when the `@ComponentScan` annotation is parsed, the matching `BeanDefinitionRegistryPostProcessor` implementation (such as `ConfigurationClassPostProcessor`) is triggered. It handles the component scan and registers the matching bean definitions.
+   - 🔗 [BeanDefinitionRegistryPostProcessor interface link](https://github.com/xuchengsheng/spring-reading/blob/master/spring-interface/spring-interface-beanDefinitionRegistryPostProcessor)
 
-##### 扫描入口
+##### Scan Entry
 
-在`org.springframework.context.annotation.ClassPathBeanDefinitionScanner#doScan`方法中，主要目标是找到指定`basePackages`中所有的组件，并为它们创建 `BeanDefinition`。这些 `BeanDefinition` 之后会被 Spring 容器用来创建实际的 bean 实例。
+The main goal of the `org.springframework.context.annotation.ClassPathBeanDefinitionScanner#doScan` method is to find all components in the given `basePackages` and create a `BeanDefinition` for each. The Spring container later uses these `BeanDefinition` objects to create the real bean instances.
 
 ```java
 protected Set<BeanDefinitionHolder> doScan(String... basePackages) {
-    // 断言确保至少有一个基础包被指定
+    // Assert that at least one base package is given
     Assert.notEmpty(basePackages, "At least one base package must be specified");
 
-    // 用于保存找到的bean定义的集合
+    // The set that holds the bean definitions that are found
     Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<>();
 
-    // 遍历每个基础包
+    // Go through each base package
     for (String basePackage : basePackages) {
-        // 在给定的基础包中找到所有候选的bean定义
+        // Find all candidate bean definitions in the given base package
         Set<BeanDefinition> candidates = findCandidateComponents(basePackage);
 
-        // 遍历找到的bean定义
+        // Go through the bean definitions that were found
         for (BeanDefinition candidate : candidates) {
-            // ... [代码部分省略以简化]
+            // ... [code omitted for brevity]
 
-            // 检查给定的bean名字是否已经存在，如果不存在，进行注册
+            // Check if the given bean name already exists. If not, register it
             if (checkCandidate(beanName, candidate)) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
                 
-                // 在bean注册表中注册bean定义
+                // Register the bean definition in the bean registry
                 registerBeanDefinition(definitionHolder, this.registry);
             }
         }
     }
-    // 返回所有注册的bean定义
+    // Return all registered bean definitions
     return beanDefinitions;
 }
 ```
 
-在`org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider#findCandidateComponents`方法中，主要提供了两种方式查找组件：通过预先生成的索引（如果可用且支持）或通过传统的扫描方式（我们重点关注传统的扫描方式）。
+The `org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider#findCandidateComponents` method has two ways to find components: with a pre-built index (if available and supported), or with the traditional scan. We focus on the traditional scan.
 
 ```java
 public Set<BeanDefinition> findCandidateComponents(String basePackage) {
-    // 如果存在组件索引并且支持include过滤器
+    // If a component index exists and it supports include filters
     if (this.componentsIndex != null && indexSupportsIncludeFilters()) {
-        // 从索引中添加候选组件
+        // Add the candidate components from the index
         return addCandidateComponentsFromIndex(this.componentsIndex, basePackage);
     } 
     else {
-        // 扫描给定基础包中的候选组件
+        // Scan the candidate components in the given base package
         return scanCandidateComponents(basePackage);
     }
 }
 ```
 
-在`org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider#scanCandidateComponents`方法中，首先是构建搜索路径，用于在类路径中搜索指定包，然后是扫描类路径，获取匹配的资源（通常是 `.class` 文件），再然后是对于每个资源，检查是否是候选组件，例如是否有 `@Named` 注解，最后对于是候选组件的类，创建一个 `BeanDefinition` 对象并添加到结果集中。
+The `org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider#scanCandidateComponents` method works in these steps. First, it builds the search path used to search the given package on the classpath. Then it scans the classpath to get the matching resources (usually `.class` files). Then, for each resource, it checks whether it is a candidate component, for example whether it has the `@Named` annotation. At the end, for each class that is a candidate component, it creates a `BeanDefinition` object and adds it to the result.
 
 ```java
 private Set<BeanDefinition> scanCandidateComponents(String basePackage) {
-    // 用于保存候选的Bean定义
+    // Holds the candidate bean definitions
     Set<BeanDefinition> candidates = new LinkedHashSet<>();
     try {
-        // 构建包搜索路径，例如："classpath*:com/example/*"
+        // Build the package search path, for example: "classpath*:com/example/*"
         String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
             resolveBasePackage(basePackage) + '/' + this.resourcePattern;
 
-        // 使用模式解析器获取所有匹配的资源（即.class文件）
+        // Use the pattern resolver to get all matching resources (the .class files)
         Resource[] resources = getResourcePatternResolver().getResources(packageSearchPath);
         
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
         
         for (Resource resource : resources) {
-            // ... [代码部分省略以简化]
-            // 检查资源是否可读
+            // ... [code omitted for brevity]
+            // Check if the resource is readable
             if (resource.isReadable()) {
                 try {
-                    // 使用元数据读取器获取类的元数据
+                    // Use the metadata reader to get the metadata of the class
                     MetadataReader metadataReader = getMetadataReaderFactory().getMetadataReader(resource);
-                    // 检查类是否是候选组件（例如，是否带有@Named注释）
+                    // Check if the class is a candidate component (for example, whether it has the @Named annotation)
                     if (isCandidateComponent(metadataReader)) {
                         ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
                         sbd.setSource(resource);
-                        // 再次检查Bean定义是否是候选组件
+                        // Check again if the bean definition is a candidate component
                         if (isCandidateComponent(sbd)) {
-                            // ... [代码部分省略以简化]
+                            // ... [code omitted for brevity]
                             candidates.add(sbd);
                         } 
                         else {
-                            // ... [代码部分省略以简化]
+                            // ... [code omitted for brevity]
                         }
                     } 
                     else {
-                        // ... [代码部分省略以简化]
+                        // ... [code omitted for brevity]
                     }
                 }
                 catch (Throwable ex) {
-                    // ... [代码部分省略以简化]
+                    // ... [code omitted for brevity]
                 }
             } 
             else {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
         }
     }
     catch (IOException ex) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
     return candidates;
 }
 ```
 
-在`org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider#isCandidateComponent`方法中，是扫描过程中的一个关键步骤，用于确定一个类是否应该被视为一个Spring组件的候选者。如果一个类带有 `@Named` 注解，那么对应的 `AnnotationTypeFilter` 将会识别它，并导致 `isCandidateComponent` 返回 `true`，表示这个类是一个合格的组件候选者。
+The `org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider#isCandidateComponent` method is a key step in the scan. It decides whether a class should be seen as a candidate for a Spring component. If a class has the `@Named` annotation, the matching `AnnotationTypeFilter` recognizes it, and `isCandidateComponent` returns `true`. This means the class is a valid component candidate.
 
 ```java
 protected boolean isCandidateComponent(MetadataReader metadataReader) throws IOException {
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
-    // 遍历所有的包含过滤器
+    // Go through all include filters
     for (TypeFilter tf : this.includeFilters) {
-        // 如果当前类与任一包含过滤器匹配
+        // If the current class matches any include filter
         if (tf.match(metadataReader, getMetadataReaderFactory())) {
-            // 判断该组件是否满足特定的条件
+            // Check if the component meets the specific conditions
             return isConditionMatch(metadataReader);
         }
     }
 
-    // 默认返回false，说明不是候选组件
+    // Return false by default, which means it is not a candidate component
     return false;
 }
 ```
 
-在`org.springframework.core.type.filter.AbstractTypeHierarchyTraversingFilter#match(metadataReader, metadataReaderFactory)`方法中，作用是确定给定的`metadataReader`是否与某些特定条件匹配。在上下文中，这个方法通常用于检查类或其元数据是否符合某些特定的条件，例如检查一个类是否有`@Named`注解。
+The `org.springframework.core.type.filter.AbstractTypeHierarchyTraversingFilter#match(metadataReader, metadataReaderFactory)` method decides whether the given `metadataReader` matches some specific conditions. In this context, it is usually used to check whether a class or its metadata meets some conditions, for example whether a class has the `@Named` annotation.
 
 ```java
 @Override
@@ -416,21 +416,21 @@ public boolean match(MetadataReader metadataReader, MetadataReaderFactory metada
     if (matchSelf(metadataReader)) {
         return true;
     }
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     return false;
 }
 ```
 
-在`org.springframework.core.type.filter.AnnotationTypeFilter#matchSelf`方法中，当我们在Spring框架中使用组件扫描时，我们的目标之一是自动发现并注册带有特定注解的类。其中，`@Named`注解是我们关心的一个，因为它标记了一个类，指示Spring应将其视为一个bean，并将其添加到Spring的应用上下文中。
+In the `org.springframework.core.type.filter.AnnotationTypeFilter#matchSelf` method: when we use component scanning in Spring, one goal is to find and register classes with a specific annotation automatically. The `@Named` annotation is one we care about here. It marks a class and tells Spring to treat it as a bean and add it to the Spring application context.
 
-**场景带入：**
+**Walkthrough with our example:**
 
-+ 首先从`metadataReader`获取类的注解元数据。
++ First, it gets the annotation metadata of the class from `metadataReader`.
 
-+ 接着，它检查`MyServiceA`类是否直接带有`@Named`注解。这是通过`metadata.hasAnnotation(this.annotationType.getName())`完成的，其中`this.annotationType.getName()`会返回`javax.inject.Named`（代表`@Named`的完全限定类名）。
++ Then, it checks whether the `MyServiceA` class has the `@Named` annotation directly. This is done with `metadata.hasAnnotation(this.annotationType.getName())`. Here `this.annotationType.getName()` returns `javax.inject.Named` (the fully qualified class name of `@Named`).
 
-+ 如果`considerMetaAnnotations`是`true`，它还会检查`MyServiceA`类是否带有任何元注解，这些元注解自己可能被`@Named`标记。
-+ 在这种情况下，因为`MyServiceA`直接带有`@Named`注解，所以`matchSelf`会返回`true`。这意味着`MyServiceA`类满足过滤条件，并且应该被注册为Spring的一个bean。
++ If `considerMetaAnnotations` is `true`, it also checks whether the `MyServiceA` class has any meta-annotations that are themselves marked with `@Named`.
++ In this case, `MyServiceA` has the `@Named` annotation directly, so `matchSelf` returns `true`. This means the `MyServiceA` class meets the filter condition, and it should be registered as a Spring bean.
 
 ```java
 @Override
@@ -441,66 +441,66 @@ protected boolean matchSelf(MetadataReader metadataReader) {
 }
 ```
 
-#### @Named依赖注入
+#### @Named Dependency Injection
 
-在Spring中，`@Named`注解既是用于标记一个类作为Spring的bean，同时也在依赖注入中作为一个限定符来解决歧义性。这里，`@Named`的功能与`@Qualifier`非常相似，实际上，`@Named`注解在Spring中也是作为一个特殊类型的`@Qualifier`来实现的。
+In Spring, the `@Named` annotation marks a class as a Spring bean. It also works as a qualifier in dependency injection, to remove ambiguity. Here, `@Named` works much like `@Qualifier`. In fact, in Spring `@Named` is handled as a special kind of `@Qualifier`.
 
-1. **`@Qualifier`注解**:
-   - 在Spring中，`@Qualifier`注解用于指定在多个相同类型的bean之间进行选择时所需的bean的名称。当与`@Named`或`@Inject`结合使用时，它帮助Spring容器解析正确的依赖关系。
-   - 🔗 [Qualifier注解传送门](https://github.com/xuchengsheng/spring-reading/tree/master/spring-annotation/spring-annotation-qualifier)
+1. **`@Qualifier` annotation**:
+   - In Spring, the `@Qualifier` annotation sets the name of the bean you want when there are several beans of the same type. When used together with `@Named` or `@Inject`, it helps the Spring container resolve the right dependency.
+   - 🔗 [Qualifier annotation link](https://github.com/xuchengsheng/spring-reading/tree/master/spring-annotation/spring-annotation-qualifier)
 
-### 八、注意事项
+### 8. Notes
 
-1. **与@Component的区别**
-   + 尽管`@Named`和`@Component`在功能上相似（都可以用于标识和注册beans），但它们来自不同的规范。`@Component`是Spring特有的，而`@Named`来自JSR-330。
-2. **与@Qualifier的结合**
-   + `@Named`可以与`@Inject`注解一起使用，作为`@Qualifier`的替代，以指定应该注入哪个具体的bean。
-3. **不要混淆注解来源**
-   + 由于Spring同时支持其自己的依赖注入注解和JSR-330，可能会在同一个项目中混合使用`@Autowired`和`@Inject`，这可能导致混淆。为了代码的一致性，最好在一个项目中坚持使用其中一种。
-4. **类路径依赖**
-   + 要使用`@Named`和其他JSR-330注解，需要确保`javax.inject`库在类路径上。如果没有添加此依赖，使用这些注解会导致类找不到错误。
-5. **与JSR-330的其他注解的集成**
-   + 当使用`@Named`时，我们可能还希望考虑使用JSR-330的其他注解，如`@Inject`，以确保一致性。
-6. **避免名称冲突**
-   + 当使用`@Named`为bean指定一个名称时，应确保在Spring上下文中没有其他bean使用相同的名称。否则，可能会出现不可预测的行为或错误。
-7. **作用域**
-   + `@Named`默认的作用域是singleton。但如果我们需要不同的作用域，例如prototype，我们需要结合使用`@Scope`注解。
+1. **Difference from @Component**
+   + `@Named` and `@Component` are similar in function (both can identify and register beans), but they come from different specifications. `@Component` is specific to Spring, while `@Named` comes from JSR-330.
+2. **Use with @Qualifier**
+   + `@Named` can be used with the `@Inject` annotation as a replacement for `@Qualifier`, to say which specific bean should be injected.
+3. **Do not mix annotation sources**
+   + Spring supports both its own dependency injection annotations and JSR-330. So `@Autowired` and `@Inject` may be mixed in one project, which can cause confusion. For consistency, it is better to stick to one of them in a project.
+4. **Classpath dependency**
+   + To use `@Named` and other JSR-330 annotations, make sure the `javax.inject` library is on the classpath. If you do not add this dependency, using these annotations causes a class-not-found error.
+5. **Integration with other JSR-330 annotations**
+   + When you use `@Named`, consider using other JSR-330 annotations such as `@Inject` too, to stay consistent.
+6. **Avoid name conflicts**
+   + When you use `@Named` to give a bean a name, make sure no other bean in the Spring context uses the same name. Otherwise, you may see unpredictable behavior or errors.
+7. **Scope**
+   + The default scope of `@Named` is singleton. If you need a different scope, such as prototype, use the `@Scope` annotation as well.
 
-### 九、总结
+### 9. Summary
 
-#### 最佳实践总结
+#### Best Practices Summary
 
-1. **启动程序**
-   + 在 `NamedApplication` 中，我们初始化了 `AnnotationConfigApplicationContext` 上下文，指定使用 `MyConfiguration` 作为配置类。然后，从该上下文中获取 `MyController` 的 bean 实例，并调用其 `showService` 方法。
+1. **Startup**
+   + In `NamedApplication`, we initialize the `AnnotationConfigApplicationContext` context and use `MyConfiguration` as the configuration class. Then we get the `MyController` bean from this context and call its `showService` method.
 
-2. **配置类**
-   + `MyConfiguration` 类使用 `@ComponentScan` 注解，指示Spring在 "`com.xcs.spring`" 包及其子包中搜索被Stereotype注解标记的组件。因此，所有带有 `@Component`、`@Service`、`@Repository` 和 `@Controller` 等注解的类都会被自动识别并注册为beans。
+2. **Configuration class**
+   + The `MyConfiguration` class uses `@ComponentScan` to tell Spring to search the "`com.xcs.spring`" package and its sub-packages for components marked with stereotype annotations. So all classes with annotations such as `@Component`, `@Service`, `@Repository`, and `@Controller` are recognized and registered as beans automatically.
 
-3. **控制器**
-   + `MyController` 是一个通过 `@Controller` 注解标记的控制器类，它有一个 `MyService` 类型的依赖。我们使用 `@Inject` 注解要求这个依赖被注入，并通过 `@Named("myServiceB")` 注解明确指定我们想要注入哪个具体的bean实例。
+3. **Controller**
+   + `MyController` is a controller class marked with `@Controller`. It has a dependency of type `MyService`. We use `@Inject` to ask for this dependency to be injected, and `@Named("myServiceB")` to say clearly which bean instance we want.
 
-4. **服务类**
-   + 有三个与服务相关的类：基类 `MyService` 以及其两个子类 `MyServiceA` 和 `MyServiceB`。这两个子类都通过 `@Named` 注解被标记，这为它们在依赖注入容器中提供了明确的标识名称。
+4. **Service classes**
+   + There are three service-related classes: the base class `MyService` and its two subclasses `MyServiceA` and `MyServiceB`. Both subclasses are marked with `@Named`. This gives them clear identifying names in the dependency injection container.
 
-5. **运行结果**
-   + 当程序执行时，通过 `@Named("myServiceB")` 的指示，成功地注入了一个 `MyServiceB` 类型的实例到 `MyController`。因此，当调用 `showService` 方法时，输出证明了 `MyServiceB` 的实例已经被正确注入。
+5. **Result**
+   + When the program runs, the `@Named("myServiceB")` instruction injects an instance of type `MyServiceB` into `MyController`. So when the `showService` method is called, the output shows that the `MyServiceB` instance was injected correctly.
 
-#### 源码分析总结
+#### Source Code Analysis Summary
 
-1. **初始化上下文**
-   + 启动类 `NamedApplication` 利用 `AnnotationConfigApplicationContext` 为上下文环境，注册了配置类 `MyConfiguration`，并从该上下文获取 `MyController` 类型的bean。
+1. **Initialize the context**
+   + The entry class `NamedApplication` uses `AnnotationConfigApplicationContext` as the context, registers the configuration class `MyConfiguration`, and gets the bean of type `MyController` from this context.
 
-2. **注解配置类扫描**
-   + Spring的 `AnnotationConfigApplicationContext` 在构造时初始化了两个关键组件：一个用于读取注解定义的bean (`AnnotatedBeanDefinitionReader`) 和另一个用于扫描类路径并自动发现bean组件 (`ClassPathBeanDefinitionScanner`)。
+2. **Annotation configuration class scan**
+   + When `AnnotationConfigApplicationContext` of Spring is constructed, it initializes two key components. One reads bean definitions from annotations (`AnnotatedBeanDefinitionReader`). The other scans the classpath and finds bean components automatically (`ClassPathBeanDefinitionScanner`).
 
-3. **`@Named` 注解的注册**
-   + 在构造 `ClassPathBeanDefinitionScanner` 时，如果 `useDefaultFilters` 为 `true`，Spring会为 `@Named` 注解添加默认过滤器，从而使其在类路径扫描时被识别。这是Spring对JSR-330规范的集成，使得我们可以使用 `@Named` 作为组件标识。
+3. **Registration of the `@Named` annotation**
+   + When `ClassPathBeanDefinitionScanner` is constructed, if `useDefaultFilters` is `true`, Spring adds a default filter for the `@Named` annotation. This way it is recognized during the classpath scan. This is how Spring integrates the JSR-330 specification, so we can use `@Named` to identify components.
 
-4. **`@Named`扫描组件**
+4. **`@Named` component scan**
 
-   + 当运行应用时，Spring会根据 `@ComponentScan` 的指示扫描指定包及其子包中的组件。在这个扫描过程中，它会检查每个类，看它们是否带有特定的注解，如 `@Named`。
+   + When the application runs, Spring scans the given package and its sub-packages for components, as `@ComponentScan` says. During this scan, it checks each class to see whether it has a specific annotation, such as `@Named`.
 
-   + 在组件扫描过程中，`isCandidateComponent` 方法用于检查一个类是否应被视为一个Spring组件的候选者。它会通过应用已注册的过滤器（其中之一就是对 `@Named` 注解的过滤器）来决定。
+   + During the component scan, the `isCandidateComponent` method checks whether a class should be seen as a candidate for a Spring component. It decides by applying the registered filters (one of them is the filter for the `@Named` annotation).
 
-5. **`@Named`依赖注入**
-   + 在Spring中，`@Named` 注解的另一个关键用途是作为限定符用于依赖注入。当存在多个同类型的bean，而我们需要指定注入哪一个时，`@Named` 可以帮助解决歧义。在这方面，它的功能与 `@Qualifier` 注解类似。
+5. **`@Named` dependency injection**
+   + In Spring, another key use of the `@Named` annotation is as a qualifier in dependency injection. When there are several beans of the same type and we need to say which one to inject, `@Named` helps remove the ambiguity. In this respect, it works like the `@Qualifier` annotation.
