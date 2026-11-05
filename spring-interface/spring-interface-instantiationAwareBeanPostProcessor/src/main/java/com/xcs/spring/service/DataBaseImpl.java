@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 /**
  * @author xcs
- * @date 2023年09月16日 16时10分
+ * @date 2023-09-16 16:10
  **/
 public class DataBaseImpl implements DataBase , InitializingBean {
 

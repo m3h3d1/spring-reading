@@ -7,13 +7,13 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * @author xcs
- * @date 2023年09月27日 10时36分
+ * @date 2023-09-27 10:36
  **/
 @Service
 public class MyService {
 
     /**
-     * 这里使用了Java的Timer来模拟定时任务。在实际应用中，可能会使用更复杂的调度机制。
+     * Java's Timer is used here to simulate a scheduled task. In a real application, a more advanced scheduling tool may be used.
      */
     public void startScheduledTask() {
         new java.util.Timer().schedule(
@@ -29,7 +29,7 @@ public class MyService {
     }
 
     /**
-     * 获取当前时间
+     * Get the current time
      *
      * @return
      */

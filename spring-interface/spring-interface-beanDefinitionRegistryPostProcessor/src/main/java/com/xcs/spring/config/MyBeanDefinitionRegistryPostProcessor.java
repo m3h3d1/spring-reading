@@ -9,7 +9,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 
 /**
  * @author xcs
- * @date 2023年09月14日 14时17分
+ * @date 2023-09-14 14:17
  **/
 public class MyBeanDefinitionRegistryPostProcessor implements BeanDefinitionRegistryPostProcessor {
 
@@ -20,11 +20,11 @@ public class MyBeanDefinitionRegistryPostProcessor implements BeanDefinitionRegi
 
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
-        System.out.println("开始新增Bean定义");
-        // 创建一个新的 BeanDefinition 对象
+        System.out.println("Start adding bean definition");
+        // Create a new BeanDefinition
         BeanDefinition beanDefinition = new RootBeanDefinition(MySimpleBean.class);
-        // 使用 registry 来注册这个新的 bean 定义
+        // Register the new bean definition with the registry
         registry.registerBeanDefinition("mySimpleBean", beanDefinition);
-        System.out.println("完成新增Bean定义");
+        System.out.println("Finished adding bean definition");
     }
 }

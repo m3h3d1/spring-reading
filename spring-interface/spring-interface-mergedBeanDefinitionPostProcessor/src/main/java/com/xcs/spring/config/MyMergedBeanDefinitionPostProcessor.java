@@ -11,12 +11,12 @@ import java.util.Map;
 
 /**
  * @author xcs
- * @date 2023年09月19日 16时42分
+ * @date 2023-09-19 16:42
  **/
 public class MyMergedBeanDefinitionPostProcessor implements MergedBeanDefinitionPostProcessor {
 
     /**
-     * 记录元数据
+     * Records the metadata
      */
     private Map<String, Map<Field, String>> metadata = new HashMap<>();
 

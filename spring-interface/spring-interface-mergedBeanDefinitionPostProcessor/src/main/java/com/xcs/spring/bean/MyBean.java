@@ -4,7 +4,7 @@ import com.xcs.spring.annotation.MyValue;
 
 /**
  * @author xcs
- * @date 2023年09月20日 10时52分
+ * @date 2023-09-20 10:52
  **/
 public class MyBean {
 

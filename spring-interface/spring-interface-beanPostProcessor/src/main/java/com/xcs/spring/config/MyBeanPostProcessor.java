@@ -6,7 +6,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 
 /**
  * @author xcs
- * @date 2023年09月19日 16时42分
+ * @date 2023-09-19 16:42
  **/
 public class MyBeanPostProcessor implements BeanPostProcessor {
 

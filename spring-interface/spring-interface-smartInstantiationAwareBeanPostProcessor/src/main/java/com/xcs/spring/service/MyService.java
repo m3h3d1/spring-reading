@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @author xcs
- * @date 2023年09月21日 10时31分
+ * @date 2023-09-21 10:31
  **/
 @Component
 public class MyService {

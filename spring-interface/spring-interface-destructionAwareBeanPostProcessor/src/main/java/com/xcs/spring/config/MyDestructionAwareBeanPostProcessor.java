@@ -6,7 +6,7 @@ import org.springframework.beans.factory.config.DestructionAwareBeanPostProcesso
 
 /**
  * @author xcs
- * @date 2023年09月18日 16时13分
+ * @date 2023-09-18 16:13
  **/
 public class MyDestructionAwareBeanPostProcessor implements DestructionAwareBeanPostProcessor {
 

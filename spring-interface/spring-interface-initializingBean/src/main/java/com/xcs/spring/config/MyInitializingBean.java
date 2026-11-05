@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * @author xcs
- * @date 2023年09月19日 16时42分
+ * @date 2023-09-19 16:42
  **/
 public class MyInitializingBean implements InitializingBean {
 
@@ -19,11 +19,11 @@ public class MyInitializingBean implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
-        // 在此方法中，我们模拟数据加载
+        // In this method, we simulate loading data
         data = new ArrayList<>();
-        data.add("数据1");
-        data.add("数据2");
-        data.add("数据3");
-        System.out.println("MyInitializingBean 初始化完毕，数据已加载!");
+        data.add("Data 1");
+        data.add("Data 2");
+        data.add("Data 3");
+        System.out.println("MyInitializingBean initialized, data loaded!");
     }
 }

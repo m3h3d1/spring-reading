@@ -7,16 +7,16 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
 /**
  * @author xcs
- * @date 2023年09月14日 14时17分
+ * @date 2023-09-14 14:17
  **/
 public class MyBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-        System.out.println("修改bean的定义");
+        System.out.println("Modify bean definition");
         BeanDefinition beanDefinition = beanFactory.getBeanDefinition("mySimpleBean");
         beanDefinition.setScope(BeanDefinition.SCOPE_PROTOTYPE);
-        System.out.println("将mySimpleBean从默认的单例修改成多例");
-        System.out.println("修改bean的定义已完成");
+        System.out.println("Changed mySimpleBean from the default singleton to prototype");
+        System.out.println("Finished modifying bean definition");
     }
 }

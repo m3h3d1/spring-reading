@@ -5,7 +5,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 /**
  * @author xcs
- * @date 2023年09月16日 16时09分
+ * @date 2023-09-16 16:09
  **/
 public class SmartInitializingSingletonApplication {
 

@@ -4,22 +4,22 @@ import org.springframework.beans.factory.DisposableBean;
 
 /**
  * @author xcs
- * @date 2023年09月19日 16时42分
+ * @date 2023-09-19 16:42
  **/
 public class MyDisposableBean implements DisposableBean {
 
-    // 模拟的数据库连接对象
+    // Simulated database connection
     private String databaseConnection;
 
     public MyDisposableBean() {
-        // 在构造函数中模拟建立数据库连接
+        // Simulate opening a database connection in the constructor
         this.databaseConnection = "Database connection established";
         System.out.println(databaseConnection);
     }
 
     @Override
     public void destroy() throws Exception {
-        // 在 destroy 方法中模拟关闭数据库连接
+        // Simulate closing the database connection in the destroy method
         databaseConnection = null;
         System.out.println("Database connection closed");
     }

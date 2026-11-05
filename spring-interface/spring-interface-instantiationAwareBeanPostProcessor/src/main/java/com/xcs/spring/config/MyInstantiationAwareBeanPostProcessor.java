@@ -8,14 +8,14 @@ import org.springframework.beans.factory.config.InstantiationAwareBeanPostProces
 
 /**
  * @author xcs
- * @date 2023年09月16日 16时12分
+ * @date 2023-09-16 16:12
  **/
 public class MyInstantiationAwareBeanPostProcessor implements InstantiationAwareBeanPostProcessor {
 
     @Override
     public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
         if (beanClass == DataBase.class) {
-            System.out.println("正在准备实例化: " + beanName);
+            System.out.println("Preparing to instantiate: " + beanName);
         }
         return null;
     }
@@ -24,7 +24,7 @@ public class MyInstantiationAwareBeanPostProcessor implements InstantiationAware
     public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
         if (bean instanceof DataBase) {
             ((DataBase) bean).setPostInstantiationFlag(true);
-            System.out.println("Bean " + beanName + " 已实例化!");
+            System.out.println("Bean " + beanName + " instantiated!");
             return true;
         }
         return true;
@@ -35,7 +35,7 @@ public class MyInstantiationAwareBeanPostProcessor implements InstantiationAware
         if (bean instanceof DataBase) {
             MutablePropertyValues mpvs = (MutablePropertyValues) pvs;
             mpvs.addPropertyValue("password", "******");
-            System.out.println(beanName + "的密码已被屏蔽:");
+            System.out.println(beanName + " password has been masked:");
         }
         return pvs;
     }

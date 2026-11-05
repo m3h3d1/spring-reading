@@ -2,7 +2,7 @@ package com.xcs.spring.service;
 
 /**
  * @author xcs
- * @date 2023年09月18日 17时30分
+ * @date 2023-09-18 17:30
  **/
 public class ConnectionServiceImpl implements ConnectionService {
 

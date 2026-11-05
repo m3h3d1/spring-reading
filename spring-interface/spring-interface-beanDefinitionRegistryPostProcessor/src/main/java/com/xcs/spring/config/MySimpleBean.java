@@ -2,7 +2,7 @@ package com.xcs.spring.config;
 
 /**
  * @author xcs
- * @date 2023年09月14日 16时05分
+ * @date 2023-09-14 16:05
  **/
 public class MySimpleBean {
 

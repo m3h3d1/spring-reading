@@ -2,7 +2,7 @@ package com.xcs.spring.service;
 
 /**
  * @author xcs
- * @date 2023年09月16日 16时10分
+ * @date 2023-09-16 16:10
  **/
 public interface DataBase {
     String getUsername();
