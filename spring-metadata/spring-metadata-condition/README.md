@@ -1,74 +1,79 @@
 ## Condition
 
 - [Condition](#condition)
-  - [一、基本信息](#一基本信息)
-  - [二、知识储备](#二知识储备)
-  - [三、基本描述](#三基本描述)
-  - [四、主要功能](#四主要功能)
-  - [五、接口源码](#五接口源码)
-  - [六、主要实现](#六主要实现)
-  - [七、最佳实践](#七最佳实践)
-  - [八、与其他组件的关系](#八与其他组件的关系)
-  - [九、常见问题](#九常见问题)
+  - [1. Overview](#1-overview)
+  - [2. Background Knowledge](#2-background-knowledge)
+  - [3. Description](#3-description)
+  - [4. Main Features](#4-main-features)
+  - [5. Interface Source](#5-interface-source)
+  - [6. Main Implementation](#6-main-implementation)
+  - [7. Best Practices](#7-best-practices)
+  - [8. Relation to Other Components](#8-relation-to-other-components)
+  - [9. Common Problems](#9-common-problems)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [Juejin](https://juejin.cn/user/4251135018533068/posts) 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、知识储备
+### 2. Background Knowledge
 
-1. **Resource接口**
-   - [Resource](https://github.com/xuchengsheng/spring-reading/blob/master/spring-resources/spring-resource) 是用于访问资源的抽象接口。资源可以是文件、类路径中的文件、URL 等等。我们需要了解如何使用 `Resource` 接口来获取资源的输入流、文件路径等信息。
+1. **Resource interface**
+   - [Resource](https://github.com/xuchengsheng/spring-reading/blob/master/spring-resources/spring-resource) is an abstract interface to access resources. A resource can be a file, a file on the classpath, a URL, and so on. You need to know how to use the `Resource` interface to get the input stream, the file path, and other information of a resource.
 
-2. **AnnotationMetadata接口**
-   - [AnnotationMetadata](https://github.com/xuchengsheng/spring-reading/tree/master/spring-metadata/spring-metadata-annotationMetadata) 是Spring 框架中用于处理类上的注解信息的接口，它提供了对类上注解信息的访问和操作方法。 
+2. **AnnotationMetadata interface**
+   - [AnnotationMetadata](https://github.com/xuchengsheng/spring-reading/tree/master/spring-metadata/spring-metadata-annotationMetadata) is an interface in the Spring Framework to work with the annotation information of classes. It has methods to access and use this information.
 
-3. **MetadataReader接口**
-   - [MetadataReader](https://github.com/xuchengsheng/spring-reading/tree/master/spring-metadata/spring-metadata-metadataReader)是Spring 提供的一个接口，用于读取类的元数据信息。它可以用于扫描类文件，获取类的基本信息，如类名、类的注解等。在注解驱动的开发中，`MetadataReader` 通常用于扫描包中的类，并从这些类中提取注解信息，以便配置 Spring Bean。
-
-
-4. **路径和模式解析**
-   - Spring 中的路径解析，特别是使用 ant 风格的路径模式，例如 `classpath*:com/xcs/spring/bean/**/*.xml`。
+3. **MetadataReader interface**
+   - [MetadataReader](https://github.com/xuchengsheng/spring-reading/tree/master/spring-metadata/spring-metadata-metadataReader) is an interface in Spring to read the metadata of a class. It can be used to scan class files and get basic information such as the class name and the class annotations. In annotation-driven development, `MetadataReader` is usually used to scan the classes in packages and read their annotations, to configure Spring beans.
 
 
-### 三、基本描述
-
-`Condition` 接口的实现类通常用于`@Conditional`注解，该注解可以用在类级别或方法级别，通过判断条件是否满足，来确定是否应该创建Bean或应用特定的配置。这样的机制使得Spring应用更加灵活，能够根据不同的条件选择性地进行配置。
-
-### 四、主要功能
-
-1. **动态决定Bean的创建**
-   + `Condition` 接口的实现类通过实现 `matches` 方法，可以根据运行时的条件判断逻辑，决定是否满足条件，从而决定是否创建特定的Bean。
+4. **Path and pattern resolution**
+   - Path resolution in Spring, especially Ant-style path patterns such as `classpath*:com/xcs/spring/bean/**/*.xml`.
 
 
-2. **条件化配置类的应用** 
-   + 通过 `@Conditional` 注解，`Condition` 接口的实现类可以用于配置类或者配置类中的方法上，从而条件化地应用或排除某个配置。
+### 3. Description
+
+Implementations of the `Condition` interface are usually used with the `@Conditional` annotation. This annotation can be put on a class or a method. It checks if a condition is met to decide if a bean should be created or a specific configuration should be applied. This makes Spring applications more flexible, because the configuration can be chosen based on different conditions.
+
+### 4. Main Features
+
+1. **Decide dynamically if a bean is created**
+   + A class that implements `Condition` implements the `matches` method. The method uses runtime logic to decide if the condition is met, and so if a specific bean is created.
 
 
-3. **与环境变量和系统属性结合使用** 
-   + 可以结合 `ConditionContext` 中的环境变量和系统属性，编写更加复杂的条件判断逻辑，使得Bean的创建或配置的应用更加灵活。
+2. **Apply configuration classes conditionally** 
+   + With the `@Conditional` annotation, a `Condition` implementation can be used on a configuration class or on a method in it. This applies or skips a configuration based on the condition.
 
 
-4. **支持自定义条件逻辑**
-   + 可以根据应用的具体需求自定义实现 `Condition` 接口，实现灵活的条件逻辑，例如基于操作系统、特定的类是否存在于类路径等条件。
+3. **Use with environment variables and system properties** 
+   + You can use the environment variables and system properties in `ConditionContext` to write more complex conditions. This makes bean creation and configuration more flexible.
 
 
-5. **提高应用的灵活性**
-   + 通过条件化机制，可以在不同的环境中配置不同的Bean或应用不同的配置，从而提高应用的灵活性和可配置性。
+4. **Support custom condition logic**
+   + You can implement the `Condition` interface for the needs of your application. This gives flexible condition logic, for example based on the operating system or whether a class is on the classpath.
 
-### 五、接口源码
 
-`Condition`接口要求实现类通过`matches`方法在组件注册前进行条件匹配，可根据运行时条件动态决定是否注册。该接口的实现类可用于`@Conditional`注解，用于灵活控制Bean的注册，遵循与`BeanFactoryPostProcessor`相同的限制。特别强调条件不应与Bean实例进行交互。为更精细地控制条件与`@Configuration` bean的交互，建议考虑实现`ConfigurationCondition`接口。
+5. **Make the application more flexible**
+   + With conditions, you can configure different beans or apply different configurations in different environments. This makes the application more flexible and configurable.
+
+### 5. Interface Source
+
+The `Condition` interface requires an implementation to check the condition in the `matches` method before a component is registered. It can decide at runtime if the component should be registered. Implementations of this interface can be used with the `@Conditional` annotation to control bean registration in a flexible way. They follow the same restrictions as `BeanFactoryPostProcessor`. In particular, a condition should not interact with bean instances. For finer control of conditions that work with `@Configuration` beans, consider implementing the `ConfigurationCondition` interface.
 
 ```java
 /**
- * 一个用于组件注册的单一 condition，必须在组件注册之前 #matches 匹配。
+ * A single {@code condition} that must be {@linkplain #matches matched} in order
+ * for a component to be registered.
  *
- * 条件将在 bean 定义即将注册之前立即检查，并可以根据在此时能够确定的任何条件否决注册。
+ * <p>Conditions are checked immediately before the bean-definition is due to be
+ * registered and are free to veto registration based on any criteria that can
+ * be determined at that point.
  *
- * 条件必须遵循与 BeanFactoryPostProcessor 相同的限制，并注意永远不要与 bean 实例进行交互。
- * 要更精细地控制与 @Configuration bean 交互的条件，请考虑实现 ConfigurationCondition 接口。
+ * <p>Conditions must follow the same restrictions as {@link BeanFactoryPostProcessor}
+ * and take care to never interact with bean instances. For more fine-grained control
+ * of conditions that interact with {@code @Configuration} beans consider implementing
+ * the {@link ConfigurationCondition} interface.
  *
  * @author Phillip Webb
  * @since 4.0
@@ -80,31 +85,33 @@
 public interface Condition {
 
     /**
-     * 确定条件是否匹配。
-     * @param context 条件上下文
-     * @param metadata 被检查的 org.springframework.core.type.AnnotationMetadata类或org.springframework.core.type.MethodMetadata方法的元数据
-     * @return true 如果条件匹配且组件可以注册，或 false 以否决带有注解组件的注册
+     * Determine if the condition matches.
+     * @param context the condition context
+     * @param metadata the metadata of the {@link org.springframework.core.type.AnnotationMetadata class}
+     * or {@link org.springframework.core.type.MethodMetadata method} being checked
+     * @return {@code true} if the condition matches and the component can be registered,
+     * or {@code false} to veto the annotated component's registration
      */
     boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata);
 }
 ```
 
-### 六、主要实现
+### 6. Main Implementation
 
 1. **ProfileCondition**
-   + 通过判断运行时的profile信息，决定是否注册组件。例如，可以根据激活的profile选择性地注册特定的Bean。
+   + Decides if a component is registered based on the profile information at runtime. For example, it can register specific beans based on the active profiles.
 
 2. **OnBeanCondition**
-   + 根据容器中是否存在某个特定类型的Bean来进行条件判断，决定是否注册组件。这个条件允许根据容器中的Bean的存在与否来决定是否创建某个Bean。
+   + Checks if a bean of a specific type exists in the container to decide if a component is registered. This lets you create a bean based on whether other beans exist in the container.
 
 3. **OnClassCondition**
-   + 判断类路径中是否存在某个特定的类，决定是否注册组件。通过检查类路径，可以根据类的存在与否来动态控制组件的注册。
+   + Checks if a specific class exists on the classpath to decide if a component is registered. By checking the classpath, you control component registration based on whether a class exists.
 
 4. **OnPropertyCondition** 
-   + 根据配置文件中的属性值来进行条件判断，决定是否注册组件。可以根据配置文件中的属性来灵活地配置组件的注册。
+   + Checks the property values in the configuration file to decide if a component is registered. You can configure component registration flexibly with the properties in the configuration file.
 
 5. **ResourceCondition**
-   + 判断类路径中是否存在指定资源文件，决定是否注册组件。类似于`OnClassCondition`，但是可以判断任意资源文件的存在与否。
+   + Checks if a specific resource file exists on the classpath to decide if a component is registered. It is similar to `OnClassCondition`, but it can check any resource file.
 
 ~~~mermaid
 classDiagram
@@ -153,43 +160,43 @@ classDiagram
    
 ~~~
 
-### 七、最佳实践
+### 7. Best Practices
 
-结合自定义的条件类`MyOnClassCondition`，来判断类路径下的资源是否满足指定的条件。通过创建资源解析器和元数据读取器工厂，然后从`classpath*:com/xcs/spring/**/*.class`路径下获取所有类文件，最后使用自定义的条件类判断每个资源是否满足条件。根据条件的结果，输出相应的信息。
+This example uses the custom condition class `MyOnClassCondition` to check if the resources on the classpath meet a condition. It creates a resource resolver and a metadata reader factory. Then it gets all class files from the path `classpath*:com/xcs/spring/**/*.class`. Finally, it uses the custom condition to check each resource and prints a message based on the result.
 
 ```java
 public class ConditionDemo {
 
     public static void main(String[] args) throws IOException {
-        // 创建资源解析器，用于获取匹配指定模式的资源
+        // Create a resource resolver to get resources that match a pattern
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
-        // 创建MetadataReader工厂，用于读取类的元数据信息
+        // Create a MetadataReader factory to read the metadata of classes
         SimpleMetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 
-        // 获取指定模式下的所有资源
+        // Get all resources that match the pattern
         Resource[] resources = resolver.getResources("classpath*:com/xcs/spring/bean/**/*.class");
 
-        // 创建自定义条件类的实例，用于条件匹配
+        // Create the custom condition used for matching
         Condition condition = new MyOnClassCondition("com.xcs.spring.ConditionDemo");
 
-        // 遍历每个资源，判断是否满足自定义条件
+        // Go through each resource and check the custom condition
         for (Resource resource : resources) {
-            // 获取资源对应的元数据读取器
+            // Get the MetadataReader of the resource
             MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(resource);
 
-            // 判断资源是否满足自定义条件
+            // Check if the resource meets the custom condition
             if (condition.matches(null, metadataReader.getAnnotationMetadata())) {
-                System.out.println(resource.getFile().getName() + "满足条件");
+                System.out.println(resource.getFile().getName() + " meets the condition");
             } else {
-                System.out.println(resource.getFile().getName() + "不满足条件");
+                System.out.println(resource.getFile().getName() + " does not meet the condition");
             }
         }
     }
 }
 ```
 
-定义了一个 `MyOnClassCondition` 的自定义条件类，实现了 Spring 框架的 `Condition` 接口。该条件类的主要功能是根据指定的类名，在运行时动态地尝试加载该类，若加载成功则条件匹配，返回 `true`，否则捕获 `ClassNotFoundException` 表示类不存在，条件不匹配，返回 `false`。
+`MyOnClassCondition` is a custom condition class that implements the `Condition` interface of Spring. It tries to load the class with the given name at runtime. If the class loads, the condition matches and it returns `true`. Otherwise, it catches `ClassNotFoundException`, which means the class does not exist. The condition does not match and it returns `false`.
 
 ```java
 public class MyOnClassCondition implements Condition {
@@ -203,19 +210,19 @@ public class MyOnClassCondition implements Condition {
     @Override
     public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
         try {
-            // 尝试加载类
+            // Try to load the class
             getClass().getClassLoader().loadClass(className);
-            // 类存在，条件匹配
+            // The class exists, so the condition matches
             return true;
         } catch (ClassNotFoundException e) {
-            // 类不存在，条件不匹配
+            // The class does not exist, so the condition does not match
             return false;
         }
     }
 }
 ```
 
-`MyBeanA`和`MyBeanB`为两个简单的Java类。
+`MyBeanA` and `MyBeanB` are two simple Java classes.
 
 ```java
 package com.xcs.spring.bean;
@@ -229,44 +236,44 @@ public class MyBeanB {
 }
 ```
 
-运行结果发现，当`com.xcs.spring.ConditionDemo`存在的情况下，`MyOnClassCondition` 类中的 `matches` 方法尝试加载 `com.xcs.spring.ConditionDemo` 类，若加载成功则条件匹配，返回 `true`。因此，`MyBeanA.class` 和 `MyBeanB.class` 均满足条件，成功注册。
+The output shows the case where `com.xcs.spring.ConditionDemo` exists. The `matches` method of `MyOnClassCondition` tries to load the `com.xcs.spring.ConditionDemo` class. The class loads, so the condition matches and it returns `true`. So both `MyBeanA.class` and `MyBeanB.class` meet the condition and are registered.
 
 ```java
-MyBeanA.class满足条件
-MyBeanB.class满足条件
+MyBeanA.class meets the condition
+MyBeanB.class meets the condition
 ```
 
-当我们修改为 `new MyOnClassCondition("com.xcs.spring.ConditionDemo1")` 后，即尝试加载 `com.xcs.spring.ConditionDemo1` 类。结果中的 "不满足条件" 表明 `MyOnClassCondition` 的 `matches` 方法返回了 `false`，即未成功加载相应的类。因此，`MyBeanA.class` 和 `MyBeanB.class` 均不满足条件。
+Now change the code to `new MyOnClassCondition("com.xcs.spring.ConditionDemo1")`. It tries to load the `com.xcs.spring.ConditionDemo1` class. The "does not meet the condition" in the output means the `matches` method of `MyOnClassCondition` returned `false`, because the class could not be loaded. So neither `MyBeanA.class` nor `MyBeanB.class` meets the condition.
 
 ```java
-MyBeanA.class不满足条件
-MyBeanB.class不满足条件
+MyBeanA.class does not meet the condition
+MyBeanB.class does not meet the condition
 ```
 
-### 八、与其他组件的关系
+### 8. Relation to Other Components
 
 1. **ConditionEvaluator**
-   + `ConditionEvaluator` 提供了 `shouldSkip` 方法，该方法接受一个 `Condition` 对象和一个 `ConditionContext` 对象，用于判断是否应该跳过（即不注册）特定的组件，例如 Bean。主要在处理 `@Conditional` 注解时被使用，当 `@Conditional` 注解标注在类或方法上时，Spring 在进行组件注册时会通过 `ConditionEvaluator` 来判断是否满足条件，从而决定是否注册相应的组件。这一机制使得在应用上下文初始化之前能够动态地根据条件来决定是否注册特定的组件，为 Spring 应用提供了更灵活的组件注册策略。
+   + `ConditionEvaluator` has a `shouldSkip` method. It takes a `Condition` object and a `ConditionContext` object. It decides if a specific component, such as a bean, should be skipped (not registered). It is mainly used to handle the `@Conditional` annotation. When `@Conditional` is on a class or a method, Spring uses `ConditionEvaluator` during component registration to check if the condition is met. The result decides if the component is registered. With this, Spring can decide dynamically, before the application context is initialized, if a specific component is registered. This gives Spring applications a more flexible way to register components.
 
-### 九、常见问题
+### 9. Common Problems
 
-1. **条件的匹配时机**
-   + 我们可能会想知道条件的匹配是在什么时候发生的。条件是在 bean 的定义注册之前立即进行检查的，因此可以在 Spring 应用上下文初始化之前进行条件匹配。
+1. **When is a condition matched?**
+   + You may wonder when a condition is matched. A condition is checked right before the bean definition is registered. So conditions are matched before the Spring application context is initialized.
 
-2. **多个条件的组合**
-   + 当需要组合多个条件时，我们可能会疑惑如何更灵活地应用多个条件。Spring 提供了一些组合条件的方式，例如 `@ConditionalOnProperty` 和 `@ConditionalOnExpression`。
+2. **Combining many conditions**
+   + When you need to combine many conditions, you may wonder how to do it in a flexible way. Spring has some ways to combine conditions, such as `@ConditionalOnProperty` and `@ConditionalOnExpression`.
 
-3. **条件与配置的关系**
-   + 我们可能会困惑条件和配置的关系。条件是用于决定是否注册组件的机制，而配置则是用于配置组件的属性和行为。
+3. **Relation between conditions and configuration**
+   + You may be confused about the relation between conditions and configuration. A condition decides if a component is registered. Configuration sets the properties and behavior of a component.
 
-4. **自定义条件的实现** 
-   + 我们可能想要自定义条件以满足特定的业务需求。这需要实现 `Condition` 接口，并确保在 `matches` 方法中提供适当的条件逻辑。
+4. **Implementing a custom condition** 
+   + You may want a custom condition for a specific business need. Implement the `Condition` interface and put the right condition logic in the `matches` method.
 
-5. **条件的错误处理** 
-   + 当条件判断出现错误时，例如 `matches` 方法中抛出异常，可能会导致注册组件的失败。我们需要注意条件逻辑中的异常处理，以确保不会影响到整个应用的启动。
+5. **Error handling in conditions** 
+   + If a condition fails, for example the `matches` method throws an exception, the component registration may fail. Handle exceptions in the condition logic, so they do not break the startup of the whole application.
 
-6. **条件的性能考虑**
-   + 如果应用中有大量的条件，可能会影响启动性能。我们需要谨慎设计条件逻辑，以确保在条件数量较多的情况下，应用的启动性能仍然可接受。
+6. **Performance of conditions**
+   + If the application has many conditions, the startup may be slower. Design the condition logic with care, so that the startup performance stays acceptable when there are many conditions.
 
-7. **条件的动态性**
-   + 我们可能关心条件是否支持动态变化。条件是在应用启动时进行一次性的检查，通常不会在运行时动态变化。如果需要更动态的条件判断，可以考虑使用其他机制，如 `Environment` 中的属性。
+7. **Dynamic conditions**
+   + You may ask if conditions can change dynamically. A condition is checked once when the application starts. It usually does not change at runtime. If you need more dynamic conditions, use other tools, such as the properties in `Environment`.

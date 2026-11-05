@@ -13,88 +13,88 @@ import java.security.AccessControlContext;
 
 /**
  * @author xcs
- * @date 2023年11月24日 13时56分
+ * @date 2023-11-24 13:56
  **/
 public class ConfigurableBeanFactoryDemo {
 
     public static void main(String[] args) {
-        // 创建 ApplicationContext
+        // Create the ConfigurableBeanFactory
         ConfigurableBeanFactory configurableBeanFactory = new AnnotationConfigApplicationContext(MyConfiguration.class).getBeanFactory();
 
-        // 设置父级 BeanFactory
+        // Set the parent BeanFactory
         configurableBeanFactory.setParentBeanFactory(new DefaultListableBeanFactory());
 
-        // 获取BeanPostProcessor数量
+        // Get the number of BeanPostProcessors
         int beanPostProcessorCount = configurableBeanFactory.getBeanPostProcessorCount();
-        System.out.println("获取BeanPostProcessor数量: " + beanPostProcessorCount);
+        System.out.println("BeanPostProcessor count: " + beanPostProcessorCount);
 
-        // 获取所有已注册的 Scope 名称
+        // Get the names of all registered scopes
         String[] scopeNames = configurableBeanFactory.getRegisteredScopeNames();
-        System.out.println("获取所有已注册的Scope名称: " + String.join(", ", scopeNames));
+        System.out.println("Registered scope names: " + String.join(", ", scopeNames));
 
-        // 获取注册的 Scope
+        // Get a registered scope
         Scope customScope = configurableBeanFactory.getRegisteredScope("customScope");
-        System.out.println("获取注册的Scope :" + customScope);
+        System.out.println("Registered scope: " + customScope);
 
-        // 获取ApplicationStartup
+        // Get the ApplicationStartup
         ApplicationStartup applicationStartup = configurableBeanFactory.getApplicationStartup();
-        System.out.println("获取ApplicationStartup: " + applicationStartup);
+        System.out.println("ApplicationStartup: " + applicationStartup);
 
-        // 获取AccessControlContext
+        // Get the AccessControlContext
         AccessControlContext accessControlContext = configurableBeanFactory.getAccessControlContext();
-        System.out.println("获取AccessControlContext: " + accessControlContext);
+        System.out.println("AccessControlContext: " + accessControlContext);
 
-        // 拷贝配置
+        // Copy the configuration
         ConfigurableListableBeanFactory otherFactory = new DefaultListableBeanFactory();
         configurableBeanFactory.copyConfigurationFrom(otherFactory);
-        System.out.println("拷贝配置copyConfigurationFrom: " + otherFactory);
+        System.out.println("copyConfigurationFrom: " + otherFactory);
 
-        // 注册别名
+        // Register an alias
         String beanName = "myService";
         String alias = "helloService";
         configurableBeanFactory.registerAlias(beanName, alias);
-        System.out.println("注册别名registerAlias, BeanName: " + beanName + "alias: " + alias);
+        System.out.println("registerAlias, beanName: " + beanName + ", alias: " + alias);
 
-        // 获取合并后的 BeanDefinition
+        // Get the merged BeanDefinition
         BeanDefinition mergedBeanDefinition = configurableBeanFactory.getMergedBeanDefinition("myService");
-        System.out.println("获取合并后的 BeanDefinition: " + mergedBeanDefinition);
+        System.out.println("Merged BeanDefinition: " + mergedBeanDefinition);
 
-        // 判断是否为 FactoryBean
+        // Check if the bean is a FactoryBean
         String factoryBeanName = "myService";
         boolean isFactoryBean = configurableBeanFactory.isFactoryBean(factoryBeanName);
-        System.out.println("判断是否为FactoryBean" + isFactoryBean);
+        System.out.println("Is FactoryBean: " + isFactoryBean);
 
-        // 设置当前 Bean 是否正在创建
+        // Mark the bean as currently in creation
         String currentBeanName = "myService";
         boolean inCreation = true;
         configurableBeanFactory.setCurrentlyInCreation(currentBeanName, inCreation);
-        System.out.println("设置当前Bean是否正在创建: " + currentBeanName);
+        System.out.println("setCurrentlyInCreation: " + currentBeanName);
 
-        // 判断指定的 Bean 是否正在创建
+        // Check if the bean is currently in creation
         boolean isCurrentlyInCreation = configurableBeanFactory.isCurrentlyInCreation(currentBeanName);
-        System.out.println("判断指定的Bean是否正在创建" + isCurrentlyInCreation);
+        System.out.println("Is currently in creation: " + isCurrentlyInCreation);
 
-        // 注册依赖关系
+        // Register a dependency
         String dependentBeanName = "dependentBean";
         configurableBeanFactory.registerDependentBean(beanName, dependentBeanName);
-        System.out.println("注册依赖关系" + "beanName: " + beanName + "dependentBeanName: " + dependentBeanName);
+        System.out.println("registerDependentBean, beanName: " + beanName + ", dependentBeanName: " + dependentBeanName);
 
-        // 获取所有依赖于指定 Bean 的 Bean 名称
+        // Get the names of all beans that depend on the bean
         String[] dependentBeans = configurableBeanFactory.getDependentBeans(beanName);
-        System.out.println("获取所有依赖于指定Bean的Bean名称: " + String.join(", ", dependentBeans));
+        System.out.println("Dependent beans: " + String.join(", ", dependentBeans));
 
-        // 获取指定 Bean 依赖的所有 Bean 名称
+        // Get the names of all beans the bean depends on
         String[] dependencies = configurableBeanFactory.getDependenciesForBean(beanName);
-        System.out.println("获取指定Bean依赖的所有Bean名称: " + String.join(", ", dependencies));
+        System.out.println("Dependencies: " + String.join(", ", dependencies));
 
-        // 销毁指定 Bean 实例
+        // Destroy the bean instance
         Object beanInstance = configurableBeanFactory.getBean(beanName);
         configurableBeanFactory.destroyBean(beanName, beanInstance);
-        System.out.println("销毁指定 Bean 实例: " + beanName);
+        System.out.println("destroyBean: " + beanName);
 
-        // 销毁所有单例 Bean
+        // Destroy all singleton beans
         configurableBeanFactory.destroySingletons();
-        System.out.println("销毁所有单例Bean destroySingletons" );
+        System.out.println("destroySingletons");
     }
 
 }

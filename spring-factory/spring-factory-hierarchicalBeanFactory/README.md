@@ -1,34 +1,35 @@
 ## HierarchicalBeanFactory
 
+### 1. Overview
 
-### 一、基本信息
+✒️ **Author** - Lex 📝 **Blog** - [Juejin](https://juejin.cn/user/4251135018533068/posts) 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+### 2. Description
 
-### 二、基本描述
+The `HierarchicalBeanFactory` interface in Spring represents a `BeanFactory` that has a hierarchy. In other words, it supports the idea of parent and child containers. It extends `BeanFactory` and adds methods that let containers form a hierarchy. A child container can access the bean definitions of its parent container.
 
-`HierarchicalBeanFactory` 接口是Spring框架中的一个接口，用于表示具有层次结构的`BeanFactory`，即支持父子容器的概念。通过继承 `BeanFactory` 接口，它定义了一些方法，使得容器能够组织成为层次结构，其中子容器可以访问父容器的 Bean 定义。
+### 3. Main Features
 
-### 三、主要功能
+1. **Get the parent container**
 
-1. **获取父容器**
+   - The `getParentBeanFactory()` method returns the parent `BeanFactory` of the current `BeanFactory`. This lets a child container access and use beans defined in the parent container.
 
-   - 通过 `getParentBeanFactory()` 方法，可以获取当前 `BeanFactory` 的父级 `BeanFactory`，允许在子容器中访问和使用父容器中定义的 Bean。
+2. **Check for local beans**
 
-2. **本地 Bean 的检查**
+   - The `containsLocalBean(String name)` method checks if the current `BeanFactory` contains a local bean with the given name. A local bean is a bean defined in the current container. It is not inherited from a parent container.
 
-   - 通过 `containsLocalBean(String name)` 方法，可以检查当前 `BeanFactory` 是否包含具有给定名称的本地 Bean。本地 Bean 是指在当前容器中定义的 Bean，而不是从父容器继承的。
+### 4. Interface Source
 
-### 四、接口源码
-
-`HierarchicalBeanFactory` 接口是由能够成为Spring容器层次结构一部分的Bean工厂实现的子接口。它定义了获取父级Bean工厂和检查本地Bean工厂是否包含指定名称的Bean的方法
+`HierarchicalBeanFactory` is a sub-interface implemented by bean factories that can be part of a Spring container hierarchy. It defines methods to get the parent bean factory and to check if the local bean factory contains a bean with a given name.
 
 ```java
 /**
- * 由能够成为层次结构一部分的Bean工厂实现的子接口。
+ * Sub-interface implemented by bean factories that can be part
+ * of a hierarchy.
  *
- * <p>对于那些允许以可配置的方式设置父级的Bean工厂，
- * 相应的 {@code setParentBeanFactory} 方法可以在 ConfigurableBeanFactory 接口中找到。
+ * <p>The corresponding {@code setParentBeanFactory} method for bean
+ * factories that allow setting the parent in a configurable
+ * fashion can be found in the ConfigurableBeanFactory interface.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -38,123 +39,124 @@
 public interface HierarchicalBeanFactory extends BeanFactory {
 
     /**
-     * 返回父级Bean工厂，如果没有则返回 {@code null}。
+     * Return the parent bean factory, or {@code null} if there is none.
      */
     @Nullable
     BeanFactory getParentBeanFactory();
 
     /**
-     * 返回本地Bean工厂是否包含给定名称的Bean，
-     * 忽略在祖先上下文中定义的Bean。
-     * <p>这是 {@code containsBean} 的替代方法，忽略来自祖先Bean工厂的给定名称的Bean。
-     * @param name 要查询的Bean的名称
-     * @return 本地工厂中是否定义了具有给定名称的Bean
+     * Return whether the local bean factory contains a bean of the given name,
+     * ignoring beans defined in ancestor contexts.
+     * <p>This is an alternative to {@code containsBean}, ignoring a bean
+     * of the given name from an ancestor bean factory.
+     * @param name the name of the bean to query
+     * @return whether a bean with the given name is defined in the local factory
      * @see BeanFactory#containsBean
      */
     boolean containsLocalBean(String name);
 }
 ```
 
-### 五、主要实现
+### 5. Main Implementation
 
 - `DefaultListableBeanFactory`
-  - `DefaultListableBeanFactory`是Spring框架中实现`BeanFactory`接口的关键类之一，负责注册、管理和初始化应用程序中的所有Bean定义。它支持依赖注入、不同作用域的Bean管理、处理`FactoryBean`、层次性容器、以及各种生命周期回调等功能，是Spring IoC容器的核心实现，提供了灵活而强大的Bean管理和配置机制。
+  - `DefaultListableBeanFactory` is one of the key classes that implement the `BeanFactory` interface in Spring. It registers, manages, and initializes all bean definitions in an application. It supports dependency injection, beans in different scopes, `FactoryBean` handling, container hierarchies, and lifecycle callbacks. It is the core implementation of the Spring IoC container and gives flexible and powerful bean management and configuration.
 
-### 六、最佳实践
+### 6. Best Practices
 
-创建了一个包含父子层次结构的Spring容器，其中父容器包含一个名为`MyBean`的Bean，子容器继承了父容器并尝试获取这个Bean。代码通过`HierarchicalBeanFactory`接口的方法展示了如何在子容器中访问父容器的Bean，判断本地和整个BeanFactory中是否包含特定名称的Bean，并获取父级BeanFactory。
+This example creates a Spring container hierarchy. The parent container holds a bean named `MyBean`. The child container uses the parent container and tries to get this bean. The code uses the methods of `HierarchicalBeanFactory` to show how to access a parent bean from the child container, how to check if the local `BeanFactory` or the whole hierarchy contains a bean with a given name, and how to get the parent `BeanFactory`.
 
 ```java
 public class HierarchicalBeanFactoryDemo {
 
     public static void main(String[] args) {
-        // 创建父级容器
+        // Create the parent container
         AnnotationConfigApplicationContext parentContext = new AnnotationConfigApplicationContext(MyBean.class);
-        // 创建子级容器
+        // Create the child container
         AnnotationConfigApplicationContext childContext = new AnnotationConfigApplicationContext();
         childContext.setParent(parentContext);
 
-        // 在子级 BeanFactory 中获取 bean
+        // Get the bean from the child BeanFactory
         HierarchicalBeanFactory childHierarchicalBeanFactory = childContext.getBeanFactory();
-        System.out.println("在子级BeanFactory中获取Bean: " + childHierarchicalBeanFactory.getBean(MyBean.class));
+        System.out.println("Get bean from child BeanFactory: " + childHierarchicalBeanFactory.getBean(MyBean.class));
 
-        // 在父级 BeanFactory 中获取 bean
+        // Get the bean from the parent BeanFactory
         HierarchicalBeanFactory parentHierarchicalBeanFactory = parentContext.getBeanFactory();
-        System.out.println("在父级BeanFactory中获取Bean: " + parentHierarchicalBeanFactory.getBean(MyBean.class));
+        System.out.println("Get bean from parent BeanFactory: " + parentHierarchicalBeanFactory.getBean(MyBean.class));
 
-        // 获取父级 BeanFactory
+        // Get the parent BeanFactory
         BeanFactory parentBeanFactory = childHierarchicalBeanFactory.getParentBeanFactory();
-        System.out.println("获取父级BeanFactory: " + parentBeanFactory);
+        System.out.println("Get parent BeanFactory: " + parentBeanFactory);
 
-        // 判断本地 BeanFactory 是否包含指定名称的 bean
+        // Check if the local BeanFactory contains a bean with the given name
         boolean containsLocalBean = childHierarchicalBeanFactory.containsLocalBean("myBean");
-        System.out.println("判断本地BeanFactory是否包含指定名称的Bean: " + containsLocalBean);
+        System.out.println("Local BeanFactory contains the bean: " + containsLocalBean);
 
-        // 判断整个 BeanFactory 是否包含指定名称的 bean
+        // Check if the whole BeanFactory hierarchy contains a bean with the given name
         boolean containsBean = childHierarchicalBeanFactory.containsBean("myBean");
-        System.out.println("判断整个BeanFactory是否包含指定名称的Bean: " + containsBean);
+        System.out.println("Whole BeanFactory contains the bean: " + containsBean);
     }
 }
 ```
 
-运行结果发现，容器层次结构的特性，包括父子容器之间的Bean继承和在不同层次的容器中判断Bean的存在。
+The output shows how the container hierarchy works. It shows bean inheritance between parent and child containers, and how to check if a bean exists at different levels.
 
 ```java
-在子级BeanFactory中获取Bean: com.xcs.spring.bean.MyBean@6379eb
-在父级BeanFactory中获取Bean: com.xcs.spring.bean.MyBean@6379eb
-获取父级BeanFactory: org.springframework.beans.factory.support.DefaultListableBeanFactory@2f112965: defining beans [org.springframework.context.annotation.internalConfigurationAnnotationProcessor,org.springframework.context.annotation.internalAutowiredAnnotationProcessor,org.springframework.context.event.internalEventListenerProcessor,org.springframework.context.event.internalEventListenerFactory,myBean]; root of factory hierarchy
-判断本地BeanFactory是否包含指定名称的Bean: false
-判断整个BeanFactory是否包含指定名称的Bean: true
+Get bean from child BeanFactory: com.xcs.spring.bean.MyBean@6379eb
+Get bean from parent BeanFactory: com.xcs.spring.bean.MyBean@6379eb
+Get parent BeanFactory: org.springframework.beans.factory.support.DefaultListableBeanFactory@2f112965: defining beans [org.springframework.context.annotation.internalConfigurationAnnotationProcessor,org.springframework.context.annotation.internalAutowiredAnnotationProcessor,org.springframework.context.event.internalEventListenerProcessor,org.springframework.context.event.internalEventListenerFactory,myBean]; root of factory hierarchy
+Local BeanFactory contains the bean: false
+Whole BeanFactory contains the bean: true
 ```
 
-### 七、与其他组件的关系
+### 7. Relation to Other Components
 
-1. **ApplicationContext接口**
+1. **ApplicationContext interface**
 
-   - `HierarchicalBeanFactory` 接口是 `ApplicationContext` 接口的子接口。因此，任何实现了 `HierarchicalBeanFactory` 的类也是 `ApplicationContext` 的子类。`ApplicationContext` 是 Spring 中应用程序上下文的核心接口，提供了更多的功能，包括事件发布、国际化支持等。
+   - `HierarchicalBeanFactory` is a super-interface of `ApplicationContext`. So any `ApplicationContext` is also a `HierarchicalBeanFactory`. `ApplicationContext` is the core interface for the application context in Spring. It adds more features, such as event publishing and internationalization support.
 
-2. **ConfigurableApplicationContext接口**
+2. **ConfigurableApplicationContext interface**
 
-   - `ConfigurableApplicationContext` 是 `ApplicationContext` 的子接口，同时也扩展了 `HierarchicalBeanFactory`。它定义了一些用于配置应用程序上下文的额外方法，例如设置父级上下文、激活和取消激活配置文件等。
+   - `ConfigurableApplicationContext` is a sub-interface of `ApplicationContext`, and it also extends `HierarchicalBeanFactory`. It defines extra methods to configure the application context, such as setting the parent context and activating or deactivating profiles.
 
-3. **BeanFactory接口**
+3. **BeanFactory interface**
 
-   - `HierarchicalBeanFactory` 扩展了 `BeanFactory` 接口，因此它继承了 `BeanFactory` 中定义的许多方法，用于获取和管理 Bean 实例。
+   - `HierarchicalBeanFactory` extends the `BeanFactory` interface. So it inherits many methods from `BeanFactory` to get and manage bean instances.
 
-4. **DefaultListableBeanFactory类**
+4. **DefaultListableBeanFactory class**
 
-   - `DefaultListableBeanFactory` 是 Spring 框架中 `HierarchicalBeanFactory` 接口的默认实现类。它实现了 `HierarchicalBeanFactory` 接口，并提供了标准的 `BeanFactory` 功能。`DefaultListableBeanFactory` 也是 `ConfigurableListableBeanFactory` 接口的实现类，进一步增强了配置的能力。
+   - `DefaultListableBeanFactory` is the default implementation of `HierarchicalBeanFactory` in Spring. It implements the `HierarchicalBeanFactory` interface and provides the standard `BeanFactory` features. It also implements `ConfigurableListableBeanFactory`, which adds more configuration options.
 
-5. **BeanDefinition接口**
+5. **BeanDefinition interface**
 
-   - `HierarchicalBeanFactory` 与 `BeanDefinition` 接口密切相关。`BeanDefinition` 定义了 Bean 的元数据，包括类名、属性值、构造函数参数等。在容器层次结构中，`HierarchicalBeanFactory` 负责管理和维护这些 `BeanDefinition`。
+   - `HierarchicalBeanFactory` is closely related to `BeanDefinition`. `BeanDefinition` holds the metadata of a bean, such as the class name, property values, and constructor arguments. In a container hierarchy, the bean factory manages and maintains these `BeanDefinition` objects.
 
-6. **ApplicationContext层次结构**
+6. **ApplicationContext hierarchy**
 
-   - `HierarchicalBeanFactory` 接口支持 Spring 容器的层次结构。通过父子关系，容器可以继承和覆盖 Bean 定义。这有助于实现模块化和组织化的应用程序架构，不同层次的容器之间可以共享或隔离 Bean。
+   - `HierarchicalBeanFactory` supports the Spring container hierarchy. With a parent-child relation, a container can inherit and override bean definitions. This helps build modular and well-organized applications. Beans can be shared or isolated between containers at different levels.
 
-### 八、常见问题
+### 8. Common Problems
 
-1. **Bean名称冲突**
+1. **Bean name conflicts**
 
-   - 当子容器和父容器中都定义了相同名称的Bean时，可能会导致Bean名称冲突。在设计时，避免在父子容器中定义相同名称的Bean。如果冲突是不可避免的，可以通过在子容器中重新定义Bean来覆盖父容器中的定义。
+   - If the child and parent containers both define a bean with the same name, the names conflict. Avoid defining beans with the same name in both containers. If a conflict cannot be avoided, redefine the bean in the child container to override the parent definition.
 
-2. **父子容器的初始化顺序**
+2. **Initialization order of parent and child containers**
 
-   - 容器的初始化顺序可能会导致在子容器初始化之前尝试访问父容器中的Bean。我们需要确保在访问子容器中的Bean之前，子容器已经成功初始化。可以使用事件监听器等机制来确保容器的正确初始化顺序。
+   - The initialization order may cause code to access a parent bean before the child container is initialized. Make sure the child container is fully initialized before you access its beans. You can use event listeners or similar tools to keep the initialization order correct.
 
-3. **父容器中Bean的更新**
+3. **Updating beans in the parent container**
 
-   - 子容器在初始化时会获取父容器中的Bean定义，并且在后续运行时不会再次更新。如果需要动态更新父容器中的Bean定义，可以考虑在特定的时机重新刷新子容器。
+   - The child container reads the bean definitions of the parent container when it initializes. It does not update them again later. If you need to update the parent bean definitions at runtime, refresh the child container at a suitable time.
 
-4. **对父容器中Bean的引用**
+4. **Referencing beans in the parent container**
 
-   - 子容器中的Bean可以直接引用父容器中的Bean。Spring会自动处理这些引用，确保在子容器中正确注入父容器中的Bean。
+   - Beans in the child container can refer directly to beans in the parent container. Spring handles these references and injects the parent beans into the child container correctly.
 
-5. **层次结构的深度**
+5. **Depth of the hierarchy**
 
-   -  尽管Spring支持容器层次结构，但在设计时要考虑层次结构的深度。深层次结构可能会导致容器初始化和访问的复杂性，可能影响性能。
+   - Spring supports container hierarchies, but think about how deep the hierarchy should be. A deep hierarchy makes container initialization and bean lookup more complex, and it may hurt performance.
 
-6. **配置错误**
+6. **Configuration errors**
 
-   -  定期审查配置，确保正确设置了父子容器关系。使用合适的配置和注解来避免潜在的错误。
+   - Review the configuration often to make sure the parent-child relation is set correctly. Use proper configuration and annotations to avoid mistakes.

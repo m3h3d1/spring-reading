@@ -14,105 +14,105 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 /**
  * @author xcs
- * @date 2023年11月24日 15时02分
+ * @date 2023-11-24 15:02
  **/
 public class AutowireCapableBeanFactoryDemo {
 
     public static void main(String[] args) {
-        // 创建 ApplicationContext
+        // Create the ApplicationContext
         AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(MyConfiguration.class);
 
-        // 配置一个后置处理器，用于验证Bean的初始化前后拦截信息打印
+        // Add a post-processor to print messages before and after bean initialization
         applicationContext.getBeanFactory().addBeanPostProcessor(new MyBeanPostProcessor());
-        // 注册一个MyRepository的Bean对象
+        // Register a MyRepository singleton bean
         applicationContext.getBeanFactory().registerSingleton("myRepository", new MyRepository());
 
-        // 获取 AutowireCapableBeanFactory
+        // Get the AutowireCapableBeanFactory
         AutowireCapableBeanFactory beanFactory = applicationContext.getAutowireCapableBeanFactory();
 
-        // 创建指定Bean名称的实例
+        // Create a bean instance of the given class
         // createBean(beanFactory);
 
-        // 对给定的Bean实例进行进一步的配置
+        // Configure the given bean instance
         // configureBean(beanFactory);
 
-        // 对给定的Bean实例进行自动装配
+        // Autowire the given bean instance
         // autowireBean(beanFactory);
 
-        // 使用指定的自动装配模式创建Bean实例
+        // Create a bean instance with the given autowire mode
         // autowire(beanFactory);
 
-        // 对给定的Bean实例的属性进行自动装配
+        // Autowire the properties of the given bean instance
         // autowireBeanProperties(beanFactory);
 
-        // 将属性值应用到给定的Bean实例
+        // Apply property values to the given bean instance
         // applyBeanPropertyValues(beanFactory);
 
-        // 初始化给定的Bean实例
+        // Initialize the given bean instance
         // initializeBean(beanFactory);
 
-        // 销毁给定的Bean实例
+        // Destroy the given bean instance
         // destroyBean(beanFactory);
 
-        // 解析Bean之间的依赖关系
+        // Resolve a dependency between beans
         // resolveDependency(beanFactory);
     }
 
     private static void createBean(AutowireCapableBeanFactory beanFactory) {
         MyService myService = beanFactory.createBean(MyService.class);
-        System.out.println("调用createBean方法,创建Bean对象 = " + myService);
+        System.out.println("Called createBean, created bean = " + myService);
     }
 
     private static void configureBean(AutowireCapableBeanFactory beanFactory) {
-        // 配置一个RootBeanDefinition
+        // Register a RootBeanDefinition
         ((DefaultListableBeanFactory) beanFactory).registerBeanDefinition("myService", new RootBeanDefinition(MyService.class));
 
         MyService myService = new MyService();
-        System.out.println("调用configureBean前,MyService = " + myService);
+        System.out.println("Before configureBean, MyService = " + myService);
         beanFactory.configureBean(myService, "myService");
-        System.out.println("调用configureBean后,MyService = " + myService);
+        System.out.println("After configureBean, MyService = " + myService);
     }
 
     private static void autowireBean(AutowireCapableBeanFactory beanFactory) {
         MyService myService = new MyService();
-        System.out.println("调用autowireBean前,MyService = " + myService);
+        System.out.println("Before autowireBean, MyService = " + myService);
         beanFactory.autowireBean(myService);
-        System.out.println("调用autowireBean后,MyService = " + myService);
+        System.out.println("After autowireBean, MyService = " + myService);
     }
 
     private static void autowire(AutowireCapableBeanFactory beanFactory) {
         Object myService = beanFactory.autowire(MyService.class, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, false);
-        System.out.println("调用autowire方法,创建Bean对象 =" + myService);
+        System.out.println("Called autowire, created bean = " + myService);
     }
 
     private static void autowireBeanProperties(AutowireCapableBeanFactory beanFactory) {
         MyService myService = new MyService();
-        System.out.println("调用autowireBeanProperties前,MyService = " + myService);
+        System.out.println("Before autowireBeanProperties, MyService = " + myService);
         beanFactory.autowireBeanProperties(myService, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, false);
-        System.out.println("调用autowireBeanProperties后,MyService = " + myService);
+        System.out.println("After autowireBeanProperties, MyService = " + myService);
     }
 
     private static void applyBeanPropertyValues(AutowireCapableBeanFactory beanFactory) {
-        PropertyValue propertyValue = new PropertyValue("javaHome", "这里是我自定义的javaHome路径配置");
+        PropertyValue propertyValue = new PropertyValue("javaHome", "My custom javaHome path");
         MutablePropertyValues propertyValues = new MutablePropertyValues();
         propertyValues.addPropertyValue(propertyValue);
 
         RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(MyService.class);
         rootBeanDefinition.setPropertyValues(propertyValues);
-        // 配置一个RootBeanDefinition
+        // Register a RootBeanDefinition
         ((DefaultListableBeanFactory) beanFactory).registerBeanDefinition("myService", rootBeanDefinition);
 
         MyService myService = new MyService();
-        System.out.println("调用applyBeanPropertyValues前,MyService = " + myService);
+        System.out.println("Before applyBeanPropertyValues, MyService = " + myService);
         beanFactory.applyBeanPropertyValues(myService, "myService");
-        System.out.println("调用applyBeanPropertyValues后,MyService = " + myService);
+        System.out.println("After applyBeanPropertyValues, MyService = " + myService);
     }
 
     private static void initializeBean(AutowireCapableBeanFactory beanFactory) {
         MyService myService = new MyService();
-        System.out.println("调用initializeBean前,MyService = " + myService);
+        System.out.println("Before initializeBean, MyService = " + myService);
         beanFactory.initializeBean(myService, "myService");
-        System.out.println("调用initializeBean前,MyService = " + myService);
+        System.out.println("After initializeBean, MyService = " + myService);
     }
 
     private static void destroyBean(AutowireCapableBeanFactory beanFactory) {

@@ -2,7 +2,7 @@ package com.xcs.spring.service;
 
 /**
  * @author xcs
- * @date 2023年11月20日 10时40分
+ * @date 2023-11-20 10:40
  **/
 public class MyService {
 }

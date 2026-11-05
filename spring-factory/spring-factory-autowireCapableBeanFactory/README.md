@@ -1,12 +1,12 @@
 ## AutowireCapableBeanFactory
 
 - [AutowireCapableBeanFactory](#autowirecapablebeanfactory)
-  - [一、基本信息](#一基本信息)
-  - [二、基本描述](#二基本描述)
-  - [三、主要功能](#三主要功能)
-  - [四、接口源码](#四接口源码)
-  - [五、主要实现](#五主要实现)
-  - [五、最佳实践](#五最佳实践)
+  - [1. Overview](#1-overview)
+  - [2. Description](#2-description)
+  - [3. Main Features](#3-main-features)
+  - [4. Interface Source](#4-interface-source)
+  - [5. Main Implementation](#5-main-implementation)
+  - [6. Best Practices](#6-best-practices)
     - [createBean](#createbean)
     - [configureBean](#configurebean)
     - [autowireBean](#autowirebean)
@@ -16,61 +16,71 @@
     - [initializeBean](#initializebean)
     - [destroyBean](#destroybean)
     - [resolveDependency](#resolvedependency)
-  - [常见问题](#常见问题)
+  - [7. Common Problems](#7-common-problems)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [Juejin](https://juejin.cn/user/4251135018533068/posts) 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、基本描述
+### 2. Description
 
-`AutowireCapableBeanFactory`接口是Spring框架中位于`org.springframework.beans.factory.config`包下的关键接口，扩展自`BeanFactory`，主要提供了在运行时进行Bean自动装配和创建的高级功能。其核心方法`createBean`允许动态创建Bean实例，并进行自动装配，解决了Bean之间的依赖关系，而其他方法如`autowireBean`和`applyBeanPostProcessorsBeforeInitialization`则提供了更细粒度的控制和定制点，使我们能够在Bean生命周期的不同阶段进行干预，实现更灵活的Bean管理和配置。这一接口的存在增强了Spring IoC容器的功能，使其能够更好地适应复杂系统的需求。
+`AutowireCapableBeanFactory` is a key interface in the `org.springframework.beans.factory.config` package of Spring. It extends `BeanFactory`. It gives advanced features to autowire and create beans at runtime. Its core method `createBean` creates a bean instance dynamically and autowires it, so the dependencies between beans are resolved. Other methods, such as `autowireBean` and `applyBeanPostProcessorsBeforeInitialization`, give finer control and more extension points. They let you step in at different stages of the bean lifecycle for more flexible bean management and configuration. This interface makes the Spring IoC container stronger, so it can better fit the needs of complex systems.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **Bean的创建和初始化** 
+1. **Create and initialize beans** 
 
-   + 通过`createBean`方法，可以创建一个新的Bean实例，并在创建过程中执行完整的初始化，包括所有适用的`BeanPostProcessor`的回调。
+   + The `createBean` method creates a new bean instance. It runs the full initialization, including the callbacks of all applicable `BeanPostProcessor` objects.
 
-2. **自动装配** 
+2. **Autowiring** 
 
-   + 提供了不同的自动装配模式，包括按名称、按类型、按构造函数等，通过`autowire`和`autowireBeanProperties`方法实现对Bean属性的自动注入。
+   + It supports different autowire modes, such as by name, by type, and by constructor. The `autowire` and `autowireBeanProperties` methods inject the bean properties.
 
-3. **Bean配置和后处理器应用** 
+3. **Bean configuration and post-processor handling** 
 
-   + 通过`configureBean`方法，可以配置已存在的Bean实例，应用属性值、工厂回调等，同时执行所有`BeanPostProcessor`的回调。
+   + The `configureBean` method configures an existing bean instance. It applies property values and factory callbacks, and runs the callbacks of all `BeanPostProcessor` objects.
 
-4. **定制化初始化和销毁过程** 
+4. **Custom initialization and destruction** 
 
-   + 通过`initializeBean`方法，可以在Bean初始化过程中应用定制化的操作，例如执行初始化回调、应用后处理器等。还提供了`destroyBean`方法用于销毁Bean实例。
+   + The `initializeBean` method applies custom actions during bean initialization, such as initialization callbacks and post-processors. The `destroyBean` method destroys a bean instance.
 
-5. **解析依赖** 
+5. **Resolve dependencies** 
 
-   + 通过`resolveDependency`方法，可以解析指定的依赖关系，支持字段、方法、构造函数等各种依赖注入方式。
+   + The `resolveDependency` method resolves a given dependency. It supports fields, methods, constructors, and other injection points.
 
-### 四、接口源码
+### 4. Interface Source
 
-从`AutowireCapableBeanFactory`接口源码中看出，它承担了创建、配置和生命周期管理Bean实例的任务。通过定义常量和方法，它提供了细粒度的控制，包括特定的自动装配策略、初始化过程、属性注入、后处理器应用以及销毁阶段。
+The source of the `AutowireCapableBeanFactory` interface shows that it creates, configures, and manages the lifecycle of bean instances. With its constants and methods, it gives fine control. This includes specific autowire strategies, the initialization process, property injection, post-processor handling, and the destruction phase.
 
 ```java
 /**
- * org.springframework.beans.factory.BeanFactory的扩展接口，由能够进行自动装配的Bean工厂实现，
- * 前提是它们希望为现有的Bean实例暴露此功能。
+ * Extension of the {@link org.springframework.beans.factory.BeanFactory}
+ * interface to be implemented by bean factories that are capable of
+ * autowiring, provided that they want to expose this functionality for
+ * existing bean instances.
  *
- * 此子接口不应在正常应用代码中使用：请使用org.springframework.beans.factory.BeanFactory
- * 或org.springframework.beans.factory.ListableBeanFactory以供典型用例使用。
+ * <p>This subinterface of BeanFactory is not meant to be used in normal
+ * application code: stick to {@link org.springframework.beans.factory.BeanFactory}
+ * or {@link org.springframework.beans.factory.ListableBeanFactory} for
+ * typical use cases.
  *
- * 其他框架的集成代码可以利用此接口来连接和填充Spring不控制生命周期的现有Bean实例。
- * 这对于WebWork Actions和Tapestry Page对象等情况特别有用。
+ * <p>Integration code for other frameworks can leverage this interface to
+ * wire and populate existing bean instances that Spring does not control
+ * the lifecycle of. This is particularly useful for WebWork Actions and
+ * Tapestry Page objects, for example.
  *
- * 请注意，此接口不由org.springframework.context.ApplicationContext门面实现，
- * 因为它在应用代码中几乎不被使用。尽管如此，它仍可从应用程序上下文中访问，通过ApplicationContext的
- * org.springframework.context.ApplicationContext#getAutowireCapableBeanFactory()方法获得。
+ * <p>Note that this interface is not implemented by
+ * {@link org.springframework.context.ApplicationContext} facades,
+ * as it is hardly ever used by application code. That said, it is available
+ * from an application context too, accessible through ApplicationContext's
+ * {@link org.springframework.context.ApplicationContext#getAutowireCapableBeanFactory()}
+ * method.
  *
- * 您还可以实现org.springframework.beans.factory.BeanFactoryAware接口，
- * 它在ApplicationContext中运行时公开内部BeanFactory，以便访问AutowireCapableBeanFactory：
- * 只需将传入的BeanFactory强制转换为AutowireCapableBeanFactory。
+ * <p>You may also implement the {@link org.springframework.beans.factory.BeanFactoryAware}
+ * interface, which exposes the internal BeanFactory even when running in an
+ * ApplicationContext, to get access to an AutowireCapableBeanFactory:
+ * simply cast the passed-in BeanFactory to AutowireCapableBeanFactory.
  *
  * @author Juergen Hoeller
  * @since 04.12.2003
@@ -81,7 +91,8 @@
 public interface AutowireCapableBeanFactory extends BeanFactory {
 
     /**
-     * 常量，表示没有外部定义的自动装配。请注意，仍将应用BeanFactoryAware等，并且将应用基于注释的注入。
+     * Constant that indicates no externally defined autowiring. Note that
+     * BeanFactoryAware etc and annotation-driven injection will still be applied.
      * @see #createBean
      * @see #autowire
      * @see #autowireBeanProperties
@@ -89,7 +100,8 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
     int AUTOWIRE_NO = 0;
 
     /**
-     * 常量，表示按名称自动装配Bean属性（适用于所有Bean属性设置器）。
+     * Constant that indicates autowiring bean properties by name
+     * (applying to all bean property setters).
      * @see #createBean
      * @see #autowire
      * @see #autowireBeanProperties
@@ -97,7 +109,8 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
     int AUTOWIRE_BY_NAME = 1;
 
     /**
-     * 常量，表示按类型自动装配Bean属性（适用于所有Bean属性设置器）。
+     * Constant that indicates autowiring bean properties by type
+     * (applying to all bean property setters).
      * @see #createBean
      * @see #autowire
      * @see #autowireBeanProperties
@@ -105,24 +118,29 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
     int AUTOWIRE_BY_TYPE = 2;
 
     /**
-     * 常量，表示自动装配可以满足的最贪婪的构造函数（涉及解析适当的构造函数）。
+     * Constant that indicates autowiring the greediest constructor that
+     * can be satisfied (involves resolving the appropriate constructor).
      * @see #createBean
      * @see #autowire
      */
     int AUTOWIRE_CONSTRUCTOR = 3;
 
     /**
-     * 常量，表示通过对Bean类进行内省来确定适当的自动装配策略。
+     * Constant that indicates determining an appropriate autowire strategy
+     * through introspection of the bean class.
      * @see #createBean
      * @see #autowire
-     * @deprecated 自Spring 3.0起：如果使用了混合自动装配策略，请优先使用基于注释的自动装配，以清晰标记自动装配需求。
+     * @deprecated as of Spring 3.0: If you are using mixed autowiring strategies,
+     * prefer annotation-based autowiring for clearer demarcation of autowiring needs.
      */
     @Deprecated
     int AUTOWIRE_AUTODETECT = 4;
 
     /**
-     * 初始化现有Bean实例时使用的后缀，以实现“原始实例”约定：附加到完全限定的Bean类名称，
-     * 例如“com.mypackage.MyClass.ORIGINAL”，以强制返回给定实例，即没有代理等。
+     * Suffix for the "original instance" convention when initializing an existing
+     * bean instance: to be appended to the fully-qualified bean class name,
+     * e.g. "com.mypackage.MyClass.ORIGINAL", in order to enforce the given instance
+     * to be returned, i.e. no proxies etc.
      * @since 5.1
      * @see #initializeBean(Object, String)
      * @see #applyBeanPostProcessorsBeforeInitialization(Object, String)
@@ -131,53 +149,63 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
     String ORIGINAL_INSTANCE_SUFFIX = ".ORIGINAL";
 
     /**
-     * 完全创建给定类的新Bean实例。
-     * 执行Bean的完全初始化，包括所有适用的BeanPostProcessor BeanPostProcessors。
-     * 注意：这用于创建一个新实例，填充带注释的字段和方法以及应用所有标准的Bean初始化回调。
-     * 它不意味着传统的按名称或按类型自动装配属性；对于这些目的，请使用#createBean(Class, int, boolean)。
-     * @param beanClass 要创建的Bean的类
-     * @return 新的Bean实例
-     * @throws BeansException 如果实例化或装配失败
+     * Fully create a new bean instance of the given class.
+     * Performs full initialization of the bean, including all applicable
+     * BeanPostProcessors.
+     * Note: This is intended for creating a fresh instance, populating annotated
+     * fields and methods as well as applying all standard bean initialization callbacks.
+     * It does not imply traditional by-name or by-type autowiring of properties;
+     * use #createBean(Class, int, boolean) for those purposes.
+     * @param beanClass the class of the bean to create
+     * @return the new bean instance
+     * @throws BeansException if instantiation or wiring failed
      */
     <T> T createBean(Class<T> beanClass) throws BeansException;
 
     /**
-     * 通过应用实例化后回调和Bean属性后处理（例如用于注释驱动的注入）来填充给定的Bean实例。
-     * 注意：这主要用于（重新）填充带注释的字段和方法，无论是对于新实例还是对于反序列化的实例。
-     * 它不意味着传统的按名称或按类型自动装配属性；对于这些目的，请使用#autowireBeanProperties。
-     * @param existingBean 现有的Bean实例
-     * @throws BeansException 如果装配失败
+     * Populate the given bean instance through applying after-instantiation callbacks
+     * and bean property post-processing (e.g. for annotation-driven injection).
+     * Note: This is essentially intended for (re-)populating annotated fields and
+     * methods, either for new instances or for deserialized instances. It does
+     * not imply traditional by-name or by-type autowiring of properties;
+     * use #autowireBeanProperties for those purposes.
+     * @param existingBean the existing bean instance
+     * @throws BeansException if wiring failed
      */
     void autowireBean(Object existingBean) throws BeansException;
 
     /**
-     * 配置给定的原始Bean：自动装配Bean属性，应用Bean属性值，
-     * 应用工厂回调，如{@code setBeanName和{@code setBeanFactory，
-     * 以及应用所有Bean后处理器（包括可能包装给定原始Bean的后处理器）。
-     * 这实际上是#initializeBean提供的超集，完全应用相应Bean定义指定的配置。
-     * 注意：此方法需要给定名称的Bean定义！
-     * @param existingBean 现有的Bean实例
-     * @param beanName Bean的名称，如果需要，将传递给它
-     *                 （必须存在该名称的Bean定义）
-     * @return 用于使用的Bean实例，原始或包装的其中之一
+     * Configure the given raw bean: autowiring bean properties, applying
+     * bean property values, applying factory callbacks such as {@code setBeanName}
+     * and {@code setBeanFactory}, and also applying all bean post processors
+     * (including ones which might wrap the given raw bean).
+     * This is effectively a superset of what #initializeBean provides,
+     * fully applying the configuration specified by the corresponding bean definition.
+     * Note: This method requires a bean definition for the given name!
+     * @param existingBean the existing bean instance
+     * @param beanName the name of the bean, to be passed to it if necessary
+     * (a bean definition of that name has to be available)
+     * @return the bean instance to use, either the original or a wrapped one
      * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
-     * 如果没有给定名称的Bean定义
-     * @throws BeansException 如果初始化失败
+     * if there is no bean definition with the given name
+     * @throws BeansException if the initialization failed
      * @see #initializeBean
      */
     Object configureBean(Object existingBean, String beanName) throws BeansException;
 
     /**
-     * 以指定的自动装配策略完全创建给定类的新Bean实例。
-     * 此接口支持此处定义的所有常量。
-     * 执行Bean的完全初始化，包括所有适用的BeanPostProcessor BeanPostProcessors。
-     * 这实际上是#autowire提供的超集，添加了#initializeBean的行为。
-     * @param beanClass 要创建的Bean的类
-     * @param autowireMode 按名称或类型，使用此接口中的常量
-     * @param dependencyCheck 是否对对象执行依赖关系检查
-     *                        （不适用于构造函数的自动装配，因此在这里被忽略）
-     * @return 新的Bean实例
-     * @throws BeansException 如果实例化或装配失败
+     * Fully create a new bean instance of the given class with the specified
+     * autowire strategy. All constants defined in this interface are supported here.
+     * Performs full initialization of the bean, including all applicable
+     * BeanPostProcessors.
+     * This is effectively a superset of what #autowire provides, adding
+     * #initializeBean behavior.
+     * @param beanClass the class of the bean to create
+     * @param autowireMode by name or type, using the constants in this interface
+     * @param dependencyCheck whether to perform a dependency check for objects
+     * (not applicable to autowiring a constructor, thus ignored there)
+     * @return the new bean instance
+     * @throws BeansException if instantiation or wiring failed
      * @see #AUTOWIRE_NO
      * @see #AUTOWIRE_BY_NAME
      * @see #AUTOWIRE_BY_TYPE
@@ -186,18 +214,22 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
     Object createBean(Class<?> beanClass, int autowireMode, boolean dependencyCheck) throws BeansException;
 
     /**
-     * 使用指定的自动装配策略实例化给定类的新Bean实例。
-     * 此处支持此接口中定义的所有常量。
-     * 也可以使用{@code AUTOWIRE_NO调用，以便仅应用实例化前回调（例如用于注释驱动的注入）。
-     * 不会应用标准的BeanPostProcessor BeanPostProcessors回调或对Bean的进一步初始化。
-     * 此接口为这些目的提供了不同的、细粒度的操作，例如#initializeBean。
-     * 然而，如果适用于实例的构建，将应用InstantiationAwareBeanPostProcessor回调。
-     * @param beanClass 要实例化的Bean的类
-     * @param autowireMode 按名称或类型，使用此接口中的常量
-     * @param dependencyCheck 是否对Bean实例中的对象引用执行依赖关系检查
-     *                        （不适用于构造函数的自动装配，因此在这里被忽略）
-     * @return 新的Bean实例
-     * @throws BeansException 如果实例化或装配失败
+     * Instantiate a new bean instance of the given class with the specified autowire
+     * strategy. All constants defined in this interface are supported here.
+     * Can also be invoked with {@code AUTOWIRE_NO} in order to just apply
+     * before-instantiation callbacks (e.g. for annotation-driven injection).
+     * Does <i>not</i> apply standard BeanPostProcessors callbacks or perform
+     * any further initialization of the bean. This interface offers distinct,
+     * fine-grained operations for those purposes, for example #initializeBean.
+     * However, InstantiationAwareBeanPostProcessor callbacks are applied, if applicable
+     * to the construction of the instance.
+     * @param beanClass the class of the bean to instantiate
+     * @param autowireMode by name or type, using the constants in this interface
+     * @param dependencyCheck whether to perform a dependency check for object
+     * references in the bean instance (not applicable to autowiring a constructor,
+     * thus ignored there)
+     * @return the new bean instance
+     * @throws BeansException if instantiation or wiring failed
      * @see #AUTOWIRE_NO
      * @see #AUTOWIRE_BY_NAME
      * @see #AUTOWIRE_BY_TYPE
@@ -210,15 +242,19 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
     Object autowire(Class<?> beanClass, int autowireMode, boolean dependencyCheck) throws BeansException;
 
     /**
-     * 按名称或类型自动装配给定Bean实例的Bean属性。
-     * 也可以使用{@code AUTOWIRE_NO调用，以便仅应用实例化后回调（例如用于注释驱动的注入）。
-     * 不会应用标准的BeanPostProcessor BeanPostProcessors回调或对Bean的进一步初始化。
-     * 此接口为这些目的提供了不同的、细粒度的操作，例如#initializeBean。
-     * 然而，如果适用于实例的配置，将应用InstantiationAwareBeanPostProcessor回调。
-     * @param existingBean 现有的Bean实例
-     * @param autowireMode 按名称或类型，使用此接口中的常量
-     * @param dependencyCheck 是否对Bean实例中的对象引用执行依赖关系检查
-     * @throws BeansException 如果装配失败
+     * Autowire the bean properties of the given bean instance by name or type.
+     * Can also be invoked with {@code AUTOWIRE_NO} in order to just apply
+     * after-instantiation callbacks (e.g. for annotation-driven injection).
+     * Does <i>not</i> apply standard BeanPostProcessors callbacks or perform
+     * any further initialization of the bean. This interface offers distinct,
+     * fine-grained operations for those purposes, for example #initializeBean.
+     * However, InstantiationAwareBeanPostProcessor callbacks are applied, if applicable
+     * to the configuration of the instance.
+     * @param existingBean the existing bean instance
+     * @param autowireMode by name or type, using the constants in this interface
+     * @param dependencyCheck whether to perform a dependency check for object
+     * references in the bean instance
+     * @throws BeansException if wiring failed
      * @see #AUTOWIRE_BY_NAME
      * @see #AUTOWIRE_BY_TYPE
      * @see #AUTOWIRE_NO
@@ -228,50 +264,59 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 
 
     /**
-     * 将给定bean定义名称的bean定义的属性值应用于给定的bean实例。
-     * bean定义可以定义一个完全独立的bean，重用其属性值，或仅用于现有bean实例的属性值。
-     * 此方法不会自动装配bean属性；它只应用显式定义的属性值。
-     * 使用#autowireBeanProperties方法来自动装配现有的bean实例。
-     * 注意：此方法需要给定名称的bean定义！
-     * 不会应用标准的BeanPostProcessor BeanPostProcessors回调或对bean的进一步初始化。
-     * 此接口为这些目的提供了不同的、细粒度的操作，例如#initializeBean。
-     * 但是，如果适用于实例的配置，将应用InstantiationAwareBeanPostProcessor回调。
-     * @param existingBean 现有的bean实例
-     * @param beanName bean工厂中bean定义的名称
-     *                 （必须存在该名称的bean定义）
+     * Apply the property values of the bean definition with the given name to
+     * the given bean instance. The bean definition can either define a fully
+     * self-contained bean, reusing its property values, or just property values
+     * meant to be used for existing bean instances.
+     * This method does <i>not</i> autowire bean properties; it just applies
+     * explicitly defined property values. Use the #autowireBeanProperties method
+     * to autowire an existing bean instance.
+     * Note: This method requires a bean definition for the given name!
+     * Does <i>not</i> apply standard BeanPostProcessors callbacks or perform
+     * any further initialization of the bean. This interface offers distinct,
+     * fine-grained operations for those purposes, for example #initializeBean.
+     * However, InstantiationAwareBeanPostProcessor callbacks are applied, if applicable
+     * to the configuration of the instance.
+     * @param existingBean the existing bean instance
+     * @param beanName the name of the bean definition in the bean factory
+     * (a bean definition of that name has to be available)
      * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
-     * 如果没有给定名称的bean定义
-     * @throws BeansException 如果应用属性值失败
+     * if there is no bean definition with the given name
+     * @throws BeansException if applying the property values failed
      * @see #autowireBeanProperties
      */
     void applyBeanPropertyValues(Object existingBean, String beanName) throws BeansException;
 
     /**
-     * 初始化给定的原始bean，应用工厂回调，例如{@code setBeanName和{@code setBeanFactory，
-     * 也应用所有bean后处理器（包括可能包装给定原始bean的后处理器）。
-     * 请注意，给定名称的bean工厂不必存在bean定义。
-     * 传入的bean名称将仅用于回调，但不会与已注册的bean定义进行检查。
-     * @param existingBean 现有的bean实例
-     * @param beanName bean的名称，如果需要，将传递给它
-     *                 （仅传递给BeanPostProcessor BeanPostProcessors；
-     *                  可以遵循#ORIGINAL_INSTANCE_SUFFIX约定，以强制返回给定的实例，
-     *                  即没有代理等）
-     * @return 要使用的bean实例，原始的或包装的其中之一
-     * @throws BeansException 如果初始化失败
+     * Initialize the given raw bean, applying factory callbacks
+     * such as {@code setBeanName} and {@code setBeanFactory},
+     * also applying all bean post processors (including ones which
+     * might wrap the given raw bean).
+     * <p>Note that no bean definition of the given name has to exist
+     * in the bean factory. The passed-in bean name will simply be used
+     * for callbacks but not checked against the registered bean definitions.
+     * @param existingBean the existing bean instance
+     * @param beanName the name of the bean, to be passed to it if necessary
+     * (only passed to BeanPostProcessors;
+     * can follow the #ORIGINAL_INSTANCE_SUFFIX convention in order to
+     * enforce the given instance to be returned, i.e. no proxies etc)
+     * @return the bean instance to use, either the original or a wrapped one
+     * @throws BeansException if the initialization failed
      * @see #ORIGINAL_INSTANCE_SUFFIX
      */
     Object initializeBean(Object existingBean, String beanName) throws BeansException;
 
     /**
-     * 将BeanPostProcessor BeanPostProcessors应用于给定的现有bean实例，
-     * 调用其{@code postProcessBeforeInitialization方法。返回的bean实例可能是原始bean的包装。
-     * @param existingBean 现有的bean实例
-     * @param beanName bean的名称，如果需要，将传递给它
-     *                 （仅传递给BeanPostProcessor BeanPostProcessors；
-     *                  可以遵循#ORIGINAL_INSTANCE_SUFFIX约定，以强制返回给定的实例，
-     *                  即没有代理等）
-     * @return 要使用的bean实例，原始的或包装的其中之一
-     * @throws BeansException 如果任何后处理失败
+     * Apply BeanPostProcessors to the given existing bean instance,
+     * invoking their {@code postProcessBeforeInitialization} methods.
+     * The returned bean instance may be a wrapper around the original.
+     * @param existingBean the existing bean instance
+     * @param beanName the name of the bean, to be passed to it if necessary
+     * (only passed to BeanPostProcessors;
+     * can follow the #ORIGINAL_INSTANCE_SUFFIX convention in order to
+     * enforce the given instance to be returned, i.e. no proxies etc)
+     * @return the bean instance to use, either the original or a wrapped one
+     * @throws BeansException if any post-processing failed
      * @see BeanPostProcessor#postProcessBeforeInitialization
      * @see #ORIGINAL_INSTANCE_SUFFIX
      */
@@ -279,15 +324,16 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
             throws BeansException;
 
     /**
-     * 将BeanPostProcessor BeanPostProcessors应用于给定的现有bean实例，
-     * 调用其{@code postProcessAfterInitialization方法。返回的bean实例可能是原始bean的包装。
-     * @param existingBean 现有的bean实例
-     * @param beanName bean的名称，如果需要，将传递给它
-     *                 （仅传递给BeanPostProcessor BeanPostProcessors；
-     *                  可以遵循#ORIGINAL_INSTANCE_SUFFIX约定，以强制返回给定的实例，
-     *                  即没有代理等）
-     * @return 要使用的bean实例，原始的或包装的其中之一
-     * @throws BeansException 如果任何后处理失败
+     * Apply BeanPostProcessors to the given existing bean instance,
+     * invoking their {@code postProcessAfterInitialization} methods.
+     * The returned bean instance may be a wrapper around the original.
+     * @param existingBean the existing bean instance
+     * @param beanName the name of the bean, to be passed to it if necessary
+     * (only passed to BeanPostProcessors;
+     * can follow the #ORIGINAL_INSTANCE_SUFFIX convention in order to
+     * enforce the given instance to be returned, i.e. no proxies etc)
+     * @return the bean instance to use, either the original or a wrapped one
+     * @throws BeansException if any post-processing failed
      * @see BeanPostProcessor#postProcessAfterInitialization
      * @see #ORIGINAL_INSTANCE_SUFFIX
      */
@@ -295,49 +341,54 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
             throws BeansException;
 
     /**
-     * 销毁给定的bean实例（通常来自#createBean），应用
-     * org.springframework.beans.factory.DisposableBean合同以及注册的
-     * DestructionAwareBeanPostProcessor DestructionAwareBeanPostProcessors。
-     * 在销毁过程中出现的任何异常都应该被捕获并记录，而不是传播到此方法的调用方。
-     * @param existingBean 要销毁的bean实例
+     * Destroy the given bean instance (typically coming from #createBean),
+     * applying the org.springframework.beans.factory.DisposableBean contract as well as
+     * registered DestructionAwareBeanPostProcessors.
+     * Any exception that arises during destruction should be caught
+     * and logged instead of propagated to the caller of this method.
+     * @param existingBean the bean instance to destroy
      */
     void destroyBean(Object existingBean);
 
     /**
-     * 解析唯一匹配给定对象类型的bean实例，如果有的话，包括其bean名称。
-     * 这实际上是#getBean(Class)的一个变体，它保留匹配实例的bean名称。
-     * @param requiredType bean必须匹配的类型；可以是接口或超类
-     * @return bean名称加上bean实例
-     * @throws NoSuchBeanDefinitionException 如果没有找到匹配的bean
-     * @throws NoUniqueBeanDefinitionException 如果找到多个匹配的bean
-     * @throws BeansException 如果无法创建bean
+     * Resolve the bean instance that uniquely matches the given object type, if any,
+     * including its bean name.
+     * This is effectively a variant of #getBean(Class) which preserves the
+     * bean name of the matching instance.
+     * @param requiredType type the bean must match; can be an interface or superclass
+     * @return the bean name plus bean instance
+     * @throws NoSuchBeanDefinitionException if no matching bean was found
+     * @throws NoUniqueBeanDefinitionException if more than one matching bean was found
+     * @throws BeansException if the bean could not be created
      * @since 4.3.3
      * @see #getBean(Class)
      */
     <T> NamedBeanHolder<T> resolveNamedBean(Class<T> requiredType) throws BeansException;
 
     /**
-     * 为给定的bean名称解析bean实例，提供一个依赖项描述符，以供目标工厂方法使用。
-     * 这实际上是#getBean(String, Class)的一个变体，支持具有
-     * org.springframework.beans.factory.InjectionPoint参数的工厂方法。
-     * @param name 要查找的bean的名称
-     * @param descriptor 用于请求注入点的依赖项描述符
-     * @return 相应的bean实例
-     * @throws NoSuchBeanDefinitionException 如果没有指定名称的bean
-     * @throws BeansException 如果无法创建bean
+     * Resolve a bean instance for the given bean name, providing a dependency descriptor
+     * for exposure to target factory methods.
+     * This is effectively a variant of #getBean(String, Class) which supports
+     * factory methods with an org.springframework.beans.factory.InjectionPoint
+     * argument.
+     * @param name the name of the bean to look up
+     * @param descriptor the dependency descriptor for the requesting injection point
+     * @return the corresponding bean instance
+     * @throws NoSuchBeanDefinitionException if there is no bean with the specified name
+     * @throws BeansException if the bean could not be created
      * @since 5.1.5
      * @see #getBean(String, Class)
      */
     Object resolveBeanByName(String name, DependencyDescriptor descriptor) throws BeansException;
 
     /**
-     * 解析针对此工厂中定义的bean的指定依赖项。
-     * @param descriptor 依赖项的描述符（字段/方法/构造函数）
-     * @param requestingBeanName 声明给定依赖项的bean的名称
-     * @return 已解析的对象，如果找不到则返回{@code null
-     * @throws NoSuchBeanDefinitionException 如果未找到匹配的bean
-     * @throws NoUniqueBeanDefinitionException 如果找到多个匹配的bean
-     * @throws BeansException 如果由于其他原因导致依赖项解析失败
+     * Resolve the specified dependency against the beans defined in this factory.
+     * @param descriptor the descriptor for the dependency (field/method/constructor)
+     * @param requestingBeanName the name of the bean which declares the given dependency
+     * @return the resolved object, or {@code null} if none found
+     * @throws NoSuchBeanDefinitionException if no matching bean was found
+     * @throws NoUniqueBeanDefinitionException if more than one matching bean was found
+     * @throws BeansException if dependency resolution failed for any other reason
      * @since 2.5
      * @see #resolveDependency(DependencyDescriptor, String, Set, TypeConverter)
      */
@@ -345,15 +396,16 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
     Object resolveDependency(DependencyDescriptor descriptor, @Nullable String requestingBeanName) throws BeansException;
 
     /**
-     * 解析针对此工厂中定义的bean的指定依赖项。
-     * @param descriptor 依赖项的描述符（字段/方法/构造函数）
-     * @param requestingBeanName 声明给定依赖项的bean的名称
-     * @param autowiredBeanNames 应将所有自动装配的bean的名称（用于解析给定依赖项）添加到的Set
-     * @param typeConverter 用于填充数组和集合的TypeConverter
-     * @return 已解析的对象，如果找不到则返回{@code null
-     * @throws NoSuchBeanDefinitionException 如果未找到匹配的bean
-     * @throws NoUniqueBeanDefinitionException 如果找到多个匹配的bean
-     * @throws BeansException 如果由于其他原因导致依赖项解析失败
+     * Resolve the specified dependency against the beans defined in this factory.
+     * @param descriptor the descriptor for the dependency (field/method/constructor)
+     * @param requestingBeanName the name of the bean which declares the given dependency
+     * @param autowiredBeanNames a Set that all names of autowired beans (used for
+     * resolving the given dependency) are supposed to be added to
+     * @param typeConverter the TypeConverter to use for populating arrays and collections
+     * @return the resolved object, or {@code null} if none found
+     * @throws NoSuchBeanDefinitionException if no matching bean was found
+     * @throws NoUniqueBeanDefinitionException if more than one matching bean was found
+     * @throws BeansException if dependency resolution failed for any other reason
      * @since 2.5
      * @see DependencyDescriptor
      */
@@ -364,10 +416,10 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 }
 ```
 
-### 五、主要实现
+### 5. Main Implementation
 
 + `AbstractAutowireCapableBeanFactory`
-  + `AbstractAutowireCapableBeanFactory`是`AutowireCapableBeanFactory`接口的抽象实现，为Spring框架提供了核心的Bean创建、初始化和销毁功能。它实现了`createBean`方法，支持对Bean的依赖注入、属性值应用、后置处理器的应用，以及初始化和销毁阶段的生命周期管理。
+  + `AbstractAutowireCapableBeanFactory` is the abstract implementation of the `AutowireCapableBeanFactory` interface. It gives Spring the core features to create, initialize, and destroy beans. It implements the `createBean` method. It supports dependency injection, applying property values, applying post-processors, and lifecycle management in the initialization and destruction phases.
 
 ~~~mermaid
 classDiagram
@@ -388,26 +440,26 @@ classDiagram
 
 ~~~
 
-### 五、最佳实践
+### 6. Best Practices
 
-使用`AnnotationConfigApplicationContext`创建了Spring应用程序上下文，手动注册了一个后置处理器（`MyBeanPostProcessor`）与一个单例Bean（`MyRepository`），最后获取了`AutowireCapableBeanFactory`。
+This example creates a Spring application context with `AnnotationConfigApplicationContext`. It registers a post-processor (`MyBeanPostProcessor`) and a singleton bean (`MyRepository`) by hand. Then it gets the `AutowireCapableBeanFactory`.
 
 ```java
 public static void main(String[] args) {
-    // 创建 ApplicationContext
+    // Create the ApplicationContext
     AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(MyConfiguration.class);
 
-    // 配置一个后置处理器，用于验证Bean的初始化前后拦截信息打印
+    // Add a post-processor to print messages before and after bean initialization
     applicationContext.getBeanFactory().addBeanPostProcessor(new MyBeanPostProcessor());
-    // 注册一个MyRepository的Bean对象
+    // Register a MyRepository singleton bean
     applicationContext.getBeanFactory().registerSingleton("myRepository", new MyRepository());
 
-    // 获取 AutowireCapableBeanFactory
+    // Get the AutowireCapableBeanFactory
     AutowireCapableBeanFactory beanFactory = applicationContext.getAutowireCapableBeanFactory();
 }
 ```
 
-`MyService`是一个经典的Spring Bean类，通过`@Autowired`和`@Value`实现了对其他Bean和配置属性的注入。它实现了`BeanNameAware`、`InitializingBean`和`DisposableBean`接口，分别在Bean分配名称、属性设置完成后和Bean销毁时执行相应的生命周期方法，最后通过调用`toString()`方法提供了方便的信息展示。
+`MyService` is a typical Spring bean class. It uses `@Autowired` and `@Value` to inject other beans and configuration properties. It implements `BeanNameAware`, `InitializingBean`, and `DisposableBean`. Their lifecycle methods run when the bean gets its name, after the properties are set, and when the bean is destroyed. Finally, `toString()` gives an easy way to see the state of the bean.
 
 ```java
 public class MyService implements BeanNameAware, InitializingBean, DisposableBean {
@@ -420,17 +472,17 @@ public class MyService implements BeanNameAware, InitializingBean, DisposableBea
 
     @Override
     public void setBeanName(String name) {
-        System.out.println("MyService.setBeanName方法被调用了");
+        System.out.println("MyService.setBeanName method was called");
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        System.out.println("MyService.afterPropertiesSet方法被调用了");
+        System.out.println("MyService.afterPropertiesSet method was called");
     }
 
     @Override
     public void destroy() throws Exception {
-        System.out.println("MyService.destroy方法被调用了");
+        System.out.println("MyService.destroy method was called");
     }
 
     @Override
@@ -443,20 +495,20 @@ public class MyService implements BeanNameAware, InitializingBean, DisposableBea
 }
 ```
 
-`MyBeanPostProcessor`是一个自定义的Bean后置处理器，实现了Spring的`BeanPostProcessor`接口。在Bean的初始化前后，它分别调用`postProcessBeforeInitialization`和`postProcessAfterInitialization`方法，在这个具体的实现中，我们简单地输出了一条日志，显示了被处理的Bean的名称。
+`MyBeanPostProcessor` is a custom bean post-processor. It implements the Spring `BeanPostProcessor` interface. Before and after bean initialization, the `postProcessBeforeInitialization` and `postProcessAfterInitialization` methods are called. In this example, they only print a log line with the name of the bean being processed.
 
 ```java
 public class MyBeanPostProcessor implements BeanPostProcessor {
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-        System.out.println("MyBeanPostProcessor#postProcessBeforeInitialization方法被调用了,Bean名称 = " + beanName);
+        System.out.println("MyBeanPostProcessor#postProcessBeforeInitialization method was called, bean name = " + beanName);
         return bean;
     }
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        System.out.println("MyBeanPostProcessor#postProcessBeforeInitialization方法被调用了,Bean名称 = " + beanName);
+        System.out.println("MyBeanPostProcessor#postProcessBeforeInitialization method was called, bean name = " + beanName);
         return bean;
     }
 }
@@ -464,169 +516,169 @@ public class MyBeanPostProcessor implements BeanPostProcessor {
 
 #### createBean
 
-通过`AutowireCapableBeanFactory`的`createBean`方法，手动创建了一个`MyService`类型的Bean实例。
+The `createBean` method of `AutowireCapableBeanFactory` creates a `MyService` bean instance by hand.
 
 ```java
 private static void createBean(AutowireCapableBeanFactory beanFactory) {
     MyService myService = beanFactory.createBean(MyService.class);
-    System.out.println("调用createBean方法,创建Bean对象 = " + myService);
+    System.out.println("Called createBean, created bean = " + myService);
 }
 ```
 
-运行结果发现，在`MyService`的生命周期中，`setBeanName`、`afterPropertiesSet`等回调方法都被成功触发，说明Bean的初始化过程正常执行。同时，`MyBeanPostProcessor`的后置处理器也在初始化前后成功拦截，并输出了Bean的名称。最重要的是，`MyService`中的`myRepository`和通过`@Value`注解注入的`javaHome`属性都成功被注入，表明依赖注入的过程也正常进行。
+The output shows that the callbacks in the `MyService` lifecycle, such as `setBeanName` and `afterPropertiesSet`, are all triggered. So the bean initialization runs as expected. The `MyBeanPostProcessor` also steps in before and after initialization and prints the bean name. Most important, both `myRepository` and the `javaHome` property (injected with `@Value`) are injected. So dependency injection works too.
 
 ```java
-MyService.setBeanName方法被调用了
-MyBeanPostProcessor#postProcessBeforeInitialization方法被调用了,Bean名称 = com.xcs.spring.service.MyService
-MyService.afterPropertiesSet方法被调用了
-MyBeanPostProcessor#postProcessBeforeInitialization方法被调用了,Bean名称 = com.xcs.spring.service.MyService
-调用createBean方法,创建Bean对象 = MyService{myRepository=com.xcs.spring.repository.MyRepository@5b03b9fe, javaHome='D:\install\jdk-11'}
+MyService.setBeanName method was called
+MyBeanPostProcessor#postProcessBeforeInitialization method was called, bean name = com.xcs.spring.service.MyService
+MyService.afterPropertiesSet method was called
+MyBeanPostProcessor#postProcessBeforeInitialization method was called, bean name = com.xcs.spring.service.MyService
+Called createBean, created bean = MyService{myRepository=com.xcs.spring.repository.MyRepository@5b03b9fe, javaHome='D:\install\jdk-11'}
 ```
 
 #### configureBean
 
-通过`AutowireCapableBeanFactory`的`configureBean`方法手动配置Bean。首先，通过`registerBeanDefinition`方法注册了一个名为 "myService" 的`RootBeanDefinition`，表示要配置的Bean的定义。接着，创建了一个新的`MyService`实例，并通过`configureBean`方法对该实例进行配置，指定了使用之前注册的 "myService" Bean 定义。在方法执行前后，分别输出了`MyService`的实例信息，观察是否成功进行了配置。
+The `configureBean` method of `AutowireCapableBeanFactory` configures a bean by hand. First, the `registerBeanDefinition` method registers a `RootBeanDefinition` named "myService". This is the definition of the bean to configure. Next, a new `MyService` instance is created. The `configureBean` method configures it with the "myService" bean definition registered before. The code prints the `MyService` instance before and after the call, so you can see if the configuration worked.
 
 ```java
 private static void configureBean(AutowireCapableBeanFactory beanFactory) {
-    // 配置一个RootBeanDefinition
+    // Register a RootBeanDefinition
     ((DefaultListableBeanFactory) beanFactory).registerBeanDefinition("myService", new RootBeanDefinition(MyService.class));
 
     MyService myService = new MyService();
-    System.out.println("调用configureBean前,MyService = " + myService);
+    System.out.println("Before configureBean, MyService = " + myService);
     beanFactory.configureBean(myService, "myService");
-    System.out.println("调用configureBean后,MyService = " + myService);
+    System.out.println("After configureBean, MyService = " + myService);
 }
 ```
 
-运行结果发现，通过`configureBean`方法配置`MyService`实例的过程与使用`createBean`方法创建实例的结果相似。在调用`configureBean`之前，`MyService`的实例信息显示属性都为null。然后，`setBeanName`、`postProcessBeforeInitialization`、`afterPropertiesSet`等回调方法依次被触发，表明Bean的初始化过程正常执行。最终，调用`configureBean`之后，`MyService`的实例信息显示成功注入了`myRepository`和通过`@Value`注解注入的`javaHome`属性。
+The output shows that configuring a `MyService` instance with `configureBean` gives a result similar to `createBean`. Before `configureBean`, the properties of `MyService` are null. Then the callbacks `setBeanName`, `postProcessBeforeInitialization`, and `afterPropertiesSet` run in order. This means the bean initialization runs as expected. After `configureBean`, `myRepository` and the `javaHome` property (injected with `@Value`) are both injected.
 
 ```java
-调用configureBean前,MyService = MyService{myRepository=null, javaHome='null'}
-MyService.setBeanName方法被调用了
-MyBeanPostProcessor#postProcessBeforeInitialization方法被调用了,Bean名称 = myService
-MyService.afterPropertiesSet方法被调用了
-MyBeanPostProcessor#postProcessBeforeInitialization方法被调用了,Bean名称 = myService
-调用configureBean后,MyService = MyService{myRepository=com.xcs.spring.repository.MyRepository@5b03b9fe, javaHome='D:\install\jdk-11'}
+Before configureBean, MyService = MyService{myRepository=null, javaHome='null'}
+MyService.setBeanName method was called
+MyBeanPostProcessor#postProcessBeforeInitialization method was called, bean name = myService
+MyService.afterPropertiesSet method was called
+MyBeanPostProcessor#postProcessBeforeInitialization method was called, bean name = myService
+After configureBean, MyService = MyService{myRepository=com.xcs.spring.repository.MyRepository@5b03b9fe, javaHome='D:\install\jdk-11'}
 ```
 
 #### autowireBean
 
-通过`AutowireCapableBeanFactory`的`autowireBean`方法手动进行Bean的自动装配。首先，创建了一个`MyService`实例，然后通过`autowireBean`方法对该实例进行自动装配。在方法执行前后，分别输出了`MyService`的实例信息，观察是否成功进行了自动装配。
+The `autowireBean` method of `AutowireCapableBeanFactory` autowires a bean by hand. First, a `MyService` instance is created. Then `autowireBean` autowires it. The code prints the `MyService` instance before and after the call, so you can see if the autowiring worked.
 
 ```java
 private static void autowireBean(AutowireCapableBeanFactory beanFactory) {
     MyService myService = new MyService();
-    System.out.println("调用autowireBean前,MyService = " + myService);
+    System.out.println("Before autowireBean, MyService = " + myService);
     beanFactory.autowireBean(myService);
-    System.out.println("调用autowireBean后,MyService = " + myService);
+    System.out.println("After autowireBean, MyService = " + myService);
 }
 ```
 
-运行结果发现，使用`AutowireCapableBeanFactory`的`autowireBean`方法对一个新创建的`MyService`实例进行手动的自动装配。在调用`autowireBean`之前，`MyService`的实例信息显示属性都为null。然后，调用`autowireBean`方法后，`MyService`的实例信息显示成功注入了`myRepository`属性，该属性引用了`com.xcs.spring.repository.MyRepository`的实例，以及通过`@Value`注解注入的`javaHome`属性，该属性的值为'D:\install\jdk-11'。
+The output shows that `autowireBean` autowires a newly created `MyService` instance by hand. Before `autowireBean`, the properties of `MyService` are null. After the call, `myRepository` is injected with an instance of `com.xcs.spring.repository.MyRepository`, and the `javaHome` property (injected with `@Value`) has the value 'D:\install\jdk-11'.
 
-然而，需要注意的是，使用`autowireBean`方法并没有触发`BeanNameAware`接口中的`setBeanName`方法、`InitializingBean`接口中的`afterPropertiesSet`方法，以及自定义的`MyBeanPostProcessor`后置处理器的相应回调方法。这是因为`autowireBean`方法主要关注依赖注入，而不涉及到完整的Bean生命周期管理。
+Note that `autowireBean` does not call `setBeanName` of `BeanNameAware`, `afterPropertiesSet` of `InitializingBean`, or the callbacks of the custom `MyBeanPostProcessor`. This is because `autowireBean` only does dependency injection. It does not manage the full bean lifecycle.
 
 ```java
-调用autowireBean前,MyService = MyService{myRepository=null, javaHome='null'}
-调用autowireBean后,MyService = MyService{myRepository=com.xcs.spring.repository.MyRepository@5b03b9fe, javaHome='D:\install\jdk-11'}
+Before autowireBean, MyService = MyService{myRepository=null, javaHome='null'}
+After autowireBean, MyService = MyService{myRepository=com.xcs.spring.repository.MyRepository@5b03b9fe, javaHome='D:\install\jdk-11'}
 ```
 
 #### autowire
 
-使用`AutowireCapableBeanFactory`的`autowire`方法来创建并自动装配一个`MyService`类型的Bean。通过指定`AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE`参数，表示使用类型自动装配。在方法执行后，输出了通过`autowire`方法创建的`MyService`实例的信息。
+The `autowire` method of `AutowireCapableBeanFactory` creates and autowires a bean of type `MyService`. The `AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE` argument means autowiring by type. After the call, the code prints the `MyService` instance created by `autowire`.
 
 ```java
 private static void autowire(AutowireCapableBeanFactory beanFactory) {
     Object myService = beanFactory.autowire(MyService.class, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, false);
-    System.out.println("调用autowire方法,创建Bean对象 =" + myService);
+    System.out.println("Called autowire, created bean = " + myService);
 }
 ```
 
-运行结果发现，通过`autowire`方法和`autowireBean`方法获得了相似的结果。
+The output shows that `autowire` and `autowireBean` give a similar result.
 
-不过，需要注意的是，虽然结果相似，但是这两个方法的使用场景略有不同。`autowireBean`是直接对一个已有实例进行自动装配，而`autowire`方法则是根据指定的类型动态创建并自动装配一个Bean。因此，具体使用哪一种方法取决于实际的需求和场景。
+But the two methods are used in slightly different cases. `autowireBean` autowires an existing instance. `autowire` creates a new bean of the given class and autowires it. So which one to use depends on what you need.
 
 ```java
-调用autowire方法,创建Bean对象 =MyService{myRepository=com.xcs.spring.repository.MyRepository@4145bad8, javaHome='D:\install\jdk-11'}
+Called autowire, created bean = MyService{myRepository=com.xcs.spring.repository.MyRepository@4145bad8, javaHome='D:\install\jdk-11'}
 ```
 
 #### autowireBeanProperties
 
-使用`AutowireCapableBeanFactory`的`autowireBeanProperties`方法，对一个新创建的`MyService`实例进行自动属性装配。首先，创建了一个`MyService`实例，并输出了其初始状态。然后，通过`autowireBeanProperties`方法对该实例进行自动属性装配，使用的是`AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE`规则。最后，输出了`autowireBeanProperties`后的`MyService`实例信息，观察是否成功进行了自动属性装配。
+The `autowireBeanProperties` method of `AutowireCapableBeanFactory` autowires the properties of a newly created `MyService` instance. First, a `MyService` instance is created and its initial state is printed. Then `autowireBeanProperties` autowires the properties with the `AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE` rule. Finally, the code prints the `MyService` instance after the call, so you can see if the autowiring worked.
 
 ```java
 private static void autowireBeanProperties(AutowireCapableBeanFactory beanFactory) {
     MyService myService = new MyService();
-    System.out.println("调用autowireBeanProperties前,MyService = " + myService);
+    System.out.println("Before autowireBeanProperties, MyService = " + myService);
     beanFactory.autowireBeanProperties(myService, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, false);
-    System.out.println("调用autowireBeanProperties后,MyService = " + myService);
+    System.out.println("After autowireBeanProperties, MyService = " + myService);
 }
 ```
 
-运行结果发现，通过`autowireBeanProperties`方法与之前的`autowireBean`和`autowire`方法相比，得到了相似的结果。在调用`autowireBeanProperties`方法之前，`MyService`的实例信息显示属性都为null。然后，调用`autowireBeanProperties`方法后，`MyService`的实例信息显示成功注入了`myRepository`属性，该属性引用了`com.xcs.spring.repository.MyRepository`的实例，以及通过`@Value`注解注入的`javaHome`属性，该属性的值为'D:\install\jdk-11'。
+The output of `autowireBeanProperties` is similar to the earlier `autowireBean` and `autowire`. Before the call, the properties of `MyService` are null. After the call, `myRepository` is injected with an instance of `com.xcs.spring.repository.MyRepository`, and the `javaHome` property (injected with `@Value`) has the value 'D:\install\jdk-11'.
 
 ```
-调用autowireBeanProperties前,MyService = MyService{myRepository=null, javaHome='null'}
-调用autowireBeanProperties后,MyService = MyService{myRepository=com.xcs.spring.repository.MyRepository@4145bad8, javaHome='D:\install\jdk-11'}
+Before autowireBeanProperties, MyService = MyService{myRepository=null, javaHome='null'}
+After autowireBeanProperties, MyService = MyService{myRepository=com.xcs.spring.repository.MyRepository@4145bad8, javaHome='D:\install\jdk-11'}
 ```
 
 #### applyBeanPropertyValues
 
-使用`AutowireCapableBeanFactory`的`applyBeanPropertyValues`方法，手动为`MyService`类型的Bean配置自定义属性值。首先，创建了一个`PropertyValue`实例，表示要设置的属性名为"javaHome"，属性值为"这里是我自定义的javaHome路径配置"。接着，通过`MutablePropertyValues`构建了属性值的集合，并将之前创建的`PropertyValue`添加到集合中。然后，创建了一个`RootBeanDefinition`，并将属性值集合设置到该Bean定义中。最后，通过`registerBeanDefinition`方法注册了一个名为 "myService" 的Bean定义。在调用`applyBeanPropertyValues`方法之前，创建了一个新的`MyService`实例，并输出了其初始状态。然后，调用`applyBeanPropertyValues`方法后，输出了`applyBeanPropertyValues`后的`MyService`实例信息，观察是否成功应用了自定义的属性值。
+The `applyBeanPropertyValues` method of `AutowireCapableBeanFactory` sets custom property values on a `MyService` bean by hand. First, a `PropertyValue` is created. The property name is "javaHome" and the value is "My custom javaHome path". Next, a `MutablePropertyValues` collection is built and the `PropertyValue` is added to it. Then a `RootBeanDefinition` is created and the property values are set on it. Finally, the `registerBeanDefinition` method registers this bean definition under the name "myService". Before calling `applyBeanPropertyValues`, a new `MyService` instance is created and its initial state is printed. After the call, the code prints the `MyService` instance again, so you can see if the custom property values were applied.
 
 ```java
 private static void applyBeanPropertyValues(AutowireCapableBeanFactory beanFactory) {
-    PropertyValue propertyValue = new PropertyValue("javaHome", "这里是我自定义的javaHome路径配置");
+    PropertyValue propertyValue = new PropertyValue("javaHome", "My custom javaHome path");
     MutablePropertyValues propertyValues = new MutablePropertyValues();
     propertyValues.addPropertyValue(propertyValue);
 
     RootBeanDefinition rootBeanDefinition = new RootBeanDefinition(MyService.class);
     rootBeanDefinition.setPropertyValues(propertyValues);
-    // 配置一个RootBeanDefinition
+    // Register a RootBeanDefinition
     ((DefaultListableBeanFactory) beanFactory).registerBeanDefinition("myService", rootBeanDefinition);
 
     MyService myService = new MyService();
-    System.out.println("调用applyBeanPropertyValues前,MyService = " + myService);
+    System.out.println("Before applyBeanPropertyValues, MyService = " + myService);
     beanFactory.applyBeanPropertyValues(myService, "myService");
-    System.out.println("调用applyBeanPropertyValues后,MyService = " + myService);
+    System.out.println("After applyBeanPropertyValues, MyService = " + myService);
 }
 ```
 
-运行结果发现，调用`applyBeanPropertyValues`方法后，并没有触发`BeanNameAware`接口中的`setBeanName`方法、`InitializingBean`接口中的`afterPropertiesSet`方法，以及自定义的`MyBeanPostProcessor`后置处理器的相应回调方法。这是因为`applyBeanPropertyValues`方法主要专注于属性值的应用，而不涉及完整的Bean初始化和生命周期管理。最终的运行结果显示`myRepository`属性为null，表明`applyBeanPropertyValues`方法并没有进行依赖注入。
+The output shows that `applyBeanPropertyValues` does not call `setBeanName` of `BeanNameAware`, `afterPropertiesSet` of `InitializingBean`, or the callbacks of the custom `MyBeanPostProcessor`. This is because `applyBeanPropertyValues` only applies property values. It does not run the full bean initialization and lifecycle. The `myRepository` property stays null. So `applyBeanPropertyValues` does not do dependency injection.
 
 ```java
-调用applyBeanPropertyValues前,MyService = MyService{myRepository=null, javaHome='null'}
-调用applyBeanPropertyValues后,MyService = MyService{myRepository=null, javaHome='这里是我自定义的javaHome路径配置'}
+Before applyBeanPropertyValues, MyService = MyService{myRepository=null, javaHome='null'}
+After applyBeanPropertyValues, MyService = MyService{myRepository=null, javaHome='My custom javaHome path'}
 ```
 
 #### initializeBean
 
-使用`AutowireCapableBeanFactory`的`initializeBean`方法，手动初始化`MyService`类型的Bean。首先，创建了一个新的`MyService`实例，并输出了其初始状态。然后，通过`initializeBean`方法对该实例进行初始化，指定了Bean的名称为 "myService"。在调用方法之后，输出了`initializeBean`后的`MyService`实例信息，观察是否成功进行了初始化。
+The `initializeBean` method of `AutowireCapableBeanFactory` initializes a `MyService` bean by hand. First, a new `MyService` instance is created and its initial state is printed. Then `initializeBean` initializes it with the bean name "myService". After the call, the code prints the `MyService` instance, so you can see if the initialization worked.
 
 ```java
 private static void initializeBean(AutowireCapableBeanFactory beanFactory) {
     MyService myService = new MyService();
-    System.out.println("调用initializeBean前,MyService = " + myService);
+    System.out.println("Before initializeBean, MyService = " + myService);
     beanFactory.initializeBean(myService, "myService");
-    System.out.println("调用initializeBean前,MyService = " + myService);
+    System.out.println("After initializeBean, MyService = " + myService);
 }
 ```
 
-运行结果发现，`myRepository`和`javaHome`的值都显示为`null`，这是因为在调用`initializeBean`方法时，并没有提供属性值的注入。`initializeBean`方法主要用于手动触发Bean的初始化阶段，包括调用`afterPropertiesSet`方法和应用Bean后置处理器，但它并不负责属性的注入。
+The output shows that `myRepository` and `javaHome` are still `null`. This is because `initializeBean` does not inject any properties. The `initializeBean` method triggers the bean initialization phase by hand. This includes calling `afterPropertiesSet` and applying the bean post-processors. It does not inject properties.
 
 ```java
-调用initializeBean前,MyService = MyService{myRepository=null, javaHome='null'}
-MyService.setBeanName方法被调用了
-MyBeanPostProcessor#postProcessBeforeInitialization方法被调用了,Bean名称 = myService
-MyService.afterPropertiesSet方法被调用了
-MyBeanPostProcessor#postProcessBeforeInitialization方法被调用了,Bean名称 = myService
-调用initializeBean前,MyService = MyService{myRepository=null, javaHome='null'}
+Before initializeBean, MyService = MyService{myRepository=null, javaHome='null'}
+MyService.setBeanName method was called
+MyBeanPostProcessor#postProcessBeforeInitialization method was called, bean name = myService
+MyService.afterPropertiesSet method was called
+MyBeanPostProcessor#postProcessBeforeInitialization method was called, bean name = myService
+After initializeBean, MyService = MyService{myRepository=null, javaHome='null'}
 ```
 
 #### destroyBean
 
-使用`AutowireCapableBeanFactory`的`destroyBean`方法，手动销毁（destroy）一个`MyService`类型的Bean实例。通过传递新创建的`MyService`实例作为参数，调用了`destroyBean`方法。
+The `destroyBean` method of `AutowireCapableBeanFactory` destroys a `MyService` bean instance by hand. A newly created `MyService` instance is passed to `destroyBean`.
 
 ```java
 private static void destroyBean(AutowireCapableBeanFactory beanFactory) {
@@ -634,15 +686,15 @@ private static void destroyBean(AutowireCapableBeanFactory beanFactory) {
 }
 ```
 
-运行结果发现，在调用`destroyBean`方法后，`MyService`实例的销毁方法 `destroy` 被成功调用。这表明`destroyBean`方法有效地触发了Bean的销毁阶段，执行了实现了`DisposableBean`接口的`destroy`方法。
+The output shows that after calling `destroyBean`, the `destroy` method of the `MyService` instance is called. This means `destroyBean` triggers the destruction phase of the bean and runs the `destroy` method from the `DisposableBean` interface.
 
 ```java
-MyService.destroy方法被调用了
+MyService.destroy method was called
 ```
 
 #### resolveDependency
 
-使用`AutowireCapableBeanFactory`的`resolveDependency`方法，手动解析一个依赖关系。通过创建一个`DependencyDescriptor`对象，表示`MyService`类中的`myRepository`属性，然后调用`resolveDependency`方法，尝试解析这个依赖关系。最后，输出解析得到的依赖对象。
+The `resolveDependency` method of `AutowireCapableBeanFactory` resolves a dependency by hand. A `DependencyDescriptor` is created for the `myRepository` field of the `MyService` class. Then `resolveDependency` tries to resolve this dependency. Finally, the code prints the resolved object.
 
 ```java
 private static void resolveDependency(AutowireCapableBeanFactory beanFactory) {
@@ -656,44 +708,44 @@ private static void resolveDependency(AutowireCapableBeanFactory beanFactory) {
 }
 ```
 
-运行结果发现，通过调用`resolveDependency`方法成功解析了依赖关系，将`myRepository`属性的依赖解析为`MyRepository`的实例。
+The output shows that `resolveDependency` resolves the dependency. The `myRepository` dependency is resolved to a `MyRepository` instance.
 
 ```java
 resolveDependency = com.xcs.spring.repository.MyRepository@37654521
 ```
 
-### 常见问题
+### 7. Common Problems
 
-1. **createBean() 和 configureBean()**
+1. **createBean() and configureBean()**
 
-   - `createBean()` 用于创建Bean的实例，即进行Bean的实例化。它是Bean创建过程中的第一步。
-   - `configureBean()` 则是在Bean实例创建之后，进行进一步的配置，如应用BeanPostProcessors等。这是在Bean实例化后、初始化之前的阶段。
+   - `createBean()` creates a bean instance, that is, it instantiates the bean. It is the first step of bean creation.
+   - `configureBean()` configures a bean instance that already exists. For example, it applies BeanPostProcessors. It works after the bean is instantiated and before it is fully initialized.
 
-2. **autowireBean() 和 autowire()**
+2. **autowireBean() and autowire()**
 
-   - `autowireBean()` 用于对现有的Bean实例进行自动装配，将依赖注入到Bean中。
-   - `autowire()` 是在创建Bean实例时使用指定的自动装配模式，用于生成新的Bean实例。
+   - `autowireBean()` autowires an existing bean instance. It injects the dependencies into the bean.
+   - `autowire()` creates a new bean instance with the given autowire mode.
 
-3. **autowireBeanProperties() 和 applyBeanPropertyValues()**
+3. **autowireBeanProperties() and applyBeanPropertyValues()**
 
-   - `autowireBeanProperties()` 主要用于对Bean实例的属性进行自动装配。
-   - `applyBeanPropertyValues()` 则是将属性值应用到Bean实例，包括在XML或注解中配置的属性值。
+   - `autowireBeanProperties()` autowires the properties of a bean instance.
+   - `applyBeanPropertyValues()` applies property values to a bean instance. This includes the property values set in XML or annotations.
 
-4. **initializeBean()、applyBeanPostProcessorsBeforeInitialization() 和 applyBeanPostProcessorsAfterInitialization()**
+4. **initializeBean(), applyBeanPostProcessorsBeforeInitialization() and applyBeanPostProcessorsAfterInitialization()**
 
-   - `initializeBean()` 是Bean生命周期中的最后一步，包括初始化和应用BeanPostProcessors等。
-   - `applyBeanPostProcessorsBeforeInitialization()` 用于在初始化之前应用BeanPostProcessors。
-   - `applyBeanPostProcessorsAfterInitialization()` 用于在初始化之后应用BeanPostProcessors。
+   - `initializeBean()` is the last step of the bean lifecycle. It includes initialization and applying BeanPostProcessors.
+   - `applyBeanPostProcessorsBeforeInitialization()` applies BeanPostProcessors before initialization.
+   - `applyBeanPostProcessorsAfterInitialization()` applies BeanPostProcessors after initialization.
 
 5. **destroyBean()**
 
-   - `destroyBean()` 用于销毁给定的Bean实例，释放资源等。通常在容器关闭时调用。
+   - `destroyBean()` destroys the given bean instance and releases resources. It is usually called when the container shuts down.
 
-6. **resolveNamedBean() 和 resolveBeanByName()**
+6. **resolveNamedBean() and resolveBeanByName()**
 
-   - `resolveNamedBean()` 主要用于解析指定名称的Bean并返回Bean实例。
-   - `resolveBeanByName()` 则是解析指定名称的Bean定义，而不是直接返回Bean实例。
+   - `resolveNamedBean()` resolves a bean of the given type and returns the bean instance together with its name.
+   - `resolveBeanByName()` resolves the bean with the given name. It uses a dependency descriptor for the injection point.
 
 7. **resolveDependency()**
 
-   - `resolveDependency()` 主要用于解析Bean之间的依赖关系，特别是在自动装配时。在`AbstractAutowireCapableBeanFactory`的`doResolveDependency()`方法中调用。
+   - `resolveDependency()` resolves the dependencies between beans, especially during autowiring. It is called in the `doResolveDependency()` method of `AbstractAutowireCapableBeanFactory`.

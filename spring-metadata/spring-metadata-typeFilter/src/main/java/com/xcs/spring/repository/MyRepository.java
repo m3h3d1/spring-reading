@@ -2,7 +2,7 @@ package com.xcs.spring.repository;
 
 /**
  * @author xcs
- * @date 2023年10月07日 11时51分
+ * @date 2023-10-07 11:51
  **/
 public class MyRepository {
 

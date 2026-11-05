@@ -13,33 +13,33 @@ import java.io.IOException;
 
 /**
  * @author xcs
- * @date 2023年11月20日 10时34分
+ * @date 2023-11-20 10:34
  **/
 public class TypeFilterDemo {
 
     public static void main(String[] args) throws IOException {
-        // 创建路径匹配的资源模式解析器
+        // Create a resolver for path pattern resources
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
-        // 创建一个简单的元数据读取器工厂
+        // Create a simple metadata reader factory
         SimpleMetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 
-        // 创建一个注解类型过滤器，用于匹配带有 MyAnnotation 注解的类
+        // Create an annotation type filter to match classes with the MyAnnotation annotation
         TypeFilter annotationTypeFilter = new AnnotationTypeFilter(MyAnnotation.class);
 
-        // 使用资源模式解析器获取所有匹配指定路径的类文件
+        // Use the resolver to get all class files that match the path
         Resource[] resources = resolver.getResources("classpath*:com/xcs/spring/**/*.class");
 
-        // 遍历扫描到的类文件
+        // Go through the scanned class files
         for (Resource resource : resources) {
-            // 获取元数据读取器
+            // Get the metadata reader
             MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(resource);
 
-            // 使用注解类型过滤器匹配当前类
+            // Match the current class with the annotation type filter
             boolean match = annotationTypeFilter.match(metadataReader, metadataReaderFactory);
 
-            // 输出扫描到的文件名和匹配结果
-            System.out.printf("扫描到的文件: %-20s || 筛选器是否匹配: %s%n", resource.getFile().getName(), match);
+            // Print the scanned file name and the match result
+            System.out.printf("Scanned file: %-20s || Filter matches: %s%n", resource.getFile().getName(), match);
         }
     }
 }

@@ -1,57 +1,56 @@
 ## MetadataReader
 
 - [MetadataReader](#metadatareader)
-  - [一、知识储备](#一知识储备)
-  - [二、基本描述](#二基本描述)
-  - [三、主要功能](#三主要功能)
-  - [四、接口源码](#四接口源码)
-  - [五、主要实现](#五主要实现)
-  - [六、最佳实践](#六最佳实践)
-  - [七、与其他组件的关系](#七与其他组件的关系)
-  - [八、常见问题](#八常见问题)
+  - [1. Background Knowledge](#1-background-knowledge)
+  - [2. Description](#2-description)
+  - [3. Main Features](#3-main-features)
+  - [4. Interface Source](#4-interface-source)
+  - [5. Main Implementation](#5-main-implementation)
+  - [6. Best Practices](#6-best-practices)
+  - [7. Relation to Other Components](#7-relation-to-other-components)
+  - [8. Common Problems](#8-common-problems)
 
 
-### 一、知识储备
+### 1. Background Knowledge
 
-1. **Resource接口**
-   + 了解 Spring 的 `Resource` 接口，它是用于访问资源的抽象接口。资源可以是文件、类路径中的文件、URL 等等。我们需要了解如何使用 `Resource` 接口来获取资源的输入流、文件路径等信息。[点击查看Resource接口](https://github.com/xuchengsheng/spring-reading/blob/master/spring-resources/spring-resource)
-2. **ResourceLoader接口**
-   + 了解 Spring 的 `ResourceLoader` 接口，它是用于获取 `Resource` 对象的工厂。我们需要了解如何使用 `ResourceLoader` 接口来获取 `Resource` 对象，以便加载资源。[点击查看ResourceLoader接口](https://github.com/xuchengsheng/spring-reading/blob/master/spring-resources/spring-resource-resourceLoader)
-3. **类路径扫描**
-   + 了解如何使用 `Resource` 接口和 `ResourceLoader` 接口来扫描类路径上的资源，以获取类的元数据信息。
-4. **Spring配置**
-   + 熟悉如何配置 Spring 应用程序上下文，以便能够使用 `Resource` 和 `ResourceLoader`。这可能涉及到配置文件（如 XML 或 Java 配置类）的编写和加载。
-5. **ASM（可选）**
-   + 虽然不是必需的，但了解基本的ASM（字节码操作框架）知识可以帮助我们更好地理解 `MetadataReader` 的内部工作原理。Spring的`SimpleMetadataReader` 使用ASM来解析类文件。
+1. **Resource interface**
+   + Know the Spring `Resource` interface. It is an abstract interface to access resources. A resource can be a file, a file on the classpath, a URL, and so on. You need to know how to use `Resource` to get the input stream, the file path, and other information of a resource. [See the Resource interface](https://github.com/xuchengsheng/spring-reading/blob/master/spring-resources/spring-resource)
+2. **ResourceLoader interface**
+   + Know the Spring `ResourceLoader` interface. It is a factory to get `Resource` objects. You need to know how to use `ResourceLoader` to get a `Resource` object and load resources. [See the ResourceLoader interface](https://github.com/xuchengsheng/spring-reading/blob/master/spring-resources/spring-resource-resourceLoader)
+3. **Classpath scanning**
+   + Know how to use the `Resource` and `ResourceLoader` interfaces to scan resources on the classpath and get the metadata of classes.
+4. **Spring configuration**
+   + Know how to configure a Spring application context so that `Resource` and `ResourceLoader` can be used. This may include writing and loading configuration files (such as XML or Java configuration classes).
+5. **ASM (optional)**
+   + It is not required, but some basic knowledge of ASM (a bytecode library) helps to understand how `MetadataReader` works inside. The Spring `SimpleMetadataReader` uses ASM to parse class files.
 
-### 二、基本描述
+### 2. Description
 
-`org.springframework.core.type.classreading.MetadataReader` 接口是 Spring 框架中用于读取和解析类文件元数据的核心接口之一。它的主要作用是允许应用程序获取有关类的元数据信息，包括类的名称、访问修饰符、接口、超类、注解等等。这些元数据信息可以在运行时用于实现各种高级功能，例如组件扫描、条件化注解处理、AOP（面向切面编程）等。
+The `org.springframework.core.type.classreading.MetadataReader` interface is one of the core interfaces in the Spring Framework to read and parse the metadata of class files. It lets an application get metadata about a class, such as the class name, access modifiers, interfaces, super class, and annotations. This metadata can be used at runtime for many advanced features, such as component scanning, conditional annotation handling, and AOP (aspect-oriented programming).
 
-### 三、主要功能
+### 3. Main Features
 
-1. **获取类的基本信息**
-   + `MetadataReader` 允许我们获取关于类的基本信息，包括类名、是否为接口、是否为抽象类、是否为注解类等。
-2. **获取类上的注解信息**
-   + 我们可以使用 `MetadataReader` 获取类上的注解信息，包括注解的类型、注解的属性值等。
-3. **获取方法上的注解信息**
-   + 通过 `MetadataReader`，我们可以获取类中方法的元数据信息，包括方法的名称、返回类型、是否为抽象方法，以及方法上的注解信息。
-4. **获取类的成员类信息**
-   + `MetadataReader` 提供了方法来获取类中声明的成员类（嵌套类或内部类）的名称。
-5. **获取类的资源信息**
-   + 我们可以使用 `MetadataReader` 获取与类关联的资源信息，例如类文件的路径。
-6. **获取类的超类信息**
-   + `MetadataReader` 允许我们获取类的超类信息，包括超类的名称和是否有超类。
+1. **Get basic class information**
+   + `MetadataReader` gives basic information about a class, such as the class name and whether it is an interface, an abstract class, or an annotation.
+2. **Get annotation information on a class**
+   + You can use `MetadataReader` to get the annotation information on a class, such as the annotation types and attribute values.
+3. **Get annotation information on methods**
+   + With `MetadataReader`, you can get the metadata of the methods in a class, such as the method name, the return type, whether it is abstract, and the annotations on it.
+4. **Get member class information**
+   + `MetadataReader` has methods to get the names of the member classes (nested or inner classes) declared in a class.
+5. **Get resource information of a class**
+   + You can use `MetadataReader` to get the resource linked to a class, for example the path of the class file.
+6. **Get super class information**
+   + `MetadataReader` gives the super class information of a class, such as the name of the super class and whether there is one.
 
-### 四、接口源码
+### 4. Interface Source
 
-`MetadataReader` 接口是 Spring 框架中的一个简单接口，用于访问类元数据。它提供了获取类文件资源、类的基本元数据和类上注解元数据的方法。这些元数据是由 ASM 中的 ClassReader 读取的。这个接口的主要用途是在 Spring 框架中处理类级别的元数据和注解，使我们能够访问和操作类的信息和注解信息。
+`MetadataReader` is a simple interface in the Spring Framework to access class metadata. It has methods to get the class file resource, the basic metadata of the class, and the annotation metadata of the class. This metadata is read by the ClassReader of ASM. The interface is mainly used in Spring to handle class-level metadata and annotations. It lets you access and use the information and annotations of a class.
 
 ```java
 /**
- * MetadataReader 接口：
- * 提供了一种访问类元数据的简单接口，以便读取类信息，包括类的基本信息和类上的注解信息。
- * 这些信息是由 ASM 中的 ClassReader 读取的。
+ * Simple facade for accessing class metadata,
+ * as read by an ASM {@link org.springframework.asm.ClassReader}.
  *
  * @author Juergen Hoeller
  * @since 2.5
@@ -59,26 +58,27 @@
 public interface MetadataReader {
 
     /**
-     * 返回类文件的资源引用。
+     * Return the resource reference for the class file.
      */
     Resource getResource();
 
     /**
-     * 读取底层类的基本元数据。
+     * Read basic class metadata for the underlying class.
      */
     ClassMetadata getClassMetadata();
 
     /**
-     * 读取底层类的完整注解元数据，包括类上的注解信息以及带注解的方法的元数据。
+     * Read full annotation metadata for the underlying class,
+     * including metadata for annotated methods.
      */
     AnnotationMetadata getAnnotationMetadata();
 }
 ```
 
-### 五、主要实现
+### 5. Main Implementation
 
 1. `SimpleMetadataReader`
-   + 用于从类文件中读取元数据。它使用 ASM 库的 `ClassReader` 来解析类文件并提取元数据。
+   + Reads metadata from class files. It uses the `ClassReader` of the ASM library to parse the class file and get the metadata.
 
 ~~~mermaid
 classDiagram
@@ -97,20 +97,20 @@ classDiagram
 
 ~~~
 
-### 六、最佳实践
+### 6. Best Practices
 
-首先创建了一个`SimpleMetadataReaderFactory`的实例，它是用于创建`MetadataReader`对象的工厂。然后，通过`SimpleMetadataReaderFactory`创建了一个`MetadataReader`。接着，使用`MetadataReader`获取了目标类的基本信息，包括类名、类的类型（接口、注解、抽象类、普通类等）以及其他相关属性，以便深入了解类的结构。接下来，获取了类上的注解信息，包括注解的类型，以帮助了解类是否使用了特定的注解。最后，遍历类中带有指定注解的方法，获取方法的详细信息，例如方法名、声明方法的类名、返回类型等，以便执行自定义注解处理或特定方法的逻辑。
+This example first creates a `SimpleMetadataReaderFactory`. It is the factory that creates `MetadataReader` objects. Then it creates a `MetadataReader` with this factory. The `MetadataReader` gets the basic information of the target class, such as the class name and the kind of class (interface, annotation, abstract class, concrete class, and so on), to understand the structure of the class. Next, it gets the annotation information of the class, including the annotation types, to see if the class uses specific annotations. Finally, it goes through the methods of the class that have the given annotation. It gets details such as the method name, the declaring class name, and the return type. You can use these for custom annotation handling or logic for specific methods.
 
 ```java
 public class MetadataReaderDemo {
     public static void main(String[] args) throws IOException {
 
-        // 创建 MetadataReaderFactory
+        // Create the MetadataReaderFactory
         SimpleMetadataReaderFactory readerFactory = new SimpleMetadataReaderFactory();
-        // 获取 MetadataReader
+        // Get the MetadataReader (Spring usually creates it for you)
         MetadataReader metadataReader = readerFactory.getMetadataReader("com.xcs.spring.bean.MyBean");
 
-        // 获取类的基本信息
+        // Get the basic information of the class
         ClassMetadata classMetadata = metadataReader.getClassMetadata();
         System.out.println("Class Name = " + classMetadata.getClassName());
         System.out.println("Class IsInterface = " + classMetadata.isInterface());
@@ -129,7 +129,7 @@ public class MetadataReaderDemo {
 
         System.out.println();
 
-        // 获取方法上的注解信息
+        // Get the annotated methods
         for (MethodMetadata methodMetadata : metadataReader.getAnnotationMetadata().getAnnotatedMethods("com.xcs.spring.annotation.MyAnnotation")) {
             System.out.println("Method Name: " + methodMetadata.getMethodName());
             System.out.println("Method DeclaringClassName: " + methodMetadata.getDeclaringClassName());
@@ -144,7 +144,7 @@ public class MetadataReaderDemo {
 }
 ```
 
-定义了一个Java类`MyBean`，它继承了一个抽象类`MyAbstract`，并被标记为`@MyClassAnnotation`的类级别注解。`MyBean`类包含字段`key`和`value`，以及三个方法：`myMethod1`（静态方法，标记有`@MyAnnotation`注解）、`myMethod2`（实例方法，返回字符串，同样标记有`@MyAnnotation`注解）和`myMethod3`（普通实例方法）。此外，`MyBean`类定义了一个静态内部类`MyInnerClass`。这个代码我给大家展示了Java类的不同方面，包括继承、实现接口、字段、方法、注解以及内部类的使用。
+This code defines a Java class `MyBean`. It extends the abstract class `MyAbstract` and has the class-level annotation `@MyClassAnnotation`. `MyBean` has the fields `key` and `value`, and three methods: `myMethod1` (a static method with the `@MyAnnotation` annotation), `myMethod2` (an instance method that returns a string, also with `@MyAnnotation`), and `myMethod3` (a plain instance method). `MyBean` also defines a static inner class `MyInnerClass`. This code shows different parts of a Java class: inheritance, interfaces, fields, methods, annotations, and inner classes.
 
 ```java
 public abstract class MyAbstract {
@@ -173,12 +173,12 @@ public final class MyBean extends MyAbstract implements Serializable {
     }
 
     public static class MyInnerClass {
-        // 内部类的定义
+        // Definition of the inner class
     }
 }
 ```
 
-定义了两个自定义注解：`MyAnnotation` 和 `MyClassAnnotation`。
+Two custom annotations are defined: `MyAnnotation` and `MyClassAnnotation`.
 
 ```java
 @Retention(RetentionPolicy.RUNTIME)
@@ -192,7 +192,7 @@ public @interface MyClassAnnotation {
 }
 ```
 
-运行结果发现，使用 `MetadataReader` 可以获取类和方法的基本信息、注解元数据，实现自定义注解处理逻辑，识别不带特定注解的方法，深入了解类的结构，以及在运行时动态检查类的特性，为开发自定义框架、组件扫描和反射操作提供了强大的工具。但是，`MetadataReader`不会收集没有特定注解的方法(比如：`myMethod3`)。这意味着未被注解标记的方法将不会包含在元数据中。
+The output shows that `MetadataReader` can get the basic information and annotation metadata of classes and methods. You can use it for custom annotation handling, to find methods that have a given annotation, to understand the structure of a class, and to check class features at runtime. It is a strong tool to build custom frameworks, component scanning, and reflection work. Note that `MetadataReader` does not collect the methods that do not have the given annotation (for example `myMethod3`). Methods without the annotation are not part of the metadata.
 
 ```java
 Class Name = com.xcs.spring.bean.MyBean
@@ -227,22 +227,22 @@ Method IsFinal: false
 Method IsOverridable: true
 ```
 
-### 七、与其他组件的关系
+### 7. Relation to Other Components
 
 1. **`ClassPathBeanDefinitionScanner`**
-   + `ClassPathBeanDefinitionScanner`使用 `MetadataReader` 类来实现组件扫描。组件扫描是一种机制，它自动发现并注册应用程序中的类，以便它们可以被Spring容器管理。`MetadataReader` 用于扫描类的元数据，以确定哪些类应该被注册为Spring组件，例如标记为 `@Component`、`@Service`、`@Repository` 等注解的类。
+   + `ClassPathBeanDefinitionScanner` uses `MetadataReader` for component scanning. Component scanning is a way to find and register the classes in an application automatically, so the Spring container can manage them. `MetadataReader` reads the metadata of classes to decide which classes should be registered as Spring components, for example classes with annotations such as `@Component`, `@Service`, and `@Repository`.
 2. **`MetadataReaderFactory`**
-   + `MetadataReaderFactory`是一个工厂类，用于创建 `MetadataReader` 实例。而`MetadataReader` 是一个接口，用于读取和解析类的元数据信息，包括类级别和方法级别的注解信息。`MetadataReaderFactory`负责处理类资源（如类文件或字节码），并将其包装成 `MetadataReader` 对象，以便进一步处理类的元数据。
+   + `MetadataReaderFactory` is a factory that creates `MetadataReader` instances. `MetadataReader` is an interface to read and parse the metadata of a class, including class-level and method-level annotation information. `MetadataReaderFactory` handles class resources (such as class files or bytecode) and wraps them into a `MetadataReader` object, so the class metadata can be processed further.
 
-### 八、常见问题
+### 8. Common Problems
 
-1. **`MetadataReader` 与 `ClassPathBeanDefinitionScanner` 之间的关系是什么？**
-   - `ClassPathBeanDefinitionScanner` 是 Spring 框架用于执行组件扫描的类，它使用 `MetadataReader` 来扫描指定包中的类，识别哪些类应该被注册为 Spring Bean。
-2. **在 Spring 中的哪些场景中使用 `MetadataReader`？**
-   - `MetadataReader` 在 Spring 中主要用于组件扫描、AOP、注解处理、Bean后处理等场景中，以读取和处理类的元数据信息。
-3. **为什么使用 `MetadataReader` 而不是反射？**
-   - 使用 `MetadataReader` 通常比反射更高效，因为它直接读取字节码，而不需要加载整个类。此外，它允许进行更高级的元数据分析和自定义操作。
-4. **有哪些常见的 `MetadataReader` 的实现类？**
-   - Spring 框架提供了多个 `MetadataReader` 的实现类，最常见的是 `SimpleMetadataReader`。它们用于从类文件和注解信息中读取元数据。
-5. **如何自定义 `MetadataReader` 的使用？**
-   - 我们可以编写自定义的元数据读取器，实现 `MetadataReader` 接口，以满足特定需求，例如自定义注解处理、特殊的类加载逻辑等。
+1. **What is the relation between `MetadataReader` and `ClassPathBeanDefinitionScanner`?**
+   - `ClassPathBeanDefinitionScanner` is the class Spring uses for component scanning. It uses `MetadataReader` to scan the classes in the given packages and find which classes should be registered as Spring beans.
+2. **Where is `MetadataReader` used in Spring?**
+   - `MetadataReader` is mainly used in component scanning, AOP, annotation handling, and bean post-processing. It reads and handles the metadata of classes.
+3. **Why use `MetadataReader` instead of reflection?**
+   - `MetadataReader` is usually faster than reflection. It reads the bytecode directly and does not need to load the whole class. It also allows more advanced metadata analysis and custom work.
+4. **What are the common implementations of `MetadataReader`?**
+   - Spring has several implementations of `MetadataReader`. The most common is `SimpleMetadataReader`. They read metadata from class files and annotation information.
+5. **How do I customize the use of `MetadataReader`?**
+   - You can write your own metadata reader that implements the `MetadataReader` interface for special needs, such as custom annotation handling or special class loading logic.

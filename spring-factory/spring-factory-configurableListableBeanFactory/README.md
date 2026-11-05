@@ -1,67 +1,70 @@
 ## ConfigurableListableBeanFactory
 
 - [ConfigurableListableBeanFactory](#configurablelistablebeanfactory)
-	- [一、基本信息](#一基本信息)
-	- [二、基本描述](#二基本描述)
-	- [三、主要功能](#三主要功能)
-	- [四、接口源码](#四接口源码)
-	- [五、最佳实践](#五最佳实践)
-	- [六、与其他组件的关系](#六与其他组件的关系)
-	- [七、常见问题](#七常见问题)
+	- [1. Overview](#1-overview)
+	- [2. Description](#2-description)
+	- [3. Main Features](#3-main-features)
+	- [4. Interface Source](#4-interface-source)
+	- [5. Best Practices](#5-best-practices)
+	- [6. Relation to Other Components](#6-relation-to-other-components)
+	- [7. Common Problems](#7-common-problems)
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [Juejin](https://juejin.cn/user/4251135018533068/posts) 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、基本描述
+### 2. Description
 
-`ConfigurableListableBeanFactory`接口是Spring框架中的一个关键接口，扩展了`ListableBeanFactory`和`ConfigurableBeanFactory`，提供了更多用于配置和管理bean的方法。通过该接口，可以注册单例对象、自定义作用域、冻结配置、获取BeanDefinition信息、设置父BeanFactory等。
+`ConfigurableListableBeanFactory` is a key interface in Spring. It extends `ListableBeanFactory` and `ConfigurableBeanFactory`, and gives more methods to configure and manage beans. With this interface, you can register singleton objects, register custom scopes, freeze the configuration, get `BeanDefinition` information, set the parent `BeanFactory`, and more.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **注册单例对象** 
+1. **Register a singleton object** 
 
-   + 允许通过指定的bean名称注册一个单例对象，使用`registerSingleton(String beanName, Object singletonObject)`方法。
+   + You can register a singleton object under a bean name with the `registerSingleton(String beanName, Object singletonObject)` method.
 
-2. **注册作用域** 
+2. **Register a scope** 
 
-   + 提供方法`registerScope(String scopeName, Scope scope)`，用于注册自定义的作用域，扩展了Spring默认的单例、原型等作用域。
+   + The `registerScope(String scopeName, Scope scope)` method registers a custom scope. This extends the default scopes of Spring, such as singleton and prototype.
 
-3. **冻结配置** 
+3. **Freeze the configuration** 
 
-   + 通过`freezeConfiguration()`方法，可以冻结bean工厂的配置，防止在后续阶段对其进行修改。这在某些场景下可以增强应用程序的安全性。
+   + The `freezeConfiguration()` method freezes the configuration of the bean factory. This stops later changes to it. In some cases, this makes the application safer.
 
-4. **提供已注册的BeanDefinition** 
+4. **Get registered BeanDefinition objects** 
 
-   + 通过`getBeanDefinition(String beanName)`方法，可以获取指定bean名称的`BeanDefinition`对象，包含有关bean的配置信息，例如作用域、依赖等。
+   + The `getBeanDefinition(String beanName)` method returns the `BeanDefinition` object of the given bean name. It holds the configuration of the bean, such as scope and dependencies.
 
-5. **提供已注册的所有BeanDefinition名称** 
+5. **Get the names of all registered BeanDefinition objects** 
 
-   + 使用`getBeanDefinitionNames()`方法，可以获取所有已注册bean定义的名称数组，方便进行遍历和查看。
+   + The `getBeanDefinitionNames()` method returns an array with the names of all registered bean definitions. This makes it easy to go through and check them.
 
-6. **提供已注册的所有单例bean名称** 
+6. **Get the names of all registered singleton beans** 
 
-   + 通过`getSingletonNames()`方法，可以获取当前已注册的所有单例bean的名称数组，方便查看和管理已实例化的bean。
+   + The `getSingletonNames()` method returns an array with the names of all registered singleton beans. This makes it easy to see and manage the beans that are already instantiated.
 
-7. **设置父BeanFactory** 
+7. **Set the parent BeanFactory** 
 
-   + 允许通过`setParentBeanFactory(BeanFactory parentBeanFactory)`方法设置一个父BeanFactory，使得在父工厂中查找bean定义。
+   + The `setParentBeanFactory(BeanFactory parentBeanFactory)` method sets a parent `BeanFactory`. Bean definitions are then also looked up in the parent factory.
 
-8. **获取类加载器** 
+8. **Get the class loader** 
 
-   + 通过`getBeanClassLoader()`方法获取用于加载bean类的类加载器，这在动态加载类的场景中很有用。
+   + The `getBeanClassLoader()` method returns the class loader used to load bean classes. This is useful when classes are loaded dynamically.
 
-### 四、接口源码
+### 4. Interface Source
 
 ```java
 /**
- * ConfigurableListableBeanFactory接口是大多数可列举的bean工厂应该实现的配置接口。
- * 除了继承自{@link ConfigurableBeanFactory}的方法外，它提供了分析和修改bean定义以及预实例化单例bean的功能。
+ * Configuration interface to be implemented by most listable bean factories.
+ * In addition to {@link ConfigurableBeanFactory}, it provides facilities to
+ * analyze and modify bean definitions, and to pre-instantiate singletons.
  *
- * <p>{@link org.springframework.beans.factory.BeanFactory}的这个子接口通常不应该在正常应用程序代码中使用：
- * 对于典型的用例，请使用{@link org.springframework.beans.factory.BeanFactory}或
- * {@link org.springframework.beans.factory.ListableBeanFactory}。
- * 此接口只是为了允许在需要访问bean工厂配置方法时进行框架内部的插拔。
+ * <p>This subinterface of {@link org.springframework.beans.factory.BeanFactory}
+ * is not meant to be used in normal application code: Stick to
+ * {@link org.springframework.beans.factory.BeanFactory} or
+ * {@link org.springframework.beans.factory.ListableBeanFactory} for typical
+ * use cases. This interface is just meant to allow for framework-internal
+ * plug'n'play even when needing access to bean factory configuration methods.
  *
  * @author Juergen Hoeller
  * @since 03.11.2003
@@ -71,65 +74,77 @@ public interface ConfigurableListableBeanFactory
 		extends ListableBeanFactory, AutowireCapableBeanFactory, ConfigurableBeanFactory {
 
 	/**
-	 * 忽略指定的自动装配依赖类型，例如String。默认为空。
-	 * @param type 要忽略的依赖类型
+	 * Ignore the given dependency type for autowiring:
+	 * for example, String. Default is none.
+	 * @param type the dependency type to ignore
 	 */
 	void ignoreDependencyType(Class<?> type);
 
 	/**
-	 * 忽略指定的自动装配依赖接口。
-	 * <p>通常由应用程序上下文使用，以注册通过其他方式解析的依赖关系，
-	 * 例如通过BeanFactoryAware或ApplicationContextAware。
-	 * <p>默认情况下，仅忽略BeanFactoryAware接口。
-	 * 若要忽略更多类型，请为每个类型调用此方法。
-	 * @param ifc 要忽略的依赖接口
+	 * Ignore the given dependency interface for autowiring.
+	 * <p>This will typically be used by application contexts to register
+	 * dependencies that are resolved in other ways, like BeanFactory through
+	 * BeanFactoryAware or ApplicationContext through ApplicationContextAware.
+	 * <p>By default, only the BeanFactoryAware interface is ignored.
+	 * For further types to ignore, invoke this method for each type.
+	 * @param ifc the dependency interface to ignore
 	 * @see org.springframework.beans.factory.BeanFactoryAware
 	 * @see org.springframework.context.ApplicationContextAware
 	 */
 	void ignoreDependencyInterface(Class<?> ifc);
 
 	/**
-	 * 注册特殊的依赖类型及其对应的自动装配值。
-	 * <p>这用于应该是可自动装配但在工厂中未定义为bean的工厂/上下文引用，
-	 * 例如类型为ApplicationContext的依赖，解析为bean所在的ApplicationContext实例。
-	 * <p>注意：在纯BeanFactory中没有默认类型注册，甚至没有为BeanFactory接口本身注册。
-	 * @param dependencyType 要注册的依赖类型。这通常是一个基本接口，如BeanFactory，
-	 * 如果声明为自动装配依赖（例如，ListableBeanFactory），则扩展的接口也会被解析，
-	 * 只要给定的值实际上实现了扩展接口。
-	 * @param autowiredValue 对应的自动装配值。这也可以是org.springframework.beans.factory.ObjectFactory
-	 * 接口的实现，允许延迟解析实际目标值。
+	 * Register a special dependency type with corresponding autowired value.
+	 * <p>This is intended for factory/context references that are supposed
+	 * to be autowirable but are not defined as beans in the factory:
+	 * e.g. a dependency of type ApplicationContext resolved to the
+	 * ApplicationContext instance that the bean is living in.
+	 * <p>Note: There are no such default types registered in a plain BeanFactory,
+	 * not even for the BeanFactory interface itself.
+	 * @param dependencyType the dependency type to register. This will typically
+	 * be a base interface such as BeanFactory, with extensions of it resolved
+	 * as well if declared as an autowiring dependency (e.g. ListableBeanFactory),
+	 * as long as the given value actually implements the extended interface.
+	 * @param autowiredValue the corresponding autowired value. This may also be an
+	 * implementation of the {@link org.springframework.beans.factory.ObjectFactory}
+	 * interface, which allows for lazy resolution of the actual target value.
 	 */
 	void registerResolvableDependency(Class<?> dependencyType, @Nullable Object autowiredValue);
 
 	/**
-	 * 确定指定的bean是否符合自动装配的条件，
-	 * 即是否可注入到声明具有匹配类型的依赖关系的其他bean中。
-	 * <p>此方法还检查祖先工厂。
-	 * @param beanName 要检查的bean的名称
-	 * @param descriptor 要解析的依赖项的描述符
-	 * @return bean是否应被视为自动装配候选
-	 * @throws NoSuchBeanDefinitionException 如果没有给定名称的bean
+	 * Determine whether the specified bean qualifies as an autowire candidate,
+	 * to be injected into other beans which declare a dependency of matching type.
+	 * <p>This method checks ancestor factories as well.
+	 * @param beanName the name of the bean to check
+	 * @param descriptor the descriptor of the dependency to resolve
+	 * @return whether the bean should be considered as autowire candidate
+	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
 	 */
 	boolean isAutowireCandidate(String beanName, DependencyDescriptor descriptor)
 			throws NoSuchBeanDefinitionException;
 
 	/**
-	 * 返回指定bean的注册BeanDefinition，允许访问其属性值和构造函数参数值
-	 * （可以在bean工厂后处理期间进行修改）。
-	 * <p>返回的BeanDefinition对象不应该是副本，而应该是在工厂中注册的原始定义对象。
-	 * 这意味着，如果有必要，它应该可以转换为更具体的实现类型。
-	 * <p><b>注意：</b>此方法不考虑祖先工厂。它仅用于访问此工厂的本地bean定义。
-	 * @param beanName 要获取的bean的名称
-	 * @return 注册的BeanDefinition
-	 * @throws NoSuchBeanDefinitionException 如果在此工厂中没有给定名称的bean定义
+	 * Return the registered BeanDefinition for the specified bean, allowing access
+	 * to its property values and constructor argument value (which can be
+	 * modified during bean factory post-processing).
+	 * <p>A returned BeanDefinition object should not be a copy but the original
+	 * definition object as registered in the factory. This means that it should
+	 * be castable to a more specific implementation type, if necessary.
+	 * <p><b>NOTE:</b> This method does <i>not</i> consider ancestor factories.
+	 * It is only meant for accessing local bean definitions of this factory.
+	 * @param beanName the name of the bean
+	 * @return the registered BeanDefinition
+	 * @throws NoSuchBeanDefinitionException if there is no bean definition
+	 * with the given name defined in this factory
 	 */
 	BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException;
 
 	/**
-	 * 返回此工厂管理的所有bean名称的统一视图。
-	 * <p>包括bean定义名称以及手动注册的单例实例的名称，
-	 * bean定义名称始终首先出现，类似于通过类型/注解特定检索bean名称的方式。
-	 * @return 用于bean名称视图的复合迭代器
+	 * Return a unified view over all bean names managed by this factory.
+	 * <p>Includes bean definition names as well as names of manually registered
+	 * singleton instances, with bean definition names consistently coming first,
+	 * analogous to how type/annotation specific retrieval of bean names works.
+	 * @return the composite iterator for the bean names view
 	 * @since 4.1.2
 	 * @see #containsBeanDefinition
 	 * @see #registerSingleton
@@ -139,9 +154,11 @@ public interface ConfigurableListableBeanFactory
 	Iterator<String> getBeanNamesIterator();
 
 	/**
-	 * 清除合并的bean定义缓存，删除不符合完全元数据缓存资格的bean的条目。
-	 * <p>通常在对原始bean定义进行更改后触发，例如在应用BeanFactoryPostProcessor之后。
-	 * 请注意，此时已经创建的bean的元数据将被保留。
+	 * Clear the merged bean definition cache, removing entries for beans
+	 * which are not considered eligible for full metadata caching yet.
+	 * <p>Typically triggered after changes to the original bean definitions,
+	 * e.g. after applying a {@link BeanFactoryPostProcessor}. Note that metadata
+	 * for beans which have already been created at this point will be kept around.
 	 * @since 4.2
 	 * @see #getBeanDefinition
 	 * @see #getMergedBeanDefinition
@@ -149,23 +166,26 @@ public interface ConfigurableListableBeanFactory
 	void clearMetadataCache();
 
 	/**
-	 * 冻结所有bean定义，表示注册的bean定义将不再被修改或进一步后处理。
-	 * <p>这允许工厂积极地缓存bean定义元数据。
+	 * Freeze all bean definitions, signalling that the registered bean definitions
+	 * will not be modified or post-processed any further.
+	 * <p>This allows the factory to aggressively cache bean definition metadata.
 	 */
 	void freezeConfiguration();
 
 	/**
-	 * 返回此工厂的bean定义是否被冻结，
-	 * 即不应再被修改或进一步后处理。
-	 * @return 如果工厂的配置被认为已冻结，则为{@code true}
+	 * Return whether this factory's bean definitions are frozen,
+	 * i.e. are not supposed to be modified or post-processed any further.
+	 * @return {@code true} if the factory's configuration is considered frozen
 	 */
 	boolean isConfigurationFrozen();
 
 	/**
-	 * 确保实例化所有非懒加载单例，还考虑到org.springframework.beans.factory.FactoryBean。
-	 * 通常在工厂设置结束时调用，如果需要的话。
-	 * @throws BeansException 如果无法创建其中一个单例bean。
-	 * 注意：这可能已经使工厂具有一些已初始化的bean！在这种情况下，调用destroySingletons()进行完全清理。
+	 * Ensure that all non-lazy-init singletons are instantiated, also considering
+	 * {@link org.springframework.beans.factory.FactoryBean FactoryBeans}.
+	 * Typically invoked at the end of factory setup, if desired.
+	 * @throws BeansException if one of the singleton beans could not be created.
+	 * Note: This may have left the factory with some beans already initialized!
+	 * Call {@link #destroySingletons()} for full cleanup in this case.
 	 * @see #destroySingletons()
 	 */
 	void preInstantiateSingletons() throws BeansException;
@@ -173,125 +193,125 @@ public interface ConfigurableListableBeanFactory
 
 ```
 
-### 五、最佳实践
+### 5. Best Practices
 
-演示了`ConfigurableListableBeanFactory`接口的一些常用方法。包括依赖类型的忽略、注册可解析的依赖、判断是否为自动注入的候选者、获取BeanDefinition等功能的使用。
+This example shows some common methods of the `ConfigurableListableBeanFactory` interface. It covers ignoring dependency types, registering resolvable dependencies, checking if a bean is an autowire candidate, getting a `BeanDefinition`, and more.
 
 ```java
 public class ConfigurableListableBeanFactoryDemo {
 
     public static void main(String[] args) throws NoSuchFieldException {
-        // 创建 ApplicationContext
+        // Create the ApplicationContext
         AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(MyConfiguration.class);
 
-        // 获取 ConfigurableListableBeanFactory
+        // Get the ConfigurableListableBeanFactory
         ConfigurableListableBeanFactory beanFactory = applicationContext.getBeanFactory();
 
-        // 忽略指定类型的依赖
+        // Ignore dependencies of the given type
         beanFactory.ignoreDependencyType(String.class);
 
-        // 忽略指定接口的依赖
+        // Ignore dependencies of the given interface
         beanFactory.ignoreDependencyInterface(BeanFactory.class);
 
-        // 注册可解析的依赖
+        // Register a resolvable dependency
         beanFactory.registerResolvableDependency(ApplicationContext.class, applicationContext);
 
-        // 判断指定的 Bean 是否可以作为自动注入的候选者
+        // Check if the bean is a candidate for autowiring
         String beanName = "myService";
 
         DependencyDescriptor dependencyDescriptor = new DependencyDescriptor(MyController.class.getDeclaredField("myService"), false);
         boolean isAutowireCandidate = beanFactory.isAutowireCandidate(beanName, dependencyDescriptor);
-        System.out.println(beanName + " 是否为自动注入的候选者: " + isAutowireCandidate);
+        System.out.println(beanName + " is an autowire candidate: " + isAutowireCandidate);
 
-        // 获取指定 Bean 的 BeanDefinition
+        // Get the BeanDefinition of the bean
         BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
-        System.out.println(beanName + " 的 BeanDefinition: " + beanDefinition);
+        System.out.println(beanName + " BeanDefinition: " + beanDefinition);
 
-        // 获取所有 Bean 的名称的迭代器
+        // Get an iterator over all bean names
         Iterator<String> beanNamesIterator = beanFactory.getBeanNamesIterator();
-        System.out.print("所有 Bean 的名称: ");
+        System.out.print("All bean names: ");
         beanNamesIterator.forEachRemaining(System.out::print);
 
-        // 清除元数据缓存
+        // Clear the metadata cache
         beanFactory.clearMetadataCache();
 
-        // 冻结配置
+        // Freeze the configuration
         beanFactory.freezeConfiguration();
 
-        // 判断配置是否已冻结
+        // Check if the configuration is frozen
         boolean isConfigurationFrozen = beanFactory.isConfigurationFrozen();
-        System.out.println("配置是否已冻结: " + isConfigurationFrozen);
+        System.out.println("Configuration frozen: " + isConfigurationFrozen);
 
-        // 预实例化所有非懒加载的单例 Bean
+        // Pre-instantiate all non-lazy singleton beans
         beanFactory.preInstantiateSingletons();
     }
 }
 ```
 
-### 六、与其他组件的关系
+### 6. Relation to Other Components
 
 1. **BeanFactory**
 
-   - `ConfigurableListableBeanFactory` 继承自 `BeanFactory` 接口，因此它继承了 `BeanFactory` 的基本功能，如 `getBean` 等方法。
+   - `ConfigurableListableBeanFactory` extends `BeanFactory`. So it inherits the basic features of `BeanFactory`, such as the `getBean` methods.
 
-   - `ConfigurableListableBeanFactory` 是 `ListableBeanFactory` 和 `ConfigurableBeanFactory` 的组合，提供了对bean列表和配置的管理能力。
+   - `ConfigurableListableBeanFactory` combines `ListableBeanFactory` and `ConfigurableBeanFactory`. It can manage the list of beans and their configuration.
 
 2. **ListableBeanFactory**
 
-   - `ConfigurableListableBeanFactory` 扩展了 `ListableBeanFactory` 接口，使得它除了具备 `ListableBeanFactory` 的能力外，还能够进行更灵活的配置和管理。
+   - `ConfigurableListableBeanFactory` extends `ListableBeanFactory`. So besides the features of `ListableBeanFactory`, it also allows more flexible configuration and management.
 
 3. **AutowireCapableBeanFactory**
 
-   - `ConfigurableListableBeanFactory` 扩展了 `AutowireCapableBeanFactory` 接口，使得它能够进行更高级的自动装配，包括忽略依赖类型、判断是否为自动注入的候选者等。
+   - `ConfigurableListableBeanFactory` extends `AutowireCapableBeanFactory`. So it supports more advanced autowiring, such as ignoring dependency types and checking if a bean is an autowire candidate.
 
 4. **ConfigurableBeanFactory**
 
-   - `ConfigurableListableBeanFactory` 实现了 `ConfigurableBeanFactory` 接口，提供了一系列配置 bean 工厂的方法，如设置 BeanClassLoader、注册单例、设置作用域等。
+   - `ConfigurableListableBeanFactory` extends `ConfigurableBeanFactory`. It provides many methods to configure the bean factory, such as setting the bean class loader, registering singletons, and setting scopes.
 
 5. **ApplicationContext**
 
-   - `ConfigurableListableBeanFactory` 是 Spring 应用上下文（`ApplicationContext`）的一部分。通过 `ApplicationContext` 实例，可以获取到 `ConfigurableListableBeanFactory` 的引用，进而对 bean 进行配置和管理。
+   - `ConfigurableListableBeanFactory` is part of the Spring application context (`ApplicationContext`). From an `ApplicationContext` instance, you can get a reference to the `ConfigurableListableBeanFactory` and use it to configure and manage beans.
 
-   - 具体实现类，例如 `GenericApplicationContext` 或 `AnnotationConfigApplicationContext`，内部持有 `ConfigurableListableBeanFactory` 实例，通过该实例管理 bean 定义和实例。
+   - Concrete classes such as `GenericApplicationContext` or `AnnotationConfigApplicationContext` hold a `ConfigurableListableBeanFactory` instance inside. They use it to manage bean definitions and instances.
 
 6. **BeanPostProcessor**
 
-   - `ConfigurableListableBeanFactory` 与 `BeanPostProcessor` 接口协同工作。`BeanPostProcessor` 允许在 bean 实例化和初始化的过程中进行自定义的处理。`ConfigurableListableBeanFactory` 通过添加 `BeanPostProcessor` 来实现对 bean 的定制化处理。
+   - `ConfigurableListableBeanFactory` works together with the `BeanPostProcessor` interface. `BeanPostProcessor` lets you add custom handling when a bean is instantiated and initialized. `ConfigurableListableBeanFactory` customizes beans by adding `BeanPostProcessor` objects.
 
 7. **BeanDefinition**
 
-   - `ConfigurableListableBeanFactory` 提供了获取 `BeanDefinition` 的方法，通过 `getBeanDefinition(String beanName)` 可以获取指定 bean 的定义信息。这对于查看和修改 bean 的配置信息非常有用。
+   - `ConfigurableListableBeanFactory` has a method to get a `BeanDefinition`. With `getBeanDefinition(String beanName)`, you get the definition of the given bean. This is very useful to view and change the configuration of a bean.
 
-### 七、常见问题
+### 7. Common Problems
 
-1. **Bean的循环依赖问题** 
+1. **Circular dependency between beans** 
 
-   - 当两个或多个 bean 彼此依赖形成循环依赖时，可能导致应用程序启动失败或不稳定。我们应该尽量设计避免循环依赖，考虑通过构造函数注入、setter 方法注入、`@Lazy` 注解等方式来解决。
+   - When two or more beans depend on each other in a circle, the application may fail to start or become unstable. Try to design the beans to avoid circular dependencies. You can use constructor injection, setter injection, or the `@Lazy` annotation to solve them.
 
-2. **Bean的配置错误** 
+2. **Wrong bean configuration** 
 
-   - 配置文件中的 bean 定义存在错误，导致无法正确创建 bean。 我们应该仔细检查配置文件，确保 XML 或 Java 配置正确无误，属性值和引用关系正确。
+   - A bean definition in the configuration has an error, so the bean cannot be created correctly. Check the configuration carefully. Make sure the XML or Java configuration is correct, and the property values and references are right.
 
-3. **依赖注入失败** 
+3. **Dependency injection fails** 
 
-   - 依赖注入失败，bean 的某些属性为 null。我们应该检查 bean 的依赖关系，确保属性注入的名称和类型正确，使用 `@Autowired` 或者 `@Resource` 注解时检查自动装配是否生效。
+   - Dependency injection fails and some properties of a bean are null. Check the dependencies of the bean. Make sure the names and types of the injected properties are correct. When you use `@Autowired` or `@Resource`, check that autowiring works.
 
-4. **Bean的生命周期问题** 
+4. **Bean lifecycle problems** 
 
-   - 想要在 bean 的初始化或销毁阶段执行一些特定操作，但操作未生效。我们应该使用 `InitializingBean` 和 `DisposableBean` 接口，或者通过 `@PostConstruct` 和 `@PreDestroy` 注解在方法上执行相应的初始化和销毁逻辑。
+   - You want to run some actions when a bean is initialized or destroyed, but the actions do not run. Use the `InitializingBean` and `DisposableBean` interfaces, or use the `@PostConstruct` and `@PreDestroy` annotations on methods to run the initialization and destruction logic.
 
-5. **Bean的作用域问题** 
+5. **Bean scope problems** 
 
-   - 需要使用不同的作用域（例如单例、原型等），但实际应用中未生效。我们应该在配置文件或 Java 配置中明确指定 bean 的作用域，确保作用域的使用符合预期。
+   - You want to use a different scope (such as singleton or prototype), but it has no effect. Set the bean scope clearly in the configuration file or in the Java configuration. Make sure the scope is used as you expect.
 
-6. **Bean的懒加载问题** 
+6. **Lazy loading problems** 
 
-   - 想要将某个 bean 设置为懒加载，但该设置未生效。我们应该使用 `@Lazy` 注解或者在 XML 配置中设置 `lazy-init="true"`，确保懒加载的配置正确。
+   - You want to make a bean lazy, but the setting has no effect. Use the `@Lazy` annotation, or set `lazy-init="true"` in the XML configuration. Make sure the lazy configuration is correct.
 
-7. **Bean的条件化注册问题** 
+7. **Conditional registration problems** 
 
-   - 想要根据条件动态注册某个 bean，但条件未生效。我们应该使用条件化注解（例如 `@Conditional`）或者通过编程方式在 `ConfigurableListableBeanFactory` 中注册 bean 前进行条件判断。
+   - You want to register a bean dynamically based on a condition, but the condition has no effect. Use conditional annotations (such as `@Conditional`), or check the condition in code before you register the bean in `ConfigurableListableBeanFactory`.
 
-8. **Bean的后置处理器问题** 
+8. **Bean post-processor problems** 
 
-   - 想要对所有 bean 进行额外的处理，但自定义的 `BeanPostProcessor` 未生效。我们应该确保自定义的 `BeanPostProcessor` 被正确注册，可以通过 `ConfigurableListableBeanFactory.addBeanPostProcessor` 方法添加。
+   - You want to add extra handling for all beans, but your own `BeanPostProcessor` has no effect. Make sure your `BeanPostProcessor` is registered correctly. You can add it with the `ConfigurableListableBeanFactory.addBeanPostProcessor` method.

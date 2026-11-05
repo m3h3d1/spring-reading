@@ -17,17 +17,17 @@ import java.util.Arrays;
 
 /**
  * @author xcs
- * @date 2023年10月31日 10时52分
+ * @date 2023-10-31 10:52
  **/
 public class MetadataReaderDemo {
     public static void main(String[] args) throws IOException {
 
-        // 创建 MetadataReaderFactory
+        // Create the MetadataReaderFactory
         SimpleMetadataReaderFactory readerFactory = new SimpleMetadataReaderFactory();
-        // 获取 MetadataReader，通常由 Spring 容器自动创建
+        // Get the MetadataReader (Spring usually creates it for you)
         MetadataReader metadataReader = readerFactory.getMetadataReader("com.xcs.spring.bean.MyBean");
 
-        // 获取类的基本信息
+        // Get the basic information of the class
         ClassMetadata classMetadata = metadataReader.getClassMetadata();
         System.out.println("Class Name = " + classMetadata.getClassName());
         System.out.println("Class IsInterface = " + classMetadata.isInterface());
@@ -46,7 +46,7 @@ public class MetadataReaderDemo {
 
         System.out.println();
 
-        // 获取方法上的注解信息
+        // Get the annotated methods
         for (MethodMetadata methodMetadata : metadataReader.getAnnotationMetadata().getAnnotatedMethods("com.xcs.spring.annotation.MyAnnotation")) {
             System.out.println("Method Name: " + methodMetadata.getMethodName());
             System.out.println("Method DeclaringClassName: " + methodMetadata.getDeclaringClassName());

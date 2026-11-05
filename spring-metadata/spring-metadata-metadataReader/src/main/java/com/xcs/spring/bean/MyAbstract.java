@@ -2,7 +2,7 @@ package com.xcs.spring.bean;
 
 /**
  * @author xcs
- * @date 2023年10月31日 11时29分
+ * @date 2023-10-31 11:29
  **/
 public abstract class MyAbstract {
 }

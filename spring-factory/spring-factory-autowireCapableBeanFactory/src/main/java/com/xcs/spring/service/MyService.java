@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 /**
  * @author xcs
- * @date 2023年11月24日 14时17分
+ * @date 2023-11-24 14:17
  **/
 public class MyService implements BeanNameAware, InitializingBean, DisposableBean {
 
@@ -21,17 +21,17 @@ public class MyService implements BeanNameAware, InitializingBean, DisposableBea
 
     @Override
     public void setBeanName(String name) {
-        System.out.println("MyService.setBeanName方法被调用了");
+        System.out.println("MyService.setBeanName method was called");
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        System.out.println("MyService.afterPropertiesSet方法被调用了");
+        System.out.println("MyService.afterPropertiesSet method was called");
     }
 
     @Override
     public void destroy() throws Exception {
-        System.out.println("MyService.destroy方法被调用了");
+        System.out.println("MyService.destroy method was called");
     }
 
     public void setJavaHome(String javaHome) {

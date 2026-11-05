@@ -1,55 +1,56 @@
 ## AnnotationMetadata
 
 - [AnnotationMetadata](#annotationmetadata)
-  - [一、知识储备](#一知识储备)
-  - [二、基本描述](#二基本描述)
-  - [三、主要功能](#三主要功能)
-  - [四、接口源码](#四接口源码)
-  - [五、主要实现](#五主要实现)
-  - [六、最佳实践](#六最佳实践)
-    - [ASM字节码技术](#asm字节码技术)
-    - [JAVA反射技术](#java反射技术)
-  - [七、与其他组件的关系](#七与其他组件的关系)
-  - [八、常见问题](#八常见问题)
+  - [1. Background Knowledge](#1-background-knowledge)
+  - [2. Description](#2-description)
+  - [3. Main Features](#3-main-features)
+  - [4. Interface Source](#4-interface-source)
+  - [5. Main Implementation](#5-main-implementation)
+  - [6. Best Practices](#6-best-practices)
+    - [ASM bytecode](#asm-bytecode)
+    - [Java reflection](#java-reflection)
+  - [7. Relation to Other Components](#7-relation-to-other-components)
+  - [8. Common Problems](#8-common-problems)
 
 
-### 一、知识储备
+### 1. Background Knowledge
 
-1. **注解**
-   + 了解什么是注解以及如何定义和使用它们是很重要的。`AnnotationMetadata` 用于处理类上的注解信息，因此我们需要了解如何编写自定义注解以及如何在类、方法或字段上应用标准和自定义注解。
-2. **反射**
-   + `AnnotationMetadata` 使用反射机制来分析类的注解信息，所以我们需要了解 Java 反射的基本原理，包括 `Class` 对象、`Method`、`Field`、`Annotation` 类等。
-3. **类路径扫描**
-   + 如果我们通过 `metadataReader.getAnnotationMetadata()` 方法来读取类的注解信息，我们需要了解如何进行类路径扫描和资源加载，以便正确定位和读取类的字节码。
+1. **Annotations**
+   + It is important to know what annotations are and how to define and use them. `AnnotationMetadata` works with the annotation information of a class. So you need to know how to write custom annotations and how to put standard and custom annotations on classes, methods, or fields.
+2. **Reflection**
+   + `AnnotationMetadata` can use reflection to analyze the annotations of a class. So you need to know the basics of Java reflection, including the `Class` object, `Method`, `Field`, and `Annotation` classes.
+3. **Classpath scanning**
+   + If you read the annotation information of a class with `metadataReader.getAnnotationMetadata()`, you need to know how classpath scanning and resource loading work. This is how the bytecode of a class is found and read.
 
-### 二、基本描述
+### 2. Description
 
-`AnnotationMetadata` 是 Spring Framework 中的一个接口，用于访问和分析与类、方法、字段等元素相关的注解信息。它提供了一种方便的方式，让我们可以在运行时动态地获取和操作类上的注解信息。
+`AnnotationMetadata` is an interface in the Spring Framework. It is used to access and analyze the annotation information of classes, methods, fields, and other elements. It gives an easy way to get and use the annotation information of a class at runtime.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **检查类上的注解**：
-   - 我们可以使用 `hasAnnotation(String annotationName)` 方法来检查是否存在指定名称的注解在类上。这对于条件化的配置非常有用，可以根据类上的注解来控制不同的行为。
-2. **获取注解属性值**：
-   - 使用 `getAnnotationAttributes(String annotationName)` 方法，我们可以获取指定注解的属性值。这允许我们动态配置类的行为，根据注解属性的值来决定不同的处理逻辑。
-3. **获取类上的所有注解**：
-   - `getAnnotations()` 方法返回类上所有的注解，以 `AnnotationAttributes` 对象的列表形式。这使我们能够全面了解类的注解情况。
-4. **获取元注解信息**：
-   - `getMetaAnnotationTypes(String annotationName)` 方法用于获取指定注解上的元注解的类型，这对于分析注解层次结构非常有帮助。
-5. **扫描带有指定注解的类**：
-   - `getAnnotatedMethods(String annotationName)` 方法允许我们扫描指定包下所有带有指定注解的类，获取它们的元数据信息。这可用于实现自定义的组件扫描或注解处理逻辑。
-6. **获取类的接口和超类信息**：
-   - 我们可以使用 `getInterfaceNames()` 方法获取类实现的接口的全限定类名，以及使用 `getSuperClassName()` 方法获取类的超类的全限定类名。
-7. **获取类的成员信息**：
-   - 通过 `getMethodMetadata()`、`getFieldMetadata()` 和 `getClassMetadata()` 方法，我们可以获取类中方法、字段和类本身的元数据信息，以便分析这些元素上的注解。
+1. **Check annotations on a class**:
+   - The `hasAnnotation(String annotationName)` method checks if an annotation with the given name is present on the class. This is useful for conditional configuration. You can change the behavior based on the annotations of a class.
+2. **Get annotation attribute values**:
+   - The `getAnnotationAttributes(String annotationName)` method returns the attribute values of the given annotation. This lets you configure the behavior of a class dynamically. You can choose different logic based on the attribute values.
+3. **Get all annotations on a class**:
+   - The `getAnnotations()` method returns all annotations on the class. This gives you a full view of the annotations of a class.
+4. **Get meta-annotation information**:
+   - The `getMetaAnnotationTypes(String annotationName)` method returns the types of the meta-annotations on the given annotation. This helps to analyze the annotation hierarchy.
+5. **Find annotated methods**:
+   - The `getAnnotatedMethods(String annotationName)` method returns the metadata of all methods that have the given annotation. This can be used to build custom component scanning or annotation handling.
+6. **Get interface and super class information**:
+   - The `getInterfaceNames()` method returns the fully qualified names of the interfaces that the class implements. The `getSuperClassName()` method returns the fully qualified name of the super class.
+7. **Get member information**:
+   - With methods such as `getAnnotatedMethods()` and the `ClassMetadata` methods, you can get the metadata of the methods and the class itself, to analyze the annotations on these elements.
 
-### 四、接口源码
+### 4. Interface Source
 
-`AnnotationMetadata` 接口提供了一组方法，用于在运行时分析和操作类的注解信息。它允许我们获取类上的注解、元注解、接口信息、超类信息以及方法上的注解信息，以便实现各种功能，如条件化配置、组件扫描和自定义注解处理。接口中的 `introspect` 方法用于创建 `AnnotationMetadata` 实例，以便在运行时分析类的注解信息。
+The `AnnotationMetadata` interface has a set of methods to analyze and use the annotation information of a class at runtime. It lets you get the annotations on a class, the meta-annotations, the interface and super class information, and the annotations on methods. This supports many features, such as conditional configuration, component scanning, and custom annotation handling. The `introspect` method of the interface creates an `AnnotationMetadata` instance, so you can analyze the annotations of a class at runtime.
 
 ```java
 /**
- * 该接口定义了对特定类的注解的抽象访问，以一种无需加载该类的形式。
+ * Interface that defines abstract access to the annotations of a specific
+ * class, in a form that does not require that class to be loaded yet.
  *
  * @author Juergen Hoeller
  * @author Mark Fisher
@@ -62,8 +63,9 @@
  */
 public interface AnnotationMetadata extends ClassMetadata, AnnotatedTypeMetadata {
     /**
-     * 获取底层类上的所有 <em>存在</em> 的注解类型的完全限定类名。
-     * @return 注解类型的名称
+     * Get the fully qualified class names of all annotation types that
+     * are <em>present</em> on the underlying class.
+     * @return the annotation type names
      */
     default Set<String> getAnnotationTypes() {
         return getAnnotations().stream()
@@ -73,9 +75,11 @@ public interface AnnotationMetadata extends ClassMetadata, AnnotatedTypeMetadata
     }
 
     /**
-     * 获取给定注解类型上底层类上 <em>存在</em> 的所有元注解类型的完全限定类名。
-     * @param annotationName 要查找的元注解类型的完全限定类名
-     * @return 元注解类型的名称集合，如果没有找到则返回空集合
+     * Get the fully qualified class names of all meta-annotation types that
+     * are <em>present</em> on the given annotation type on the underlying class.
+     * @param annotationName the fully qualified class name of the meta-annotation
+     * type to look for
+     * @return the meta-annotation type names, or an empty set if none found
      */
     default Set<String> getMetaAnnotationTypes(String annotationName) {
         MergedAnnotation<?> annotation = getAnnotations().get(annotationName, MergedAnnotation::isDirectlyPresent);
@@ -88,18 +92,22 @@ public interface AnnotationMetadata extends ClassMetadata, AnnotatedTypeMetadata
     }
 
     /**
-     * 确定给定类型的注解是否 <em>存在</em> 在底层类上。
-     * @param annotationName 要查找的注解类型的完全限定类名
-     * @return 如果存在匹配的注解则返回 {@code true}
+     * Determine whether an annotation of the given type is <em>present</em> on
+     * the underlying class.
+     * @param annotationName the fully qualified class name of the annotation
+     * type to look for
+     * @return {@code true} if a matching annotation is present
      */
     default boolean hasAnnotation(String annotationName) {
         return getAnnotations().isDirectlyPresent(annotationName);
     }
 
     /**
-     * 确定底层类是否具有其本身带有给定类型的元注解的注解。
-     * @param metaAnnotationName 要查找的元注解类型的完全限定类名
-     * @return 如果存在匹配的元注解则返回 {@code true}
+     * Determine whether the underlying class has an annotation that is itself
+     * annotated with the meta-annotation of the given type.
+     * @param metaAnnotationName the fully qualified class name of the
+     * meta-annotation type to look for
+     * @return {@code true} if a matching meta-annotation is present
      */
     default boolean hasMetaAnnotation(String metaAnnotationName) {
         return getAnnotations().get(metaAnnotationName,
@@ -107,25 +115,33 @@ public interface AnnotationMetadata extends ClassMetadata, AnnotatedTypeMetadata
     }
 
     /**
-     * 确定底层类是否具有任何方法带有给定注解类型（或带有元注解的）。
-     * @param annotationName 要查找的注解类型的完全限定类名
+     * Determine whether the underlying class has any methods that are
+     * annotated (or meta-annotated) with the given annotation type.
+     * @param annotationName the fully qualified class name of the annotation
+     * type to look for
      */
     default boolean hasAnnotatedMethods(String annotationName) {
         return !getAnnotatedMethods(annotationName).isEmpty();
     }
 
     /**
-     * 检索带有给定注解类型（或带有元注解的）的所有方法的方法元数据。
-     * <p>对于任何返回的方法，{@link MethodMetadata#isAnnotated} 将对给定的注解类型返回 {@code true}。
-     * @param annotationName 要查找的注解类型的完全限定类名
-     * @return 具有匹配注解的方法的{@link MethodMetadata}集合。如果没有方法匹配注解类型，则返回空集合。
+     * Retrieve the method metadata for all methods that are annotated
+     * (or meta-annotated) with the given annotation type.
+     * <p>For any returned method, {@link MethodMetadata#isAnnotated} will
+     * return {@code true} for the given annotation type.
+     * @param annotationName the fully qualified class name of the annotation
+     * type to look for
+     * @return a set of {@link MethodMetadata} for methods that have a matching
+     * annotation. The return value will be an empty set if no methods match
+     * the annotation type.
      */
     Set<MethodMetadata> getAnnotatedMethods(String annotationName);
 
     /**
-     * 使用标准反射创建一个新的 {@link AnnotationMetadata} 实例的工厂方法，用于给定的类。
-     * @param type 要分析的类
-     * @return 新的 {@link AnnotationMetadata} 实例
+     * Factory method to create a new {@link AnnotationMetadata} instance
+     * for the given class using standard reflection.
+     * @param type the class to introspect
+     * @return a new {@link AnnotationMetadata} instance
      * @since 5.2
      */
     static AnnotationMetadata introspect(Class<?> type) {
@@ -134,13 +150,13 @@ public interface AnnotationMetadata extends ClassMetadata, AnnotatedTypeMetadata
 }
 ```
 
-### 五、主要实现
+### 5. Main Implementation
 
 1. **StandardAnnotationMetadata**:
-   - 这个实现依赖于标准的 Java 反射机制，它使用 Java 的 `java.lang.Class` 对象来分析和访问类的注解信息。
-   - 通过这个实现，我们可以轻松地检查类上的注解、获取注解属性值以及执行其他与注解相关的操作。
+   - This implementation uses standard Java reflection. It uses the `java.lang.Class` object to analyze and access the annotation information of a class.
+   - With this implementation, you can easily check the annotations on a class, get the annotation attribute values, and do other annotation-related work.
 2. **SimpleAnnotationMetadata**:
-   - 是一个基于 ASM（字节码操作库）的实现，用于分析和访问类的注解信息。相比于 `StandardAnnotationMetadata`，它通常更轻量，不依赖于标准 Java 反射机制，而是直接解析类的字节码。
+   - This implementation is based on ASM (a bytecode library). It analyzes and accesses the annotation information of a class. Compared to `StandardAnnotationMetadata`, it is usually lighter. It does not use standard Java reflection. It reads the bytecode of the class directly.
 
 ~~~mermaid
 classDiagram
@@ -176,31 +192,31 @@ classDiagram
 
 ~~~
 
-### 六、最佳实践
+### 6. Best Practices
 
-#### ASM字节码技术
+#### ASM bytecode
 
-我们使用 ASM 字节码技术创建了一个 `AnnotationMetadata` 对象，通过创建 `MetadataReaderFactory` 和 `MetadataReader` 对象，加载了名为 "`com.xcs.spring.bean.MyBean`" 的类的元数据，然后通过 `AnnotationMetadata` 检查是否被 `@Component` 注解标记，并获取注解属性值，最后输出相应的结果。这个过程允许在不实际加载类的情况下，动态地分析和操作类的注解信息。
+This example uses ASM bytecode to create an `AnnotationMetadata` object. It creates a `MetadataReaderFactory` and a `MetadataReader`, and loads the metadata of the class "`com.xcs.spring.bean.MyBean`". Then it uses `AnnotationMetadata` to check if the class is annotated with `@Component`, gets the annotation attribute value, and prints the results. This way, you can analyze the annotation information of a class without loading the class.
 
 ```java
 public class AnnotationMetadataDemoByASM {
 
     public static void main(String[] args) throws Exception {
-        // 创建 MetadataReaderFactory
+        // Create the MetadataReaderFactory
         SimpleMetadataReaderFactory readerFactory = new SimpleMetadataReaderFactory();
-        // 获取 MetadataReader
+        // Get the MetadataReader
         MetadataReader metadataReader = readerFactory.getMetadataReader("com.xcs.spring.bean.MyBean");
 
-        // 获取 AnnotationMetadata
+        // Get the AnnotationMetadata
         AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
 
         System.out.println("AnnotationMetadata impl class is " + annotationMetadata.getClass());
 
-        // 检查 MyBean 类是否被 @Component 注解标记
+        // Check if the MyBean class is annotated with @Component
         boolean isComponent = annotationMetadata.hasAnnotation(Component.class.getName());
         System.out.println("MyBean is a @Component: " + isComponent);
 
-        // 获取 MyBean 类上的注解属性
+        // Get the annotation attributes on the MyBean class
         if (isComponent) {
             Map<String, Object> annotationAttributes = annotationMetadata.getAnnotationAttributes(Component.class.getName());
             System.out.println("@Component value is " + annotationAttributes.get("value"));
@@ -209,7 +225,7 @@ public class AnnotationMetadataDemoByASM {
 }
 ```
 
-运行结果发现，`AnnotationMetadata` 的实现类是 `SimpleAnnotationMetadata`，这是一个基于 ASM 的实现，不依赖标准的 Java 反射机制。
+The output shows that the implementation of `AnnotationMetadata` is `SimpleAnnotationMetadata`. It is based on ASM and does not use standard Java reflection.
 
 ```java
 AnnotationMetadata impl class is class org.springframework.core.type.classreading.SimpleAnnotationMetadata
@@ -217,24 +233,24 @@ MyBean is a @Component: true
 @Component value is myBean
 ```
 
-#### JAVA反射技术
+#### Java reflection
 
-使用 Java 反射技术创建 `AnnotationMetadata` 对象，通过调用 `AnnotationMetadata.introspect(MyBean.class)` 方法，加载了名为 `MyBean` 的类的元数据。然后通过 `AnnotationMetadata` 检查是否被 `@Component` 注解标记，并获取注解属性值，最后输出相应的结果。使用标准 Java 反射机制来实现这些功能，这是一种通用的方式，适用于大多数 Spring 应用程序。
+This example uses Java reflection to create an `AnnotationMetadata` object. It calls `AnnotationMetadata.introspect(MyBean.class)` to load the metadata of the `MyBean` class. Then it uses `AnnotationMetadata` to check if the class is annotated with `@Component`, gets the annotation attribute value, and prints the results. It uses standard Java reflection. This is the common way and fits most Spring applications.
 
 ```java
 public class AnnotationMetadataDemoByReflection {
 
     public static void main(String[] args) throws Exception {
-        // 获取 AnnotationMetadata
+        // Get the AnnotationMetadata
         AnnotationMetadata annotationMetadata = AnnotationMetadata.introspect(MyBean.class);
 
         System.out.println("AnnotationMetadata impl class is " + annotationMetadata.getClass());
 
-        // 检查 MyBean 类是否被 @Component 注解标记
+        // Check if the MyBean class is annotated with @Component
         boolean isComponent = annotationMetadata.hasAnnotation(Component.class.getName());
         System.out.println("MyBean is a @Component: " + isComponent);
 
-        // 获取 MyBean 类上的注解属性
+        // Get the annotation attributes on the MyBean class
         if (isComponent) {
             Map<String, Object> annotationAttributes = annotationMetadata.getAnnotationAttributes(Component.class.getName());
             System.out.println("@Component value is " + annotationAttributes.get("value"));
@@ -243,7 +259,7 @@ public class AnnotationMetadataDemoByReflection {
 }
 ```
 
-运行结果发现，`AnnotationMetadata` 的实现类是 `StandardAnnotationMetadata`，这是一个基于 JAVA反射机制的实现的。
+The output shows that the implementation of `AnnotationMetadata` is `StandardAnnotationMetadata`. It is based on Java reflection.
 
 ```java
 AnnotationMetadata impl class is class org.springframework.core.type.StandardAnnotationMetadata
@@ -251,26 +267,26 @@ MyBean is a @Component: true
 @Component value is myBean
 ```
 
-### 七、与其他组件的关系
+### 7. Relation to Other Components
 
-1. **组件扫描**
-   - `AnnotationMetadata` 与 `ClassPathBeanDefinitionScanner` 类相关。在组件扫描过程中，`ClassPathBeanDefinitionScanner` 使用 `AnnotationMetadata` 来检查类上的特定注解（如 `@Component`、`@Service`、`@Controller` 等），并将这些类注册为 Spring Beans。
-2. **Bean 定义**
-   - `AnnotationMetadata` 与 `AnnotatedGenericBeanDefinition`，`ScannedGenericBeanDefinition` 类相关。当 Spring 扫描到带有注解的类时，会使用 `AnnotationMetadata` 来构建 Bean 定义。它提取类上的注解信息，包括 Bean 名称、作用域、依赖关系等，然后将这些信息用于创建 Bean 定义。
-3. **条件化的 Bean 注册**
-   - `AnnotationMetadata` 与条件化 Bean 注册相关的类有 `Conditional` 注解和 `Condition` 接口。在条件化注册中，`AnnotationMetadata` 用于评估 `@Conditional` 注解，根据条件的计算结果来决定是否注册特定的 Bean。
+1. **Component scanning**
+   - `AnnotationMetadata` is related to the `ClassPathBeanDefinitionScanner` class. During component scanning, `ClassPathBeanDefinitionScanner` uses `AnnotationMetadata` to check for specific annotations on classes (such as `@Component`, `@Service`, and `@Controller`). It registers these classes as Spring beans.
+2. **Bean definitions**
+   - `AnnotationMetadata` is related to the `AnnotatedGenericBeanDefinition` and `ScannedGenericBeanDefinition` classes. When Spring finds an annotated class, it uses `AnnotationMetadata` to build the bean definition. It reads the annotation information of the class, such as the bean name, scope, and dependencies. Then it uses this information to create the bean definition.
+3. **Conditional bean registration**
+   - For conditional bean registration, `AnnotationMetadata` works with the `Conditional` annotation and the `Condition` interface. During conditional registration, `AnnotationMetadata` is used to evaluate the `@Conditional` annotation. The result decides if a specific bean is registered.
 
-### 八、常见问题
+### 8. Common Problems
 
-1. **如何获取类上的特定注解信息？**
-   - 使用 `AnnotationMetadata` 的 `getAnnotations()` 方法，然后可以过滤和检查每个注解以获取特定注解的信息。例如，使用 `isDirectlyPresent()` 来检查注解是否直接存在于类上，然后使用 `getAnnotationAttributes()` 获取注解的属性值。
-2. **如何判断类是否被特定注解标记？**
-   - 使用 `AnnotationMetadata` 的 `hasAnnotation()` 方法，提供注解的完全限定名，可以检查类是否被特定注解标记。
-3. **如何处理条件化注册的问题？**
-   - 当使用条件化注解（如 `@Conditional`）时，需要使用 `AnnotationMetadata` 评估条件，并根据条件的结果来决定是否注册 Bean。通常，这需要自定义条件类和实现 `Condition` 接口来处理条件逻辑。
-4. **如何扫描和分析多个类？**
-   - 可以使用 Spring 的组件扫描功能，通过配置 `@ComponentScan` 注解或 XML 配置文件来扫描多个类。然后，`AnnotationMetadata` 可以用于分析扫描到的每个类。
-5. **如何自定义注解处理器？**
-   - 如果需要自定义处理特定注解的逻辑，可以编写自定义注解处理器，并使用 `AnnotationMetadata` 来分析和处理注解信息。这通常涉及实现自定义逻辑，例如动态创建 Bean 定义或执行其他操作。
-6. **如何选择使用 ASM 或标准 Java 反射？**
-   - 当选择使用 `AnnotationMetadata` 时，需要根据具体需求和性能考虑选择使用 ASM 或标准 Java 反射的实现。ASM 更适合需要高性能的场景，而标准 Java 反射通常更易于使用和维护。选择取决于项目的要求和性能需求。
+1. **How do I get the information of a specific annotation on a class?**
+   - Use the `getAnnotations()` method of `AnnotationMetadata`. Then filter and check each annotation to get the information of a specific one. For example, use `isDirectlyPresent()` to check if the annotation is directly present on the class. Then use `getAnnotationAttributes()` to get its attribute values.
+2. **How do I check if a class has a specific annotation?**
+   - Use the `hasAnnotation()` method of `AnnotationMetadata` and pass the fully qualified name of the annotation.
+3. **How do I handle conditional registration?**
+   - When you use conditional annotations (such as `@Conditional`), use `AnnotationMetadata` to evaluate the condition. The result decides if the bean is registered. Usually, you write a custom condition class that implements the `Condition` interface to handle the condition logic.
+4. **How do I scan and analyze many classes?**
+   - Use the component scanning of Spring. Configure the `@ComponentScan` annotation or an XML configuration file to scan many classes. Then use `AnnotationMetadata` to analyze each scanned class.
+5. **How do I write a custom annotation processor?**
+   - If you need custom logic for a specific annotation, write a custom annotation processor and use `AnnotationMetadata` to analyze and handle the annotation information. This usually means custom logic, such as creating bean definitions dynamically or doing other work.
+6. **How do I choose between ASM and standard Java reflection?**
+   - When you use `AnnotationMetadata`, choose ASM or standard Java reflection based on your needs and performance. ASM suits cases that need high performance. Standard Java reflection is usually easier to use and maintain. The choice depends on the project requirements.

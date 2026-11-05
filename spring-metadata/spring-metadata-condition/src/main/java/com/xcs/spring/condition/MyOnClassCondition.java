@@ -6,7 +6,7 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 
 /**
  * @author xcs
- * @date 2023年11月20日 15时24分
+ * @date 2023-11-20 15:24
  **/
 public class MyOnClassCondition implements Condition {
 
@@ -19,12 +19,12 @@ public class MyOnClassCondition implements Condition {
     @Override
     public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
         try {
-            // 尝试加载类
+            // Try to load the class
             getClass().getClassLoader().loadClass(className);
-            // 类存在，条件匹配
+            // The class exists, so the condition matches
             return true;
         } catch (ClassNotFoundException e) {
-            // 类不存在，条件不匹配
+            // The class does not exist, so the condition does not match
             return false;
         }
     }

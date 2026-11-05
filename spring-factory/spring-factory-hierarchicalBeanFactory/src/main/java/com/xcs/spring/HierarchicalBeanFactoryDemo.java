@@ -7,35 +7,35 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 /**
  * @author xcs
- * @date 2023年11月23日 20时22分
+ * @date 2023-11-23 20:22
  **/
 public class HierarchicalBeanFactoryDemo {
 
     public static void main(String[] args) {
-        // 创建父级容器
+        // Create the parent container
         AnnotationConfigApplicationContext parentContext = new AnnotationConfigApplicationContext(MyBean.class);
-        // 创建子级容器
+        // Create the child container
         AnnotationConfigApplicationContext childContext = new AnnotationConfigApplicationContext();
         childContext.setParent(parentContext);
 
-        // 在子级 BeanFactory 中获取 bean
+        // Get the bean from the child BeanFactory
         HierarchicalBeanFactory childHierarchicalBeanFactory = childContext.getBeanFactory();
-        System.out.println("在子级BeanFactory中获取Bean: " + childHierarchicalBeanFactory.getBean(MyBean.class));
+        System.out.println("Get bean from child BeanFactory: " + childHierarchicalBeanFactory.getBean(MyBean.class));
 
-        // 在父级 BeanFactory 中获取 bean
+        // Get the bean from the parent BeanFactory
         HierarchicalBeanFactory parentHierarchicalBeanFactory = parentContext.getBeanFactory();
-        System.out.println("在父级BeanFactory中获取Bean: " + parentHierarchicalBeanFactory.getBean(MyBean.class));
+        System.out.println("Get bean from parent BeanFactory: " + parentHierarchicalBeanFactory.getBean(MyBean.class));
 
-        // 获取父级 BeanFactory
+        // Get the parent BeanFactory
         BeanFactory parentBeanFactory = childHierarchicalBeanFactory.getParentBeanFactory();
-        System.out.println("获取父级BeanFactory: " + parentBeanFactory);
+        System.out.println("Get parent BeanFactory: " + parentBeanFactory);
 
-        // 判断本地 BeanFactory 是否包含指定名称的 bean
+        // Check if the local BeanFactory contains a bean with the given name
         boolean containsLocalBean = childHierarchicalBeanFactory.containsLocalBean("myBean");
-        System.out.println("判断本地BeanFactory是否包含指定名称的Bean: " + containsLocalBean);
+        System.out.println("Local BeanFactory contains the bean: " + containsLocalBean);
 
-        // 判断整个 BeanFactory 是否包含指定名称的 bean
+        // Check if the whole BeanFactory hierarchy contains a bean with the given name
         boolean containsBean = childHierarchicalBeanFactory.containsBean("myBean");
-        System.out.println("判断整个BeanFactory是否包含指定名称的Bean: " + containsBean);
+        System.out.println("Whole BeanFactory contains the bean: " + containsBean);
     }
 }

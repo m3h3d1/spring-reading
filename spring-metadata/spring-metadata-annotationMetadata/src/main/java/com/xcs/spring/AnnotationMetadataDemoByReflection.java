@@ -8,21 +8,21 @@ import java.util.Map;
 
 /**
  * @author xcs
- * @date 2023年10月31日 16时17分
+ * @date 2023-10-31 16:17
  **/
 public class AnnotationMetadataDemoByReflection {
 
     public static void main(String[] args) throws Exception {
-        // 获取 AnnotationMetadata
+        // Get the AnnotationMetadata
         AnnotationMetadata annotationMetadata = AnnotationMetadata.introspect(MyBean.class);
 
         System.out.println("AnnotationMetadata impl class is " + annotationMetadata.getClass());
 
-        // 检查 MyBean 类是否被 @Component 注解标记
+        // Check if the MyBean class is annotated with @Component
         boolean isComponent = annotationMetadata.hasAnnotation(Component.class.getName());
         System.out.println("MyBean is a @Component: " + isComponent);
 
-        // 获取 MyBean 类上的注解属性
+        // Get the annotation attributes on the MyBean class
         if (isComponent) {
             Map<String, Object> annotationAttributes = annotationMetadata.getAnnotationAttributes(Component.class.getName());
             System.out.println("@Component value is " + annotationAttributes.get("value"));

@@ -8,44 +8,44 @@ import org.springframework.core.ResolvableType;
 
 /**
  * @author xcs
- * @date 2023年11月23日 19时17分
+ * @date 2023-11-23 19:17
  **/
 public class BeanFactoryDemo {
 
     public static void main(String[] args) {
-        // 创建 BeanFactory
+        // Create the BeanFactory
         BeanFactory beanFactory = new AnnotationConfigApplicationContext(MyBean.class).getBeanFactory();
 
-        // 根据名称获取 bean
+        // Get a bean by name
         Object bean = beanFactory.getBean("myBean");
-        System.out.println("通过名称获取Bean: " + bean);
+        System.out.println("Get bean by name: " + bean);
 
-        // 获取 bean 的 ObjectProvider
+        // Get the ObjectProvider of a bean
         ObjectProvider<MyBean> objectProvider = beanFactory.getBeanProvider(MyBean.class);
-        System.out.println("获取Bean的ObjectProvider: " + objectProvider);
+        System.out.println("Get ObjectProvider of bean: " + objectProvider);
 
-        // 获取 bean 的类型
+        // Get the type of a bean
         Class<?> beanType = beanFactory.getType("myBean");
-        System.out.println("获取Bean的类型: " + beanType);
+        System.out.println("Get bean type: " + beanType);
 
-        // 判断是否包含某个 bean
+        // Check if a bean exists
         boolean containsBean = beanFactory.containsBean("myBean");
-        System.out.println("判断是否包含Bean: " + containsBean);
+        System.out.println("Contains bean: " + containsBean);
 
-        // 判断 bean 是否为单例
+        // Check if a bean is a singleton
         boolean isSingleton = beanFactory.isSingleton("myBean");
-        System.out.println("判断是否为单例: " + isSingleton);
+        System.out.println("Is singleton: " + isSingleton);
 
-        // 判断 bean 是否为原型
+        // Check if a bean is a prototype
         boolean isPrototype = beanFactory.isPrototype("myBean");
-        System.out.println("判断是否为原型: " + isPrototype);
+        System.out.println("Is prototype: " + isPrototype);
 
-        // 判断 bean 是否匹配指定类型
+        // Check if a bean matches the given type
         boolean isTypeMatch = beanFactory.isTypeMatch("myBean", ResolvableType.forClass(MyBean.class));
-        System.out.println("判断是否匹配指定类型: " + isTypeMatch);
+        System.out.println("Type matches: " + isTypeMatch);
 
-        // 获取 bean 的所有别名
+        // Get all aliases of a bean
         String[] aliases = beanFactory.getAliases("myBean");
-        System.out.println("获取Bean的所有别名: " + String.join(", ", aliases));
+        System.out.println("Get all aliases of bean: " + String.join(", ", aliases));
     }
 }

@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 /**
  * @author xcs
- * @date 2023年10月31日 10时53分
+ * @date 2023-10-31 10:53
  **/
 @MyClassAnnotation
 public final class MyBean extends MyAbstract implements Serializable {
@@ -18,7 +18,7 @@ public final class MyBean extends MyAbstract implements Serializable {
 
     @MyAnnotation
     public static void myMethod1() {
-        // 方法1的实现
+        // Implementation of method 1
     }
 
     @MyAnnotation
@@ -27,10 +27,10 @@ public final class MyBean extends MyAbstract implements Serializable {
     }
 
     public void myMethod3() {
-        // 方法3的实现
+        // Implementation of method 3
     }
 
     public static class MyInnerClass {
-        // 内部类的定义
+        // Definition of the inner class
     }
 }

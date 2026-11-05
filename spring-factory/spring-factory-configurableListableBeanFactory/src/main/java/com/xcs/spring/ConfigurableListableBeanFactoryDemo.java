@@ -14,53 +14,53 @@ import java.util.Iterator;
 
 /**
  * @author xcs
- * @date 2023年11月24日 14时44分
+ * @date 2023-11-24 14:44
  **/
 public class ConfigurableListableBeanFactoryDemo {
 
     public static void main(String[] args) throws NoSuchFieldException {
-        // 创建 ApplicationContext
+        // Create the ApplicationContext
         AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(MyConfiguration.class);
 
-        // 获取 ConfigurableListableBeanFactory
+        // Get the ConfigurableListableBeanFactory
         ConfigurableListableBeanFactory beanFactory = applicationContext.getBeanFactory();
 
-        // 忽略指定类型的依赖
+        // Ignore dependencies of the given type
         beanFactory.ignoreDependencyType(String.class);
 
-        // 忽略指定接口的依赖
+        // Ignore dependencies of the given interface
         beanFactory.ignoreDependencyInterface(BeanFactory.class);
 
-        // 注册可解析的依赖
+        // Register a resolvable dependency
         beanFactory.registerResolvableDependency(ApplicationContext.class, applicationContext);
 
-        // 判断指定的 Bean 是否可以作为自动注入的候选者
+        // Check if the bean is a candidate for autowiring
         String beanName = "myService";
 
         DependencyDescriptor dependencyDescriptor = new DependencyDescriptor(MyController.class.getDeclaredField("myService"), false);
         boolean isAutowireCandidate = beanFactory.isAutowireCandidate(beanName, dependencyDescriptor);
-        System.out.println(beanName + " 是否为自动注入的候选者: " + isAutowireCandidate);
+        System.out.println(beanName + " is an autowire candidate: " + isAutowireCandidate);
 
-        // 获取指定 Bean 的 BeanDefinition
+        // Get the BeanDefinition of the bean
         BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
-        System.out.println(beanName + " 的 BeanDefinition: " + beanDefinition);
+        System.out.println(beanName + " BeanDefinition: " + beanDefinition);
 
-        // 获取所有 Bean 的名称的迭代器
+        // Get an iterator over all bean names
         Iterator<String> beanNamesIterator = beanFactory.getBeanNamesIterator();
-        System.out.print("所有 Bean 的名称: ");
+        System.out.print("All bean names: ");
         beanNamesIterator.forEachRemaining(System.out::print);
 
-        // 清除元数据缓存
+        // Clear the metadata cache
         beanFactory.clearMetadataCache();
 
-        // 冻结配置
+        // Freeze the configuration
         beanFactory.freezeConfiguration();
 
-        // 判断配置是否已冻结
+        // Check if the configuration is frozen
         boolean isConfigurationFrozen = beanFactory.isConfigurationFrozen();
-        System.out.println("配置是否已冻结: " + isConfigurationFrozen);
+        System.out.println("Configuration frozen: " + isConfigurationFrozen);
 
-        // 预实例化所有非懒加载的单例 Bean
+        // Pre-instantiate all non-lazy singleton beans
         beanFactory.preInstantiateSingletons();
     }
 }

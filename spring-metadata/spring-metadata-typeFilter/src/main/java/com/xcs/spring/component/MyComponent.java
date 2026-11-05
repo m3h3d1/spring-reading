@@ -4,7 +4,7 @@ import com.xcs.spring.annotation.MyAnnotation;
 
 /**
  * @author xcs
- * @date 2023年11月20日 10时51分
+ * @date 2023-11-20 10:51
  **/
 @MyAnnotation
 public class MyComponent {

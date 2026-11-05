@@ -12,28 +12,28 @@ import java.io.IOException;
 public class ConditionDemo {
 
     public static void main(String[] args) throws IOException {
-        // 创建资源解析器，用于获取匹配指定模式的资源
+        // Create a resource resolver to get resources that match a pattern
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
-        // 创建MetadataReader工厂，用于读取类的元数据信息
+        // Create a MetadataReader factory to read the metadata of classes
         SimpleMetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 
-        // 获取指定模式下的所有资源
+        // Get all resources that match the pattern
         Resource[] resources = resolver.getResources("classpath*:com/xcs/spring/bean/**/*.class");
 
-        // 创建自定义条件类的实例，用于条件匹配
+        // Create the custom condition used for matching
         Condition condition = new MyOnClassCondition("com.xcs.spring.ConditionDemo1");
 
-        // 遍历每个资源，判断是否满足自定义条件
+        // Go through each resource and check the custom condition
         for (Resource resource : resources) {
-            // 获取资源对应的元数据读取器
+            // Get the MetadataReader of the resource
             MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(resource);
 
-            // 判断资源是否满足自定义条件
+            // Check if the resource meets the custom condition
             if (condition.matches(null, metadataReader.getAnnotationMetadata())) {
-                System.out.println(resource.getFile().getName() + "满足条件");
+                System.out.println(resource.getFile().getName() + " meets the condition");
             } else {
-                System.out.println(resource.getFile().getName() + "不满足条件");
+                System.out.println(resource.getFile().getName() + " does not meet the condition");
             }
         }
     }
