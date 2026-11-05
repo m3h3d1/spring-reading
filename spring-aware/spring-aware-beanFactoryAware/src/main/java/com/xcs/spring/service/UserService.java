@@ -30,9 +30,9 @@ public class UserService implements BeanFactoryAware, InitializingBean {
     public void validateUser(String username, String password) {
         boolean success = userValidator.validate(username, password);
         if (success){
-            System.out.println("验证账号密码成功");
+            System.out.println("Account and password verified");
         }else{
-            System.out.println("验证账号密码失败");
+            System.out.println("Account and password verification failed");
         }
     }
 

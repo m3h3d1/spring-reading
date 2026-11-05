@@ -19,12 +19,12 @@ public class MyApplicationStartupAware implements ApplicationStartupAware, Initi
     @Override
     public void afterPropertiesSet() throws Exception {
         StartupStep step1 = applicationStartup.start("MyApplicationStartupAware Logic Step 1");
-        // 自定义逻辑
+        // Custom logic
         Thread.sleep(200);
         step1.tag("status", "done").end();
 
         StartupStep step2 = applicationStartup.start("MyApplicationStartupAware Logic Step 2");
-        // 自定义逻辑
+        // Custom logic
         Thread.sleep(300);
         step2.tag("status", "done").end();
     }

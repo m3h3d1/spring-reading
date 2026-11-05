@@ -1,39 +1,39 @@
 ## BeanClassLoaderAware
 
 - [BeanClassLoaderAware](#beanclassloaderaware)
-  - [一、基本信息](#一基本信息)
-  - [二、接口描述](#二接口描述)
-  - [三、接口源码](#三接口源码)
-  - [四、主要功能](#四主要功能)
-  - [五、最佳实践](#五最佳实践)
-  - [六、时序图](#六时序图)
-  - [七、源码分析](#七源码分析)
-  - [八、注意事项](#八注意事项)
-  - [九、总结](#九总结)
-    - [最佳实践总结](#最佳实践总结)
-    - [源码分析总结](#源码分析总结)
+  - [1. Overview](#1-overview)
+  - [2. Interface Description](#2-interface-description)
+  - [3. Interface Source](#3-interface-source)
+  - [4. Main Features](#4-main-features)
+  - [5. Best Practices](#5-best-practices)
+  - [6. Sequence Diagram](#6-sequence-diagram)
+  - [7. Source Code Analysis](#7-source-code-analysis)
+  - [8. Notes](#8-notes)
+  - [9. Summary](#9-summary)
+    - [Best Practices Summary](#best-practices-summary)
+    - [Source Code Analysis Summary](#source-code-analysis-summary)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [我的CSDN](https://blog.csdn.net/duzhuang2399/article/details/133916700) 📚 **文章目录** - [所有文章](https://github.com/xuchengsheng/spring-reading) 🔗 **源码地址** - [BeanClassLoaderAware源码](https://github.com/xuchengsheng/spring-reading/tree/master/spring-aware/spring-aware-beanClassLoaderAware)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN](https://blog.csdn.net/duzhuang2399/article/details/133916700) 📚 **Contents** - [All Articles](https://github.com/xuchengsheng/spring-reading) 🔗 **Source code** - [BeanClassLoaderAware source code](https://github.com/xuchengsheng/spring-reading/tree/master/spring-aware/spring-aware-beanClassLoaderAware)
 
-### 二、接口描述
+### 2. Interface Description
 
-`BeanClassLoaderAware` 接口，允许 bean 得知其加载的类加载器。当一个 bean 实现了这个接口时，Spring 容器在 bean 初始化的时候会设置它的类加载器。
+The `BeanClassLoaderAware` interface lets a bean know the class loader that loaded it. When a bean implements this interface, the Spring container sets its class loader when the bean is initialized.
 
-### 三、接口源码
+### 3. Interface Source
 
-`BeanClassLoaderAware` 是 Spring 框架自 2.0 版本开始引入的一个核心接口。当一个 bean 实现了这个接口，并在 Spring 容器中被初始化时，Spring 容器会自动调用 `setClassLoader` 方法，并将加载该 bean 的类加载器传入。
+`BeanClassLoaderAware` is a core Spring interface, available since version 2.0. When a bean implements this interface and is initialized in the Spring container, the container calls the `setClassLoader` method automatically and passes in the class loader that loaded the bean.
 
 ```java
 /**
- * 回调接口，允许 bean 了解其所使用的 ClassLoader 类加载器；
- * 也就是当前 bean 工厂用于加载 bean 类的类加载器。
+ * Callback that allows a bean to be aware of the bean ClassLoader,
+ * that is, the class loader used by the present bean factory to load bean classes.
  * 
- * 主要目的是供那些需要按名称选择应用类的框架类实现，尽管这些框架类可能是由共享的类加载器加载的。
+ * This is mainly intended to be implemented by framework classes that need to pick up application classes by name, even though they may themselves have been loaded from a shared class loader.
  *
- * 对于所有 bean 生命周期方法的列表，请参阅 BeanFactory BeanFactory 的 javadocs。
+ * For a list of all bean lifecycle methods, see the BeanFactory BeanFactory javadocs.
  *
  * @author Juergen Hoeller
  * @author Chris Beams
@@ -45,31 +45,31 @@
 public interface BeanClassLoaderAware extends Aware {
 
     /**
-     * 提供 bean 的 ClassLoader 类加载器 的回调方法。
-     * 在填充普通的 bean 属性之后但在初始化回调（如 InitializingBean InitializingBean 的
-     * InitializingBean#afterPropertiesSet() 方法或自定义初始化方法）之前调用此方法。
+     * Callback that supplies the bean class loader to a bean instance.
+     * Invoked after the population of normal bean properties but before an initialization callback such as InitializingBean's
+     * InitializingBean#afterPropertiesSet() method or a custom init method.
      * 
-     * @param classLoader 拥有的类加载器
+     * @param classLoader the owning class loader
      */
     void setBeanClassLoader(ClassLoader classLoader);
 
 }
 ```
 
-### 四、主要功能
+### 4. Main Features
 
-1. **提供类加载器信息**
-   + Bean 可以得知其加载的类加载器，从而可以利用该类加载器进行动态的类加载或资源查找。
+1. **Provides class loader information**
+   + A bean can learn the class loader that loaded it. It can use this class loader to load classes or look up resources dynamically.
 
-2. **框架与应用类加载器隔离**
-   + 在某些复杂的环境中，框架类和应用程序类可能是由不同的类加载器加载的。例如，在某些应用服务器环境中，框架可能是由共享的类加载器加载的，而应用程序类是由专门的类加载器加载的。通过 `BeanClassLoaderAware`，框架类可以确保使用正确的类加载器来加载或访问应用程序类。
+2. **Separating framework and application class loaders**
+   + In some complex environments, framework classes and application classes may be loaded by different class loaders. For example, in some application servers, the framework may be loaded by a shared class loader, while the application classes are loaded by a dedicated class loader. With `BeanClassLoaderAware`, framework classes can make sure they use the right class loader to load or access application classes.
 
-3. **生命周期管理**
-   + `setBeanClassLoader` 方法会在填充 bean 的普通属性之后但在调用任何初始化回调（如 `InitializingBean#afterPropertiesSet()`）之前被调用。这确保了在 bean 的生命周期的合适阶段提供类加载器信息。
+3. **Lifecycle management**
+   + `setBeanClassLoader` is called after the normal bean properties are populated, but before any initialization callback (such as `InitializingBean#afterPropertiesSet()`). This makes sure the class loader information is provided at the right stage of the bean lifecycle.
 
-### 五、最佳实践
+### 5. Best Practices
 
-首先来看看启动类入口，上下文环境使用`AnnotationConfigApplicationContext`（此类是使用Java注解来配置Spring容器的方式），构造参数我们给定了一个`MyConfiguration`组件类。然后从Spring上下文中获取一个`MyBeanClassLoaderAware`类型的bean，最后调用`loadAndExecute`方法。
+First, look at the entry class. It uses `AnnotationConfigApplicationContext` (a way to configure the Spring container with Java annotations). The constructor receives one configuration class, `MyConfiguration`. Then it gets a bean of type `MyBeanClassLoaderAware` from the Spring context and calls the `loadAndExecute` method.
 
 ```java
 public class BeanClassLoaderAwareApplication {
@@ -82,7 +82,7 @@ public class BeanClassLoaderAwareApplication {
 }
 ```
 
-这里使用`@Bean`注解，定义了一个Bean，是为了确保`MyBeanClassLoaderAware` 被 Spring 容器执行
+The `@Bean` annotation defines a bean here, to make sure the Spring container creates `MyBeanClassLoaderAware`.
 
 ```java
 @Configuration
@@ -95,7 +95,7 @@ public class MyConfiguration {
 }
 ```
 
-在`MyBeanClassLoaderAware` 类中，我们实现了 `BeanClassLoaderAware` 接口，允许这个 bean 在初始化时获取其 `ClassLoader`。接着，在 `loadAndExecute` 方法中，我们使用这个 `ClassLoader` 来动态加载一个名为 `com.xcs.spring.service.UserServiceImpl` 的类并执行它的 `getUserInfo` 方法。
+In the `MyBeanClassLoaderAware` class, we implement `BeanClassLoaderAware`, which lets this bean get its `ClassLoader` when it is initialized. Then, in the `loadAndExecute` method, we use this `ClassLoader` to load a class named `com.xcs.spring.service.UserServiceImpl` dynamically and run its `getUserInfo` method.
 
 ```java
 public class MyBeanClassLoaderAware implements BeanClassLoaderAware {
@@ -119,7 +119,7 @@ public class MyBeanClassLoaderAware implements BeanClassLoaderAware {
 }
 ```
 
-定义一个接口与此接口的实现类。
+Define an interface and an implementation class of that interface.
 
 ```java
 package com.xcs.spring.service;
@@ -136,17 +136,17 @@ public class UserServiceImpl implements UserService {
 }
 ```
 
-运行结果发现，通过这种方式，我们保证了`MyBeanClassLoaderAware`的代码与`UserServiceImpl`的具体实现解耦。这意味着，如果`UserServiceImpl`的具体实现发生了变化，或者有了新的实现，只要我们遵循`UserService`接口，我们的`MyBeanClassLoaderAware`代码就不需要任何更改。
+The output shows that this way, the code of `MyBeanClassLoaderAware` is decoupled from the concrete implementation of `UserServiceImpl`. If the implementation of `UserServiceImpl` changes, or a new implementation appears, our `MyBeanClassLoaderAware` code does not need any change, as long as we follow the `UserService` interface.
 
 ```java
 UserInfo = this is user info
 ```
 
-### 六、时序图
+### 6. Sequence Diagram
 
 ~~~mermaid
 sequenceDiagram
-    Title: BeanClassLoaderAware时序图
+    Title: BeanClassLoaderAware sequence diagram
     participant BeanFactoryAwareApplication
     participant AnnotationConfigApplicationContext
     participant AbstractApplicationContext
@@ -156,28 +156,28 @@ sequenceDiagram
     participant AbstractAutowireCapableBeanFactory
     participant BeanClassLoaderAware
     
-    BeanFactoryAwareApplication->>AnnotationConfigApplicationContext:AnnotationConfigApplicationContext(componentClasses)<br>创建上下文
-    AnnotationConfigApplicationContext->>AbstractApplicationContext:refresh()<br>刷新上下文
-    AbstractApplicationContext->>AbstractApplicationContext:finishBeanFactoryInitialization(beanFactory)<br>初始化Bean工厂
-    AbstractApplicationContext->>DefaultListableBeanFactory:preInstantiateSingletons()<br>实例化单例
-    DefaultListableBeanFactory->>AbstractBeanFactory:getBean(name)<br>获取Bean
-    AbstractBeanFactory->>AbstractBeanFactory:doGetBean(name,requiredType,args,typeCheckOnly)<br>执行获取Bean
-    AbstractBeanFactory->>DefaultSingletonBeanRegistry:getSingleton(beanName,singletonFactory)<br>获取单例Bean
-    DefaultSingletonBeanRegistry-->>AbstractBeanFactory:getObject()<br>获取Bean实例
-    AbstractBeanFactory->>AbstractAutowireCapableBeanFactory:createBean(beanName,mbd,args)<br>创建Bean
-    AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:doCreateBean(beanName,mbd,args)<br>执行Bean创建
-    AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:initializeBean(beanName,bean,mbd)<br>负责bean的初始化
-    AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:invokeAwareMethods(beanName, bean)<br>调用Aware方法
-    AbstractAutowireCapableBeanFactory->>BeanClassLoaderAware:setBeanClassLoader(classLoader)<br>设置classLoader
-    AbstractAutowireCapableBeanFactory-->>AbstractBeanFactory:返回Bean对象
-    AbstractBeanFactory-->>DefaultListableBeanFactory:返回Bean对象
-    AnnotationConfigApplicationContext-->>BeanFactoryAwareApplication:初始化完成
+    BeanFactoryAwareApplication->>AnnotationConfigApplicationContext:AnnotationConfigApplicationContext(componentClasses)<br>Create the context
+    AnnotationConfigApplicationContext->>AbstractApplicationContext:refresh()<br>Refresh the context
+    AbstractApplicationContext->>AbstractApplicationContext:finishBeanFactoryInitialization(beanFactory)<br>Initialize the bean factory
+    AbstractApplicationContext->>DefaultListableBeanFactory:preInstantiateSingletons()<br>Instantiate singletons
+    DefaultListableBeanFactory->>AbstractBeanFactory:getBean(name)<br>Get the bean
+    AbstractBeanFactory->>AbstractBeanFactory:doGetBean(name,requiredType,args,typeCheckOnly)<br>Do the actual get
+    AbstractBeanFactory->>DefaultSingletonBeanRegistry:getSingleton(beanName,singletonFactory)<br>Get the singleton bean
+    DefaultSingletonBeanRegistry-->>AbstractBeanFactory:getObject()<br>Get the bean instance
+    AbstractBeanFactory->>AbstractAutowireCapableBeanFactory:createBean(beanName,mbd,args)<br>Create the bean
+    AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:doCreateBean(beanName,mbd,args)<br>Do the actual creation
+    AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:initializeBean(beanName,bean,mbd)<br>Initialize the bean
+    AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:invokeAwareMethods(beanName, bean)<br>Call the Aware methods
+    AbstractAutowireCapableBeanFactory->>BeanClassLoaderAware:setBeanClassLoader(classLoader)<br>Set the classLoader
+    AbstractAutowireCapableBeanFactory-->>AbstractBeanFactory:Return the bean
+    AbstractBeanFactory-->>DefaultListableBeanFactory:Return the bean
+    AnnotationConfigApplicationContext-->>BeanFactoryAwareApplication:Initialization complete
 
 ~~~
 
-### 七、源码分析
+### 7. Source Code Analysis
 
-首先来看看启动类入口，上下文环境使用`AnnotationConfigApplicationContext`（此类是使用Java注解来配置Spring容器的方式），构造参数我们给定了一个`MyConfiguration`组件类。然后从Spring上下文中获取一个`MyBeanClassLoaderAware`类型的bean，最后调用`loadAndExecute`方法。
+First, look at the entry class. It uses `AnnotationConfigApplicationContext` (a way to configure the Spring container with Java annotations). The constructor receives one configuration class, `MyConfiguration`. Then it gets a bean of type `MyBeanClassLoaderAware` from the Spring context and calls the `loadAndExecute` method.
 
 ```java
 public class BeanClassLoaderAwareApplication {
@@ -190,7 +190,7 @@ public class BeanClassLoaderAwareApplication {
 }
 ```
 
-在`org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext`构造函数中，执行了三个步骤，我们重点关注`refresh()`方法
+The constructor of `org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext` does three steps. We focus on the `refresh()` method.
 
 ```java
 public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
@@ -200,47 +200,47 @@ public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
 
 ```
 
-在`org.springframework.context.support.AbstractApplicationContext#refresh`方法中我们重点关注一下`finishBeanFactoryInitialization(beanFactory)`这方法会对实例化所有剩余非懒加载的单列Bean对象，其他方法不是本次源码阅读的重点暂时忽略。
+In `org.springframework.context.support.AbstractApplicationContext#refresh`, we focus on `finishBeanFactoryInitialization(beanFactory)`. It instantiates all remaining non-lazy singleton beans. The other methods are not the focus of this reading, so we skip them.
 
 ```java
 @Override
 public void refresh() throws BeansException, IllegalStateException {
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     // Instantiate all remaining (non-lazy-init) singletons.
     finishBeanFactoryInitialization(beanFactory);
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-在`org.springframework.context.support.AbstractApplicationContext#finishBeanFactoryInitialization`方法中，会继续调用`DefaultListableBeanFactory`类中的`preInstantiateSingletons`方法来完成所有剩余非懒加载的单列Bean对象。
+The method `org.springframework.context.support.AbstractApplicationContext#finishBeanFactoryInitialization` then calls `preInstantiateSingletons` in `DefaultListableBeanFactory` to create all remaining non-lazy singleton beans.
 
 ```java
 /**
- * 完成此工厂的bean初始化，实例化所有剩余的非延迟初始化单例bean。
+ * Finish the initialization of this factory by instantiating all remaining non-lazy-init singleton beans.
  * 
- * @param beanFactory 要初始化的bean工厂
+ * @param beanFactory the bean factory to initialize
  */
 protected void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
-    // ... [代码部分省略以简化]
-    // 完成所有剩余非懒加载的单列Bean对象。
+    // ... [code omitted for brevity]
+    // Instantiate all remaining non-lazy singleton beans.
     beanFactory.preInstantiateSingletons();
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultListableBeanFactory#preInstantiateSingletons`方法中，主要的核心目的是预先实例化所有非懒加载的单例bean。在Spring的上下文初始化完成后，该方法会被触发，以确保所有单例bean都被正确地创建并初始化。其中`getBean(beanName)`是此方法的核心操作。对于容器中定义的每一个单例bean，它都会调用`getBean`方法，这将触发bean的实例化、初始化及其依赖的注入。如果bean之前没有被创建过，那么这个调用会导致其被实例化和初始化。
+The main purpose of `org.springframework.beans.factory.support.DefaultListableBeanFactory#preInstantiateSingletons` is to instantiate all non-lazy singleton beans up front. It runs when the Spring context finishes initializing, so that all singleton beans are created and initialized. Its core operation is `getBean(beanName)`. For each singleton bean defined in the container, it calls `getBean`, which triggers instantiation, initialization, and dependency injection. If the bean has not been created yet, this call creates and initializes it.
 
 ```java
 public void preInstantiateSingletons() throws BeansException {
-    // ... [代码部分省略以简化]
-    // 循环遍历所有bean的名称
+    // ... [code omitted for brevity]
+    // Loop over all bean names
     for (String beanName : beanNames) {
         getBean(beanName);
     }
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractBeanFactory#getBean()`方法中，又调用了`doGetBean`方法来实际执行创建Bean的过程，传递给它bean的名称和一些其他默认的参数值。此处，`doGetBean`负责大部分工作，如查找bean定义、创建bean（如果尚未创建）、处理依赖关系等。
+The method `org.springframework.beans.factory.support.AbstractBeanFactory#getBean()` calls `doGetBean` to do the real work of creating the bean. It passes the bean name and some default argument values. `doGetBean` does most of the work, such as finding the bean definition, creating the bean (if it does not exist yet), and handling dependencies.
 
 ```java
 @Override
@@ -249,153 +249,153 @@ public Object getBean(String name) throws BeansException {
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractBeanFactory#doGetBean`方法中，首先检查所请求的bean是否是一个单例并且已经创建。如果尚未创建，它将创建一个新的实例。在这个过程中，它处理可能的异常情况，如循环引用，并确保返回的bean是正确的类型。这是Spring容器bean生命周期管理的核心部分。
+In `org.springframework.beans.factory.support.AbstractBeanFactory#doGetBean`, Spring first checks whether the requested bean is a singleton that has already been created. If not, it creates a new instance. Along the way it handles possible problems such as circular references, and makes sure the returned bean has the right type. This is a core part of bean lifecycle management in the Spring container.
 
 ```java
 protected <T> T doGetBean(
         String name, @Nullable Class<T> requiredType, @Nullable Object[] args, boolean typeCheckOnly)
         throws BeansException {
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
-    // 开始创建bean实例
+    // Start creating the bean instance
     if (mbd.isSingleton()) {
-        // 如果bean是单例的，我们会尝试从单例缓存中获取它
-        // 如果不存在，则使用lambda创建一个新的实例
+        // If the bean is a singleton, try to get it from the singleton cache
+        // If it does not exist, create a new instance with a lambda
         sharedInstance = getSingleton(beanName, () -> {
             try {
-                // 尝试创建bean实例
+                // Try to create the bean instance
                 return createBean(beanName, mbd, args);
             }
             catch (BeansException ex) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
         });
-        // 对于某些bean（例如FactoryBeans），可能需要进一步处理以获取真正的bean实例
+        // For some beans (for example FactoryBeans), more work may be needed to get the real bean instance
         beanInstance = getObjectForBeanInstance(sharedInstance, name, beanName, mbd);
     }
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
-    // 确保返回的bean实例与请求的类型匹配
+    // Make sure the returned bean instance matches the requested type
     return adaptBeanInstance(name, beanInstance, requiredType);
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultSingletonBeanRegistry#getSingleton()`方法中，主要负责从单例缓存中获取一个已存在的bean实例，或者使用提供的`ObjectFactory`创建一个新的实例。这是确保bean在Spring容器中作为单例存在的关键部分。
+The method `org.springframework.beans.factory.support.DefaultSingletonBeanRegistry#getSingleton()` gets an existing bean instance from the singleton cache, or creates a new one with the given `ObjectFactory`. This is the key part that keeps a bean a singleton in the Spring container.
 
 ```java
 public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) {
-    // 断言bean名称不能为空
+    // Assert that the bean name is not null
     Assert.notNull(beanName, "Bean name must not be null");
 
-    // 同步访问单例对象缓存，确保线程安全
+    // Synchronize on the singleton cache for thread safety
     synchronized (this.singletonObjects) {
-        // 从缓存中获取单例对象
+        // Get the singleton from the cache
         Object singletonObject = this.singletonObjects.get(beanName);
 
-        // 如果缓存中没有找到
+        // If it is not in the cache
         if (singletonObject == null) {
-            // ... [代码部分省略以简化]
+            // ... [code omitted for brevity]
 
             try {
-                // 使用工厂创建新的单例实例
+                // Create a new singleton instance with the factory
                 singletonObject = singletonFactory.getObject();
                 newSingleton = true;
             }
             catch (IllegalStateException ex) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
             catch (BeanCreationException ex) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
             finally {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
 
-            // ... [代码部分省略以简化]
+            // ... [code omitted for brevity]
         }
 
-        // 返回单例对象
+        // Return the singleton
         return singletonObject;
     }
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#createBean()`方法中，主要的逻辑是调用 `doCreateBean`，这是真正进行 bean 实例化、属性填充和初始化的地方。这个方法会返回新创建的 bean 实例。
+The main logic of `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#createBean()` is to call `doCreateBean`. That is where the bean is really instantiated, populated, and initialized. The method returns the newly created bean instance.
 
 ```java
 @Override
 protected Object createBean(String beanName, RootBeanDefinition mbd, @Nullable Object[] args)
     throws BeanCreationException {
     
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     
     try {
-        // 正常的bean实例化、属性注入和初始化。
-        // 这里是真正进行bean创建的部分。
+        // Normal bean instantiation, property injection, and initialization.
+        // This is where the bean is really created.
         Object beanInstance = doCreateBean(beanName, mbdToUse, args);
-        // 记录bean成功创建的日志
+        // Log that the bean was created successfully
         if (logger.isTraceEnabled()) {
             logger.trace("Finished creating instance of bean '" + beanName + "'");
         }
         return beanInstance;
     }
     catch (BeanCreationException | ImplicitlyAppearedSingletonException ex) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
     catch (Throwable ex) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#doCreateBean`方法中，`initializeBean`方法是bean初始化，确保bean是完全配置和准备好的。
+In `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#doCreateBean`, the `initializeBean` method initializes the bean and makes sure it is fully configured and ready.
 
 ```java
 protected Object doCreateBean(String beanName, RootBeanDefinition mbd, @Nullable Object[] args)
         throws BeanCreationException {
 
-    // 声明一个对象，后续可能用于存放初始化后的bean或它的代理对象
+    // Declare an object that may later hold the initialized bean or its proxy
     Object exposedObject = bean;
 
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     
     try {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
         
-        // bean初始化
+        // Initialize the bean
         exposedObject = initializeBean(beanName, exposedObject, mbd);
     } 
     catch (Throwable ex) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
 
-    // 返回创建和初始化后的bean
+    // Return the created and initialized bean
     return exposedObject;
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#initializeBean`方法中，`invokeAwareMethods(beanName, bean)`是一个非常重要的步骤。这个方法是为了处理实现了Spring的`Aware`接口族的Beans（例如`BeanNameAware`, `BeanFactoryAware`等）。如果提供的bean实现了任何这些接口，该方法会回调相应的`Aware`方法。
+In `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#initializeBean`, `invokeAwareMethods(beanName, bean)` is an important step. It handles beans that implement the Spring `Aware` interfaces (such as `BeanNameAware` and `BeanFactoryAware`). If the bean implements any of them, the matching `Aware` method is called.
 
 ```java
 protected Object initializeBean(String beanName, Object bean, @Nullable RootBeanDefinition mbd) {
 
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     
     invokeAwareMethods(beanName, bean);
     
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
     return wrappedBean;
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#invokeAwareMethods`方法中，用于处理实现了 Spring `Aware` 接口族的 beans。当一个 bean 实现了如 `BeanNameAware`、`BeanClassLoaderAware` 或 `BeanFactoryAware` 等接口时，此方法确保正确的回调方法被调用，从而为 bean 提供关于其运行环境或其他相关信息。
+The method `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#invokeAwareMethods` handles beans that implement the Spring `Aware` interfaces. When a bean implements an interface such as `BeanNameAware`, `BeanClassLoaderAware`, or `BeanFactoryAware`, this method makes sure the right callback is called. This gives the bean information about its runtime environment.
 
 ```java
 private void invokeAwareMethods(String beanName, Object bean) {
     if (bean instanceof Aware) {
         if (bean instanceof BeanNameAware) {
-            // ... [代码部分省略以简化]
+            // ... [code omitted for brevity]
         }
         if (bean instanceof BeanClassLoaderAware) {
             ClassLoader bcl = getBeanClassLoader();
@@ -404,13 +404,13 @@ private void invokeAwareMethods(String beanName, Object bean) {
             }
         }
         if (bean instanceof BeanFactoryAware) {
-            // ... [代码部分省略以简化]
+            // ... [code omitted for brevity]
         }
     }
 }
 ```
 
-最后执行到我们自定义的逻辑中，我们实现了 `BeanClassLoaderAware` 接口，允许这个 bean 在初始化时获取其 `ClassLoader`。
+Finally, execution reaches our own logic. We implement `BeanClassLoaderAware`, which lets this bean get its `ClassLoader` when it is initialized.
 
 ```java
 public class MyBeanClassLoaderAware implements BeanClassLoaderAware {
@@ -434,70 +434,70 @@ public class MyBeanClassLoaderAware implements BeanClassLoaderAware {
 }
 ```
 
-### 八、注意事项
+### 8. Notes
 
-1. **避免过度使用**
-   + 只有当我们真的需要访问类加载器时才使用 `BeanClassLoaderAware`。不要滥用它，因为这可能会导致代码与Spring框架过度耦合。
+1. **Avoid overuse**
+   + Use `BeanClassLoaderAware` only when you really need access to the class loader. Do not abuse it, because it may couple your code too tightly to the Spring framework.
 
-2. **考虑类加载器层次结构**
-   + 在Java中，类加载器通常有一个父子关系。如果我们不能使用当前的类加载器找到一个类，可能需要检查其父类加载器。
+2. **Consider the class loader hierarchy**
+   + In Java, class loaders usually have a parent-child relationship. If you cannot find a class with the current class loader, you may need to check its parent class loader.
 
-3. **不要在setter中执行复杂的逻辑**
-   + `setBeanClassLoader` 是一个setter方法，应该避免在其中执行复杂的逻辑。它应该只用于设置类加载器。
+3. **Do not run complex logic in the setter**
+   + `setBeanClassLoader` is a setter method. Avoid complex logic in it. It should only be used to set the class loader.
 
-4. **避免存储状态**
-   + 尽量不要在实现了`BeanClassLoaderAware`的bean中存储状态或依赖于其他bean的状态。这会使bean的生命周期和初始化更加复杂。
+4. **Avoid storing state**
+   + Try not to store state in a bean that implements `BeanClassLoaderAware`, or depend on the state of other beans. It makes the bean lifecycle and initialization more complex.
 
-5. **考虑使用其他技术**
-   + 在某些情况下，可能有其他技术或方法可以达到同样的目的，而无需使用 `BeanClassLoaderAware`。例如，使用Spring的`@Value`注解或`ResourceLoader`来加载资源，而不是直接使用类加载器。
+5. **Consider other techniques**
+   + In some cases, other techniques can reach the same goal without `BeanClassLoaderAware`. For example, use the Spring `@Value` annotation or `ResourceLoader` to load resources, instead of using the class loader directly.
 
-6. **考虑类加载器层次结构**
-   + 在Java中，类加载器通常有一个父子关系。如果我们不能使用当前的类加载器找到一个类，可能需要检查其父类加载器。
+6. **Consider the class loader hierarchy**
+   + In Java, class loaders usually have a parent-child relationship. If you cannot find a class with the current class loader, you may need to check its parent class loader.
 
-7. **资源管理**
-   + 类加载器不仅可以加载类，还可以用来加载其他资源（例如，属性文件）。但是，要小心确保资源路径正确，并记住类加载器的搜索行为可能与文件系统或其他加载机制不同。
+7. **Resource management**
+   + A class loader can load more than classes. It can also load other resources (for example property files). But be careful to make sure the resource path is correct, and remember that the search behavior of a class loader may differ from the file system or other loading mechanisms.
 
-### 九、总结
+### 9. Summary
 
-#### 最佳实践总结
+#### Best Practices Summary
 
-1. **启动及上下文配置**
-   + 利用 `AnnotationConfigApplicationContext` 初始化Spring容器，使用 `MyConfiguration` 作为配置类来为Spring上下文提供设置。
+1. **Startup and context configuration**
+   + `AnnotationConfigApplicationContext` initializes the Spring container, and `MyConfiguration` is used as the configuration class for the Spring context.
 
-2. **配置类定义**
-   + 标记配置类为 `@Configuration`，使用 `@Bean` 注解来确保 `MyBeanClassLoaderAware` 被Spring容器管理。
+2. **Configuration class definition**
+   + The configuration class is marked with `@Configuration`, and the `@Bean` annotation makes sure `MyBeanClassLoaderAware` is managed by the Spring container.
 
-3. **实现 `BeanClassLoaderAware`**
-   + 通过实现 `BeanClassLoaderAware` 接口，bean 可以在初始化时获得其加载的 `ClassLoader`，在 `loadAndExecute` 方法中，动态加载并执行特定的服务方法。
+3. **Implementing `BeanClassLoaderAware`**
+   + By implementing `BeanClassLoaderAware`, the bean gets the `ClassLoader` that loaded it when it is initialized. In the `loadAndExecute` method, it loads and runs a specific service method dynamically.
 
-4. **接口与实现**
-   + 定义清晰的 `UserService` 接口和相应的 `UserServiceImpl` 实现。
+4. **Interface and implementation**
+   + We define a clear `UserService` interface and the matching `UserServiceImpl` implementation.
 
-5. **结果及结论**
-   + 运行程序后，我们能够看到预期输出，这表明成功地将 `MyBeanClassLoaderAware` 与特定实现解耦。
+5. **Result and conclusion**
+   + After the program runs, we see the expected output. This shows that `MyBeanClassLoaderAware` is decoupled from the specific implementation.
 
-#### 源码分析总结
+#### Source Code Analysis Summary
 
-1. **应用启动入口**
-   + 通过`AnnotationConfigApplicationContext`，以`MyConfiguration`为配置类，初始化Spring容器。随后获取`MyBeanClassLoaderAware` bean并调用其`loadAndExecute`方法。
+1. **Application entry**
+   + `AnnotationConfigApplicationContext` initializes the Spring container with `MyConfiguration` as the configuration class. Then the `MyBeanClassLoaderAware` bean is taken and its `loadAndExecute` method is called.
 
-2. **初始化Spring上下文**
-   + 在`AnnotationConfigApplicationContext`构造函数中，`refresh()`方法被调用来刷新或初始化Spring容器。
+2. **Initializing the Spring context**
+   + In the `AnnotationConfigApplicationContext` constructor, `refresh()` is called to refresh or initialize the Spring container.
 
-3. **Bean的预实例化**
-   + 在Spring的上下文初始化的`refresh()`方法中，`finishBeanFactoryInitialization(beanFactory)`方法确保所有非延迟加载的单例bean被实例化。
+3. **Bean pre-instantiation**
+   + In `refresh()` of the Spring context initialization, `finishBeanFactoryInitialization(beanFactory)` makes sure all non-lazy singleton beans are instantiated.
 
-4. **单例Bean的创建**
-   + `DefaultListableBeanFactory`中的`preInstantiateSingletons`方法负责预先实例化所有非懒加载的单例bean。它会对容器中的每个单例bean调用`getBean`方法。
+4. **Creating singleton beans**
+   + The `preInstantiateSingletons` method in `DefaultListableBeanFactory` instantiates all non-lazy singleton beans up front. It calls `getBean` for each singleton bean in the container.
 
-5. **Bean的实例化及初始化**
-   + 在获取bean的过程中，如果bean还未创建，`doCreateBean`方法会被调用，完成bean的实例化、属性填充和初始化。
+5. **Bean instantiation and initialization**
+   + While getting a bean, if the bean is not created yet, `doCreateBean` is called. It instantiates the bean, populates its properties, and initializes it.
 
-6. **处理Aware接口族**
-   + 在bean的初始化阶段，`invokeAwareMethods`方法确保任何实现了`Aware`接口族（如`BeanNameAware`、`BeanClassLoaderAware`等）的bean都会得到适当的回调。
+6. **Handle the Aware interfaces**
+   + In the bean initialization stage, `invokeAwareMethods` makes sure any bean that implements the `Aware` interfaces (such as `BeanNameAware` and `BeanClassLoaderAware`) gets the right callback.
 
-7. **BeanClassLoaderAware的实现**
-   + 对于实现了`BeanClassLoaderAware`接口的bean，Spring容器在初始化阶段会通过`setBeanClassLoader`方法设置bean的`ClassLoader`。
+7. **Implementation of BeanClassLoaderAware**
+   + For a bean that implements `BeanClassLoaderAware`, the Spring container sets the bean's `ClassLoader` through `setBeanClassLoader` in the initialization stage.
 
-8. **自定义逻辑的执行**
-   + 在`MyBeanClassLoaderAware`中，已经保存了bean的类加载器，然后在`loadAndExecute`方法中，利用这个类加载器动态加载并执行特定的类和方法。
+8. **Running custom logic**
+   + In `MyBeanClassLoaderAware`, the bean's class loader has been saved. Then, in the `loadAndExecute` method, this class loader is used to load and run a specific class and method dynamically.

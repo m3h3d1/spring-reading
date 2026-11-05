@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 public class SimpleUserValidator implements UserValidator {
     @Override
     public boolean validate(String username, String password) {
-        System.out.println("使用SimpleUserValidator");
+        System.out.println("Using SimpleUserValidator");
         return username != null && password != null;
     }
 }

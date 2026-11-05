@@ -1,35 +1,35 @@
 ## ApplicationStartupAware
 
 - [ApplicationStartupAware](#applicationstartupaware)
-  - [一、基本信息](#一基本信息)
-  - [二、接口描述](#二接口描述)
-  - [三、接口源码](#三接口源码)
-  - [四、主要功能](#四主要功能)
-  - [五、最佳实践](#五最佳实践)
-  - [六、时序图](#六时序图)
-  - [七、源码分析](#七源码分析)
-  - [八、注意事项](#八注意事项)
-  - [九、总结](#九总结)
-    - [最佳实践总结](#最佳实践总结)
-    - [源码分析总结](#源码分析总结)
+  - [1. Overview](#1-overview)
+  - [2. Interface Description](#2-interface-description)
+  - [3. Interface Source](#3-interface-source)
+  - [4. Main Features](#4-main-features)
+  - [5. Best Practices](#5-best-practices)
+  - [6. Sequence Diagram](#6-sequence-diagram)
+  - [7. Source Code Analysis](#7-source-code-analysis)
+  - [8. Notes](#8-notes)
+  - [9. Summary](#9-summary)
+    - [Best Practices Summary](#best-practices-summary)
+    - [Source Code Analysis Summary](#source-code-analysis-summary)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [我的CSDN](https://blog.csdn.net/duzhuang2399/article/details/133914474) 📚 **文章目录** - [所有文章](https://github.com/xuchengsheng/spring-reading) 🔗 **源码地址** - [ApplicationStartupAware源码]()
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN](https://blog.csdn.net/duzhuang2399/article/details/133914474) 📚 **Contents** - [All Articles](https://github.com/xuchengsheng/spring-reading) 🔗 **Source code** - [ApplicationStartupAware source code]()
 
-### 二、接口描述
+### 2. Interface Description
 
-`ApplicationStartupAware`接口，是为了提供对这一过程的细粒度跟踪。通过`StartupStep`，我们可以定义应用启动过程中的各个步骤，并收集关于它们的性能和上下文信息。
+The `ApplicationStartupAware` interface is for fine-grained tracking of the startup process. With `StartupStep`, we can define the steps of application startup and collect performance and context information about them.
 
-### 三、接口源码
+### 3. Interface Source
 
-`ApplicationStartupAware` 是 Spring 框架自 5.3 开始引入的一个核心接口。实现`ApplicationStartupAware`接口的对象会在Spring容器中被自动注入一个`ApplicationStartup`实例。
+`ApplicationStartupAware` is a core Spring interface, available since 5.3. Spring automatically injects an `ApplicationStartup` instance into any object that implements `ApplicationStartupAware`.
 
 ```java
 /**
- * 任何希望在运行时被通知其关联的ApplicationStartup实例的对象都应实现此接口。
- * 在更简单的术语中，这是一个使bean意识到应用启动跟踪机制的接口。
+ * Interface to be implemented by any object that wishes to be notified of the ApplicationStartup it runs with.
+ * In simpler terms, this interface makes a bean aware of the application startup tracking mechanism.
  * 
  * @author Brian Clozel
  * @since 5.3
@@ -38,30 +38,30 @@
 public interface ApplicationStartupAware extends Aware {
 
     /**
-     * 设置此对象运行时的ApplicationStartup。
-     * 此方法的调用时机为正常bean属性填充之后，但在任何初始化回调（例如InitializingBean的afterPropertiesSet或自定义的初始化方法）之前。
-     * 并且在ApplicationContextAware的setApplicationContext之前调用。
+     * Set the ApplicationStartup that this object runs with.
+     * This method is called after the normal bean properties are populated, but before any initialization callback (such as InitializingBean's afterPropertiesSet or a custom init method).
+     * It is called before ApplicationContextAware's setApplicationContext.
      * 
-     * @param applicationStartup 由此对象使用的application startup实例
+     * @param applicationStartup application startup to be used by this object
      */
     void setApplicationStartup(ApplicationStartup applicationStartup);
 }
 ```
 
-### 四、主要功能
+### 4. Main Features
 
-1. **启动性能跟踪**
-   + 通过提供对`ApplicationStartup`的访问，实现此接口的beans可以使用`StartupStep`API来跟踪它们在启动过程中的各个步骤。这对于检测和优化启动性能非常有用。
+1. **Startup performance tracking**
+   + With access to `ApplicationStartup`, beans that implement this interface can use the `StartupStep` API to track their own steps during startup. This is very useful for finding and tuning startup performance.
 
-2. **为beans提供跟踪能力**
-   + 而不仅仅是Spring框架内部使用。这意味着我们可以为他们的自定义beans或组件提供与Spring框架同样的启动跟踪能力。
+2. **Tracking for beans**
+   + It is not only for use inside the Spring framework. We can give our own beans or components the same startup tracking ability that the Spring framework has.
 
-3. **细粒度控制**
-   + 与`StartupStep`一起使用，`ApplicationStartupAware`允许beans对其启动过程中的特定部分进行跟踪，例如数据库初始化、外部服务连接或任何其他可能需要时间的操作。
+3. **Fine-grained control**
+   + Together with `StartupStep`, `ApplicationStartupAware` lets beans track specific parts of their startup, such as database initialization, connecting to external services, or any other operation that may take time.
 
-### 五、最佳实践
+### 5. Best Practices
 
-首先来看看启动类入口，上下文环境使用`AnnotationConfigApplicationContext`（此类是使用Java注解来配置Spring容器的方式），首先设置了`BufferingApplicationStartup`，这是Spring Boot提供的一个`ApplicationStartup`实现，缓存了最后的100个启动步骤。这使得我们可以在应用启动后查看并分析这些步骤，以便了解哪些操作可能会影响启动性能，然后使用`register`方法，我们告诉Spring上下文加载`MyConfiguration`类，最后调用`refresh`方法会触发应用上下文的初始化，包括bean的创建和依赖注入。
+First, look at the entry class. It uses `AnnotationConfigApplicationContext` (a way to configure the Spring container with Java annotations). It first sets `BufferingApplicationStartup`, an `ApplicationStartup` implementation that keeps the last 100 startup steps. This lets us look at and analyze these steps after startup, to see which operations may slow it down. Then the `register` method tells the Spring context to load the `MyConfiguration` class. Finally, the `refresh` method triggers the initialization of the application context, including bean creation and dependency injection.
 
 ```java
 public class ApplicationStartupAwareApplication {
@@ -76,7 +76,7 @@ public class ApplicationStartupAwareApplication {
 }
 ```
 
-这里使用`@Bean`注解，定义了一个Bean，是为了确保 `MyApplicationStartupAware` 被 Spring 容器执行。
+The `@Bean` annotation defines a bean here, to make sure the Spring container creates `MyApplicationStartupAware`.
 
 ```java
 @Configuration
@@ -89,7 +89,7 @@ public class MyConfiguration {
 }
 ```
 
-`MyApplicationStartupAware`类的主要目的是展示如何使用`ApplicationStartup`来跟踪Spring应用程序启动过程中的特定逻辑。这对于我们程序来说是有用的，因为我们可以看到哪些启动步骤是最消耗时间的，然后据此进行优化。在这个具体的实现中，仅仅模拟了两个步骤，但在实际应用中，可以跟踪任意数量和类型的步骤。
+The main purpose of the `MyApplicationStartupAware` class is to show how to use `ApplicationStartup` to track specific logic during Spring application startup. This is useful because we can see which startup steps take the most time, and tune them. This implementation only simulates two steps, but in a real application you can track any number and type of steps.
 
 ```java
 public class MyApplicationStartupAware implements ApplicationStartupAware, InitializingBean {
@@ -104,23 +104,23 @@ public class MyApplicationStartupAware implements ApplicationStartupAware, Initi
     @Override
     public void afterPropertiesSet() throws Exception {
         StartupStep step1 = applicationStartup.start("MyApplicationStartupAware Logic Step 1");
-        // 自定义逻辑
+        // Custom logic
         Thread.sleep(200);
         step1.tag("status", "done").end();
 
         StartupStep step2 = applicationStartup.start("MyApplicationStartupAware Logic Step 2");
-        // 自定义逻辑
+        // Custom logic
         Thread.sleep(300);
         step2.tag("status", "done").end();
     }
 }
 ```
 
-### 六、时序图
+### 6. Sequence Diagram
 
 ~~~mermaid
 sequenceDiagram
-    Title: ApplicationStartupAware时序图
+    Title: ApplicationStartupAware sequence diagram
     participant ApplicationStartupAwareApplication
     participant AnnotationConfigApplicationContext
     participant AbstractApplicationContext
@@ -131,29 +131,29 @@ sequenceDiagram
     participant ApplicationContextAwareProcessor
     participant MyApplicationStartupAware
     
-    ApplicationStartupAwareApplication->>AnnotationConfigApplicationContext:AnnotationConfigApplicationContext(componentClasses)<br>创建上下文
-    AnnotationConfigApplicationContext->>AbstractApplicationContext:refresh()<br>刷新上下文
-    AbstractApplicationContext->>AbstractApplicationContext:finishBeanFactoryInitialization(beanFactory)<br>初始化Bean工厂
-    AbstractApplicationContext->>DefaultListableBeanFactory:preInstantiateSingletons()<br>实例化单例
-    DefaultListableBeanFactory->>AbstractBeanFactory:getBean(name)<br>获取Bean
-    AbstractBeanFactory->>AbstractBeanFactory:doGetBean(name,requiredType,args,typeCheckOnly)<br>执行获取Bean
-    AbstractBeanFactory->>DefaultSingletonBeanRegistry:getSingleton(beanName,singletonFactory)<br>获取单例Bean
-    DefaultSingletonBeanRegistry-->>AbstractBeanFactory:getObject()<br>获取Bean实例
-    AbstractBeanFactory->>AbstractAutowireCapableBeanFactory:createBean(beanName,mbd,args)<br>创建Bean
-    AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:doCreateBean(beanName,mbd,args)<br>执行Bean创建
-    AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:initializeBean(beanName,bean,mbd)<br>负责bean的初始化
-	AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:applyBeanPostProcessorsBeforeInitialization(existingBean, beanName)<br>调用前置处理器
-    AbstractAutowireCapableBeanFactory->>ApplicationContextAwareProcessor:postProcessBeforeInitialization(bean,beanName)<br>触发Aware处理
-    ApplicationContextAwareProcessor->>ApplicationContextAwareProcessor:invokeAwareInterfaces(bean)<br>执行Aware回调
-    ApplicationContextAwareProcessor->>MyApplicationStartupAware:setApplicationStartup(applicationStartup)<br>设置运行环境
-    AbstractAutowireCapableBeanFactory-->>AbstractBeanFactory:返回Bean对象
-    AbstractBeanFactory-->>DefaultListableBeanFactory:返回Bean对象
-    AnnotationConfigApplicationContext-->>ApplicationStartupAwareApplication:初始化完成
+    ApplicationStartupAwareApplication->>AnnotationConfigApplicationContext:AnnotationConfigApplicationContext(componentClasses)<br>Create the context
+    AnnotationConfigApplicationContext->>AbstractApplicationContext:refresh()<br>Refresh the context
+    AbstractApplicationContext->>AbstractApplicationContext:finishBeanFactoryInitialization(beanFactory)<br>Initialize the bean factory
+    AbstractApplicationContext->>DefaultListableBeanFactory:preInstantiateSingletons()<br>Instantiate singletons
+    DefaultListableBeanFactory->>AbstractBeanFactory:getBean(name)<br>Get the bean
+    AbstractBeanFactory->>AbstractBeanFactory:doGetBean(name,requiredType,args,typeCheckOnly)<br>Do the actual get
+    AbstractBeanFactory->>DefaultSingletonBeanRegistry:getSingleton(beanName,singletonFactory)<br>Get the singleton bean
+    DefaultSingletonBeanRegistry-->>AbstractBeanFactory:getObject()<br>Get the bean instance
+    AbstractBeanFactory->>AbstractAutowireCapableBeanFactory:createBean(beanName,mbd,args)<br>Create the bean
+    AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:doCreateBean(beanName,mbd,args)<br>Do the actual creation
+    AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:initializeBean(beanName,bean,mbd)<br>Initialize the bean
+	AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:applyBeanPostProcessorsBeforeInitialization(existingBean, beanName)<br>Call the before-initialization processors
+    AbstractAutowireCapableBeanFactory->>ApplicationContextAwareProcessor:postProcessBeforeInitialization(bean,beanName)<br>Trigger Aware handling
+    ApplicationContextAwareProcessor->>ApplicationContextAwareProcessor:invokeAwareInterfaces(bean)<br>Run the Aware callbacks
+    ApplicationContextAwareProcessor->>MyApplicationStartupAware:setApplicationStartup(applicationStartup)<br>Set the applicationStartup
+    AbstractAutowireCapableBeanFactory-->>AbstractBeanFactory:Return the bean
+    AbstractBeanFactory-->>DefaultListableBeanFactory:Return the bean
+    AnnotationConfigApplicationContext-->>ApplicationStartupAwareApplication:Initialization complete
 ~~~
 
-### 七、源码分析
+### 7. Source Code Analysis
 
-首先来看看启动类入口，上下文环境使用`AnnotationConfigApplicationContext`（此类是使用Java注解来配置Spring容器的方式），首先设置了`BufferingApplicationStartup`，这是Spring Boot提供的一个`ApplicationStartup`实现，缓存了最后的100个启动步骤。这使得我们可以在应用启动后查看并分析这些步骤，以便了解哪些操作可能会影响启动性能，然后使用`register`方法，我们告诉Spring上下文加载`MyConfiguration`类，最后调用`refresh`方法会触发应用上下文的初始化，包括bean的创建和依赖注入。
+First, look at the entry class. It uses `AnnotationConfigApplicationContext` (a way to configure the Spring container with Java annotations). It first sets `BufferingApplicationStartup`, an `ApplicationStartup` implementation that keeps the last 100 startup steps. This lets us look at and analyze these steps after startup, to see which operations may slow it down. Then the `register` method tells the Spring context to load the `MyConfiguration` class. Finally, the `refresh` method triggers the initialization of the application context, including bean creation and dependency injection.
 
 ```java
 public class ApplicationStartupAwareApplication {
@@ -168,7 +168,7 @@ public class ApplicationStartupAwareApplication {
 }
 ```
 
-在`org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext`构造函数中，执行了三个步骤，我们重点关注`refresh()`方法
+The constructor of `org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext` does three steps. We focus on the `refresh()` method.
 
 ```java
 public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
@@ -177,47 +177,47 @@ public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
     refresh();
 ```
 
-在`org.springframework.context.support.AbstractApplicationContext#refresh`方法中我们重点关注一下`finishBeanFactoryInitialization(beanFactory)`这方法会对实例化所有剩余非懒加载的单列Bean对象，其他方法不是本次源码阅读的重点暂时忽略。
+In `org.springframework.context.support.AbstractApplicationContext#refresh`, we focus on `finishBeanFactoryInitialization(beanFactory)`. It instantiates all remaining non-lazy singleton beans. The other methods are not the focus of this reading, so we skip them.
 
 ```java
 @Override
 public void refresh() throws BeansException, IllegalStateException {
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     // Instantiate all remaining (non-lazy-init) singletons.
     finishBeanFactoryInitialization(beanFactory);
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-在`org.springframework.context.support.AbstractApplicationContext#finishBeanFactoryInitialization`方法中，会继续调用`DefaultListableBeanFactory`类中的`preInstantiateSingletons`方法来完成所有剩余非懒加载的单列Bean对象。
+The method `org.springframework.context.support.AbstractApplicationContext#finishBeanFactoryInitialization` then calls `preInstantiateSingletons` in `DefaultListableBeanFactory` to create all remaining non-lazy singleton beans.
 
 ```java
 /**
- * 完成此工厂的bean初始化，实例化所有剩余的非延迟初始化单例bean。
+ * Finish the initialization of this factory by instantiating all remaining non-lazy-init singleton beans.
  * 
- * @param beanFactory 要初始化的bean工厂
+ * @param beanFactory the bean factory to initialize
  */
 protected void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
-    // ... [代码部分省略以简化]
-    // 完成所有剩余非懒加载的单列Bean对象。
+    // ... [code omitted for brevity]
+    // Instantiate all remaining non-lazy singleton beans.
     beanFactory.preInstantiateSingletons();
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultListableBeanFactory#preInstantiateSingletons`方法中，主要的核心目的是预先实例化所有非懒加载的单例bean。在Spring的上下文初始化完成后，该方法会被触发，以确保所有单例bean都被正确地创建并初始化。其中`getBean(beanName)`是此方法的核心操作。对于容器中定义的每一个单例bean，它都会调用`getBean`方法，这将触发bean的实例化、初始化及其依赖的注入。如果bean之前没有被创建过，那么这个调用会导致其被实例化和初始化。
+The main purpose of `org.springframework.beans.factory.support.DefaultListableBeanFactory#preInstantiateSingletons` is to instantiate all non-lazy singleton beans up front. It runs when the Spring context finishes initializing, so that all singleton beans are created and initialized. Its core operation is `getBean(beanName)`. For each singleton bean defined in the container, it calls `getBean`, which triggers instantiation, initialization, and dependency injection. If the bean has not been created yet, this call creates and initializes it.
 
 ```java
 public void preInstantiateSingletons() throws BeansException {
-    // ... [代码部分省略以简化]
-    // 循环遍历所有bean的名称
+    // ... [code omitted for brevity]
+    // Loop over all bean names
     for (String beanName : beanNames) {
         getBean(beanName);
     }
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractBeanFactory#getBean()`方法中，又调用了`doGetBean`方法来实际执行创建Bean的过程，传递给它bean的名称和一些其他默认的参数值。此处，`doGetBean`负责大部分工作，如查找bean定义、创建bean（如果尚未创建）、处理依赖关系等。
+The method `org.springframework.beans.factory.support.AbstractBeanFactory#getBean()` calls `doGetBean` to do the real work of creating the bean. It passes the bean name and some default argument values. `doGetBean` does most of the work, such as finding the bean definition, creating the bean (if it does not exist yet), and handling dependencies.
 
 ```java
 @Override
@@ -226,150 +226,150 @@ public Object getBean(String name) throws BeansException {
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractBeanFactory#doGetBean`方法中，首先检查所请求的bean是否是一个单例并且已经创建。如果尚未创建，它将创建一个新的实例。在这个过程中，它处理可能的异常情况，如循环引用，并确保返回的bean是正确的类型。这是Spring容器bean生命周期管理的核心部分。
+In `org.springframework.beans.factory.support.AbstractBeanFactory#doGetBean`, Spring first checks whether the requested bean is a singleton that has already been created. If not, it creates a new instance. Along the way it handles possible problems such as circular references, and makes sure the returned bean has the right type. This is a core part of bean lifecycle management in the Spring container.
 
 ```java
 protected <T> T doGetBean(
         String name, @Nullable Class<T> requiredType, @Nullable Object[] args, boolean typeCheckOnly)
         throws BeansException {
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
-    // 开始创建bean实例
+    // Start creating the bean instance
     if (mbd.isSingleton()) {
-        // 如果bean是单例的，我们会尝试从单例缓存中获取它
-        // 如果不存在，则使用lambda创建一个新的实例
+        // If the bean is a singleton, try to get it from the singleton cache
+        // If it does not exist, create a new instance with a lambda
         sharedInstance = getSingleton(beanName, () -> {
             try {
-                // 尝试创建bean实例
+                // Try to create the bean instance
                 return createBean(beanName, mbd, args);
             }
             catch (BeansException ex) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
         });
-        // 对于某些bean（例如FactoryBeans），可能需要进一步处理以获取真正的bean实例
+        // For some beans (for example FactoryBeans), more work may be needed to get the real bean instance
         beanInstance = getObjectForBeanInstance(sharedInstance, name, beanName, mbd);
     }
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
-    // 确保返回的bean实例与请求的类型匹配
+    // Make sure the returned bean instance matches the requested type
     return adaptBeanInstance(name, beanInstance, requiredType);
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultSingletonBeanRegistry#getSingleton()`方法中，主要负责从单例缓存中获取一个已存在的bean实例，或者使用提供的`ObjectFactory`创建一个新的实例。这是确保bean在Spring容器中作为单例存在的关键部分。
+The method `org.springframework.beans.factory.support.DefaultSingletonBeanRegistry#getSingleton()` gets an existing bean instance from the singleton cache, or creates a new one with the given `ObjectFactory`. This is the key part that keeps a bean a singleton in the Spring container.
 
 ```java
 public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) {
-    // 断言bean名称不能为空
+    // Assert that the bean name is not null
     Assert.notNull(beanName, "Bean name must not be null");
 
-    // 同步访问单例对象缓存，确保线程安全
+    // Synchronize on the singleton cache for thread safety
     synchronized (this.singletonObjects) {
-        // 从缓存中获取单例对象
+        // Get the singleton from the cache
         Object singletonObject = this.singletonObjects.get(beanName);
 
-        // 如果缓存中没有找到
+        // If it is not in the cache
         if (singletonObject == null) {
-            // ... [代码部分省略以简化]
+            // ... [code omitted for brevity]
 
             try {
-                // 使用工厂创建新的单例实例
+                // Create a new singleton instance with the factory
                 singletonObject = singletonFactory.getObject();
                 newSingleton = true;
             }
             catch (IllegalStateException ex) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
             catch (BeanCreationException ex) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
             finally {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
 
-            // ... [代码部分省略以简化]
+            // ... [code omitted for brevity]
         }
 
-        // 返回单例对象
+        // Return the singleton
         return singletonObject;
     }
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#createBean()`方法中，主要的逻辑是调用 `doCreateBean`，这是真正进行 bean 实例化、属性填充和初始化的地方。这个方法会返回新创建的 bean 实例。
+The main logic of `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#createBean()` is to call `doCreateBean`. That is where the bean is really instantiated, populated, and initialized. The method returns the newly created bean instance.
 
 ```java
 @Override
 protected Object createBean(String beanName, RootBeanDefinition mbd, @Nullable Object[] args)
     throws BeanCreationException {
     
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     
     try {
-        // 正常的bean实例化、属性注入和初始化。
-        // 这里是真正进行bean创建的部分。
+        // Normal bean instantiation, property injection, and initialization.
+        // This is where the bean is really created.
         Object beanInstance = doCreateBean(beanName, mbdToUse, args);
-        // 记录bean成功创建的日志
+        // Log that the bean was created successfully
         if (logger.isTraceEnabled()) {
             logger.trace("Finished creating instance of bean '" + beanName + "'");
         }
         return beanInstance;
     }
     catch (BeanCreationException | ImplicitlyAppearedSingletonException ex) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
     catch (Throwable ex) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#doCreateBean`方法中，`initializeBean`方法是bean初始化，确保bean是完全配置和准备好的。
+In `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#doCreateBean`, the `initializeBean` method initializes the bean and makes sure it is fully configured and ready.
 
 ```java
 protected Object doCreateBean(String beanName, RootBeanDefinition mbd, @Nullable Object[] args)
         throws BeanCreationException {
 
-    // 声明一个对象，后续可能用于存放初始化后的bean或它的代理对象
+    // Declare an object that may later hold the initialized bean or its proxy
     Object exposedObject = bean;
 
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     
     try {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
         
-        // bean初始化
+        // Initialize the bean
         exposedObject = initializeBean(beanName, exposedObject, mbd);
     } 
     catch (Throwable ex) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
 
-    // 返回创建和初始化后的bean
+    // Return the created and initialized bean
     return exposedObject;
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#initializeBean`方法中，如果条件满足（即 bean 不是合成的），那么它会调用 `applyBeanPostProcessorsBeforeInitialization` 方法。这个方法是 Spring 生命周期中的一个关键点，它会遍历所有已注册的 `BeanPostProcessor` 实现，并调用它们的 `postProcessBeforeInitialization` 方法。这允许我们和内部处理器在 bean 初始化之前对其进行修改或执行其他操作。
+In `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#initializeBean`, if the condition is met (the bean is not synthetic), it calls `applyBeanPostProcessorsBeforeInitialization`. This is a key point in the Spring lifecycle. It loops over all registered `BeanPostProcessor` implementations and calls their `postProcessBeforeInitialization` methods. This lets us, and Spring's internal processors, change the bean or do other work before it is initialized.
 
 ```java
 protected Object initializeBean(String beanName, Object bean, @Nullable RootBeanDefinition mbd) {
 
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     
     Object wrappedBean = bean;
     if (mbd == null || !mbd.isSynthetic()) {
         wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
     }
     
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
     return wrappedBean;
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsBeforeInitialization`方法中，遍历每一个 `BeanPostProcessor` 的 `postProcessBeforeInitialization` 方法都有机会对bean进行修改或增强
+In `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsBeforeInitialization`, the `postProcessBeforeInitialization` method of each `BeanPostProcessor` gets a chance to change or enhance the bean.
 
 ```java
 @Override
@@ -388,7 +388,7 @@ public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, S
 }
 ```
 
-在`org.springframework.context.support.ApplicationContextAwareProcessor#postProcessBeforeInitialization`方法中，在这个方法的实现特别关注那些实现了 "aware" 接口的 beans，并为它们提供所需的运行环境信息。
+In `org.springframework.context.support.ApplicationContextAwareProcessor#postProcessBeforeInitialization`, the implementation looks mainly at beans that implement "aware" interfaces and gives them the runtime information they need.
 
 ```java
 @Override
@@ -401,7 +401,7 @@ public Object postProcessBeforeInitialization(Object bean, String beanName) thro
         return bean;
     }
 
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     
     invokeAwareInterfaces(bean);
 
@@ -409,19 +409,19 @@ public Object postProcessBeforeInitialization(Object bean, String beanName) thro
 }
 ```
 
-在`org.springframework.context.support.ApplicationContextAwareProcessor#invokeAwareInterfaces`方法中，用于处理实现了"Aware"接口的beans。这些接口使得beans能够被自动"感知"并获得对其运行环境或特定依赖的引用，而不需要显式地进行查找或注入。
+The method `org.springframework.context.support.ApplicationContextAwareProcessor#invokeAwareInterfaces` handles beans that implement "Aware" interfaces. These interfaces let a bean be "aware" of its runtime environment or specific dependencies automatically, without an explicit lookup or injection.
 
 ```java
 private void invokeAwareInterfaces(Object bean) {
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 	if (bean instanceof ApplicationStartupAware) {
         ((ApplicationStartupAware) bean).setApplicationStartup(this.applicationContext.getApplicationStartup());
     }
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-最后执行到我们自定义的逻辑中，`MyApplicationStartupAware`类的主要目的是展示如何使用`ApplicationStartup`来跟踪Spring应用程序启动过程中的特定逻辑。这对于我们程序来说是有用的，因为我们可以看到哪些启动步骤是最消耗时间的，然后据此进行优化。在这个具体的实现中，仅仅模拟了两个步骤，但在实际应用中，可以跟踪任意数量和类型的步骤。
+Finally, execution reaches our own logic. The main purpose of the `MyApplicationStartupAware` class is to show how to use `ApplicationStartup` to track specific logic during Spring application startup. This is useful because we can see which startup steps take the most time, and tune them. This implementation only simulates two steps, but in a real application you can track any number and type of steps.
 
 ```java
 public class MyApplicationStartupAware implements ApplicationStartupAware, InitializingBean {
@@ -436,70 +436,70 @@ public class MyApplicationStartupAware implements ApplicationStartupAware, Initi
     @Override
     public void afterPropertiesSet() throws Exception {
         StartupStep step1 = applicationStartup.start("MyApplicationStartupAware Logic Step 1");
-        // 自定义逻辑
+        // Custom logic
         Thread.sleep(200);
         step1.tag("status", "done").end();
 
         StartupStep step2 = applicationStartup.start("MyApplicationStartupAware Logic Step 2");
-        // 自定义逻辑
+        // Custom logic
         Thread.sleep(300);
         step2.tag("status", "done").end();
     }
 }
 ```
 
-### 八、注意事项
+### 8. Notes
 
-1. **生命周期时机**
-   + `setApplicationStartup`方法在其他bean属性设置之后、`InitializingBean`的`afterPropertiesSet`方法之前调用。确保我们的bean在这一阶段不依赖于其他尚未初始化或注入的属性。
+1. **Timing in the lifecycle**
+   + `setApplicationStartup` is called after the other bean properties are set and before `afterPropertiesSet` of `InitializingBean`. Make sure your bean does not depend on other properties that are not initialized or injected yet at this stage.
 
-2. **性能考虑**
-   + 虽然启动跟踪对于分析应用程序启动时间很有用，但添加太多的启动步骤跟踪可能会对性能产生微小的影响。在生产环境中，我们可能需要权衡跟踪的详细程度和性能的关系。
+2. **Performance**
+   + Startup tracking is useful for analyzing application startup time. But adding too many startup step trackers may have a small effect on performance. In production, you may need to balance the level of detail against performance.
 
-3. **清晰的步骤名称**
-   + 当定义`StartupStep`时，为其提供清晰、描述性的名称，这样其他我们可以更容易地理解它代表的步骤。
+3. **Clear step names**
+   + When you define a `StartupStep`, give it a clear, descriptive name. Then others can easily understand which step it stands for.
 
-4. **不要滥用**
-   + 尽量只为那些真正重要和可能影响启动性能的步骤使用启动跟踪。不需要为每个小操作都添加跟踪。
+4. **Do not overuse it**
+   + Use startup tracking only for steps that are really important and may affect startup performance. You do not need to track every small operation.
 
-5. **不要忘记结束步骤**
-   + 每当我们开始一个`StartupStep`，记得在适当的时机调用`end`方法结束它。否则，该步骤可能会在报告中显示为仍在运行，这可能会导致混淆。
+5. **Do not forget to end the step**
+   + Whenever you start a `StartupStep`, remember to call `end` at the right time. Otherwise the step may show as still running in the report, which can cause confusion.
 
-### 九、总结
+### 9. Summary
 
-#### 最佳实践总结
+#### Best Practices Summary
 
-1. **启动类概述**
-   + 使用`AnnotationConfigApplicationContext`，一个基于Java注解的Spring上下文初始化方法。设置`BufferingApplicationStartup`来缓存应用启动过程的最后100个步骤。这样可以分析哪些步骤可能影响启动性能。注册`MyConfiguration`类以加载相应的配置。刷新并初始化应用上下文，从而触发bean的创建和依赖注入。关闭上下文。
+1. **Entry class overview**
+   + It uses `AnnotationConfigApplicationContext`, a Java annotation-based way to initialize a Spring context. It sets `BufferingApplicationStartup` to keep the last 100 steps of application startup. This lets you analyze which steps may affect startup performance. It registers the `MyConfiguration` class to load the configuration. It refreshes and initializes the application context, which triggers bean creation and dependency injection. Then it closes the context.
 
-2. **配置类概述**
-   + 使用`@Configuration`注解标记，告诉Spring这是一个配置类。通过`@Bean`注解定义了`MyApplicationStartupAware` bean。这样可以确保它被Spring容器处理，并在容器启动时执行其生命周期方法。
+2. **Configuration class overview**
+   + It is marked with the `@Configuration` annotation, which tells Spring that this is a configuration class. The `@Bean` annotation defines the `MyApplicationStartupAware` bean. This makes sure it is handled by the Spring container and its lifecycle methods run when the container starts.
 
-3. **`MyApplicationStartupAware`类概述**
-   + 实现了`ApplicationStartupAware`接口，允许它在启动时获知`ApplicationStartup`实例。定义了两个启动步骤来模拟潜在的长时间运行任务，并使用`StartupStep`进行跟踪。在每个步骤的末尾，都有一个标记状态为"done"，然后结束该步骤。
+3. **`MyApplicationStartupAware` class overview**
+   + It implements `ApplicationStartupAware`, so it learns the `ApplicationStartup` instance at startup. It defines two startup steps that simulate possibly long-running tasks, and tracks them with `StartupStep`. At the end of each step, it tags the status as "done" and then ends the step.
 
-#### 源码分析总结
+#### Source Code Analysis Summary
 
-1. **实例化Beans**
-   + 在`AbstractApplicationContext`的`refresh()`方法中，`finishBeanFactoryInitialization`方法被调用，确保所有单例Bean被预先实例化。
+1. **Instantiating beans**
+   + In `refresh()` of `AbstractApplicationContext`, `finishBeanFactoryInitialization` is called to make sure all singleton beans are instantiated up front.
 
-2. **Bean预实例化**
-   + `DefaultListableBeanFactory`的`preInstantiateSingletons`方法确保所有非懒加载的单例Beans被实例化。核心操作是调用`getBean(beanName)`。
+2. **Bean pre-instantiation**
+   + `preInstantiateSingletons` of `DefaultListableBeanFactory` makes sure all non-lazy singleton beans are instantiated. The core operation is calling `getBean(beanName)`.
 
-3. **获取Bean实例**
-   + `AbstractBeanFactory`的`getBean`方法进一步调用`doGetBean`来真正实例化Bean，处理异常和依赖，并返回Bean实例。
+3. **Getting the bean instance**
+   + `getBean` of `AbstractBeanFactory` calls `doGetBean` to really create the bean, handle exceptions and dependencies, and return the bean instance.
 
-4. **Bean单例获取**
-   + `DefaultSingletonBeanRegistry`的`getSingleton`方法确保Bean以单例形式存在，从缓存获取或使用提供的`ObjectFactory`创建新实例。
+4. **Getting the singleton**
+   + `getSingleton` of `DefaultSingletonBeanRegistry` makes sure the bean exists as a singleton. It gets the bean from the cache, or creates a new instance with the given `ObjectFactory`.
 
-5. **创建Bean实例**
-   + `AbstractAutowireCapableBeanFactory`的`createBean`方法调用`doCreateBean`进行Bean的实际实例化，并进行初始化，确保Bean完全配置并准备就绪。
+5. **Creating the bean instance**
+   + `createBean` of `AbstractAutowireCapableBeanFactory` calls `doCreateBean` to really instantiate and initialize the bean, so that it is fully configured and ready.
 
-6. **Bean初始化**
-   + `AbstractAutowireCapableBeanFactory`的`initializeBean`方法确保Bean被正确初始化，其中调用`applyBeanPostProcessorsBeforeInitialization`方法是Spring生命周期中的关键点，允许BeanPostProcessors在Bean初始化之前进行操作。
+6. **Bean initialization**
+   + `initializeBean` of `AbstractAutowireCapableBeanFactory` makes sure the bean is initialized correctly. Its call to `applyBeanPostProcessorsBeforeInitialization` is a key point in the Spring lifecycle. It lets BeanPostProcessors act before the bean is initialized.
 
-7. **处理Aware接口**
-   + 在Bean初始化过程中，`ApplicationContextAwareProcessor`确保实现了`Aware`接口的Beans被正确处理，这些Beans会自动"感知"并获得其运行环境或特定依赖的引用。
+7. **Handle Aware interfaces**
+   + During bean initialization, `ApplicationContextAwareProcessor` makes sure beans that implement `Aware` interfaces are handled correctly. These beans are automatically "aware" of their runtime environment or specific dependencies.
 
-8. **自定义逻辑执行**
-   + `MyApplicationStartupAware`类实现了`ApplicationStartupAware`接口，它将接收一个`ApplicationStartup`实例。
+8. **Running custom logic**
+   + The `MyApplicationStartupAware` class implements `ApplicationStartupAware`, so it receives an `ApplicationStartup` instance.

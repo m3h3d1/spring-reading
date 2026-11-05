@@ -16,6 +16,6 @@ public class MyMessageSourceAware implements MessageSourceAware {
 
     public void getMessage() {
         System.out.println("English："+messageSource.getMessage("greeting", null, Locale.ENGLISH));
-        System.out.println("中文："+messageSource.getMessage("greeting", null, Locale.SIMPLIFIED_CHINESE));
+        System.out.println("Chinese: "+messageSource.getMessage("greeting", null, Locale.SIMPLIFIED_CHINESE));
     }
 }

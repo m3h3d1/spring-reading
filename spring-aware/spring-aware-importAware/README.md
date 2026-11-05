@@ -1,35 +1,35 @@
 ## ImportAware
 
 - [ImportAware](#importaware)
-  - [一、基本信息](#一基本信息)
-  - [二、接口描述](#二接口描述)
-  - [三、接口源码](#三接口源码)
-  - [四、主要功能](#四主要功能)
-  - [五、最佳实践](#五最佳实践)
-  - [六、时序图](#六时序图)
-  - [七、源码分析](#七源码分析)
-  - [八、注意事项](#八注意事项)
-  - [九、总结](#九总结)
-    - [最佳实践总结](#最佳实践总结)
-    - [源码分析总结](#源码分析总结)
+  - [1. Overview](#1-overview)
+  - [2. Interface Description](#2-interface-description)
+  - [3. Interface Source](#3-interface-source)
+  - [4. Main Features](#4-main-features)
+  - [5. Best Practices](#5-best-practices)
+  - [6. Sequence Diagram](#6-sequence-diagram)
+  - [7. Source Code Analysis](#7-source-code-analysis)
+  - [8. Notes](#8-notes)
+  - [9. Summary](#9-summary)
+    - [Best Practices Summary](#best-practices-summary)
+    - [Source Code Analysis Summary](#source-code-analysis-summary)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [我的CSDN](https://blog.csdn.net/duzhuang2399/article/details/133915616) 📚 **文章目录** - [所有文章](https://github.com/xuchengsheng/spring-reading) 🔗 **源码地址** - [ImportAware源码]()
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN](https://blog.csdn.net/duzhuang2399/article/details/133915616) 📚 **Contents** - [All Articles](https://github.com/xuchengsheng/spring-reading) 🔗 **Source code** - [ImportAware source code]()
 
-### 二、接口描述
+### 2. Interface Description
 
-`ImportAware` 接口，提供被导入类的访问功能。当一个类实现了 `ImportAware` 接口，并且被通过 @Import 注解导入到其他配置类中，该类可以获得对导入它的 `AnnotationMetadata` 的访问权。
+The `ImportAware` interface gives an imported class access to the class that imported it. When a class implements `ImportAware` and is imported into another configuration class with the @Import annotation, it can access the `AnnotationMetadata` of the class that imported it.
 
-### 三、接口源码
+### 3. Interface Source
 
-`ApplicationStartupAware` 是 Spring 框架自 3.1 开始引入的一个核心接口。实现`ImportAware`接口的对象会在Spring容器中被自动注入一个`AnnotationMetadata`实例。
+`ImportAware` is a core Spring interface, available since 3.1. Spring automatically injects an `AnnotationMetadata` instance into any object that implements `ImportAware`.
 
 ```java
 /**
- * 任何希望被注入其导入它的Configuration类的AnnotationMetadata的Configuration类都应实现此接口。
- * 与使用Import作为元注解的注解结合使用时特别有用。
+ * Interface to be implemented by any @Configuration class that wishes to be injected with the AnnotationMetadata of the @Configuration class that imported it.
+ * Useful in conjunction with annotations that use Import as a meta-annotation.
  * 
  * @author Chris Beams
  * @since 3.1
@@ -37,30 +37,30 @@
 public interface ImportAware extends Aware {
 
 	/**
-	 * 设置导入的@Configuration类的注解元数据。
+	 * Set the annotation metadata of the importing @Configuration class.
 	 */
 	void setImportMetadata(AnnotationMetadata importMetadata);
 
 }
 ```
 
-### 四、主要功能
+### 4. Main Features
 
-1. **访问导入类的注解元数据**
-   + 当一个类实现了 `ImportAware` 接口，并且它是通过 `@Import` 或其他特定方式被导入的，Spring 容器会自动调用它的 `setImportMetadata` 方法，并传入与导入该类的注解相关的 `AnnotationMetadata`。
+1. **Access the annotation metadata of the importing class**
+   + When a class implements `ImportAware` and is imported with `@Import` or in another specific way, the Spring container calls its `setImportMetadata` method automatically and passes in the `AnnotationMetadata` of the class that imported it.
 
-2. **条件性的行为**
-   + 通过访问导入类的注解元数据，可以实现基于特定条件的行为。例如，根据导入类上的注解属性，决定是否注册某个 bean，或者为 bean 设置特定的属性值。
+2. **Conditional behavior**
+   + With access to the annotation metadata of the importing class, you can act on specific conditions. For example, depending on the annotation attributes on the importing class, you can decide whether to register a bean, or set specific property values on a bean.
 
-3. **框架和库的开发**
-   + `ImportAware` 在 Spring 框架内部和某些第三方库中被用于执行特定的初始化和配置任务。例如，某些特性的自动配置可能会根据导入它们的配置类上的注解属性进行调整。
+3. **Framework and library development**
+   + `ImportAware` is used inside the Spring framework and in some third-party libraries for specific initialization and configuration. For example, the auto-configuration of some features can be adjusted by the annotation attributes on the configuration class that imports them.
 
-4. **增强诊断和调试信息**
-   + 可以基于导入类的元数据为我们提供更多的上下文信息，这在诊断复杂的配置问题时可能会很有用。
+4. **Better diagnostics and debugging**
+   + The metadata of the importing class gives more context, which can help when you diagnose complex configuration problems.
 
-### 五、最佳实践
+### 5. Best Practices
 
-首先来看看启动类入口，上下文环境使用`AnnotationConfigApplicationContext`（此类是使用Java注解来配置Spring容器的方式），构造参数我们给定了一个`MyConfiguration`组件类。然后从Spring上下文中获取一个`String`类型的bean并打印。
+First, look at the entry class. It uses `AnnotationConfigApplicationContext` (a way to configure the Spring container with Java annotations). The constructor receives one configuration class, `MyConfiguration`. Then it gets a bean of type `String` from the Spring context and prints it.
 
 ```java
 public class ImportAwareApplication {
@@ -73,7 +73,7 @@ public class ImportAwareApplication {
 }
 ```
 
- `MyConfiguration` 是一个 Spring 配置类，然后通过这个类启用了通过 `@EnableXcs` 注解提供`ImportAware`功能。
+ `MyConfiguration` is a Spring configuration class. It enables the `ImportAware` feature through the `@EnableXcs` annotation.
 
 ```java
 @Configuration
@@ -83,7 +83,7 @@ public class MyConfiguration {
 }
 ```
 
-`EnableXcs`是一个注解类，`@Import(MyImportAware.class)`会对 Spring 上下文进行某种配置或修改
+`EnableXcs` is an annotation. `@Import(MyImportAware.class)` configures or changes the Spring context in some way.
 
 ```java
 @Retention(RetentionPolicy.RUNTIME)
@@ -95,7 +95,7 @@ public @interface EnableXcs {
 }
 ```
 
-由于 `MyImportAware` 实现了 `ImportAware`，它会检查导入它的配置类上是否存在 `@EnableXcs` 注解。如果存在，则继续处理并注册 `customBean` 这个 String 类型的 bean 到 Spring 上下文中。如果不存在 `@EnableXcs` 注解，则抛出异常。
+`MyImportAware` implements `ImportAware`, so it checks whether the configuration class that imported it has the `@EnableXcs` annotation. If it does, it continues and registers a `String` bean named `customBean` in the Spring context. If the `@EnableXcs` annotation is missing, it throws an exception.
 
 ```java
 public class MyImportAware implements ImportAware {
@@ -119,13 +119,13 @@ public class MyImportAware implements ImportAware {
 }
 ```
 
-运行结果发现，当我们在 Spring 上下文中使用 `@EnableXcs` 注解并运行程序时，`MyImportAware` 类会被导入并处理，最后在 Spring 容器中注册一个 String 类型的 bean，其值为 "This is a custom bean!"。
+The output shows that when we use the `@EnableXcs` annotation in the Spring context and run the program, the `MyImportAware` class is imported and processed. In the end, a `String` bean with the value "This is a custom bean!" is registered in the Spring container.
 
 ```java
 This is a custom bean!
 ```
 
-当我们不通过`@EnableXcs` 注解方式去导入`MyImportAware`类，而是直接在MyConfiguration类中导入`@Import(MyImportAware.class)`来看看另外一种情况。
+Now let's look at another case. We do not import `MyImportAware` through the `@EnableXcs` annotation. Instead, we import it directly in `MyConfiguration` with `@Import(MyImportAware.class)`.
 
 ```java
 @Configuration
@@ -135,7 +135,7 @@ public class MyConfiguration {
 }
 ```
 
-运行结果发现，当我们直接使用`@Import(MyImportAware.class)`导入`MyImportAware`类而不使用`@EnableXcs`注解时，由于`MyConfiguration`上没有`@EnableXcs`注解，所以`enableXcs`的值为null，由于此时`enableXcs`是null，`MyImportAware`抛出了一个`IllegalArgumentException`异常。
+The output shows that when we import `MyImportAware` directly with `@Import(MyImportAware.class)` and do not use `@EnableXcs`, `MyConfiguration` has no `@EnableXcs` annotation, so the value of `enableXcs` is null. Because `enableXcs` is null, `MyImportAware` throws an `IllegalArgumentException`.
 
 ```java
 Caused by: java.lang.IllegalArgumentException: @EnableXcs is not present on importing class com.xcs.spring.config.MyConfiguration
@@ -147,11 +147,11 @@ Caused by: java.lang.IllegalArgumentException: @EnableXcs is not present on impo
 	... 10 more
 ```
 
-### 六、时序图
+### 6. Sequence Diagram
 
 ~~~mermaid
 sequenceDiagram
-    Title: ImportAware时序图
+    Title: ImportAware sequence diagram
     participant ImportAwareApplication
     participant AnnotationConfigApplicationContext
     participant AbstractApplicationContext
@@ -175,16 +175,16 @@ sequenceDiagram
     AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:initializeBean(beanName,bean,mbd)
     AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:applyBeanPostProcessorsBeforeInitialization(existingBean,beanName)
     AbstractAutowireCapableBeanFactory->>ImportAwareBeanPostProcessor: postProcessBeforeInitialization(bean,beanName)
-    ImportAwareBeanPostProcessor->>MyImportAware:setImportMetadata(importMetadata)设置importMetadata
-    ImportAwareBeanPostProcessor-->>AbstractAutowireCapableBeanFactory: 返回Bean对象
-	AbstractAutowireCapableBeanFactory-->>AbstractBeanFactory:返回Bean对象
-	AbstractBeanFactory-->>DefaultListableBeanFactory:返回Bean对象
-	AnnotationConfigApplicationContext->>ImportAwareApplication: 初始化完成
+    ImportAwareBeanPostProcessor->>MyImportAware:setImportMetadata(importMetadata)<br>Set importMetadata
+    ImportAwareBeanPostProcessor-->>AbstractAutowireCapableBeanFactory: Return the bean
+	AbstractAutowireCapableBeanFactory-->>AbstractBeanFactory:Return the bean
+	AbstractBeanFactory-->>DefaultListableBeanFactory:Return the bean
+	AnnotationConfigApplicationContext->>ImportAwareApplication: Initialization complete
 ~~~
 
-### 七、源码分析
+### 7. Source Code Analysis
 
-首先来看看启动类入口，上下文环境使用`AnnotationConfigApplicationContext`（此类是使用Java注解来配置Spring容器的方式），构造参数我们给定了一个`MyConfiguration`组件类。然后从Spring上下文中获取一个`String`类型的bean并打印。
+First, look at the entry class. It uses `AnnotationConfigApplicationContext` (a way to configure the Spring container with Java annotations). The constructor receives one configuration class, `MyConfiguration`. Then it gets a bean of type `String` from the Spring context and prints it.
 
 ```java
 public class ImportAwareApplication {
@@ -197,7 +197,7 @@ public class ImportAwareApplication {
 }
 ```
 
-在`org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext`构造函数中，执行了三个步骤，我们重点关注`refresh()`方法。
+The constructor of `org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext` does three steps. We focus on the `refresh()` method.
 
 ```java
 public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
@@ -207,47 +207,47 @@ public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
 }
 ```
 
-在`org.springframework.context.support.AbstractApplicationContext#refresh`方法中，我们重点关注一下`finishBeanFactoryInitialization(beanFactory)`这方法会对实例化所有剩余非懒加载的单列Bean对象，其他方法不是本次源码阅读的重点暂时忽略。
+In `org.springframework.context.support.AbstractApplicationContext#refresh`, we focus on `finishBeanFactoryInitialization(beanFactory)`. It instantiates all remaining non-lazy singleton beans. The other methods are not the focus of this reading, so we skip them.
 
 ```java
 @Override
 public void refresh() throws BeansException, IllegalStateException {
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     // Instantiate all remaining (non-lazy-init) singletons.
     finishBeanFactoryInitialization(beanFactory);
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-在`org.springframework.context.support.AbstractApplicationContext#finishBeanFactoryInitialization`方法中，会继续调用`DefaultListableBeanFactory`类中的`preInstantiateSingletons`方法来完成所有剩余非懒加载的单列Bean对象。
+The method `org.springframework.context.support.AbstractApplicationContext#finishBeanFactoryInitialization` then calls `preInstantiateSingletons` in `DefaultListableBeanFactory` to create all remaining non-lazy singleton beans.
 
 ```java
 /**
- * 完成此工厂的bean初始化，实例化所有剩余的非延迟初始化单例bean。
+ * Finish the initialization of this factory by instantiating all remaining non-lazy-init singleton beans.
  * 
- * @param beanFactory 要初始化的bean工厂
+ * @param beanFactory the bean factory to initialize
  */
 protected void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
-    // ... [代码部分省略以简化]
-    // 完成所有剩余非懒加载的单列Bean对象。
+    // ... [code omitted for brevity]
+    // Instantiate all remaining non-lazy singleton beans.
     beanFactory.preInstantiateSingletons();
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultListableBeanFactory#preInstantiateSingletons`方法中，主要的核心目的是预先实例化所有非懒加载的单例bean。在Spring的上下文初始化完成后，该方法会被触发，以确保所有单例bean都被正确地创建并初始化。其中`getBean(beanName)`是此方法的核心操作。对于容器中定义的每一个单例bean，它都会调用`getBean`方法，这将触发bean的实例化、初始化及其依赖的注入。如果bean之前没有被创建过，那么这个调用会导致其被实例化和初始化。
+The main purpose of `org.springframework.beans.factory.support.DefaultListableBeanFactory#preInstantiateSingletons` is to instantiate all non-lazy singleton beans up front. It runs when the Spring context finishes initializing, so that all singleton beans are created and initialized. Its core operation is `getBean(beanName)`. For each singleton bean defined in the container, it calls `getBean`, which triggers instantiation, initialization, and dependency injection. If the bean has not been created yet, this call creates and initializes it.
 
 ```java
 public void preInstantiateSingletons() throws BeansException {
-    // ... [代码部分省略以简化]
-    // 循环遍历所有bean的名称
+    // ... [code omitted for brevity]
+    // Loop over all bean names
     for (String beanName : beanNames) {
         getBean(beanName);
     }
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractBeanFactory#getBean()`方法中，又调用了`doGetBean`方法来实际执行创建Bean的过程，传递给它bean的名称和一些其他默认的参数值。此处，`doGetBean`负责大部分工作，如查找bean定义、创建bean（如果尚未创建）、处理依赖关系等。
+The method `org.springframework.beans.factory.support.AbstractBeanFactory#getBean()` calls `doGetBean` to do the real work of creating the bean. It passes the bean name and some default argument values. `doGetBean` does most of the work, such as finding the bean definition, creating the bean (if it does not exist yet), and handling dependencies.
 
 ```java
 @Override
@@ -256,150 +256,150 @@ public Object getBean(String name) throws BeansException {
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractBeanFactory#doGetBean`方法中，首先检查所请求的bean是否是一个单例并且已经创建。如果尚未创建，它将创建一个新的实例。在这个过程中，它处理可能的异常情况，如循环引用，并确保返回的bean是正确的类型。这是Spring容器bean生命周期管理的核心部分。
+In `org.springframework.beans.factory.support.AbstractBeanFactory#doGetBean`, Spring first checks whether the requested bean is a singleton that has already been created. If not, it creates a new instance. Along the way it handles possible problems such as circular references, and makes sure the returned bean has the right type. This is a core part of bean lifecycle management in the Spring container.
 
 ```java
 protected <T> T doGetBean(
         String name, @Nullable Class<T> requiredType, @Nullable Object[] args, boolean typeCheckOnly)
         throws BeansException {
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
-    // 开始创建bean实例
+    // Start creating the bean instance
     if (mbd.isSingleton()) {
-        // 如果bean是单例的，我们会尝试从单例缓存中获取它
-        // 如果不存在，则使用lambda创建一个新的实例
+        // If the bean is a singleton, try to get it from the singleton cache
+        // If it does not exist, create a new instance with a lambda
         sharedInstance = getSingleton(beanName, () -> {
             try {
-                // 尝试创建bean实例
+                // Try to create the bean instance
                 return createBean(beanName, mbd, args);
             }
             catch (BeansException ex) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
         });
-        // 对于某些bean（例如FactoryBeans），可能需要进一步处理以获取真正的bean实例
+        // For some beans (for example FactoryBeans), more work may be needed to get the real bean instance
         beanInstance = getObjectForBeanInstance(sharedInstance, name, beanName, mbd);
     }
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
-    // 确保返回的bean实例与请求的类型匹配
+    // Make sure the returned bean instance matches the requested type
     return adaptBeanInstance(name, beanInstance, requiredType);
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultSingletonBeanRegistry#getSingleton()`方法中，主要负责从单例缓存中获取一个已存在的bean实例，或者使用提供的`ObjectFactory`创建一个新的实例。这是确保bean在Spring容器中作为单例存在的关键部分。
+The method `org.springframework.beans.factory.support.DefaultSingletonBeanRegistry#getSingleton()` gets an existing bean instance from the singleton cache, or creates a new one with the given `ObjectFactory`. This is the key part that keeps a bean a singleton in the Spring container.
 
 ```java
 public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) {
-    // 断言bean名称不能为空
+    // Assert that the bean name is not null
     Assert.notNull(beanName, "Bean name must not be null");
 
-    // 同步访问单例对象缓存，确保线程安全
+    // Synchronize on the singleton cache for thread safety
     synchronized (this.singletonObjects) {
-        // 从缓存中获取单例对象
+        // Get the singleton from the cache
         Object singletonObject = this.singletonObjects.get(beanName);
 
-        // 如果缓存中没有找到
+        // If it is not in the cache
         if (singletonObject == null) {
-            // ... [代码部分省略以简化]
+            // ... [code omitted for brevity]
 
             try {
-                // 使用工厂创建新的单例实例
+                // Create a new singleton instance with the factory
                 singletonObject = singletonFactory.getObject();
                 newSingleton = true;
             }
             catch (IllegalStateException ex) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
             catch (BeanCreationException ex) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
             finally {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
 
-			// ... [代码部分省略以简化]
+			// ... [code omitted for brevity]
         }
 
-        // 返回单例对象
+        // Return the singleton
         return singletonObject;
     }
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#createBean()`方法中，主要的逻辑是调用 `doCreateBean`，这是真正进行 bean 实例化、属性填充和初始化的地方。这个方法会返回新创建的 bean 实例。
+The main logic of `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#createBean()` is to call `doCreateBean`. That is where the bean is really instantiated, populated, and initialized. The method returns the newly created bean instance.
 
 ```java
 @Override
 protected Object createBean(String beanName, RootBeanDefinition mbd, @Nullable Object[] args)
     throws BeanCreationException {
     
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     
     try {
-        // 正常的bean实例化、属性注入和初始化。
-        // 这里是真正进行bean创建的部分。
+        // Normal bean instantiation, property injection, and initialization.
+        // This is where the bean is really created.
         Object beanInstance = doCreateBean(beanName, mbdToUse, args);
-        // 记录bean成功创建的日志
+        // Log that the bean was created successfully
         if (logger.isTraceEnabled()) {
             logger.trace("Finished creating instance of bean '" + beanName + "'");
         }
         return beanInstance;
     }
     catch (BeanCreationException | ImplicitlyAppearedSingletonException ex) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
     catch (Throwable ex) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#doCreateBean`方法中，主要负责bean初始化。
+In `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#doCreateBean`, the main job is bean initialization.
 
 ```java
 protected Object doCreateBean(String beanName, RootBeanDefinition mbd, @Nullable Object[] args)
         throws BeanCreationException {
 
-    // 声明一个对象，后续可能用于存放初始化后的bean或它的代理对象
+    // Declare an object that may later hold the initialized bean or its proxy
     Object exposedObject = bean;
 
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     
     try {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
         
-        // bean初始化
+        // Initialize the bean
         exposedObject = initializeBean(beanName, exposedObject, mbd);
     } 
     catch (Throwable ex) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
 
-    // 返回创建和初始化后的bean
+    // Return the created and initialized bean
     return exposedObject;
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#initializeBean()`方法中，核心逻辑是对`BeanPostProcessors`接口中的`postProcessBeforeInitialization`进行回调。
+In `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#initializeBean()`, the core logic is to call back `postProcessBeforeInitialization` of the `BeanPostProcessors` interface.
 
 ```java
 protected Object initializeBean(String beanName, Object bean, @Nullable RootBeanDefinition mbd) {
 
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     
     Object wrappedBean = bean;
     if (mbd == null || !mbd.isSynthetic()) {
         wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
     }
     
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
     return wrappedBean;
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsBeforeInitialization`方法中，遍历每一个 `BeanPostProcessor` 的 `postProcessBeforeInitialization` 方法都有机会对bean进行修改或增强。
+In `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsBeforeInitialization`, the `postProcessBeforeInitialization` method of each `BeanPostProcessor` gets a chance to change or enhance the bean.
 
 ```java
 @Override
@@ -418,7 +418,7 @@ public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, S
 }
 ```
 
-在`org.springframework.context.annotation.ConfigurationClassPostProcessor.ImportAwareBeanPostProcessor#postProcessBeforeInitialization`方法中，主要作用是为实现了 `ImportAware` 接口的 beans 设置导入它们的类的 `AnnotationMetadata`。这样，任何实现了 `ImportAware` 接口的 bean 都可以知道它是由哪个类导入的，以及这个导入类上的所有注解信息。
+The main job of `org.springframework.context.annotation.ConfigurationClassPostProcessor.ImportAwareBeanPostProcessor#postProcessBeforeInitialization` is to set the `AnnotationMetadata` of the importing class on beans that implement `ImportAware`. So any bean that implements `ImportAware` can know which class imported it, and see all the annotation information on that class.
 
 ```java
 @Override
@@ -434,7 +434,7 @@ public Object postProcessBeforeInitialization(Object bean, String beanName) {
 }
 ```
 
-最后执行到我们自定义的逻辑中，由于 `MyImportAware` 实现了 `ImportAware`，它会检查导入它的配置类上是否存在 `@EnableXcs` 注解。如果存在，则继续处理并注册 `customBean` 这个 String 类型的 bean 到 Spring 上下文中。如果不存在 `@EnableXcs` 注解，则抛出异常。
+Finally, execution reaches our own logic. `MyImportAware` implements `ImportAware`, so it checks whether the configuration class that imported it has the `@EnableXcs` annotation. If it does, it continues and registers a `String` bean named `customBean` in the Spring context. If the `@EnableXcs` annotation is missing, it throws an exception.
 
 ```java
 public class MyImportAware implements ImportAware {
@@ -458,61 +458,61 @@ public class MyImportAware implements ImportAware {
 }
 ```
 
-### 八、注意事项
+### 8. Notes
 
-1. **明确需求**
-   + 在决定实现 `ImportAware` 之前，请确保我们确实需要知道是哪个类导入了我们的组件，并且需要访问其注解元数据。避免不必要的复杂性。
+1. **Be clear about the need**
+   + Before you implement `ImportAware`, make sure you really need to know which class imported your component, and that you need its annotation metadata. Avoid unnecessary complexity.
 
-2. **正确的上下文**
-   + `ImportAware` 只对通过 `@Import` 导入的类有意义。对于其他方式注册的 beans（例如，通过 component scanning 或 XML 配置），`setImportMetadata` 方法可能不会被调用。
+2. **The right context**
+   + `ImportAware` only makes sense for classes imported with `@Import`. For beans registered in other ways (for example component scanning or XML configuration), `setImportMetadata` may not be called.
 
-3. **小心处理元数据**
-   + 当访问 `AnnotationMetadata` 时，确保处理不存在的注解或属性的情况，以避免空指针异常。
+3. **Handle metadata with care**
+   + When you access `AnnotationMetadata`, handle the case where an annotation or attribute does not exist, to avoid a null pointer exception.
 
-4. **注意与其他 `BeanPostProcessor` 的交互**
-   + `ImportAware` 的功能部分是通过 `BeanPostProcessor` 机制实现的。如果我们在应用中使用其他 `BeanPostProcessor`，请确保我们了解它们之间的交互和执行顺序。
+4. **Watch the interaction with other `BeanPostProcessor`s**
+   + Part of the `ImportAware` feature works through the `BeanPostProcessor` mechanism. If you use other `BeanPostProcessor`s in your application, make sure you understand how they interact and in what order they run.
 
-5. **不要过度使用**
-   + 虽然 `ImportAware` 可以带来一些灵活性，但不应在不需要的地方使用它。过度使用可能会导致配置变得复杂且难以追踪。
+5. **Do not overuse it**
+   + `ImportAware` can add some flexibility, but do not use it where it is not needed. Overuse can make the configuration complex and hard to trace.
 
-### 九、总结
+### 9. Summary
 
-#### 最佳实践总结
+#### Best Practices Summary
 
-1. **初始化与运行**
-   + 使用 `AnnotationConfigApplicationContext` 初始化了一个 Spring 上下文，加载了 `MyConfiguration` 配置类，并从上下文中获取了一个类型为 `String` 的 bean。
+1. **Initialization and run**
+   + `AnnotationConfigApplicationContext` initializes a Spring context, loads the `MyConfiguration` class, and gets a bean of type `String` from the context.
 
-2. **`@EnableXcs` 注解的作用**
-   + `@EnableXcs` 是一个自定义注解，其主要作用是通过 `@Import` 注解导入 `MyImportAware` 类，从而启动 `ImportAware` 功能。
+2. **What the `@EnableXcs` annotation does**
+   + `@EnableXcs` is a custom annotation. Its main job is to import the `MyImportAware` class through `@Import`, which turns on the `ImportAware` feature.
 
-3. **`MyImportAware` 类与 `ImportAware`**
-   + `MyImportAware` 实现了 `ImportAware` 接口，允许它获取关于导入它的类的注解信息。在 `setImportMetadata` 方法中，`MyImportAware` 会检查导入它的类是否有 `@EnableXcs` 注解。如果存在 `@EnableXcs` 注解，它会继续并注册一个 `String` 类型的 bean，值为 "This is a custom bean!"。如果不存在，它会抛出异常，提示 `@EnableXcs` 注解不存在于导入它的类上。
+3. **The `MyImportAware` class and `ImportAware`**
+   + `MyImportAware` implements `ImportAware`, so it can get the annotation information of the class that imported it. In `setImportMetadata`, `MyImportAware` checks whether the importing class has the `@EnableXcs` annotation. If it does, it continues and registers a `String` bean with the value "This is a custom bean!". If not, it throws an exception saying that `@EnableXcs` is missing on the importing class.
 
-4. **正常使用**
-   + 当 `MyConfiguration` 使用 `@EnableXcs` 注解时，程序可以正常运行，从上下文中获取到的 String 类型的 bean 值为 "This is a custom bean!"。
+4. **Normal use**
+   + When `MyConfiguration` uses the `@EnableXcs` annotation, the program runs normally, and the `String` bean taken from the context has the value "This is a custom bean!".
 
-5. **异常情况**
-   + 但如果 `MyConfiguration` 直接使用 `@Import(MyImportAware.class)` 导入 `MyImportAware` 类，而不使用 `@EnableXcs` 注解，会导致 `MyImportAware` 在查找 `@EnableXcs` 注解时发现它不存在，从而抛出异常。
+5. **Error case**
+   + But if `MyConfiguration` imports `MyImportAware` directly with `@Import(MyImportAware.class)` and does not use `@EnableXcs`, `MyImportAware` does not find the `@EnableXcs` annotation and throws an exception.
 
-#### 源码分析总结
+#### Source Code Analysis Summary
 
-1. **应用程序启动**
-   + 使用 `AnnotationConfigApplicationContext` 初始化 Spring 上下文，加载 `MyConfiguration` 配置类。程序试图从 Spring 上下文中获取一个类型为 `String` 的 bean。
+1. **Application startup**
+   + `AnnotationConfigApplicationContext` initializes the Spring context and loads the `MyConfiguration` class. The program tries to get a bean of type `String` from the Spring context.
 
-2. **上下文刷新**
-   + 在构造 `AnnotationConfigApplicationContext` 时，会调用 `refresh()` 方法，这是 Spring 上下文的初始化和刷新过程的入口点。
+2. **Context refresh**
+   + When `AnnotationConfigApplicationContext` is constructed, it calls `refresh()`. This is the entry point of the initialization and refresh process of the Spring context.
 
-3. **实例化Beans**
-   + 执行 `finishBeanFactoryInitialization`，该方法负责预实例化上下文中的所有非懒加载单例bean。对于每个bean，它都会调用 `getBean` 方法。
+3. **Instantiating beans**
+   + It runs `finishBeanFactoryInitialization`, which pre-instantiates all non-lazy singleton beans in the context. For each bean, it calls `getBean`.
 
-4. **处理 `ImportAware` Beans**
-   + 如果bean实现了 `ImportAware` 接口，`postProcessBeforeInitialization` 方法会为该 bean 设置导入它的类的注解元数据。在我们的例子中，`MyImportAware` 就是这样一个bean。
+4. **Handling `ImportAware` beans**
+   + If a bean implements `ImportAware`, the `postProcessBeforeInitialization` method sets the annotation metadata of the importing class on that bean. In our example, `MyImportAware` is such a bean.
 
-5. **检查 `@EnableXcs`**
-   + 在 `MyImportAware` 的 `setImportMetadata` 方法中，它会检查导入它的类是否有 `@EnableXcs` 注解。如果存在该注解，则继续处理；如果不存在，则抛出异常。
+5. **Checking `@EnableXcs`**
+   + In the `setImportMetadata` method of `MyImportAware`, it checks whether the importing class has the `@EnableXcs` annotation. If it does, processing continues. If not, it throws an exception.
 
-6. **Bean创建**
-   + 如果导入类上存在 `@EnableXcs` 注解，`MyImportAware` 继续并定义了一个 `String` 类型的 bean。这就是我们从上下文中检索并在控制台上打印的bean。
+6. **Bean creation**
+   + If the importing class has the `@EnableXcs` annotation, `MyImportAware` continues and defines a `String` bean. This is the bean we get from the context and print to the console.
 
-7. **异常处理**
-   + 如果直接使用 `@Import` 导入 `MyImportAware` 而不使用 `@EnableXcs` 注解，会发生异常，因为 `MyImportAware` 期望导入它的类上有 `@EnableXcs` 注解。
+7. **Exception handling**
+   + If `MyImportAware` is imported directly with `@Import` and without `@EnableXcs`, an exception occurs, because `MyImportAware` expects the importing class to have the `@EnableXcs` annotation.

@@ -1,70 +1,70 @@
 ## MessageSourceAware
 
 - [MessageSourceAware](#messagesourceaware)
-  - [一、基本信息](#一基本信息)
-  - [二、接口描述](#二接口描述)
-  - [三、接口源码](#三接口源码)
-  - [四、主要功能](#四主要功能)
-  - [五、最佳实践](#五最佳实践)
-  - [六、时序图](#六时序图)
-  - [七、源码分析](#七源码分析)
-  - [八、注意事项](#八注意事项)
-  - [八、总结](#八总结)
-    - [最佳实践总结](#最佳实践总结)
-    - [源码分析总结](#源码分析总结)
+  - [1. Overview](#1-overview)
+  - [2. Interface Description](#2-interface-description)
+  - [3. Interface Source](#3-interface-source)
+  - [4. Main Features](#4-main-features)
+  - [5. Best Practices](#5-best-practices)
+  - [6. Sequence Diagram](#6-sequence-diagram)
+  - [7. Source Code Analysis](#7-source-code-analysis)
+  - [8. Notes](#8-notes)
+  - [8. Summary](#8-summary)
+    - [Best Practices Summary](#best-practices-summary)
+    - [Source Code Analysis Summary](#source-code-analysis-summary)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [我的CSDN](https://blog.csdn.net/duzhuang2399/article/details/133916775) 📚 **文章目录** - [所有文章](https://github.com/xuchengsheng/spring-reading) 🔗 **源码地址** - [MessageSourceAware源码](https://github.com/xuchengsheng/spring-reading/blob/master/spring-aware/spring-aware-messageSourceAware)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN](https://blog.csdn.net/duzhuang2399/article/details/133916775) 📚 **Contents** - [All Articles](https://github.com/xuchengsheng/spring-reading) 🔗 **Source code** - [MessageSourceAware source code](https://github.com/xuchengsheng/spring-reading/blob/master/spring-aware/spring-aware-messageSourceAware)
 
-### 二、接口描述
+### 2. Interface Description
 
-`MessageSourceAware` 接口，主要用于对象希望被注入`MessageSource`。`MessageSource`是Spring中用于国际化（i18n）的接口，它提供了从不同的消息资源（例如：属性文件）获取消息的方法。使用`MessageSource`，我们可以为应用程序提供国际化的消息支持。
+The `MessageSourceAware` interface is for objects that want a `MessageSource` injected. `MessageSource` is the Spring interface for internationalization (i18n). It provides ways to get messages from different message resources (for example property files). With `MessageSource`, we can give an application internationalized message support.
 
-### 三、接口源码
+### 3. Interface Source
 
-`MessageSourceAware` 是 Spring 框架自 1.1.1 开始引入的一个核心接口。实现`MessageSourceAware`接口的对象会在Spring容器中被自动注入一个`MessageSource`实例。
+`MessageSourceAware` is a core Spring interface, available since 1.1.1. Spring automatically injects a `MessageSource` instance into any object that implements `MessageSourceAware`.
 
 ```java
 /**
- * 任何希望被通知运行其中的MessageSource（通常是ApplicationContext）的对象需要实现的接口。
+ * Interface to be implemented by any object that wishes to be notified of the MessageSource (typically the ApplicationContext) that it runs in.
  *
- * 注意，MessageSource通常也可以作为bean引用传递
- * （到任意的bean属性或构造函数参数），因为它在应用上下文中通常是以"name"为messageSource的bean定义的。
+ * Note that the MessageSource can usually also be passed on as a bean reference
+ * (to arbitrary bean properties or constructor arguments), because it is defined as a bean with name "messageSource" in the application context.
  * 
- * 作者: Juergen Hoeller, Chris Beams
- * 版本: 1.1.1
- * 参见: ApplicationContextAware
+ * Author: Juergen Hoeller, Chris Beams
+ * Version: 1.1.1
+ * See: ApplicationContextAware
  */
 public interface MessageSourceAware extends Aware {
 
     /**
-     * 设置此对象运行的MessageSource。
-     * 此方法在常规bean属性被填充之后调用，但在初始化回调（如InitializingBean的afterPropertiesSet或自定义的init-method）之前调用。
-     * 此方法在ApplicationContextAware的setApplicationContext方法之前被调用。
+     * Set the MessageSource that this object runs in.
+     * This method is called after the normal bean properties are populated, but before an initialization callback such as InitializingBean's afterPropertiesSet or a custom init-method.
+     * This method is called before ApplicationContextAware's setApplicationContext.
      * 
-     * @param messageSource 此对象要使用的消息源
+     * @param messageSource the message source to be used by this object
      */
     void setMessageSource(MessageSource messageSource);
 
 }
 ```
 
-### 四、主要功能
+### 4. Main Features
 
-1. **自动注入**
-   + 当一个bean实现了`MessageSourceAware`接口，并且被Spring容器管理时，Spring将会自动调用该bean的`setMessageSource`方法，传入当前应用上下文的`MessageSource`实例。
+1. **Automatic injection**
+   + When a bean implements `MessageSourceAware` and is managed by the Spring container, Spring calls the bean's `setMessageSource` method automatically and passes in the `MessageSource` instance of the current application context.
 
-2. **国际化支持**
-   + 通过`MessageSourceAware`，beans可以获得对`MessageSource`的访问权，从而可以根据不同的地区和语言获取相应的消息。这对于需要显示不同语言的错误消息、UI标签或其他用户面向的文本的beans特别有用。
+2. **Internationalization support**
+   + With `MessageSourceAware`, beans get access to the `MessageSource`. They can then get messages for different regions and languages. This is especially useful for beans that show error messages, UI labels, or other user-facing text in different languages.
 
-3. **简化配置**
-   + 虽然我们可以通过常规的依赖注入方法将`MessageSource`注入到beans中，但`MessageSourceAware`提供了一种更加自动化和明确的方法，特别是当我们的bean需要在初始化过程的特定阶段获得`MessageSource`时。
+3. **Simpler configuration**
+   + We can inject `MessageSource` into beans with normal dependency injection. But `MessageSourceAware` is a more automatic and explicit way, especially when the bean needs the `MessageSource` at a specific stage of initialization.
 
-### 五、最佳实践
+### 5. Best Practices
 
-首先来看看启动类入口，上下文环境使用`AnnotationConfigApplicationContext`（此类是使用Java注解来配置Spring容器的方式），构造参数我们给定了一个`MyConfiguration`组件类。然后从Spring上下文中获取一个`MyMessageSourceAware`类型的bean，最后调用`getMessage`方法。
+First, look at the entry class. It uses `AnnotationConfigApplicationContext` (a way to configure the Spring container with Java annotations). The constructor receives one configuration class, `MyConfiguration`. Then it gets a bean of type `MyMessageSourceAware` from the Spring context and calls the `getMessage` method.
 
 ```java
 public class MessageSourceAwareApplication {
@@ -77,7 +77,7 @@ public class MessageSourceAwareApplication {
 }
 ```
 
-这里使用`@Bean`注解，定义了两个Bean，是为了确保 `MyMessageSourceAware` ，`MessageSource`被 Spring 容器执行。其中`ResourceBundleMessageSource` 是 Spring 框架中用于国际化（i18n）的一个具体实现。它为应用程序提供了从属性文件中读取国际化消息的能力。
+The `@Bean` annotation defines two beans here, to make sure the Spring container creates `MyMessageSourceAware` and `MessageSource`. `ResourceBundleMessageSource` is a concrete Spring implementation for internationalization (i18n). It lets the application read internationalized messages from property files.
 
 ```java
 @Configuration
@@ -97,7 +97,7 @@ public class MyConfiguration {
 }
 ```
 
-`MyMessageSourceAware`类使用`MessageSourceAware`接口来自动获得对`MessageSource`的引用。这个引用可以用来根据不同的语言或地区检索国际化的消息。然后利用注入的`MessageSource`，从属性文件中检索并打印两个国际化的消息，一个是英文的，另一个是简体中文的。
+The `MyMessageSourceAware` class uses the `MessageSourceAware` interface to get a reference to the `MessageSource` automatically. This reference can be used to get internationalized messages for different languages or regions. Using the injected `MessageSource`, it reads two internationalized messages from the property files and prints them. One is in English and the other is in Simplified Chinese.
 
 ```java
 public class MyMessageSourceAware implements MessageSourceAware {
@@ -111,23 +111,23 @@ public class MyMessageSourceAware implements MessageSourceAware {
 
     public void getMessage() {
         System.out.println("English："+messageSource.getMessage("greeting", null, Locale.ENGLISH));
-        System.out.println("中文："+messageSource.getMessage("greeting", null, Locale.SIMPLIFIED_CHINESE));
+        System.out.println("Chinese: "+messageSource.getMessage("greeting", null, Locale.SIMPLIFIED_CHINESE));
     }
 }
 ```
 
-运行结果发现，`MyMessageSourceAware`类已成功从属性文件中获取了国际化消息。
+The output shows that the `MyMessageSourceAware` class got the internationalized messages from the property files.
 
 ```java
 English：Hello!
-中文：我们好
+Chinese: (the Chinese text for "Hello")
 ```
 
-### 六、时序图
+### 6. Sequence Diagram
 
 ~~~mermaid
 sequenceDiagram
-    Title: EnvironmentAware时序图
+    Title: EnvironmentAware sequence diagram
     participant MessageSourceAwareApplication
     participant AnnotationConfigApplicationContext
     participant AbstractApplicationContext
@@ -138,29 +138,29 @@ sequenceDiagram
     participant ApplicationContextAwareProcessor
     participant MyMessageSourceAware
     
-    MessageSourceAwareApplication->>AnnotationConfigApplicationContext:AnnotationConfigApplicationContext(componentClasses)<br>创建上下文
-    AnnotationConfigApplicationContext->>AbstractApplicationContext:refresh()<br>刷新上下文
-    AbstractApplicationContext->>AbstractApplicationContext:finishBeanFactoryInitialization(beanFactory)<br>初始化Bean工厂
-    AbstractApplicationContext->>DefaultListableBeanFactory:preInstantiateSingletons()<br>实例化单例
-    DefaultListableBeanFactory->>AbstractBeanFactory:getBean(name)<br>获取Bean
-    AbstractBeanFactory->>AbstractBeanFactory:doGetBean(name,requiredType,args,typeCheckOnly)<br>执行获取Bean
-    AbstractBeanFactory->>DefaultSingletonBeanRegistry:getSingleton(beanName,singletonFactory)<br>获取单例Bean
-    DefaultSingletonBeanRegistry-->>AbstractBeanFactory:getObject()<br>获取Bean实例
-    AbstractBeanFactory->>AbstractAutowireCapableBeanFactory:createBean(beanName,mbd,args)<br>创建Bean
-    AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:doCreateBean(beanName,mbd,args)<br>执行Bean创建
-    AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:initializeBean(beanName,bean,mbd)<br>负责bean的初始化
-	AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:applyBeanPostProcessorsBeforeInitialization(existingBean, beanName)<br>调用前置处理器
-    AbstractAutowireCapableBeanFactory->>ApplicationContextAwareProcessor:postProcessBeforeInitialization(bean,beanName)<br>触发Aware处理
-    ApplicationContextAwareProcessor->>ApplicationContextAwareProcessor:invokeAwareInterfaces(bean)<br>执行Aware回调
-    ApplicationContextAwareProcessor->>MyMessageSourceAware:setMessageSource(messageSource)<br>设置messageSource
-    AbstractAutowireCapableBeanFactory-->>AbstractBeanFactory:返回Bean对象
-    AbstractBeanFactory-->>DefaultListableBeanFactory:返回Bean对象
-    AnnotationConfigApplicationContext-->>MessageSourceAwareApplication:初始化完成
+    MessageSourceAwareApplication->>AnnotationConfigApplicationContext:AnnotationConfigApplicationContext(componentClasses)<br>Create the context
+    AnnotationConfigApplicationContext->>AbstractApplicationContext:refresh()<br>Refresh the context
+    AbstractApplicationContext->>AbstractApplicationContext:finishBeanFactoryInitialization(beanFactory)<br>Initialize the bean factory
+    AbstractApplicationContext->>DefaultListableBeanFactory:preInstantiateSingletons()<br>Instantiate singletons
+    DefaultListableBeanFactory->>AbstractBeanFactory:getBean(name)<br>Get the bean
+    AbstractBeanFactory->>AbstractBeanFactory:doGetBean(name,requiredType,args,typeCheckOnly)<br>Do the actual get
+    AbstractBeanFactory->>DefaultSingletonBeanRegistry:getSingleton(beanName,singletonFactory)<br>Get the singleton bean
+    DefaultSingletonBeanRegistry-->>AbstractBeanFactory:getObject()<br>Get the bean instance
+    AbstractBeanFactory->>AbstractAutowireCapableBeanFactory:createBean(beanName,mbd,args)<br>Create the bean
+    AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:doCreateBean(beanName,mbd,args)<br>Do the actual creation
+    AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:initializeBean(beanName,bean,mbd)<br>Initialize the bean
+	AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:applyBeanPostProcessorsBeforeInitialization(existingBean, beanName)<br>Call the before-initialization processors
+    AbstractAutowireCapableBeanFactory->>ApplicationContextAwareProcessor:postProcessBeforeInitialization(bean,beanName)<br>Trigger Aware handling
+    ApplicationContextAwareProcessor->>ApplicationContextAwareProcessor:invokeAwareInterfaces(bean)<br>Run the Aware callbacks
+    ApplicationContextAwareProcessor->>MyMessageSourceAware:setMessageSource(messageSource)<br>Set the messageSource
+    AbstractAutowireCapableBeanFactory-->>AbstractBeanFactory:Return the bean
+    AbstractBeanFactory-->>DefaultListableBeanFactory:Return the bean
+    AnnotationConfigApplicationContext-->>MessageSourceAwareApplication:Initialization complete
 ~~~
 
-### 七、源码分析
+### 7. Source Code Analysis
 
-首先来看看启动类入口，上下文环境使用`AnnotationConfigApplicationContext`（此类是使用Java注解来配置Spring容器的方式），构造参数我们给定了一个`MyConfiguration`组件类。然后从Spring上下文中获取一个`MyMessageSourceAware`类型的bean，最后调用`getMessage`方法。
+First, look at the entry class. It uses `AnnotationConfigApplicationContext` (a way to configure the Spring container with Java annotations). The constructor receives one configuration class, `MyConfiguration`. Then it gets a bean of type `MyMessageSourceAware` from the Spring context and calls the `getMessage` method.
 
 ```java
 public class MessageSourceAwareApplication {
@@ -173,7 +173,7 @@ public class MessageSourceAwareApplication {
 }
 ```
 
-在`org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext`构造函数中，执行了三个步骤，我们重点关注`refresh()`方法
+The constructor of `org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext` does three steps. We focus on the `refresh()` method.
 
 ```java
 public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
@@ -182,83 +182,83 @@ public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
     refresh();
 ```
 
-在`org.springframework.context.support.AbstractApplicationContext#refresh`方法中，我们重点关注一下`finishBeanFactoryInitialization(beanFactory)`这方法会对实例化所有剩余非懒加载的单列Bean对象，其他方法不是本次源码阅读的重点暂时忽略。
+In `org.springframework.context.support.AbstractApplicationContext#refresh`, we focus on `finishBeanFactoryInitialization(beanFactory)`. It instantiates all remaining non-lazy singleton beans. The other methods are not the focus of this reading, so we skip them.
 
 ```java
 @Override
 public void refresh() throws BeansException, IllegalStateException {
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     
-    // 步骤1. Initialize message source for this context.
+    // Step 1. Initialize message source for this context.
 	initMessageSource();
     
-    // 步骤2. Instantiate all remaining (non-lazy-init) singletons.
+    // Step 2. Instantiate all remaining (non-lazy-init) singletons.
     finishBeanFactoryInitialization(beanFactory);
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-我们来到`org.springframework.context.support.AbstractApplicationContext#refresh`方法中的步骤1，在`org.springframework.context.support.AbstractApplicationContext#initMessageSource`方法中，这个方法确保Spring应用上下文总是有一个`MessageSource` bean可用，无论是否明确定义了它。如果用户没有定义，它会提供一个默认实现。这意味着在Spring上下文中，我们总是可以安全地调用`getMessage()`，因为总会有一个`MessageSource`可用。
+We come to step 1 in `org.springframework.context.support.AbstractApplicationContext#refresh`. The method `org.springframework.context.support.AbstractApplicationContext#initMessageSource` makes sure the Spring application context always has a `MessageSource` bean, whether or not one is defined explicitly. If the user did not define one, it provides a default. So in a Spring context we can always call `getMessage()` safely, because a `MessageSource` is always available.
 
 ```java
 protected void initMessageSource() {
-    // 获取Bean工厂
+    // Get the bean factory
     ConfigurableListableBeanFactory beanFactory = getBeanFactory();
-    // 检查是否已经存在名为MESSAGE_SOURCE_BEAN_NAME的bean
+    // Check whether a bean named MESSAGE_SOURCE_BEAN_NAME already exists
     if (beanFactory.containsLocalBean(MESSAGE_SOURCE_BEAN_NAME)) {
-        // 如果存在，则获取该bean
+        // If it exists, get that bean
         this.messageSource = beanFactory.getBean(MESSAGE_SOURCE_BEAN_NAME, MessageSource.class);
-        // 如果当前MessageSource具有层次结构并且没有设置父MessageSource
+        // If the current MessageSource is hierarchical and has no parent MessageSource set
         if (this.parent != null && this.messageSource instanceof HierarchicalMessageSource) {
             HierarchicalMessageSource hms = (HierarchicalMessageSource) this.messageSource;
             if (hms.getParentMessageSource() == null) {
-                // 设置父上下文作为父MessageSource（如果之前没有注册过父MessageSource）
+                // Set the parent context as the parent MessageSource (if no parent MessageSource was registered before)
                 hms.setParentMessageSource(getInternalParentMessageSource());
             }
         }
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
     else {
-        // 如果不存在MESSAGE_SOURCE_BEAN_NAME的bean，则创建一个DelegatingMessageSource并注册到上下文
-        // 使用DelegatingMessageSource以便能够处理getMessage调用
+        // If there is no bean named MESSAGE_SOURCE_BEAN_NAME, create a DelegatingMessageSource and register it in the context
+        // Use DelegatingMessageSource so that getMessage calls can be handled
         DelegatingMessageSource dms = new DelegatingMessageSource();
         dms.setParentMessageSource(getInternalParentMessageSource());
         this.messageSource = dms;
         beanFactory.registerSingleton(MESSAGE_SOURCE_BEAN_NAME, this.messageSource);
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
 }
 ```
 
-我们来到`org.springframework.context.support.AbstractApplicationContext#refresh`方法中的步骤2，在`org.springframework.context.support.AbstractApplicationContext#finishBeanFactoryInitialization`方法中，会继续调用`DefaultListableBeanFactory`类中的`preInstantiateSingletons`方法来完成所有剩余非懒加载的单列Bean对象。
+We come to step 2 in `org.springframework.context.support.AbstractApplicationContext#refresh`. The method `org.springframework.context.support.AbstractApplicationContext#finishBeanFactoryInitialization` then calls `preInstantiateSingletons` in `DefaultListableBeanFactory` to create all remaining non-lazy singleton beans.
 
 ```java
 /**
- * 完成此工厂的bean初始化，实例化所有剩余的非延迟初始化单例bean。
+ * Finish the initialization of this factory by instantiating all remaining non-lazy-init singleton beans.
  * 
- * @param beanFactory 要初始化的bean工厂
+ * @param beanFactory the bean factory to initialize
  */
 protected void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
-    // ... [代码部分省略以简化]
-    // 完成所有剩余非懒加载的单列Bean对象。
+    // ... [code omitted for brevity]
+    // Instantiate all remaining non-lazy singleton beans.
     beanFactory.preInstantiateSingletons();
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultListableBeanFactory#preInstantiateSingletons`方法中，主要的核心目的是预先实例化所有非懒加载的单例bean。在Spring的上下文初始化完成后，该方法会被触发，以确保所有单例bean都被正确地创建并初始化。其中`getBean(beanName)`是此方法的核心操作。对于容器中定义的每一个单例bean，它都会调用`getBean`方法，这将触发bean的实例化、初始化及其依赖的注入。如果bean之前没有被创建过，那么这个调用会导致其被实例化和初始化。
+The main purpose of `org.springframework.beans.factory.support.DefaultListableBeanFactory#preInstantiateSingletons` is to instantiate all non-lazy singleton beans up front. It runs when the Spring context finishes initializing, so that all singleton beans are created and initialized. Its core operation is `getBean(beanName)`. For each singleton bean defined in the container, it calls `getBean`, which triggers instantiation, initialization, and dependency injection. If the bean has not been created yet, this call creates and initializes it.
 
 ```java
 public void preInstantiateSingletons() throws BeansException {
-    // ... [代码部分省略以简化]
-    // 循环遍历所有bean的名称
+    // ... [code omitted for brevity]
+    // Loop over all bean names
     for (String beanName : beanNames) {
         getBean(beanName);
     }
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractBeanFactory#getBean()`方法中，又调用了`doGetBean`方法来实际执行创建Bean的过程，传递给它bean的名称和一些其他默认的参数值。此处，`doGetBean`负责大部分工作，如查找bean定义、创建bean（如果尚未创建）、处理依赖关系等。
+The method `org.springframework.beans.factory.support.AbstractBeanFactory#getBean()` calls `doGetBean` to do the real work of creating the bean. It passes the bean name and some default argument values. `doGetBean` does most of the work, such as finding the bean definition, creating the bean (if it does not exist yet), and handling dependencies.
 
 ```java
 @Override
@@ -267,150 +267,150 @@ public Object getBean(String name) throws BeansException {
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractBeanFactory#doGetBean`方法中，首先检查所请求的bean是否是一个单例并且已经创建。如果尚未创建，它将创建一个新的实例。在这个过程中，它处理可能的异常情况，如循环引用，并确保返回的bean是正确的类型。这是Spring容器bean生命周期管理的核心部分。
+In `org.springframework.beans.factory.support.AbstractBeanFactory#doGetBean`, Spring first checks whether the requested bean is a singleton that has already been created. If not, it creates a new instance. Along the way it handles possible problems such as circular references, and makes sure the returned bean has the right type. This is a core part of bean lifecycle management in the Spring container.
 
 ```java
 protected <T> T doGetBean(
         String name, @Nullable Class<T> requiredType, @Nullable Object[] args, boolean typeCheckOnly)
         throws BeansException {
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
-    // 开始创建bean实例
+    // Start creating the bean instance
     if (mbd.isSingleton()) {
-        // 如果bean是单例的，我们会尝试从单例缓存中获取它
-        // 如果不存在，则使用lambda创建一个新的实例
+        // If the bean is a singleton, try to get it from the singleton cache
+        // If it does not exist, create a new instance with a lambda
         sharedInstance = getSingleton(beanName, () -> {
             try {
-                // 尝试创建bean实例
+                // Try to create the bean instance
                 return createBean(beanName, mbd, args);
             }
             catch (BeansException ex) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
         });
-        // 对于某些bean（例如FactoryBeans），可能需要进一步处理以获取真正的bean实例
+        // For some beans (for example FactoryBeans), more work may be needed to get the real bean instance
         beanInstance = getObjectForBeanInstance(sharedInstance, name, beanName, mbd);
     }
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
-    // 确保返回的bean实例与请求的类型匹配
+    // Make sure the returned bean instance matches the requested type
     return adaptBeanInstance(name, beanInstance, requiredType);
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultSingletonBeanRegistry#getSingleton()`方法中，主要负责从单例缓存中获取一个已存在的bean实例，或者使用提供的`ObjectFactory`创建一个新的实例。这是确保bean在Spring容器中作为单例存在的关键部分。
+The method `org.springframework.beans.factory.support.DefaultSingletonBeanRegistry#getSingleton()` gets an existing bean instance from the singleton cache, or creates a new one with the given `ObjectFactory`. This is the key part that keeps a bean a singleton in the Spring container.
 
 ```java
 public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) {
-    // 断言bean名称不能为空
+    // Assert that the bean name is not null
     Assert.notNull(beanName, "Bean name must not be null");
 
-    // 同步访问单例对象缓存，确保线程安全
+    // Synchronize on the singleton cache for thread safety
     synchronized (this.singletonObjects) {
-        // 从缓存中获取单例对象
+        // Get the singleton from the cache
         Object singletonObject = this.singletonObjects.get(beanName);
 
-        // 如果缓存中没有找到
+        // If it is not in the cache
         if (singletonObject == null) {
-            // ... [代码部分省略以简化]
+            // ... [code omitted for brevity]
 
             try {
-                // 使用工厂创建新的单例实例
+                // Create a new singleton instance with the factory
                 singletonObject = singletonFactory.getObject();
                 newSingleton = true;
             }
             catch (IllegalStateException ex) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
             catch (BeanCreationException ex) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
             finally {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
 
-            // ... [代码部分省略以简化]
+            // ... [code omitted for brevity]
         }
 
-        // 返回单例对象
+        // Return the singleton
         return singletonObject;
     }
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#createBean()`方法中，主要的逻辑是调用 `doCreateBean`，这是真正进行 bean 实例化、属性填充和初始化的地方。这个方法会返回新创建的 bean 实例。
+The main logic of `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#createBean()` is to call `doCreateBean`. That is where the bean is really instantiated, populated, and initialized. The method returns the newly created bean instance.
 
 ```java
 @Override
 protected Object createBean(String beanName, RootBeanDefinition mbd, @Nullable Object[] args)
     throws BeanCreationException {
     
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     
     try {
-        // 正常的bean实例化、属性注入和初始化。
-        // 这里是真正进行bean创建的部分。
+        // Normal bean instantiation, property injection, and initialization.
+        // This is where the bean is really created.
         Object beanInstance = doCreateBean(beanName, mbdToUse, args);
-        // 记录bean成功创建的日志
+        // Log that the bean was created successfully
         if (logger.isTraceEnabled()) {
             logger.trace("Finished creating instance of bean '" + beanName + "'");
         }
         return beanInstance;
     }
     catch (BeanCreationException | ImplicitlyAppearedSingletonException ex) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
     catch (Throwable ex) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#doCreateBean`方法中，`initializeBean`方法是bean初始化，确保bean是完全配置和准备好的。
+In `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#doCreateBean`, the `initializeBean` method initializes the bean and makes sure it is fully configured and ready.
 
 ```java
 protected Object doCreateBean(String beanName, RootBeanDefinition mbd, @Nullable Object[] args)
         throws BeanCreationException {
 
-    // 声明一个对象，后续可能用于存放初始化后的bean或它的代理对象
+    // Declare an object that may later hold the initialized bean or its proxy
     Object exposedObject = bean;
 
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     
     try {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
         
-        // bean初始化
+        // Initialize the bean
         exposedObject = initializeBean(beanName, exposedObject, mbd);
     } 
     catch (Throwable ex) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
 
-    // 返回创建和初始化后的bean
+    // Return the created and initialized bean
     return exposedObject;
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#initializeBean`方法中，如果条件满足（即 bean 不是合成的），那么它会调用 `applyBeanPostProcessorsBeforeInitialization` 方法。这个方法是 Spring 生命周期中的一个关键点，它会遍历所有已注册的 `BeanPostProcessor` 实现，并调用它们的 `postProcessBeforeInitialization` 方法。这允许我们和内部处理器在 bean 初始化之前对其进行修改或执行其他操作。
+In `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#initializeBean`, if the condition is met (the bean is not synthetic), it calls `applyBeanPostProcessorsBeforeInitialization`. This is a key point in the Spring lifecycle. It loops over all registered `BeanPostProcessor` implementations and calls their `postProcessBeforeInitialization` methods. This lets us, and Spring's internal processors, change the bean or do other work before it is initialized.
 
 ```java
 protected Object initializeBean(String beanName, Object bean, @Nullable RootBeanDefinition mbd) {
 
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     
     Object wrappedBean = bean;
     if (mbd == null || !mbd.isSynthetic()) {
         wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
     }
     
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
     return wrappedBean;
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsBeforeInitialization`方法中，遍历每一个 `BeanPostProcessor` 的 `postProcessBeforeInitialization` 方法都有机会对bean进行修改或增强
+In `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsBeforeInitialization`, the `postProcessBeforeInitialization` method of each `BeanPostProcessor` gets a chance to change or enhance the bean.
 
 ```java
 @Override
@@ -429,7 +429,7 @@ public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, S
 }
 ```
 
-在`org.springframework.context.support.ApplicationContextAwareProcessor#postProcessBeforeInitialization`方法中，在这个方法的实现特别关注那些实现了 "aware" 接口的 beans，并为它们提供所需的运行环境信息。
+In `org.springframework.context.support.ApplicationContextAwareProcessor#postProcessBeforeInitialization`, the implementation looks mainly at beans that implement "aware" interfaces and gives them the runtime information they need.
 
 ```java
 @Override
@@ -442,7 +442,7 @@ public Object postProcessBeforeInitialization(Object bean, String beanName) thro
         return bean;
     }
 
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     
     invokeAwareInterfaces(bean);
 
@@ -450,19 +450,19 @@ public Object postProcessBeforeInitialization(Object bean, String beanName) thro
 }
 ```
 
-在`org.springframework.context.support.ApplicationContextAwareProcessor#invokeAwareInterfaces`方法中，用于处理实现了"Aware"接口的beans。这些接口使得beans能够被自动"感知"并获得对其运行环境或特定依赖的引用，而不需要显式地进行查找或注入。
+The method `org.springframework.context.support.ApplicationContextAwareProcessor#invokeAwareInterfaces` handles beans that implement "Aware" interfaces. These interfaces let a bean be "aware" of its runtime environment or specific dependencies automatically, without an explicit lookup or injection.
 
 ```java
 private void invokeAwareInterfaces(Object bean) {
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 	if (bean instanceof MessageSourceAware) {
         ((MessageSourceAware) bean).setMessageSource(this.applicationContext);
     }
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-最后执行到我们自定义的逻辑中，`MyMessageSourceAware`类使用`MessageSourceAware`接口来自动获得对`MessageSource`的引用。这个引用可以用来根据不同的语言或地区检索国际化的消息。然后利用注入的`MessageSource`，从属性文件中检索并打印两个国际化的消息，一个是英文的，另一个是简体中文的。
+Finally, execution reaches our own logic. The `MyMessageSourceAware` class uses the `MessageSourceAware` interface to get a reference to the `MessageSource` automatically. This reference can be used to get internationalized messages for different languages or regions. Using the injected `MessageSource`, it reads two internationalized messages from the property files and prints them. One is in English and the other is in Simplified Chinese.
 
 ```java
 public class MyMessageSourceAware implements MessageSourceAware {
@@ -476,72 +476,72 @@ public class MyMessageSourceAware implements MessageSourceAware {
 
     public void getMessage() {
         System.out.println("English："+messageSource.getMessage("greeting", null, Locale.ENGLISH));
-        System.out.println("中文："+messageSource.getMessage("greeting", null, Locale.SIMPLIFIED_CHINESE));
+        System.out.println("Chinese: "+messageSource.getMessage("greeting", null, Locale.SIMPLIFIED_CHINESE));
     }
 }
 ```
 
-### 八、注意事项
+### 8. Notes
 
-1. **明确的配置**
-   + 确保我们的Spring上下文中有一个`MessageSource` bean，通常命名为“messageSource”。虽然Spring提供了一个默认的，但为了满足自定义需求，我们可能需要明确地配置它。
+1. **Explicit configuration**
+   + Make sure your Spring context has a `MessageSource` bean, usually named "messageSource". Spring provides a default one, but to meet custom needs you may have to configure it explicitly.
 
-2. **生命周期时机**
-   + `MessageSourceAware`的`setMessageSource`方法在常规属性设置之后和初始化方法（如`InitializingBean`的`afterPropertiesSet`或任何自定义的init方法）之前被调用。确保我们的bean不在其生命周期的早期阶段（例如，在构造函数中）期望使用`MessageSource`。
+2. **Lifecycle timing**
+   + `setMessageSource` of `MessageSourceAware` is called after the normal properties are set and before initialization methods (such as `afterPropertiesSet` of `InitializingBean`, or any custom init method). Make sure your bean does not expect to use the `MessageSource` early in its lifecycle (for example in the constructor).
 
-3. **文件位置和命名**
-   + 如果我们使用`ResourceBundleMessageSource`或类似的机制，确保我们的属性文件位于类路径上，并且与我们在`MessageSource`配置中指定的basename匹配。
+3. **File location and naming**
+   + If you use `ResourceBundleMessageSource` or a similar mechanism, make sure your property files are on the classpath and match the basename set in the `MessageSource` configuration.
 
-4. **编码问题**
-   + 属性文件默认使用ISO-8859-1编码。如果我们的消息包含非此编码的字符（例如中文、俄文等），确保使用Unicode转义或正确设置文件的编码。
+4. **Encoding**
+   + Property files use ISO-8859-1 encoding by default. If your messages contain characters outside this encoding (such as Chinese or Russian), use Unicode escapes or set the file encoding correctly.
 
-5. **父子上下文**
-   + 在使用Spring的父子上下文（例如，在Web应用中）时，子上下文可以访问父上下文中的`MessageSource`，但反之则不行。确保我们在正确的上下文中配置了`MessageSource`。
+5. **Parent and child contexts**
+   + With Spring parent and child contexts (for example in a web application), a child context can access the `MessageSource` of the parent context, but not the other way around. Make sure you configure the `MessageSource` in the right context.
 
-6. **避免硬编码**
-   + 尽量不要在代码中硬编码消息键或默认消息。最好在属性文件中管理它们，这样在未来需要更改或添加新的语言支持时，我们不需要修改代码。
+6. **Avoid hard-coding**
+   + Avoid hard-coding message keys or default messages in code. It is better to manage them in property files. Then, when you need to change them or add a new language later, you do not have to change the code.
 
-7. **默认消息**
-   + 当使用`MessageSource`检索消息时，考虑提供一个默认消息。这可以在未找到特定消息时提供一个后备，避免抛出异常。
+7. **Default messages**
+   + When you get a message with `MessageSource`, consider providing a default message. It works as a fallback when the message is not found, and it avoids throwing an exception.
 
-### 八、总结
+### 8. Summary
 
-#### 最佳实践总结
+#### Best Practices Summary
 
-1. **启动类**
-   + 在`MessageSourceAwareApplication`类中，使用了`AnnotationConfigApplicationContext`来启动Spring应用。这个上下文是专为基于Java注解的配置而设计的。启动时，它加载了`MyConfiguration`配置类，并从上下文中获取了`MyMessageSourceAware`bean，随后调用了`getMessage`方法显示消息。
+1. **Entry class**
+   + In the `MessageSourceAwareApplication` class, `AnnotationConfigApplicationContext` starts the Spring application. This context is designed for Java annotation-based configuration. On startup, it loads the `MyConfiguration` class, gets the `MyMessageSourceAware` bean from the context, and then calls the `getMessage` method to show the messages.
 
-2. **配置类**
-   + `MyConfiguration`是一个基于Java的Spring配置类，其中定义了两个bean：`MyMessageSourceAware`和`messageSource`。`messageSource` bean是一个`ResourceBundleMessageSource`实例，用于从`i18n/messages`基本名称的属性文件中读取国际化消息。
+2. **Configuration class**
+   + `MyConfiguration` is a Java-based Spring configuration class that defines two beans: `MyMessageSourceAware` and `messageSource`. The `messageSource` bean is a `ResourceBundleMessageSource` instance. It reads internationalized messages from the property files with the basename `i18n/messages`.
 
-3. **实现MessageSourceAware接口**
-   +  `MyMessageSourceAware`类实现了`MessageSourceAware`接口，这意味着Spring容器会自动注入一个`MessageSource`实例到这个bean中。这是通过`setMessageSource`方法完成的。
+3. **Implementing the MessageSourceAware interface**
+   + The `MyMessageSourceAware` class implements `MessageSourceAware`. So the Spring container injects a `MessageSource` instance into this bean automatically, through the `setMessageSource` method.
 
-4. **消息检索**
-   + 在`MyMessageSourceAware`的`getMessage`方法中，使用了注入的`MessageSource`来检索和打印两种语言的国际化消息：英文和简体中文。
+4. **Getting messages**
+   + In the `getMessage` method of `MyMessageSourceAware`, the injected `MessageSource` is used to get and print internationalized messages in two languages: English and Simplified Chinese.
 
-5. **运行结果**
-   + 当应用程序执行时，它成功地从对应的属性文件中获取并显示了英文和简体中文的国际化消息。
+5. **Result**
+   + When the application runs, it gets and shows the English and Simplified Chinese internationalized messages from the matching property files.
 
-#### 源码分析总结
+#### Source Code Analysis Summary
 
-1. **应用启动**
-   + 我们从`MessageSourceAwareApplication`启动应用，使用`AnnotationConfigApplicationContext`初始化Spring容器，并加载`MyConfiguration`配置。
+1. **Application startup**
+   + We start the application from `MessageSourceAwareApplication`. `AnnotationConfigApplicationContext` initializes the Spring container and loads the `MyConfiguration` configuration.
 
-2. **容器初始化**
-   + 在`AnnotationConfigApplicationContext`的构造函数中，执行了`register`和`refresh`方法，其中`refresh`是最重要的，它触发了容器的初始化和bean的创建过程。
+2. **Container initialization**
+   + The constructor of `AnnotationConfigApplicationContext` runs `register` and `refresh`. `refresh` is the most important. It triggers the container initialization and the bean creation process.
 
-3. **消息源初始化**
-   + 在容器刷新的`refresh`方法中，首先确保了一个`MessageSource` bean存在，这是通过`initMessageSource`方法完成的。如果没有明确定义`MessageSource` bean，Spring会提供一个默认实现，确保应用上下文总是有一个可用。
+3. **Message source initialization**
+   + In the container's `refresh` method, the first thing is to make sure a `MessageSource` bean exists. This is done by the `initMessageSource` method. If no `MessageSource` bean is defined explicitly, Spring provides a default one, so the application context always has one available.
 
-4. **bean实例化**
-   + 随后，在`refresh`方法中，通过调用`finishBeanFactoryInitialization`方法，容器开始实例化所有非延迟加载的单例bean。
+4. **Bean instantiation**
+   + Then, in `refresh`, the `finishBeanFactoryInitialization` method is called, and the container starts to instantiate all non-lazy singleton beans.
 
-5. **Bean的生命周期**
-   + 在bean的创建过程中，Spring容器会确保所有的生命周期回调都被正确地执行，其中最重要的是`BeanPostProcessors`。这些处理器提供了一个插件机制，允许我们在bean的初始化前后执行自定义的逻辑。
+5. **Bean lifecycle**
+   + While beans are created, the Spring container makes sure all lifecycle callbacks run correctly. The most important ones are the `BeanPostProcessors`. They are a plug-in mechanism that lets us run custom logic before and after bean initialization.
 
-6. **处理Aware接口**
-   + `ApplicationContextAwareProcessor`是一个特殊的`BeanPostProcessor`，它关心那些实现了"Aware"接口的beans。对于实现了`MessageSourceAware`的beans，该处理器会自动注入应用上下文的`MessageSource`。
+6. **Handling Aware interfaces**
+   + `ApplicationContextAwareProcessor` is a special `BeanPostProcessor` that looks at beans implementing "Aware" interfaces. For beans that implement `MessageSourceAware`, this processor injects the `MessageSource` of the application context automatically.
 
-7. **消息检索**
-   + 在我们的`MyMessageSourceAware`类中，已经成功地获取了`MessageSource`的引用。然后，我们调用其`getMessage`方法，从属性文件中检索并打印两个国际化的消息。
+7. **Getting messages**
+   + In our `MyMessageSourceAware` class, we have a reference to the `MessageSource`. We call its `getMessage` method to get two internationalized messages from the property files and print them.

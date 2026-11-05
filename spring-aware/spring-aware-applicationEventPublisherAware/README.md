@@ -1,35 +1,35 @@
 ## ApplicationEventPublisherAware
 
 - [ApplicationEventPublisherAware](#applicationeventpublisheraware)
-  - [一、基本信息](#一基本信息)
-  - [二、接口描述](#二接口描述)
-  - [三、接口源码](#三接口源码)
-  - [四、主要功能](#四主要功能)
-  - [五、最佳实践](#五最佳实践)
-  - [六、时序图](#六时序图)
-  - [七、源码分析](#七源码分析)
-  - [八、注意事项](#八注意事项)
-  - [九、总结](#九总结)
-    - [最佳实践总结](#最佳实践总结)
-    - [源码分析总结](#源码分析总结)
+  - [1. Overview](#1-overview)
+  - [2. Interface Description](#2-interface-description)
+  - [3. Interface Source](#3-interface-source)
+  - [4. Main Features](#4-main-features)
+  - [5. Best Practices](#5-best-practices)
+  - [6. Sequence Diagram](#6-sequence-diagram)
+  - [7. Source Code Analysis](#7-source-code-analysis)
+  - [8. Notes](#8-notes)
+  - [9. Summary](#9-summary)
+    - [Best Practices Summary](#best-practices-summary)
+    - [Source Code Analysis Summary](#source-code-analysis-summary)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [我的CSDN](https://blog.csdn.net/duzhuang2399/article/details/133914254) 📚 **文章目录** - [所有文章](https://github.com/xuchengsheng/spring-reading) 🔗 **源码地址** - [ApplicationEventPublisherAware源码](https://github.com/xuchengsheng/spring-reading/tree/master/spring-aware/spring-aware-applicationEventPublisherAware)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN](https://blog.csdn.net/duzhuang2399/article/details/133914254) 📚 **Contents** - [All Articles](https://github.com/xuchengsheng/spring-reading) 🔗 **Source code** - [ApplicationEventPublisherAware source code](https://github.com/xuchengsheng/spring-reading/tree/master/spring-aware/spring-aware-applicationEventPublisherAware)
 
-### 二、接口描述
+### 2. Interface Description
 
-`ApplicationEventPublisherAware` 接口，用于给需要发布应用事件的bean提供一个便捷的方式。实现此接口的bean可以接收到一个 `ApplicationEventPublisher` 的引用，这样它们就可以发布事件到 Spring 应用上下文中。
+The `ApplicationEventPublisherAware` interface gives beans a convenient way to publish application events. A bean that implements it receives a reference to an `ApplicationEventPublisher`, so it can publish events to the Spring application context.
 
-### 三、接口源码
+### 3. Interface Source
 
-`ApplicationEventPublisherAware` 是 Spring 框架自 1.1.1 开始引入的一个核心接口。实现`ApplicationEventPublisherAware`接口的对象会在Spring容器中被自动注入一个`ApplicationEventPublisher`（通常是 `ApplicationContext`）实例。
+`ApplicationEventPublisherAware` is a core Spring interface, available since 1.1.1. Spring automatically injects an `ApplicationEventPublisher` instance (usually the `ApplicationContext`) into any object that implements `ApplicationEventPublisherAware`.
 
 ```java
 /**
- * 任何希望被通知 ApplicationEventPublisher（通常是 ApplicationContext）的对象都应该实现的接口。
- * 当对象运行在某个 ApplicationEventPublisher 中时，它将被通知。
+ * Interface to be implemented by any object that wishes to be notified of the ApplicationEventPublisher (typically the ApplicationContext) that it runs in.
+ * The object is notified when it runs inside an ApplicationEventPublisher.
  * 
  * @author Juergen Hoeller
  * @author Chris Beams
@@ -39,31 +39,31 @@
 public interface ApplicationEventPublisherAware extends Aware {
 
     /**
-     * 设置此对象运行的 ApplicationEventPublisher。
-     * 此方法在正常bean属性填充之后被调用，但在init回调（如 InitializingBean 的 afterPropertiesSet 或自定义的 init-method）之前被调用。
-     * 并且在 ApplicationContextAware 的 setApplicationContext 之前被调用。
+     * Set the ApplicationEventPublisher that this object runs in.
+     * This method is called after the normal bean properties are populated, but before an init callback such as InitializingBean's afterPropertiesSet or a custom init-method.
+     * It is called before ApplicationContextAware's setApplicationContext.
      * 
-     * @param applicationEventPublisher 由这个对象使用的事件发布器
+     * @param applicationEventPublisher event publisher to be used by this object
      */
     void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher);
 
 }
 ```
 
-### 四、主要功能
+### 4. Main Features
 
-1. **事件发布能力**
-   + 它允许 Spring beans 获得事件发布的能力，使它们能够发布事件到 Spring 应用上下文中。
+1. **Event publishing ability**
+   + It gives Spring beans the ability to publish events, so they can publish events to the Spring application context.
 
-2. **回调机制**
-   + 当一个 bean 实现了 `ApplicationEventPublisherAware` 接口时，Spring 容器会自动注入 `ApplicationEventPublisher` 实例到该 bean 中。
+2. **Callback mechanism**
+   + When a bean implements `ApplicationEventPublisherAware`, the Spring container injects an `ApplicationEventPublisher` instance into the bean automatically.
 
-3. **与 ApplicationContext 的关联**
-   + 通常，所注入的 `ApplicationEventPublisher` 实例实际上就是 `ApplicationContext` 本身，这意味着 beans 可以使用它来发布事件。
+3. **Relation to ApplicationContext**
+   + The injected `ApplicationEventPublisher` instance is usually the `ApplicationContext` itself. So beans can use it to publish events.
 
-### 五、最佳实践
+### 5. Best Practices
 
-首先来看看启动类入口，上下文环境使用`AnnotationConfigApplicationContext`（此类是使用Java注解来配置Spring容器的方式），构造参数我们给定了一个`MyConfiguration`组件类。然后从Spring上下文中获取一个`MyApplicationEventPublisherAware`类型的bean，最后调用`publish`方法用于发布一个事件。
+First, look at the entry class. It uses `AnnotationConfigApplicationContext` (a way to configure the Spring container with Java annotations). The constructor receives one configuration class, `MyConfiguration`. Then it gets a bean of type `MyApplicationEventPublisherAware` from the Spring context and calls the `publish` method to publish an event.
 
 ```java
 public class ApplicationEventPublisherAwareApplication {
@@ -76,7 +76,7 @@ public class ApplicationEventPublisherAwareApplication {
 }
 ```
 
-这里使用`@Bean`注解，定义了两个Bean，是为了确保`MyEventListener`， `MyApplicationEventPublisherAware` 被 Spring 容器执行
+The `@Bean` annotation defines two beans here, to make sure the Spring container creates `MyEventListener` and `MyApplicationEventPublisherAware`.
 
 ```java
 @Configuration
@@ -94,7 +94,7 @@ public class MyConfiguration {
 }
 ```
 
-`MyApplicationContextAware` 类使用 `ApplicationEventPublisherAware` 来获取 `ApplicationEventPublisher` 的引用，并使用这个引用来发布自定义事件。
+The `MyApplicationContextAware` class uses `ApplicationEventPublisherAware` to get a reference to `ApplicationEventPublisher`, and uses it to publish a custom event.
 
 ```java
 public class MyApplicationEventPublisherAware implements ApplicationEventPublisherAware {
@@ -112,7 +112,7 @@ public class MyApplicationEventPublisherAware implements ApplicationEventPublish
 }
 ```
 
-`MyEvent` 是我们自定义的 Spring 应用事件，用于传递一个字符串消息。
+`MyEvent` is our custom Spring application event. It carries a string message.
 
 ```java
 public class MyEvent extends ApplicationEvent {
@@ -130,7 +130,7 @@ public class MyEvent extends ApplicationEvent {
 }
 ```
 
-`MyEventListener` 是一个监听器。当 `MyEvent` 事件被发布时，此监听器会自动被触发，执行 `onApplicationEvent` 方法的逻辑。
+`MyEventListener` is a listener. When a `MyEvent` event is published, this listener is triggered automatically and runs the logic in its `onApplicationEvent` method.
 
 ```java
 public class MyEventListener implements ApplicationListener<MyEvent> {
@@ -142,17 +142,17 @@ public class MyEventListener implements ApplicationListener<MyEvent> {
 }
 ```
 
-运行结果发现，这表示监听器成功地捕获了该事件并处理了它。
+The output shows that the listener caught the event and handled it.
 
 ```java
 Received my event - hello world
 ```
 
-### 六、时序图
+### 6. Sequence Diagram
 
 ~~~mermaid
 sequenceDiagram
-    Title: ApplicationEventPublisherAware时序图
+    Title: ApplicationEventPublisherAware sequence diagram
     participant ApplicationEventPublisherAwareApplication
     participant AnnotationConfigApplicationContext
     participant AbstractApplicationContext
@@ -163,29 +163,29 @@ sequenceDiagram
     participant ApplicationContextAwareProcessor
     participant MyApplicationEventPublisherAware
     
-    ApplicationEventPublisherAwareApplication->>AnnotationConfigApplicationContext:AnnotationConfigApplicationContext(componentClasses)<br>创建上下文
-    AnnotationConfigApplicationContext->>AbstractApplicationContext:refresh()<br>刷新上下文
-    AbstractApplicationContext->>AbstractApplicationContext:finishBeanFactoryInitialization(beanFactory)<br>初始化Bean工厂
-    AbstractApplicationContext->>DefaultListableBeanFactory:preInstantiateSingletons()<br>实例化单例
-    DefaultListableBeanFactory->>AbstractBeanFactory:getBean(name)<br>获取Bean
-    AbstractBeanFactory->>AbstractBeanFactory:doGetBean(name,requiredType,args,typeCheckOnly)<br>执行获取Bean
-    AbstractBeanFactory->>DefaultSingletonBeanRegistry:getSingleton(beanName,singletonFactory)<br>获取单例Bean
-    DefaultSingletonBeanRegistry-->>AbstractBeanFactory:getObject()<br>获取Bean实例
-    AbstractBeanFactory->>AbstractAutowireCapableBeanFactory:createBean(beanName,mbd,args)<br>创建Bean
-    AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:doCreateBean(beanName,mbd,args)<br>执行Bean创建
-    AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:initializeBean(beanName,bean,mbd)<br>负责bean的初始化
-AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:applyBeanPostProcessorsBeforeInitialization(existingBean, beanName)<br>调用前置处理
-AbstractAutowireCapableBeanFactory->>ApplicationContextAwareProcessor:postProcessBeforeInitialization(bean,beanName)<br>前置处理器方法
-ApplicationContextAwareProcessor->>ApplicationContextAwareProcessor:invokeAwareInterfaces(bean)<br>调用Aware接口
-ApplicationContextAwareProcessor->>MyApplicationEventPublisherAware:setApplicationEventPublisher(publisher)<br>注入事件发布器
-    AbstractAutowireCapableBeanFactory-->>AbstractBeanFactory:返回Bean对象
-    AbstractBeanFactory-->>DefaultListableBeanFactory:返回Bean对象
-    AnnotationConfigApplicationContext-->>ApplicationEventPublisherAwareApplication:初始化完成
+    ApplicationEventPublisherAwareApplication->>AnnotationConfigApplicationContext:AnnotationConfigApplicationContext(componentClasses)<br>Create the context
+    AnnotationConfigApplicationContext->>AbstractApplicationContext:refresh()<br>Refresh the context
+    AbstractApplicationContext->>AbstractApplicationContext:finishBeanFactoryInitialization(beanFactory)<br>Initialize the bean factory
+    AbstractApplicationContext->>DefaultListableBeanFactory:preInstantiateSingletons()<br>Instantiate singletons
+    DefaultListableBeanFactory->>AbstractBeanFactory:getBean(name)<br>Get the bean
+    AbstractBeanFactory->>AbstractBeanFactory:doGetBean(name,requiredType,args,typeCheckOnly)<br>Do the actual get
+    AbstractBeanFactory->>DefaultSingletonBeanRegistry:getSingleton(beanName,singletonFactory)<br>Get the singleton bean
+    DefaultSingletonBeanRegistry-->>AbstractBeanFactory:getObject()<br>Get the bean instance
+    AbstractBeanFactory->>AbstractAutowireCapableBeanFactory:createBean(beanName,mbd,args)<br>Create the bean
+    AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:doCreateBean(beanName,mbd,args)<br>Do the actual creation
+    AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:initializeBean(beanName,bean,mbd)<br>Initialize the bean
+AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:applyBeanPostProcessorsBeforeInitialization(existingBean, beanName)<br>Call the before-initialization processors
+AbstractAutowireCapableBeanFactory->>ApplicationContextAwareProcessor:postProcessBeforeInitialization(bean,beanName)<br>Before-initialization processor method
+ApplicationContextAwareProcessor->>ApplicationContextAwareProcessor:invokeAwareInterfaces(bean)<br>Call the Aware interfaces
+ApplicationContextAwareProcessor->>MyApplicationEventPublisherAware:setApplicationEventPublisher(publisher)<br>Inject the event publisher
+    AbstractAutowireCapableBeanFactory-->>AbstractBeanFactory:Return the bean
+    AbstractBeanFactory-->>DefaultListableBeanFactory:Return the bean
+    AnnotationConfigApplicationContext-->>ApplicationEventPublisherAwareApplication:Initialization complete
 ~~~
 
-### 七、源码分析
+### 7. Source Code Analysis
 
-首先来看看启动类入口，上下文环境使用`AnnotationConfigApplicationContext`（此类是使用Java注解来配置Spring容器的方式），构造参数我们给定了一个`MyConfiguration`组件类。然后从Spring上下文中获取一个`MyApplicationEventPublisherAware`类型的bean，最后调用`publish`方法用于发布一个事件。
+First, look at the entry class. It uses `AnnotationConfigApplicationContext` (a way to configure the Spring container with Java annotations). The constructor receives one configuration class, `MyConfiguration`. Then it gets a bean of type `MyApplicationEventPublisherAware` from the Spring context and calls the `publish` method to publish an event.
 
 ```java
 public class ApplicationEventPublisherAwareApplication {
@@ -198,7 +198,7 @@ public class ApplicationEventPublisherAwareApplication {
 }
 ```
 
-在`org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext`构造函数中，执行了三个步骤，我们重点关注`refresh()`方法
+The constructor of `org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext` does three steps. We focus on the `refresh()` method.
 
 ```java
 public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
@@ -207,47 +207,47 @@ public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
     refresh();
 ```
 
-在`org.springframework.context.support.AbstractApplicationContext#refresh`方法中我们重点关注一下`finishBeanFactoryInitialization(beanFactory)`这方法会对实例化所有剩余非懒加载的单列Bean对象，其他方法不是本次源码阅读的重点暂时忽略。
+In `org.springframework.context.support.AbstractApplicationContext#refresh`, we focus on `finishBeanFactoryInitialization(beanFactory)`. It instantiates all remaining non-lazy singleton beans. The other methods are not the focus of this reading, so we skip them.
 
 ```java
 @Override
 public void refresh() throws BeansException, IllegalStateException {
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     // Instantiate all remaining (non-lazy-init) singletons.
     finishBeanFactoryInitialization(beanFactory);
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-在`org.springframework.context.support.AbstractApplicationContext#finishBeanFactoryInitialization`方法中，会继续调用`DefaultListableBeanFactory`类中的`preInstantiateSingletons`方法来完成所有剩余非懒加载的单列Bean对象。
+The method `org.springframework.context.support.AbstractApplicationContext#finishBeanFactoryInitialization` then calls `preInstantiateSingletons` in `DefaultListableBeanFactory` to create all remaining non-lazy singleton beans.
 
 ```java
 /**
- * 完成此工厂的bean初始化，实例化所有剩余的非延迟初始化单例bean。
+ * Finish the initialization of this factory by instantiating all remaining non-lazy-init singleton beans.
  * 
- * @param beanFactory 要初始化的bean工厂
+ * @param beanFactory the bean factory to initialize
  */
 protected void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
-    // ... [代码部分省略以简化]
-    // 完成所有剩余非懒加载的单列Bean对象。
+    // ... [code omitted for brevity]
+    // Instantiate all remaining non-lazy singleton beans.
     beanFactory.preInstantiateSingletons();
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultListableBeanFactory#preInstantiateSingletons`方法中，主要的核心目的是预先实例化所有非懒加载的单例bean。在Spring的上下文初始化完成后，该方法会被触发，以确保所有单例bean都被正确地创建并初始化。其中`getBean(beanName)`是此方法的核心操作。对于容器中定义的每一个单例bean，它都会调用`getBean`方法，这将触发bean的实例化、初始化及其依赖的注入。如果bean之前没有被创建过，那么这个调用会导致其被实例化和初始化。
+The main purpose of `org.springframework.beans.factory.support.DefaultListableBeanFactory#preInstantiateSingletons` is to instantiate all non-lazy singleton beans up front. It runs when the Spring context finishes initializing, so that all singleton beans are created and initialized. Its core operation is `getBean(beanName)`. For each singleton bean defined in the container, it calls `getBean`, which triggers instantiation, initialization, and dependency injection. If the bean has not been created yet, this call creates and initializes it.
 
 ```java
 public void preInstantiateSingletons() throws BeansException {
-    // ... [代码部分省略以简化]
-    // 循环遍历所有bean的名称
+    // ... [code omitted for brevity]
+    // Loop over all bean names
     for (String beanName : beanNames) {
         getBean(beanName);
     }
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractBeanFactory#getBean()`方法中，又调用了`doGetBean`方法来实际执行创建Bean的过程，传递给它bean的名称和一些其他默认的参数值。此处，`doGetBean`负责大部分工作，如查找bean定义、创建bean（如果尚未创建）、处理依赖关系等。
+The method `org.springframework.beans.factory.support.AbstractBeanFactory#getBean()` calls `doGetBean` to do the real work of creating the bean. It passes the bean name and some default argument values. `doGetBean` does most of the work, such as finding the bean definition, creating the bean (if it does not exist yet), and handling dependencies.
 
 ```java
 @Override
@@ -256,150 +256,150 @@ public Object getBean(String name) throws BeansException {
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractBeanFactory#doGetBean`方法中，首先检查所请求的bean是否是一个单例并且已经创建。如果尚未创建，它将创建一个新的实例。在这个过程中，它处理可能的异常情况，如循环引用，并确保返回的bean是正确的类型。这是Spring容器bean生命周期管理的核心部分。
+In `org.springframework.beans.factory.support.AbstractBeanFactory#doGetBean`, Spring first checks whether the requested bean is a singleton that has already been created. If not, it creates a new instance. Along the way it handles possible problems such as circular references, and makes sure the returned bean has the right type. This is a core part of bean lifecycle management in the Spring container.
 
 ```java
 protected <T> T doGetBean(
         String name, @Nullable Class<T> requiredType, @Nullable Object[] args, boolean typeCheckOnly)
         throws BeansException {
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
-    // 开始创建bean实例
+    // Start creating the bean instance
     if (mbd.isSingleton()) {
-        // 如果bean是单例的，我们会尝试从单例缓存中获取它
-        // 如果不存在，则使用lambda创建一个新的实例
+        // If the bean is a singleton, try to get it from the singleton cache
+        // If it does not exist, create a new instance with a lambda
         sharedInstance = getSingleton(beanName, () -> {
             try {
-                // 尝试创建bean实例
+                // Try to create the bean instance
                 return createBean(beanName, mbd, args);
             }
             catch (BeansException ex) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
         });
-        // 对于某些bean（例如FactoryBeans），可能需要进一步处理以获取真正的bean实例
+        // For some beans (for example FactoryBeans), more work may be needed to get the real bean instance
         beanInstance = getObjectForBeanInstance(sharedInstance, name, beanName, mbd);
     }
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
-    // 确保返回的bean实例与请求的类型匹配
+    // Make sure the returned bean instance matches the requested type
     return adaptBeanInstance(name, beanInstance, requiredType);
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultSingletonBeanRegistry#getSingleton()`方法中，主要负责从单例缓存中获取一个已存在的bean实例，或者使用提供的`ObjectFactory`创建一个新的实例。这是确保bean在Spring容器中作为单例存在的关键部分。
+The method `org.springframework.beans.factory.support.DefaultSingletonBeanRegistry#getSingleton()` gets an existing bean instance from the singleton cache, or creates a new one with the given `ObjectFactory`. This is the key part that keeps a bean a singleton in the Spring container.
 
 ```java
 public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) {
-    // 断言bean名称不能为空
+    // Assert that the bean name is not null
     Assert.notNull(beanName, "Bean name must not be null");
 
-    // 同步访问单例对象缓存，确保线程安全
+    // Synchronize on the singleton cache for thread safety
     synchronized (this.singletonObjects) {
-        // 从缓存中获取单例对象
+        // Get the singleton from the cache
         Object singletonObject = this.singletonObjects.get(beanName);
 
-        // 如果缓存中没有找到
+        // If it is not in the cache
         if (singletonObject == null) {
-            // ... [代码部分省略以简化]
+            // ... [code omitted for brevity]
 
             try {
-                // 使用工厂创建新的单例实例
+                // Create a new singleton instance with the factory
                 singletonObject = singletonFactory.getObject();
                 newSingleton = true;
             }
             catch (IllegalStateException ex) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
             catch (BeanCreationException ex) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
             finally {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
 
-            // ... [代码部分省略以简化]
+            // ... [code omitted for brevity]
         }
 
-        // 返回单例对象
+        // Return the singleton
         return singletonObject;
     }
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#createBean()`方法中，主要的逻辑是调用 `doCreateBean`，这是真正进行 bean 实例化、属性填充和初始化的地方。这个方法会返回新创建的 bean 实例。
+The main logic of `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#createBean()` is to call `doCreateBean`. That is where the bean is really instantiated, populated, and initialized. The method returns the newly created bean instance.
 
 ```java
 @Override
 protected Object createBean(String beanName, RootBeanDefinition mbd, @Nullable Object[] args)
     throws BeanCreationException {
     
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     
     try {
-        // 正常的bean实例化、属性注入和初始化。
-        // 这里是真正进行bean创建的部分。
+        // Normal bean instantiation, property injection, and initialization.
+        // This is where the bean is really created.
         Object beanInstance = doCreateBean(beanName, mbdToUse, args);
-        // 记录bean成功创建的日志
+        // Log that the bean was created successfully
         if (logger.isTraceEnabled()) {
             logger.trace("Finished creating instance of bean '" + beanName + "'");
         }
         return beanInstance;
     }
     catch (BeanCreationException | ImplicitlyAppearedSingletonException ex) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
     catch (Throwable ex) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#doCreateBean`方法中，`initializeBean`方法是bean初始化，确保bean是完全配置和准备好的。
+In `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#doCreateBean`, the `initializeBean` method initializes the bean and makes sure it is fully configured and ready.
 
 ```java
 protected Object doCreateBean(String beanName, RootBeanDefinition mbd, @Nullable Object[] args)
         throws BeanCreationException {
 
-    // 声明一个对象，后续可能用于存放初始化后的bean或它的代理对象
+    // Declare an object that may later hold the initialized bean or its proxy
     Object exposedObject = bean;
 
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     
     try {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
         
-        // bean初始化
+        // Initialize the bean
         exposedObject = initializeBean(beanName, exposedObject, mbd);
     } 
     catch (Throwable ex) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
 
-    // 返回创建和初始化后的bean
+    // Return the created and initialized bean
     return exposedObject;
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#initializeBean`方法中，如果条件满足（即 bean 不是合成的），那么它会调用 `applyBeanPostProcessorsBeforeInitialization` 方法。这个方法是 Spring 生命周期中的一个关键点，它会遍历所有已注册的 `BeanPostProcessor` 实现，并调用它们的 `postProcessBeforeInitialization` 方法。这允许我们和内部处理器在 bean 初始化之前对其进行修改或执行其他操作。
+In `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#initializeBean`, if the condition is met (the bean is not synthetic), it calls `applyBeanPostProcessorsBeforeInitialization`. This is a key point in the Spring lifecycle. It loops over all registered `BeanPostProcessor` implementations and calls their `postProcessBeforeInitialization` methods. This lets us, and Spring's internal processors, change the bean or do other work before it is initialized.
 
 ```java
 protected Object initializeBean(String beanName, Object bean, @Nullable RootBeanDefinition mbd) {
 
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     
     Object wrappedBean = bean;
     if (mbd == null || !mbd.isSynthetic()) {
         wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
     }
     
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
     return wrappedBean;
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsBeforeInitialization`方法中，遍历每一个 `BeanPostProcessor` 的 `postProcessBeforeInitialization` 方法都有机会对bean进行修改或增强
+In `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsBeforeInitialization`, the `postProcessBeforeInitialization` method of each `BeanPostProcessor` gets a chance to change or enhance the bean.
 
 ```java
 @Override
@@ -418,7 +418,7 @@ public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, S
 }
 ```
 
-在`org.springframework.context.support.ApplicationContextAwareProcessor#postProcessBeforeInitialization`方法中，在这个方法的实现特别关注那些实现了 "aware" 接口的 beans，并为它们提供所需的运行环境信息。
+In `org.springframework.context.support.ApplicationContextAwareProcessor#postProcessBeforeInitialization`, the implementation looks mainly at beans that implement "aware" interfaces and gives them the runtime information they need.
 
 ```java
 @Override
@@ -431,7 +431,7 @@ public Object postProcessBeforeInitialization(Object bean, String beanName) thro
         return bean;
     }
 
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     
     invokeAwareInterfaces(bean);
 
@@ -439,20 +439,20 @@ public Object postProcessBeforeInitialization(Object bean, String beanName) thro
 }
 ```
 
-在`org.springframework.context.support.ApplicationContextAwareProcessor#invokeAwareInterfaces`方法中，用于处理实现了"Aware"接口的beans。这些接口使得beans能够被自动"感知"并获得对其运行环境或特定依赖的引用，而不需要显式地进行查找或注入。
+The method `org.springframework.context.support.ApplicationContextAwareProcessor#invokeAwareInterfaces` handles beans that implement "Aware" interfaces. These interfaces let a bean be "aware" of its runtime environment or specific dependencies automatically, without an explicit lookup or injection.
 
 ```java
 private void invokeAwareInterfaces(Object bean) {
-	// ... [代码部分省略以简化]
-    // 对ApplicationEventPublisherAware接口进行回调
+	// ... [code omitted for brevity]
+    // Call back the ApplicationEventPublisherAware interface
     if (bean instanceof ApplicationEventPublisherAware) {
         ((ApplicationEventPublisherAware) bean).setApplicationEventPublisher(this.applicationContext);
     }
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-最后执行到我们自定义的逻辑中，使用 `ApplicationEventPublisherAware` 来获取 `ApplicationEventPublisher` 的引用，并使用这个引用来发布自定义事件。
+Finally, execution reaches our own logic. It uses `ApplicationEventPublisherAware` to get a reference to `ApplicationEventPublisher`, and uses it to publish a custom event.
 
 ```java
 public class MyApplicationEventPublisherAware implements ApplicationEventPublisherAware {
@@ -470,64 +470,64 @@ public class MyApplicationEventPublisherAware implements ApplicationEventPublish
 }
 ```
 
-### 八、注意事项
+### 8. Notes
 
-1. **确保容器支持**
-   + 不是所有的Spring容器都支持 `Aware` 接口。例如，基本的 `BeanFactory` 不支持，而 `ApplicationContext` 支持。确保我们的bean是由支持 `ApplicationEventPublisherAware` 的容器管理的。
+1. **Make sure the container supports it**
+   + Not all Spring containers support `Aware` interfaces. For example, a basic `BeanFactory` does not, but `ApplicationContext` does. Make sure your bean is managed by a container that supports `ApplicationEventPublisherAware`.
 
-2. **避免复杂的业务逻辑**
-   + 在实现的 `setApplicationEventPublisher` 方法中，尽量避免放入复杂的业务逻辑，该方法主要是用于注入 `ApplicationEventPublisher` 的。
+2. **Avoid complex business logic**
+   + Avoid putting complex business logic in your `setApplicationEventPublisher` method. It is mainly for injecting the `ApplicationEventPublisher`.
 
-3. **注意事件的目标**
-   + 当使用 `ApplicationEventPublisher` 发布事件时，这些事件会被所有相应的监听器捕获。确保我们了解这些监听器的存在和它们的行为，以避免出现一些奇奇怪怪的问题。
+3. **Know who receives the event**
+   + When you publish an event with `ApplicationEventPublisher`, all matching listeners receive it. Make sure you know which listeners exist and what they do, to avoid strange problems.
 
-4. **不要手动调用**
-   + `setApplicationEventPublisher` 方法是为了由Spring容器调用的，而不是为了应用程序代码调用的。我们不应该在业务逻辑中手动调用这个方法。
+4. **Do not call it manually**
+   + `setApplicationEventPublisher` is meant to be called by the Spring container, not by application code. Do not call this method yourself in business logic.
 
-### 九、总结
+### 9. Summary
 
-#### 最佳实践总结
+#### Best Practices Summary
 
-1. **启动应用**
-   + 在 `ApplicationEventPublisherAwareApplication` 的主方法中，使用 `AnnotationConfigApplicationContext` 初始化了 Spring 上下文，并指定了配置类 `MyConfiguration`。
+1. **Application startup**
+   + In the main method of `ApplicationEventPublisherAwareApplication`, `AnnotationConfigApplicationContext` initializes the Spring context with the configuration class `MyConfiguration`.
 
-2. **配置类**
-   + `MyConfiguration` 使用了 `@Configuration` 注解，表示它是一个 Spring 配置类。此类中使用 `@Bean` 注解定义了两个 Bean：`MyApplicationEventPublisherAware` 和 `MyEventListener`，确保它们被 Spring 容器管理。
+2. **Configuration class**
+   + `MyConfiguration` is marked with `@Configuration`, so it is a Spring configuration class. It uses `@Bean` to define two beans, `MyApplicationEventPublisherAware` and `MyEventListener`, so that the Spring container manages them.
 
-3. **事件发布者**
-   + `MyApplicationEventPublisherAware` 类实现了 `ApplicationEventPublisherAware` 接口，从而可以获取 `ApplicationEventPublisher` 的引用。它还定义了一个 `publish` 方法，用于发布自定义的 `MyEvent` 事件。
+3. **Event publisher**
+   + The `MyApplicationEventPublisherAware` class implements `ApplicationEventPublisherAware`, so it gets a reference to `ApplicationEventPublisher`. It also defines a `publish` method that publishes a custom `MyEvent` event.
 
-4. **自定义事件**
-   + `MyEvent` 是一个自定义事件类，继承自 `ApplicationEvent`。它携带一个字符串消息。
+4. **Custom event**
+   + `MyEvent` is a custom event class that extends `ApplicationEvent`. It carries a string message.
 
-5. **事件监听器**
-   + `MyEventListener` 是一个事件监听器，它实现了 `ApplicationListener` 并专门用于监听 `MyEvent` 事件。当相应事件被发布时，它的 `onApplicationEvent` 方法会被自动触发。
+5. **Event listener**
+   + `MyEventListener` is an event listener. It implements `ApplicationListener` and listens only for `MyEvent` events. When such an event is published, its `onApplicationEvent` method is triggered automatically.
 
-6. **执行结果**
-   + 当运行 `ApplicationEventPublisherAwareApplication` 主方法时，应用发布了一个 `MyEvent` 事件，携带了 "hello world" 消息。`MyEventListener` 成功捕获此事件，并输出了相应的消息。
+6. **Result**
+   + When the main method of `ApplicationEventPublisherAwareApplication` runs, the application publishes a `MyEvent` event with the message "hello world". `MyEventListener` catches the event and prints the matching message.
 
-#### 源码分析总结
+#### Source Code Analysis Summary
 
-1. **启动应用**
-   + 通过 `ApplicationEventPublisherAwareApplication` 的主方法，使用 `AnnotationConfigApplicationContext` 初始化了 Spring 上下文，并指定了配置类 `MyConfiguration`。
+1. **Application startup**
+   + In the main method of `ApplicationEventPublisherAwareApplication`, `AnnotationConfigApplicationContext` initializes the Spring context with the configuration class `MyConfiguration`.
 
-2. **注册和刷新**
-   + 在 `AnnotationConfigApplicationContext` 构造函数中，先注册组件类，然后调用 `refresh()` 来启动Spring容器的初始化过程。
+2. **Register and refresh**
+   + In the `AnnotationConfigApplicationContext` constructor, the component classes are registered first. Then `refresh()` is called to start the initialization of the Spring container.
 
-3. **初始化Bean工厂**
-   + 在 `AbstractApplicationContext#refresh` 方法中，调用 `finishBeanFactoryInitialization` 以实例化所有非懒加载的单例Bean。
+3. **Initialize the bean factory**
+   + In `AbstractApplicationContext#refresh`, `finishBeanFactoryInitialization` is called to instantiate all non-lazy singleton beans.
 
-4. **预实例化单例**
-   + 在 `DefaultListableBeanFactory` 中，通过 `preInstantiateSingletons` 方法预先实例化所有非懒加载的单例Bean。
+4. **Pre-instantiate singletons**
+   + In `DefaultListableBeanFactory`, the `preInstantiateSingletons` method instantiates all non-lazy singleton beans up front.
 
-5. **Bean创建**
-   + 在 `AbstractBeanFactory#getBean` 中，调用 `doGetBean` 来真正执行Bean的创建过程。此方法中涉及到真正的Bean实例化、属性注入和初始化。
+5. **Bean creation**
+   + In `AbstractBeanFactory#getBean`, `doGetBean` is called to really create the bean. This involves real bean instantiation, property injection, and initialization.
 
-6. **初始化Bean**
-   + 在 `AbstractAutowireCapableBeanFactory` 类中，`initializeBean` 方法用于确保bean完全配置并准备就绪。这个过程中会应用所有的 `BeanPostProcessor`，它们能在bean初始化前后做额外的处理。
+6. **Initialize the bean**
+   + In the `AbstractAutowireCapableBeanFactory` class, the `initializeBean` method makes sure the bean is fully configured and ready. All `BeanPostProcessor`s are applied here. They can do extra work before and after bean initialization.
 
-7. **处理Aware接口**
-   + 在 `ApplicationContextAwareProcessor` 中，`invokeAwareInterfaces` 方法负责处理实现了 `Aware` 接口的beans，为它们自动注入对应的依赖或运行环境信息。
+7. **Handle Aware interfaces**
+   + In `ApplicationContextAwareProcessor`, the `invokeAwareInterfaces` method handles beans that implement `Aware` interfaces. It injects the matching dependencies or runtime information into them.
 
-8. **发布事件**
-   + 在我们的自定义逻辑中，使用 `ApplicationEventPublisherAware` 接口来获取Spring的事件发布器。然后，使用这个事件发布器，我们可以发布自定义事件。
+8. **Publish the event**
+   + In our custom logic, the `ApplicationEventPublisherAware` interface gives us the Spring event publisher. We then use it to publish a custom event.

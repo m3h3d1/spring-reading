@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 public class ComplexUserValidator implements UserValidator {
     @Override
     public boolean validate(String username, String password) {
-        System.out.println("使用ComplexUserValidator");
+        System.out.println("Using ComplexUserValidator");
         return username != null && username.length() > 5 && password != null && password.length() > 8;
     }
 }

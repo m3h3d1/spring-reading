@@ -1,37 +1,37 @@
 ## EmbeddedValueResolverAware
 
 - [EmbeddedValueResolverAware](#embeddedvalueresolveraware)
-  - [一、基本信息](#一基本信息)
-  - [二、接口描述](#二接口描述)
-  - [三、接口源码](#三接口源码)
-  - [四、主要功能](#四主要功能)
-  - [五、最佳实践](#五最佳实践)
-  - [六、时序图](#六时序图)
-  - [七、源码分析](#七源码分析)
-  - [八、注意事项](#八注意事项)
-  - [九、总结](#九总结)
-    - [最佳实践总结](#最佳实践总结)
-    - [源码分析总结](#源码分析总结)
+  - [1. Overview](#1-overview)
+  - [2. Interface Description](#2-interface-description)
+  - [3. Interface Source](#3-interface-source)
+  - [4. Main Features](#4-main-features)
+  - [5. Best Practices](#5-best-practices)
+  - [6. Sequence Diagram](#6-sequence-diagram)
+  - [7. Source Code Analysis](#7-source-code-analysis)
+  - [8. Notes](#8-notes)
+  - [9. Summary](#9-summary)
+    - [Best Practices Summary](#best-practices-summary)
+    - [Source Code Analysis Summary](#source-code-analysis-summary)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [我的CSDN](https://blog.csdn.net/duzhuang2399/article/details/133914999) 📚 **文章目录** - [所有文章](https://github.com/xuchengsheng/spring-reading) 🔗 **源码地址** - [EmbeddedValueResolverAware源码](https://github.com/xuchengsheng/spring-reading/tree/master/spring-aware/spring-aware-embeddedValueResolverAware)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN](https://blog.csdn.net/duzhuang2399/article/details/133914999) 📚 **Contents** - [All Articles](https://github.com/xuchengsheng/spring-reading) 🔗 **Source code** - [EmbeddedValueResolverAware source code](https://github.com/xuchengsheng/spring-reading/tree/master/spring-aware/spring-aware-embeddedValueResolverAware)
 
-### 二、接口描述
+### 2. Interface Description
 
-`EmbeddedValueResolverAware` 接口，主要用于提供一个字符串值解析器，这可以在 Bean 属性中解析占位符和表达式。如果我们熟悉 Spring 的 `${...}` 占位符和 `#{...}` 表达式，那么这个接口将帮助我们在自定义组件中解析这些值。
+The `EmbeddedValueResolverAware` interface provides a string value resolver. It can resolve placeholders and expressions in bean properties. If you know the Spring `${...}` placeholders and `#{...}` expressions, this interface helps you resolve such values in your own components.
 
-### 三、接口源码
+### 3. Interface Source
 
-`EmbeddedValueResolverAware` 是 Spring 框架自 3.0.3 开始引入的一个核心接口。实现`EmbeddedValueResolverAware`接口的对象会在Spring容器中被自动注入一个`StringValueResolver`实例。
+`EmbeddedValueResolverAware` is a core Spring interface, available since 3.0.3. Spring automatically injects a `StringValueResolver` instance into any object that implements `EmbeddedValueResolverAware`.
 
 ```java
 /**
- * 如果对象希望被通知一个 StringValueResolver，以解析嵌入的定义值，那么它应实现此接口。
+ * Interface to be implemented by any object that wishes to be notified of a StringValueResolver for resolving embedded definition values.
  *
- * 这提供了一个通过 ApplicationContextAware/BeanFactoryAware 接口
- * 依赖于完整的 ConfigurableBeanFactory 的替代方法。
+ * This is an alternative to implementing the full
+ * ConfigurableBeanFactory through the ApplicationContextAware/BeanFactoryAware interfaces.
  *
  * @author Juergen Hoeller
  * @author Chris Beams
@@ -43,27 +43,27 @@
 public interface EmbeddedValueResolverAware extends Aware {
 
 	/**
-	 * 设置用于解析嵌入定义值的 StringValueResolver。
+	 * Set the StringValueResolver to use for resolving embedded definition values.
 	 */
 	void setEmbeddedValueResolver(StringValueResolver resolver);
 
 }
 ```
 
-### 四、主要功能
+### 4. Main Features
 
-1. **解析嵌入的字符串值**
-   + 当我们在 Bean 的属性或构造函数参数中有一个值，如 `${property.name}` 或 `#{some.expression}`，这需要被解析成实际的值时，`StringValueResolver` 可以帮助做这件事。
+1. **Resolve embedded string values**
+   + A bean property or constructor argument may have a value such as `${property.name}` or `#{some.expression}`. It must be resolved to a real value. `StringValueResolver` helps do this.
 
-2. **避免对 `ConfigurableBeanFactory` 的直接依赖**
-   + 通过使用 `EmbeddedValueResolverAware`，我们可以间接地得到这种解析功能，而不必直接依赖于整个 `ConfigurableBeanFactory`。这提供了一种更轻量级、更关注特定功能的方法来解析嵌入的值。
+2. **Avoid a direct dependency on `ConfigurableBeanFactory`**
+   + With `EmbeddedValueResolverAware`, we get this resolving feature indirectly, without depending on the whole `ConfigurableBeanFactory`. This is a lighter way, focused on one feature, to resolve embedded values.
 
-3. **自动注入 `StringValueResolver`**
-   + 当我们的 Bean 实现了 `EmbeddedValueResolverAware` 接口，Spring 容器会在 Bean 初始化时自动调用 `setEmbeddedValueResolver` 方法，为其注入一个 `StringValueResolver` 实例。这样，Bean 可以在其生命周期中任何时候使用它来解析字符串值。
+3. **Automatic injection of `StringValueResolver`**
+   + When our bean implements `EmbeddedValueResolverAware`, the Spring container calls `setEmbeddedValueResolver` automatically during bean initialization and injects a `StringValueResolver` instance. The bean can then use it at any time in its lifecycle to resolve string values.
 
-### 五、最佳实践
+### 5. Best Practices
 
-首先来看看启动类入口，上下文环境使用`AnnotationConfigApplicationContext`（此类是使用Java注解来配置Spring容器的方式），构造参数我们给定了一个`MyConfiguration`组件类。然后从Spring上下文中获取一个`MyEmbeddedValueResolverAware`类型的bean，最后调用`resolve`方法。
+First, look at the entry class. It uses `AnnotationConfigApplicationContext` (a way to configure the Spring container with Java annotations). The constructor receives one configuration class, `MyConfiguration`. Then it gets a bean of type `MyEmbeddedValueResolverAware` from the Spring context and calls the `resolve` method.
 
 ```java
 public class EmbeddedValueResolverAwareApplication {
@@ -76,7 +76,7 @@ public class EmbeddedValueResolverAwareApplication {
 }
 ```
 
-这里使用`@Bean`注解，定义了一个Bean，是为了确保 `MyEmbeddedValueResolverAware` 被 Spring 容器执行。
+The `@Bean` annotation defines a bean here, to make sure the Spring container creates `MyEmbeddedValueResolverAware`.
 
 ```java
 @Configuration
@@ -89,7 +89,7 @@ public class MyConfiguration {
 }
 ```
 
-`MyEmbeddedValueResolverAware`类实现了`EmbeddedValueResolverAware`接口，当Spring容器初始化此类的Bean时，此方法将被调用，容器将传入一个`StringValueResolver`实例，然后通过`resolve()`方法，使用注入的`stringValueResolver`来解析包含占位符和SpEL表达式的字符串，并将解析后的字符串打印到控制台。
+The `MyEmbeddedValueResolverAware` class implements `EmbeddedValueResolverAware`. When the Spring container initializes a bean of this class, this method is called and the container passes in a `StringValueResolver` instance. The `resolve()` method then uses the injected `stringValueResolver` to resolve a string that contains a placeholder and an SpEL expression, and prints the result to the console.
 
 ```java
 public class MyEmbeddedValueResolverAware implements EmbeddedValueResolverAware {
@@ -108,17 +108,17 @@ public class MyEmbeddedValueResolverAware implements EmbeddedValueResolverAware 
 }
 ```
 
-运行结果发现，结合 Spring 的 `Environment` 和 SpEL 功能来解析嵌入的字符串值，并得到了预期的运行结果。
+The output shows that the embedded string value was resolved with the Spring `Environment` and SpEL, and the result is as expected.
 
 ```java
 Hello, Lex! Today is 2023-10-03
 ```
 
-### 六、时序图
+### 6. Sequence Diagram
 
 ~~~mermaid
 sequenceDiagram
-    Title: EnvironmentAware时序图
+    Title: EnvironmentAware sequence diagram
     participant EmbeddedValueResolverAwareApplication
     participant AnnotationConfigApplicationContext
     participant AbstractApplicationContext
@@ -129,29 +129,29 @@ sequenceDiagram
     participant ApplicationContextAwareProcessor
     participant MyEmbeddedValueResolverAware
     
-    EmbeddedValueResolverAwareApplication->>AnnotationConfigApplicationContext:AnnotationConfigApplicationContext(componentClasses)<br>创建上下文
-    AnnotationConfigApplicationContext->>AbstractApplicationContext:refresh()<br>刷新上下文
-    AbstractApplicationContext->>AbstractApplicationContext:finishBeanFactoryInitialization(beanFactory)<br>初始化Bean工厂
-    AbstractApplicationContext->>DefaultListableBeanFactory:preInstantiateSingletons()<br>实例化单例
-    DefaultListableBeanFactory->>AbstractBeanFactory:getBean(name)<br>获取Bean
-    AbstractBeanFactory->>AbstractBeanFactory:doGetBean(name,requiredType,args,typeCheckOnly)<br>执行获取Bean
-    AbstractBeanFactory->>DefaultSingletonBeanRegistry:getSingleton(beanName,singletonFactory)<br>获取单例Bean
-    DefaultSingletonBeanRegistry-->>AbstractBeanFactory:getObject()<br>获取Bean实例
-    AbstractBeanFactory->>AbstractAutowireCapableBeanFactory:createBean(beanName,mbd,args)<br>创建Bean
-    AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:doCreateBean(beanName,mbd,args)<br>执行Bean创建
-    AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:initializeBean(beanName,bean,mbd)<br>负责bean的初始化
-	AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:applyBeanPostProcessorsBeforeInitialization(existingBean, beanName)<br>调用前置处理器
-    AbstractAutowireCapableBeanFactory->>ApplicationContextAwareProcessor:postProcessBeforeInitialization(bean,beanName)<br>触发Aware处理
-    ApplicationContextAwareProcessor->>ApplicationContextAwareProcessor:invokeAwareInterfaces(bean)<br>执行Aware回调
-    ApplicationContextAwareProcessor->>MyEmbeddedValueResolverAware:setEmbeddedValueResolver(resolver)<br>设置StringValueResolver
-    AbstractAutowireCapableBeanFactory-->>AbstractBeanFactory:返回Bean对象
-    AbstractBeanFactory-->>DefaultListableBeanFactory:返回Bean对象
-    AnnotationConfigApplicationContext-->>EmbeddedValueResolverAwareApplication:初始化完成
+    EmbeddedValueResolverAwareApplication->>AnnotationConfigApplicationContext:AnnotationConfigApplicationContext(componentClasses)<br>Create the context
+    AnnotationConfigApplicationContext->>AbstractApplicationContext:refresh()<br>Refresh the context
+    AbstractApplicationContext->>AbstractApplicationContext:finishBeanFactoryInitialization(beanFactory)<br>Initialize the bean factory
+    AbstractApplicationContext->>DefaultListableBeanFactory:preInstantiateSingletons()<br>Instantiate singletons
+    DefaultListableBeanFactory->>AbstractBeanFactory:getBean(name)<br>Get the bean
+    AbstractBeanFactory->>AbstractBeanFactory:doGetBean(name,requiredType,args,typeCheckOnly)<br>Do the actual get
+    AbstractBeanFactory->>DefaultSingletonBeanRegistry:getSingleton(beanName,singletonFactory)<br>Get the singleton bean
+    DefaultSingletonBeanRegistry-->>AbstractBeanFactory:getObject()<br>Get the bean instance
+    AbstractBeanFactory->>AbstractAutowireCapableBeanFactory:createBean(beanName,mbd,args)<br>Create the bean
+    AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:doCreateBean(beanName,mbd,args)<br>Do the actual creation
+    AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:initializeBean(beanName,bean,mbd)<br>Initialize the bean
+	AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:applyBeanPostProcessorsBeforeInitialization(existingBean, beanName)<br>Call the before-initialization processors
+    AbstractAutowireCapableBeanFactory->>ApplicationContextAwareProcessor:postProcessBeforeInitialization(bean,beanName)<br>Trigger Aware handling
+    ApplicationContextAwareProcessor->>ApplicationContextAwareProcessor:invokeAwareInterfaces(bean)<br>Run the Aware callbacks
+    ApplicationContextAwareProcessor->>MyEmbeddedValueResolverAware:setEmbeddedValueResolver(resolver)<br>Set the StringValueResolver
+    AbstractAutowireCapableBeanFactory-->>AbstractBeanFactory:Return the bean
+    AbstractBeanFactory-->>DefaultListableBeanFactory:Return the bean
+    AnnotationConfigApplicationContext-->>EmbeddedValueResolverAwareApplication:Initialization complete
 ~~~
 
-### 七、源码分析
+### 7. Source Code Analysis
 
-首先来看看启动类入口，上下文环境使用`AnnotationConfigApplicationContext`（此类是使用Java注解来配置Spring容器的方式），构造参数我们给定了一个`MyConfiguration`组件类。然后从Spring上下文中获取一个`MyEmbeddedValueResolverAware`类型的bean，最后调用`resolve`方法。
+First, look at the entry class. It uses `AnnotationConfigApplicationContext` (a way to configure the Spring container with Java annotations). The constructor receives one configuration class, `MyConfiguration`. Then it gets a bean of type `MyEmbeddedValueResolverAware` from the Spring context and calls the `resolve` method.
 
 ```java
 public class EmbeddedValueResolverAwareApplication {
@@ -164,7 +164,7 @@ public class EmbeddedValueResolverAwareApplication {
 }
 ```
 
-在`org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext`构造函数中，执行了三个步骤，我们重点关注`refresh()`方法
+The constructor of `org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext` does three steps. We focus on the `refresh()` method.
 
 ```java
 public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
@@ -173,47 +173,47 @@ public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
     refresh();
 ```
 
-在`org.springframework.context.support.AbstractApplicationContext#refresh`方法中我们重点关注一下`finishBeanFactoryInitialization(beanFactory)`这方法会对实例化所有剩余非懒加载的单列Bean对象，其他方法不是本次源码阅读的重点暂时忽略。
+In `org.springframework.context.support.AbstractApplicationContext#refresh`, we focus on `finishBeanFactoryInitialization(beanFactory)`. It instantiates all remaining non-lazy singleton beans. The other methods are not the focus of this reading, so we skip them.
 
 ```java
 @Override
 public void refresh() throws BeansException, IllegalStateException {
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     // Instantiate all remaining (non-lazy-init) singletons.
     finishBeanFactoryInitialization(beanFactory);
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-在`org.springframework.context.support.AbstractApplicationContext#finishBeanFactoryInitialization`方法中，会继续调用`DefaultListableBeanFactory`类中的`preInstantiateSingletons`方法来完成所有剩余非懒加载的单列Bean对象。
+The method `org.springframework.context.support.AbstractApplicationContext#finishBeanFactoryInitialization` then calls `preInstantiateSingletons` in `DefaultListableBeanFactory` to create all remaining non-lazy singleton beans.
 
 ```java
 /**
- * 完成此工厂的bean初始化，实例化所有剩余的非延迟初始化单例bean。
+ * Finish the initialization of this factory by instantiating all remaining non-lazy-init singleton beans.
  * 
- * @param beanFactory 要初始化的bean工厂
+ * @param beanFactory the bean factory to initialize
  */
 protected void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
-    // ... [代码部分省略以简化]
-    // 完成所有剩余非懒加载的单列Bean对象。
+    // ... [code omitted for brevity]
+    // Instantiate all remaining non-lazy singleton beans.
     beanFactory.preInstantiateSingletons();
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultListableBeanFactory#preInstantiateSingletons`方法中，主要的核心目的是预先实例化所有非懒加载的单例bean。在Spring的上下文初始化完成后，该方法会被触发，以确保所有单例bean都被正确地创建并初始化。其中`getBean(beanName)`是此方法的核心操作。对于容器中定义的每一个单例bean，它都会调用`getBean`方法，这将触发bean的实例化、初始化及其依赖的注入。如果bean之前没有被创建过，那么这个调用会导致其被实例化和初始化。
+The main purpose of `org.springframework.beans.factory.support.DefaultListableBeanFactory#preInstantiateSingletons` is to instantiate all non-lazy singleton beans up front. It runs when the Spring context finishes initializing, so that all singleton beans are created and initialized. Its core operation is `getBean(beanName)`. For each singleton bean defined in the container, it calls `getBean`, which triggers instantiation, initialization, and dependency injection. If the bean has not been created yet, this call creates and initializes it.
 
 ```java
 public void preInstantiateSingletons() throws BeansException {
-    // ... [代码部分省略以简化]
-    // 循环遍历所有bean的名称
+    // ... [code omitted for brevity]
+    // Loop over all bean names
     for (String beanName : beanNames) {
         getBean(beanName);
     }
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractBeanFactory#getBean()`方法中，又调用了`doGetBean`方法来实际执行创建Bean的过程，传递给它bean的名称和一些其他默认的参数值。此处，`doGetBean`负责大部分工作，如查找bean定义、创建bean（如果尚未创建）、处理依赖关系等。
+The method `org.springframework.beans.factory.support.AbstractBeanFactory#getBean()` calls `doGetBean` to do the real work of creating the bean. It passes the bean name and some default argument values. `doGetBean` does most of the work, such as finding the bean definition, creating the bean (if it does not exist yet), and handling dependencies.
 
 ```java
 @Override
@@ -222,150 +222,150 @@ public Object getBean(String name) throws BeansException {
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractBeanFactory#doGetBean`方法中，首先检查所请求的bean是否是一个单例并且已经创建。如果尚未创建，它将创建一个新的实例。在这个过程中，它处理可能的异常情况，如循环引用，并确保返回的bean是正确的类型。这是Spring容器bean生命周期管理的核心部分。
+In `org.springframework.beans.factory.support.AbstractBeanFactory#doGetBean`, Spring first checks whether the requested bean is a singleton that has already been created. If not, it creates a new instance. Along the way it handles possible problems such as circular references, and makes sure the returned bean has the right type. This is a core part of bean lifecycle management in the Spring container.
 
 ```java
 protected <T> T doGetBean(
         String name, @Nullable Class<T> requiredType, @Nullable Object[] args, boolean typeCheckOnly)
         throws BeansException {
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
-    // 开始创建bean实例
+    // Start creating the bean instance
     if (mbd.isSingleton()) {
-        // 如果bean是单例的，我们会尝试从单例缓存中获取它
-        // 如果不存在，则使用lambda创建一个新的实例
+        // If the bean is a singleton, try to get it from the singleton cache
+        // If it does not exist, create a new instance with a lambda
         sharedInstance = getSingleton(beanName, () -> {
             try {
-                // 尝试创建bean实例
+                // Try to create the bean instance
                 return createBean(beanName, mbd, args);
             }
             catch (BeansException ex) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
         });
-        // 对于某些bean（例如FactoryBeans），可能需要进一步处理以获取真正的bean实例
+        // For some beans (for example FactoryBeans), more work may be needed to get the real bean instance
         beanInstance = getObjectForBeanInstance(sharedInstance, name, beanName, mbd);
     }
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
-    // 确保返回的bean实例与请求的类型匹配
+    // Make sure the returned bean instance matches the requested type
     return adaptBeanInstance(name, beanInstance, requiredType);
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultSingletonBeanRegistry#getSingleton()`方法中，主要负责从单例缓存中获取一个已存在的bean实例，或者使用提供的`ObjectFactory`创建一个新的实例。这是确保bean在Spring容器中作为单例存在的关键部分。
+The method `org.springframework.beans.factory.support.DefaultSingletonBeanRegistry#getSingleton()` gets an existing bean instance from the singleton cache, or creates a new one with the given `ObjectFactory`. This is the key part that keeps a bean a singleton in the Spring container.
 
 ```java
 public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) {
-    // 断言bean名称不能为空
+    // Assert that the bean name is not null
     Assert.notNull(beanName, "Bean name must not be null");
 
-    // 同步访问单例对象缓存，确保线程安全
+    // Synchronize on the singleton cache for thread safety
     synchronized (this.singletonObjects) {
-        // 从缓存中获取单例对象
+        // Get the singleton from the cache
         Object singletonObject = this.singletonObjects.get(beanName);
 
-        // 如果缓存中没有找到
+        // If it is not in the cache
         if (singletonObject == null) {
-            // ... [代码部分省略以简化]
+            // ... [code omitted for brevity]
 
             try {
-                // 使用工厂创建新的单例实例
+                // Create a new singleton instance with the factory
                 singletonObject = singletonFactory.getObject();
                 newSingleton = true;
             }
             catch (IllegalStateException ex) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
             catch (BeanCreationException ex) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
             finally {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
 
-            // ... [代码部分省略以简化]
+            // ... [code omitted for brevity]
         }
 
-        // 返回单例对象
+        // Return the singleton
         return singletonObject;
     }
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#createBean()`方法中，主要的逻辑是调用 `doCreateBean`，这是真正进行 bean 实例化、属性填充和初始化的地方。这个方法会返回新创建的 bean 实例。
+The main logic of `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#createBean()` is to call `doCreateBean`. That is where the bean is really instantiated, populated, and initialized. The method returns the newly created bean instance.
 
 ```java
 @Override
 protected Object createBean(String beanName, RootBeanDefinition mbd, @Nullable Object[] args)
     throws BeanCreationException {
     
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     
     try {
-        // 正常的bean实例化、属性注入和初始化。
-        // 这里是真正进行bean创建的部分。
+        // Normal bean instantiation, property injection, and initialization.
+        // This is where the bean is really created.
         Object beanInstance = doCreateBean(beanName, mbdToUse, args);
-        // 记录bean成功创建的日志
+        // Log that the bean was created successfully
         if (logger.isTraceEnabled()) {
             logger.trace("Finished creating instance of bean '" + beanName + "'");
         }
         return beanInstance;
     }
     catch (BeanCreationException | ImplicitlyAppearedSingletonException ex) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
     catch (Throwable ex) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#doCreateBean`方法中，`initializeBean`方法是bean初始化，确保bean是完全配置和准备好的。
+In `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#doCreateBean`, the `initializeBean` method initializes the bean and makes sure it is fully configured and ready.
 
 ```java
 protected Object doCreateBean(String beanName, RootBeanDefinition mbd, @Nullable Object[] args)
         throws BeanCreationException {
 
-    // 声明一个对象，后续可能用于存放初始化后的bean或它的代理对象
+    // Declare an object that may later hold the initialized bean or its proxy
     Object exposedObject = bean;
 
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     
     try {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
         
-        // bean初始化
+        // Initialize the bean
         exposedObject = initializeBean(beanName, exposedObject, mbd);
     } 
     catch (Throwable ex) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
 
-    // 返回创建和初始化后的bean
+    // Return the created and initialized bean
     return exposedObject;
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#initializeBean`方法中，如果条件满足（即 bean 不是合成的），那么它会调用 `applyBeanPostProcessorsBeforeInitialization` 方法。这个方法是 Spring 生命周期中的一个关键点，它会遍历所有已注册的 `BeanPostProcessor` 实现，并调用它们的 `postProcessBeforeInitialization` 方法。这允许我们和内部处理器在 bean 初始化之前对其进行修改或执行其他操作。
+In `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#initializeBean`, if the condition is met (the bean is not synthetic), it calls `applyBeanPostProcessorsBeforeInitialization`. This is a key point in the Spring lifecycle. It loops over all registered `BeanPostProcessor` implementations and calls their `postProcessBeforeInitialization` methods. This lets us, and Spring's internal processors, change the bean or do other work before it is initialized.
 
 ```java
 protected Object initializeBean(String beanName, Object bean, @Nullable RootBeanDefinition mbd) {
 
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     
     Object wrappedBean = bean;
     if (mbd == null || !mbd.isSynthetic()) {
         wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
     }
     
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
     return wrappedBean;
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsBeforeInitialization`方法中，遍历每一个 `BeanPostProcessor` 的 `postProcessBeforeInitialization` 方法都有机会对bean进行修改或增强
+In `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsBeforeInitialization`, the `postProcessBeforeInitialization` method of each `BeanPostProcessor` gets a chance to change or enhance the bean.
 
 ```java
 @Override
@@ -384,7 +384,7 @@ public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, S
 }
 ```
 
-在`org.springframework.context.support.ApplicationContextAwareProcessor#postProcessBeforeInitialization`方法中，在这个方法的实现特别关注那些实现了 "aware" 接口的 beans，并为它们提供所需的运行环境信息。
+In `org.springframework.context.support.ApplicationContextAwareProcessor#postProcessBeforeInitialization`, the implementation looks mainly at beans that implement "aware" interfaces and gives them the runtime information they need.
 
 ```java
 @Override
@@ -397,7 +397,7 @@ public Object postProcessBeforeInitialization(Object bean, String beanName) thro
         return bean;
     }
 
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     
     invokeAwareInterfaces(bean);
 
@@ -405,19 +405,19 @@ public Object postProcessBeforeInitialization(Object bean, String beanName) thro
 }
 ```
 
-在`org.springframework.context.support.ApplicationContextAwareProcessor#invokeAwareInterfaces`方法中，用于处理实现了"Aware"接口的beans。这些接口使得beans能够被自动"感知"并获得对其运行环境或特定依赖的引用，而不需要显式地进行查找或注入。
+The method `org.springframework.context.support.ApplicationContextAwareProcessor#invokeAwareInterfaces` handles beans that implement "Aware" interfaces. These interfaces let a bean be "aware" of its runtime environment or specific dependencies automatically, without an explicit lookup or injection.
 
 ```java
 private void invokeAwareInterfaces(Object bean) {
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 	if (bean instanceof EmbeddedValueResolverAware) {
         ((EmbeddedValueResolverAware) bean).setEmbeddedValueResolver(this.embeddedValueResolver);
     }
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-最后执行到我们自定义的逻辑中，`MyEmbeddedValueResolverAware`类实现了`EmbeddedValueResolverAware`接口，当Spring容器初始化此类的Bean时，此方法将被调用，容器将传入一个`StringValueResolver`实例，然后通过`resolve()`方法，使用注入的`stringValueResolver`来解析包含占位符和SpEL表达式的字符串，并将解析后的字符串打印到控制台。
+Finally, execution reaches our own logic. The `MyEmbeddedValueResolverAware` class implements `EmbeddedValueResolverAware`. When the Spring container initializes a bean of this class, this method is called and the container passes in a `StringValueResolver` instance. The `resolve()` method then uses the injected `stringValueResolver` to resolve a string that contains a placeholder and an SpEL expression, and prints the result to the console.
 
 ```java
 public class MyEmbeddedValueResolverAware implements EmbeddedValueResolverAware {
@@ -436,67 +436,67 @@ public class MyEmbeddedValueResolverAware implements EmbeddedValueResolverAware 
 }
 ```
 
-### 八、注意事项
+### 8. Notes
 
-1. **正确的环境**
-   + 确保我们在 Spring 的环境中使用它，因为 `StringValueResolver` 需要 Spring 上下文来正确解析嵌入的值。
+1. **Use the right environment**
+   + Use it inside a Spring environment. `StringValueResolver` needs the Spring context to resolve embedded values correctly.
 
-2. **非延迟依赖注入**
-   + `setEmbeddedValueResolver` 方法在 Bean 初始化时调用。如果我们太早地尝试使用 `StringValueResolver`（例如，在构造函数中），它可能还没有被注入。
+2. **No early use**
+   + `setEmbeddedValueResolver` is called during bean initialization. If you try to use the `StringValueResolver` too early (for example in the constructor), it may not be injected yet.
 
-3. **默认值**
-   + 当使用 `${user.name:xcs}` 语法时，如果 `user.name` 没有在环境中定义，它将使用 `xcs`。这可以避免因缺少配置而导致的错误。
+3. **Default values**
+   + With the `${user.name:xcs}` syntax, if `user.name` is not defined in the environment, `xcs` is used. This avoids errors from missing configuration.
 
-4. **明确解析的范围**
-   +  `EmbeddedValueResolverAware` 通常用于解析占位符和 SpEL 表达式。确保不将它与更复杂的 Bean 解析逻辑混淆。
+4. **Know the scope of resolving**
+   + `EmbeddedValueResolverAware` is mainly used to resolve placeholders and SpEL expressions. Do not confuse it with more complex bean resolving logic.
 
-5. **错误处理**
-   + 当解析一个字符串值失败时，Spring 通常会抛出一个异常。确保在代码中适当地处理这些异常。
+5. **Error handling**
+   + When resolving a string value fails, Spring usually throws an exception. Handle these exceptions properly in your code.
 
-6. **与其他 Aware 接口的交互**
-   + 如果我们的 Bean 实现了多个 `Aware` 接口，需要确保我们理解了每个接口的初始化时机和顺序，以及如何与其他 Aware 方法（如 `setBeanFactory` 或 `setApplicationContext`）交互。
+6. **Interaction with other Aware interfaces**
+   + If your bean implements several `Aware` interfaces, make sure you understand the initialization timing and order of each one, and how they interact with other Aware methods (such as `setBeanFactory` or `setApplicationContext`).
 
-### 九、总结
+### 9. Summary
 
-#### 最佳实践总结
+#### Best Practices Summary
 
-1. **启动类**
-   + 在 `EmbeddedValueResolverAwareApplication` 中，我们初始化了 Spring 的 `AnnotationConfigApplicationContext` 并加载了 `MyConfiguration` 作为配置类。接着，我们从上下文中取得 `MyEmbeddedValueResolverAware` 的 Bean，并调用了其 `resolve` 方法。
+1. **Entry class**
+   + In `EmbeddedValueResolverAwareApplication`, we initialize the Spring `AnnotationConfigApplicationContext` and load `MyConfiguration` as the configuration class. Then we get the `MyEmbeddedValueResolverAware` bean from the context and call its `resolve` method.
 
-2. **配置与Bean声明**
-   + 在 `MyConfiguration` 配置类中，我们声明了 `MyEmbeddedValueResolverAware` 为一个 Bean，这确保了它会被 Spring 容器管理，并且会接收到 `StringValueResolver` 的实例注入。
+2. **Configuration and bean declaration**
+   + In the `MyConfiguration` class, we declare `MyEmbeddedValueResolverAware` as a bean. This makes sure the Spring container manages it and injects a `StringValueResolver` instance into it.
 
-3. **嵌入值解析**
-   + `MyEmbeddedValueResolverAware` 类实现了 `EmbeddedValueResolverAware` 接口，这意味着在该 Bean 被初始化时，Spring 会自动提供一个 `StringValueResolver` 实例。这个解析器之后被用于解析字符串 "Hello, ${user.name:xcs}! Today is #{T(java.time.LocalDate).now().toString()}"。
+3. **Embedded value resolving**
+   + The `MyEmbeddedValueResolverAware` class implements `EmbeddedValueResolverAware`. So when the bean is initialized, Spring provides a `StringValueResolver` instance automatically. This resolver is then used to resolve the string "Hello, ${user.name:xcs}! Today is #{T(java.time.LocalDate).now().toString()}".
 
-#### 源码分析总结
+#### Source Code Analysis Summary
 
-1. **应用启动**
-   + 在`EmbeddedValueResolverAwareApplication`类中，使用`AnnotationConfigApplicationContext`来启动Spring应用并加载`MyConfiguration`配置类。
+1. **Application startup**
+   + In the `EmbeddedValueResolverAwareApplication` class, `AnnotationConfigApplicationContext` starts the Spring application and loads the `MyConfiguration` class.
 
-2. **容器初始化**
-   + 在构造函数`AnnotationConfigApplicationContext`中，`refresh()`方法被调用来初始化Spring容器。
+2. **Container initialization**
+   + In the `AnnotationConfigApplicationContext` constructor, `refresh()` is called to initialize the Spring container.
 
-3. **实例化Beans**
-   + 在`AbstractApplicationContext`的`refresh()`方法中，`finishBeanFactoryInitialization`方法被调用，确保所有单例Bean被预先实例化。
+3. **Instantiating beans**
+   + In `refresh()` of `AbstractApplicationContext`, `finishBeanFactoryInitialization` is called to make sure all singleton beans are instantiated up front.
 
-4. **Bean预实例化**
-   + `DefaultListableBeanFactory`的`preInstantiateSingletons`方法确保所有非懒加载的单例Beans被实例化。核心操作是调用`getBean(beanName)`。
+4. **Bean pre-instantiation**
+   + `preInstantiateSingletons` of `DefaultListableBeanFactory` makes sure all non-lazy singleton beans are instantiated. The core operation is calling `getBean(beanName)`.
 
-5. **获取Bean实例**
-   + `AbstractBeanFactory`的`getBean`方法进一步调用`doGetBean`来真正实例化Bean，处理异常和依赖，并返回Bean实例。
+5. **Getting the bean instance**
+   + `getBean` of `AbstractBeanFactory` calls `doGetBean` to really create the bean, handle exceptions and dependencies, and return the bean instance.
 
-6. **Bean单例获取**
-   + `DefaultSingletonBeanRegistry`的`getSingleton`方法确保Bean以单例形式存在，从缓存获取或使用提供的`ObjectFactory`创建新实例。
+6. **Getting the singleton**
+   + `getSingleton` of `DefaultSingletonBeanRegistry` makes sure the bean exists as a singleton. It gets the bean from the cache, or creates a new instance with the given `ObjectFactory`.
 
-7. **创建Bean实例**
-   + `AbstractAutowireCapableBeanFactory`的`createBean`方法调用`doCreateBean`进行Bean的实际实例化，并进行初始化，确保Bean完全配置并准备就绪。
+7. **Creating the bean instance**
+   + `createBean` of `AbstractAutowireCapableBeanFactory` calls `doCreateBean` to really instantiate and initialize the bean, so that it is fully configured and ready.
 
-8. **Bean初始化**
-   + `AbstractAutowireCapableBeanFactory`的`initializeBean`方法确保Bean被正确初始化，其中调用`applyBeanPostProcessorsBeforeInitialization`方法是Spring生命周期中的关键点，允许BeanPostProcessors在Bean初始化之前进行操作。
+8. **Bean initialization**
+   + `initializeBean` of `AbstractAutowireCapableBeanFactory` makes sure the bean is initialized correctly. Its call to `applyBeanPostProcessorsBeforeInitialization` is a key point in the Spring lifecycle. It lets BeanPostProcessors act before the bean is initialized.
 
-9. **处理Aware接口**
-   + 在Bean初始化过程中，`ApplicationContextAwareProcessor`确保实现了`Aware`接口的Beans被正确处理，这些Beans会自动"感知"并获得其运行环境或特定依赖的引用。
+9. **Handling Aware interfaces**
+   + During bean initialization, `ApplicationContextAwareProcessor` makes sure beans that implement `Aware` interfaces are handled correctly. These beans are automatically "aware" of their runtime environment or specific dependencies.
 
-10. **值解析**
-    + 最后，我们的`MyEmbeddedValueResolverAware` Bean接收到了一个`StringValueResolver`实例。此时，当`resolve`方法被调用，它会使用这个解析器来解析嵌入的字符串值，并打印到控制台。
+10. **Value resolving**
+    + Finally, our `MyEmbeddedValueResolverAware` bean receives a `StringValueResolver` instance. When the `resolve` method is called, it uses this resolver to resolve the embedded string value and prints it to the console.

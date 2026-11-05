@@ -8,7 +8,7 @@ public class MyApplicationContextAware implements ApplicationContextAware {
 
     @Override
     public void setApplicationContext(ApplicationContext context) throws BeansException {
-        System.out.println("实现ApplicationContextAware接口,自动调用setApplicationContext方法");
+        System.out.println("Implements ApplicationContextAware, so setApplicationContext is called automatically");
         System.out.println("ApplicationContext = " + context);
     }
 }

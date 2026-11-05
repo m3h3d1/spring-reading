@@ -1,40 +1,40 @@
 ## BeanFactoryAware
 
 - [BeanFactoryAware](#beanfactoryaware)
-  - [一、基本信息](#一基本信息)
-  - [二、接口描述](#二接口描述)
-  - [三、接口源码](#三接口源码)
-  - [四、主要功能](#四主要功能)
-  - [五、最佳实践](#五最佳实践)
-  - [六、时序图](#六时序图)
-  - [七、源码分析](#七源码分析)
-  - [八、注意事项](#八注意事项)
-  - [九、总结](#九总结)
-    - [最佳实践总结](#最佳实践总结)
-    - [源码分析总结](#源码分析总结)
+  - [1. Overview](#1-overview)
+  - [2. Interface Description](#2-interface-description)
+  - [3. Interface Source](#3-interface-source)
+  - [4. Main Features](#4-main-features)
+  - [5. Best Practices](#5-best-practices)
+  - [6. Sequence Diagram](#6-sequence-diagram)
+  - [7. Source Code Analysis](#7-source-code-analysis)
+  - [8. Notes](#8-notes)
+  - [9. Summary](#9-summary)
+    - [Best Practices Summary](#best-practices-summary)
+    - [Source Code Analysis Summary](#source-code-analysis-summary)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [我的CSDN](https://blog.csdn.net/duzhuang2399/article/details/133914782) 📚 **文章目录** - [所有文章](https://github.com/xuchengsheng/spring-reading) 🔗 **源码地址** - [BeanFactoryAware源码](https://github.com/xuchengsheng/spring-reading/tree/master/spring-aware/spring-aware-beanFactoryAware)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN](https://blog.csdn.net/duzhuang2399/article/details/133914782) 📚 **Contents** - [All Articles](https://github.com/xuchengsheng/spring-reading) 🔗 **Source code** - [BeanFactoryAware source code](https://github.com/xuchengsheng/spring-reading/tree/master/spring-aware/spring-aware-beanFactoryAware)
 
-### 二、接口描述
+### 2. Interface Description
 
-`BeanFactoryAware` 接口，允许 Spring bean 获得其所在的 `BeanFactory` 的引用。当一个 bean 实现了这个接口，Spring 容器在初始化该 bean 时，会自动调用 `setBeanFactory()` 方法，并传递一个 `BeanFactory` 实例。
+The `BeanFactoryAware` interface lets a Spring bean get a reference to the `BeanFactory` that holds it. When a bean implements this interface, the Spring container calls its `setBeanFactory()` method during initialization and passes in a `BeanFactory` instance.
 
-### 三、接口源码
+### 3. Interface Source
 
-`BeanFactoryAware` 是 Spring 框架自 11.03.2003 开始引入的一个核心接口。允许 Spring beans 获知并与其所在的 `BeanFactory` 进行交互。这为 beans 提供了直接访问 `BeanFactory` 的能力，进而可以查询和交互其他的 beans。
+`BeanFactoryAware` is a core Spring interface, available since 11.03.2003. It lets Spring beans know about and work with the `BeanFactory` they live in. This gives beans direct access to the `BeanFactory`, so they can look up and work with other beans.
 
 ```java
 /**
- * 由希望知道其所属的 BeanFactory 的 beans 实现的接口。
+ * Interface to be implemented by beans that wish to be aware of their owning BeanFactory.
  *
- * 例如，beans 可以通过工厂查找合作的 beans（依赖查找）。
- * 请注意，大多数 beans 会选择通过相应的 bean 属性或构造函数参数
- * 接收对合作 beans 的引用（依赖注入）。
+ * For example, beans can look up collaborating beans via the factory (dependency lookup).
+ * Note that most beans will choose to receive references to collaborating beans via corresponding bean properties or constructor arguments
+ * (dependency injection).
  *
- * 有关所有 bean 生命周期方法的列表，请参阅
+ * For a list of all bean lifecycle methods, see the
  * BeanFactory BeanFactory javadocs。
  *
  * @author Rod Johnson
@@ -48,12 +48,12 @@
 public interface BeanFactoryAware extends Aware {
 
 	/**
-	 * 向 bean 实例提供其拥有的工厂的回调。
-	 * 在正常 bean 属性填充之后但在初始化回调之前（如
-	 * InitializingBean#afterPropertiesSet() 或自定义的初始化方法）调用。
-	 * @param beanFactory 拥有的 BeanFactory（永远不会是 null）。
-	 * bean 可以立即调用工厂上的方法。
-	 * @throws BeansException 初始化错误的情况下
+	 * Callback that supplies the owning factory to a bean instance.
+	 * Invoked after the population of normal bean properties but before an initialization callback such as
+	 * InitializingBean#afterPropertiesSet() or a custom init method.
+	 * @param beanFactory the owning BeanFactory (never null).
+	 * The bean can immediately call methods on the factory.
+	 * @throws BeansException in case of initialization errors
 	 * @see BeanInitializationException
 	 */
 	void setBeanFactory(BeanFactory beanFactory) throws BeansException;
@@ -61,20 +61,20 @@ public interface BeanFactoryAware extends Aware {
 }
 ```
 
-### 四、主要功能
+### 4. Main Features
 
-1. **获取 `BeanFactory` 引用**
-   + 通过实现 `BeanFactoryAware` 接口并重写 `setBeanFactory` 方法，bean 在初始化过程中会收到其所属的 `BeanFactory` 的引用。Spring 容器会自动为实现了该接口的 bean 调用 `setBeanFactory` 方法。
+1. **Get a `BeanFactory` reference**
+   + If a bean implements `BeanFactoryAware` and overrides `setBeanFactory`, it receives a reference to its own `BeanFactory` during initialization. The Spring container calls `setBeanFactory` automatically for beans that implement this interface.
 
-2. **依赖查找**
-   + 一旦 bean 有了 `BeanFactory` 的引用，它就可以使用这个工厂来动态地查找其他 beans。这种方式被称为“依赖查找”（Dependency Lookup），与常见的“依赖注入”（Dependency Injection）方式相对。
+2. **Dependency lookup**
+   + Once a bean has a `BeanFactory` reference, it can use the factory to look up other beans at runtime. This is called "Dependency Lookup", as opposed to the more common "Dependency Injection".
 
-3. **与 `BeanFactory` 进行交互**
-   + 获取 `BeanFactory` 的引用不仅仅是为了查找其他 beans，bean 还可以与其所在的 `BeanFactory` 进行更广泛的互动，例如检查 bean 的作用域、检查 bean 是否为单例、或获取 bean 的别名等。
+3. **Working with the `BeanFactory`**
+   + A bean can use the `BeanFactory` for more than looking up other beans. For example, it can check a bean's scope, check whether a bean is a singleton, or get a bean's aliases.
 
-### 五、最佳实践
+### 5. Best Practices
 
-首先来看看启动类入口，上下文环境使用`AnnotationConfigApplicationContext`（此类是使用Java注解来配置Spring容器的方式），构造参数我们给定了一个`MyConfiguration`组件类。然后从Spring上下文中获取一个`UserService`类型的bean，最后调用`validateUser`方法。
+First, look at the entry class. It uses `AnnotationConfigApplicationContext` (a way to configure the Spring container with Java annotations). The constructor receives one configuration class, `MyConfiguration`. Then it gets a bean of type `UserService` from the Spring context and calls the `validateUser` method.
 
 ```java
 public class BeanNameAwareApplication {
@@ -87,7 +87,7 @@ public class BeanNameAwareApplication {
 }
 ```
 
-使用`@ComponentScan`注解，告诉 Spring 容器去 "`com.xcs.spring.validate`" "`com.xcs.spring.service`"扫描包及其子包
+The `@ComponentScan` annotation tells the Spring container to scan the "`com.xcs.spring.validate`" and "`com.xcs.spring.service`" packages and their sub-packages.
 
 ```java
 @Configuration
@@ -97,7 +97,7 @@ public class MyConfiguration {
 }
 ```
 
-**UserValidator**是一个简单的验证器接口，具有一个方法 `validate`，用于验证用户名和密码是否有效。SimpleUserValidator是一个实现。它进行简单的验证，仅检查用户名和密码是否为非空。`ComplexUserValidator` 是 `UserValidator` 接口的另一个实现。这个验证器有点复杂，除了检查用户名和密码是否为空外，还检查用户名的长度是否大于 5 以及密码的长度是否大于 8。
+**UserValidator** is a simple validator interface with one method, `validate`, which checks whether a user name and password are valid. SimpleUserValidator is one implementation. It does a simple check: the user name and password must not be empty. `ComplexUserValidator` is another implementation of `UserValidator`. It is a bit stricter. Besides checking for empty values, it checks that the user name is longer than 5 characters and the password is longer than 8 characters.
 
 ```java
 public interface UserValidator {
@@ -108,7 +108,7 @@ public interface UserValidator {
 public class SimpleUserValidator implements UserValidator {
     @Override
     public boolean validate(String username, String password) {
-        System.out.println("使用SimpleUserValidator");
+        System.out.println("Using SimpleUserValidator");
         return username != null && password != null;
     }
 }
@@ -117,13 +117,13 @@ public class SimpleUserValidator implements UserValidator {
 public class ComplexUserValidator implements UserValidator {
     @Override
     public boolean validate(String username, String password) {
-        System.out.println("使用ComplexUserValidator");
+        System.out.println("Using ComplexUserValidator");
         return username != null && username.length() > 5 && password != null && password.length() > 8;
     }
 }
 ```
 
-`UserService` 类利用了 Spring 的 `BeanFactoryAware` 和 `InitializingBean` 接口，动态地选择了一个验证器。这种设计提供了极大的灵活性，允许 `UserService` 根据不同的配置或条件使用不同的验证方法。这也意味着在未来，如果需要添加更多的验证方法，只需简单地添加新的验证器实现，然后在 `someConfigurationMethod()` 中进行相应的调整。
+The `UserService` class uses the Spring `BeanFactoryAware` and `InitializingBean` interfaces to choose a validator dynamically. This design is very flexible. `UserService` can use different validation methods depending on configuration or conditions. It also means that if you need more validation methods later, you only add a new validator implementation and adjust `someConfigurationMethod()`.
 
 ```java
 @Service
@@ -149,9 +149,9 @@ public class UserService implements BeanFactoryAware, InitializingBean {
     public void validateUser(String username, String password) {
         boolean success = userValidator.validate(username, password);
         if (success){
-            System.out.println("验证账号密码成功");
+            System.out.println("Account and password verified");
         }else{
-            System.out.println("验证账号密码失败");
+            System.out.println("Account and password verification failed");
         }
     }
 
@@ -161,18 +161,18 @@ public class UserService implements BeanFactoryAware, InitializingBean {
 }
 ```
 
-运行结果发现，使用了`SimpleUserValidator`来验证账号密码，并且验证成功。
+The output shows that `SimpleUserValidator` was used to check the account and password, and the check passed.
 
 ```java
-使用SimpleUserValidator
-验证账号密码成功
+Using SimpleUserValidator
+Account and password verified
 ```
 
-### 六、时序图
+### 6. Sequence Diagram
 
 ~~~mermaid
 sequenceDiagram
-    Title: BeanFactoryAware时序图
+    Title: BeanFactoryAware sequence diagram
     participant BeanFactoryAwareApplication
     participant AnnotationConfigApplicationContext
     participant AbstractApplicationContext
@@ -182,28 +182,28 @@ sequenceDiagram
     participant AbstractAutowireCapableBeanFactory
     participant UserService
     
-    BeanFactoryAwareApplication->>AnnotationConfigApplicationContext:AnnotationConfigApplicationContext(componentClasses)<br>创建上下文
-    AnnotationConfigApplicationContext->>AbstractApplicationContext:refresh()<br>刷新上下文
-    AbstractApplicationContext->>AbstractApplicationContext:finishBeanFactoryInitialization(beanFactory)<br>初始化Bean工厂
-    AbstractApplicationContext->>DefaultListableBeanFactory:preInstantiateSingletons()<br>实例化单例
-    DefaultListableBeanFactory->>AbstractBeanFactory:getBean(name)<br>获取Bean
-    AbstractBeanFactory->>AbstractBeanFactory:doGetBean(name,requiredType,args,typeCheckOnly)<br>执行获取Bean
-    AbstractBeanFactory->>DefaultSingletonBeanRegistry:getSingleton(beanName,singletonFactory)<br>获取单例Bean
-    DefaultSingletonBeanRegistry-->>AbstractBeanFactory:getObject()<br>获取Bean实例
-    AbstractBeanFactory->>AbstractAutowireCapableBeanFactory:createBean(beanName,mbd,args)<br>创建Bean
-    AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:doCreateBean(beanName,mbd,args)<br>执行Bean创建
-    AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:initializeBean(beanName,bean,mbd)<br>负责bean的初始化
-    AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:invokeAwareMethods(beanName, bean)<br>调用Aware方法
-    AbstractAutowireCapableBeanFactory->>UserService:setBeanFactory(beanFactory)<br>设置beanFactory
-    AbstractAutowireCapableBeanFactory-->>AbstractBeanFactory:返回Bean对象
-    AbstractBeanFactory-->>DefaultListableBeanFactory:返回Bean对象
-    AnnotationConfigApplicationContext-->>BeanFactoryAwareApplication:初始化完成
+    BeanFactoryAwareApplication->>AnnotationConfigApplicationContext:AnnotationConfigApplicationContext(componentClasses)<br>Create the context
+    AnnotationConfigApplicationContext->>AbstractApplicationContext:refresh()<br>Refresh the context
+    AbstractApplicationContext->>AbstractApplicationContext:finishBeanFactoryInitialization(beanFactory)<br>Initialize the bean factory
+    AbstractApplicationContext->>DefaultListableBeanFactory:preInstantiateSingletons()<br>Instantiate singletons
+    DefaultListableBeanFactory->>AbstractBeanFactory:getBean(name)<br>Get the bean
+    AbstractBeanFactory->>AbstractBeanFactory:doGetBean(name,requiredType,args,typeCheckOnly)<br>Do the actual get
+    AbstractBeanFactory->>DefaultSingletonBeanRegistry:getSingleton(beanName,singletonFactory)<br>Get the singleton bean
+    DefaultSingletonBeanRegistry-->>AbstractBeanFactory:getObject()<br>Get the bean instance
+    AbstractBeanFactory->>AbstractAutowireCapableBeanFactory:createBean(beanName,mbd,args)<br>Create the bean
+    AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:doCreateBean(beanName,mbd,args)<br>Do the actual creation
+    AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:initializeBean(beanName,bean,mbd)<br>Initialize the bean
+    AbstractAutowireCapableBeanFactory->>AbstractAutowireCapableBeanFactory:invokeAwareMethods(beanName, bean)<br>Call the Aware methods
+    AbstractAutowireCapableBeanFactory->>UserService:setBeanFactory(beanFactory)<br>Set the beanFactory
+    AbstractAutowireCapableBeanFactory-->>AbstractBeanFactory:Return the bean
+    AbstractBeanFactory-->>DefaultListableBeanFactory:Return the bean
+    AnnotationConfigApplicationContext-->>BeanFactoryAwareApplication:Initialization complete
 
 ~~~
 
-### 七、源码分析
+### 7. Source Code Analysis
 
-首先来看看启动类入口，上下文环境使用`AnnotationConfigApplicationContext`（此类是使用Java注解来配置Spring容器的方式），构造参数我们给定了一个`MyConfiguration`组件类。然后从Spring上下文中获取一个`UserService`类型的bean，最后调用`validateUser`方法。
+First, look at the entry class. It uses `AnnotationConfigApplicationContext` (a way to configure the Spring container with Java annotations). The constructor receives one configuration class, `MyConfiguration`. Then it gets a bean of type `UserService` from the Spring context and calls the `validateUser` method.
 
 ```java
 public class BeanNameAwareApplication {
@@ -216,7 +216,7 @@ public class BeanNameAwareApplication {
 }
 ```
 
-在`org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext`构造函数中，执行了三个步骤，我们重点关注`refresh()`方法
+The constructor of `org.springframework.context.annotation.AnnotationConfigApplicationContext#AnnotationConfigApplicationContext` does three steps. We focus on the `refresh()` method.
 
 ```java
 public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
@@ -226,47 +226,47 @@ public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
 }
 ```
 
-在`org.springframework.context.support.AbstractApplicationContext#refresh`方法中我们重点关注一下`finishBeanFactoryInitialization(beanFactory)`这方法会对实例化所有剩余非懒加载的单列Bean对象，其他方法不是本次源码阅读的重点暂时忽略。
+In `org.springframework.context.support.AbstractApplicationContext#refresh`, we focus on `finishBeanFactoryInitialization(beanFactory)`. It instantiates all remaining non-lazy singleton beans. The other methods are not the focus of this reading, so we skip them.
 
 ```java
 @Override
 public void refresh() throws BeansException, IllegalStateException {
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     // Instantiate all remaining (non-lazy-init) singletons.
     finishBeanFactoryInitialization(beanFactory);
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-在`org.springframework.context.support.AbstractApplicationContext#finishBeanFactoryInitialization`方法中，会继续调用`DefaultListableBeanFactory`类中的`preInstantiateSingletons`方法来完成所有剩余非懒加载的单列Bean对象。
+The method `org.springframework.context.support.AbstractApplicationContext#finishBeanFactoryInitialization` then calls `preInstantiateSingletons` in `DefaultListableBeanFactory` to create all remaining non-lazy singleton beans.
 
 ```java
 /**
- * 完成此工厂的bean初始化，实例化所有剩余的非延迟初始化单例bean。
+ * Finish the initialization of this factory by instantiating all remaining non-lazy-init singleton beans.
  * 
- * @param beanFactory 要初始化的bean工厂
+ * @param beanFactory the bean factory to initialize
  */
 protected void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
-    // ... [代码部分省略以简化]
-    // 完成所有剩余非懒加载的单列Bean对象。
+    // ... [code omitted for brevity]
+    // Instantiate all remaining non-lazy singleton beans.
     beanFactory.preInstantiateSingletons();
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultListableBeanFactory#preInstantiateSingletons`方法中，主要的核心目的是预先实例化所有非懒加载的单例bean。在Spring的上下文初始化完成后，该方法会被触发，以确保所有单例bean都被正确地创建并初始化。其中`getBean(beanName)`是此方法的核心操作。对于容器中定义的每一个单例bean，它都会调用`getBean`方法，这将触发bean的实例化、初始化及其依赖的注入。如果bean之前没有被创建过，那么这个调用会导致其被实例化和初始化。
+The main purpose of `org.springframework.beans.factory.support.DefaultListableBeanFactory#preInstantiateSingletons` is to instantiate all non-lazy singleton beans up front. It runs when the Spring context finishes initializing, so that all singleton beans are created and initialized. Its core operation is `getBean(beanName)`. For each singleton bean defined in the container, it calls `getBean`, which triggers instantiation, initialization, and dependency injection. If the bean has not been created yet, this call creates and initializes it.
 
 ```java
 public void preInstantiateSingletons() throws BeansException {
-    // ... [代码部分省略以简化]
-    // 循环遍历所有bean的名称
+    // ... [code omitted for brevity]
+    // Loop over all bean names
     for (String beanName : beanNames) {
         getBean(beanName);
     }
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractBeanFactory#getBean()`方法中，又调用了`doGetBean`方法来实际执行创建Bean的过程，传递给它bean的名称和一些其他默认的参数值。此处，`doGetBean`负责大部分工作，如查找bean定义、创建bean（如果尚未创建）、处理依赖关系等。
+The method `org.springframework.beans.factory.support.AbstractBeanFactory#getBean()` calls `doGetBean` to do the real work of creating the bean. It passes the bean name and some default argument values. `doGetBean` does most of the work, such as finding the bean definition, creating the bean (if it does not exist yet), and handling dependencies.
 
 ```java
 @Override
@@ -275,156 +275,156 @@ public Object getBean(String name) throws BeansException {
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractBeanFactory#doGetBean`方法中，首先检查所请求的bean是否是一个单例并且已经创建。如果尚未创建，它将创建一个新的实例。在这个过程中，它处理可能的异常情况，如循环引用，并确保返回的bean是正确的类型。这是Spring容器bean生命周期管理的核心部分。
+In `org.springframework.beans.factory.support.AbstractBeanFactory#doGetBean`, Spring first checks whether the requested bean is a singleton that has already been created. If not, it creates a new instance. Along the way it handles possible problems such as circular references, and makes sure the returned bean has the right type. This is a core part of bean lifecycle management in the Spring container.
 
 ```java
 protected <T> T doGetBean(
         String name, @Nullable Class<T> requiredType, @Nullable Object[] args, boolean typeCheckOnly)
         throws BeansException {
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
-    // 开始创建bean实例
+    // Start creating the bean instance
     if (mbd.isSingleton()) {
-        // 如果bean是单例的，我们会尝试从单例缓存中获取它
-        // 如果不存在，则使用lambda创建一个新的实例
+        // If the bean is a singleton, try to get it from the singleton cache
+        // If it does not exist, create a new instance with a lambda
         sharedInstance = getSingleton(beanName, () -> {
             try {
-                // 尝试创建bean实例
+                // Try to create the bean instance
                 return createBean(beanName, mbd, args);
             }
             catch (BeansException ex) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
         });
-        // 对于某些bean（例如FactoryBeans），可能需要进一步处理以获取真正的bean实例
+        // For some beans (for example FactoryBeans), more work may be needed to get the real bean instance
         beanInstance = getObjectForBeanInstance(sharedInstance, name, beanName, mbd);
     }
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
-    // 确保返回的bean实例与请求的类型匹配
+    // Make sure the returned bean instance matches the requested type
     return adaptBeanInstance(name, beanInstance, requiredType);
 }
 ```
 
-在`org.springframework.beans.factory.support.DefaultSingletonBeanRegistry#getSingleton()`方法中，主要负责从单例缓存中获取一个已存在的bean实例，或者使用提供的`ObjectFactory`创建一个新的实例。这是确保bean在Spring容器中作为单例存在的关键部分。
+The method `org.springframework.beans.factory.support.DefaultSingletonBeanRegistry#getSingleton()` gets an existing bean instance from the singleton cache, or creates a new one with the given `ObjectFactory`. This is the key part that keeps a bean a singleton in the Spring container.
 
 ```java
 public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) {
-    // 断言bean名称不能为空
+    // Assert that the bean name is not null
     Assert.notNull(beanName, "Bean name must not be null");
 
-    // 同步访问单例对象缓存，确保线程安全
+    // Synchronize on the singleton cache for thread safety
     synchronized (this.singletonObjects) {
-        // 从缓存中获取单例对象
+        // Get the singleton from the cache
         Object singletonObject = this.singletonObjects.get(beanName);
 
-        // 如果缓存中没有找到
+        // If it is not in the cache
         if (singletonObject == null) {
-            // ... [代码部分省略以简化]
+            // ... [code omitted for brevity]
 
             try {
-                // 使用工厂创建新的单例实例
+                // Create a new singleton instance with the factory
                 singletonObject = singletonFactory.getObject();
                 newSingleton = true;
             }
             catch (IllegalStateException ex) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
             catch (BeanCreationException ex) {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
             finally {
-                // ... [代码部分省略以简化]
+                // ... [code omitted for brevity]
             }
 
-            // ... [代码部分省略以简化]
+            // ... [code omitted for brevity]
         }
 
-        // 返回单例对象
+        // Return the singleton
         return singletonObject;
     }
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#createBean()`方法中，主要的逻辑是调用 `doCreateBean`，这是真正进行 bean 实例化、属性填充和初始化的地方。这个方法会返回新创建的 bean 实例。
+The main logic of `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#createBean()` is to call `doCreateBean`. That is where the bean is really instantiated, populated, and initialized. The method returns the newly created bean instance.
 
 ```java
 @Override
 protected Object createBean(String beanName, RootBeanDefinition mbd, @Nullable Object[] args)
     throws BeanCreationException {
     
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     
     try {
-        // 正常的bean实例化、属性注入和初始化。
-        // 这里是真正进行bean创建的部分。
+        // Normal bean instantiation, property injection, and initialization.
+        // This is where the bean is really created.
         Object beanInstance = doCreateBean(beanName, mbdToUse, args);
-        // 记录bean成功创建的日志
+        // Log that the bean was created successfully
         if (logger.isTraceEnabled()) {
             logger.trace("Finished creating instance of bean '" + beanName + "'");
         }
         return beanInstance;
     }
     catch (BeanCreationException | ImplicitlyAppearedSingletonException ex) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
     catch (Throwable ex) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#doCreateBean`方法中，`initializeBean`方法是bean初始化，确保bean是完全配置和准备好的。
+In `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#doCreateBean`, the `initializeBean` method initializes the bean and makes sure it is fully configured and ready.
 
 ```java
 protected Object doCreateBean(String beanName, RootBeanDefinition mbd, @Nullable Object[] args)
         throws BeanCreationException {
 
-    // 声明一个对象，后续可能用于存放初始化后的bean或它的代理对象
+    // Declare an object that may later hold the initialized bean or its proxy
     Object exposedObject = bean;
 
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     
     try {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
         
-        // bean初始化
+        // Initialize the bean
         exposedObject = initializeBean(beanName, exposedObject, mbd);
     } 
     catch (Throwable ex) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
 
-    // 返回创建和初始化后的bean
+    // Return the created and initialized bean
     return exposedObject;
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#initializeBean`方法中，`invokeAwareMethods(beanName, bean)`是一个非常重要的步骤。这个方法是为了处理实现了Spring的`Aware`接口族的Beans（例如`BeanNameAware`, `BeanFactoryAware`等）。如果提供的bean实现了任何这些接口，该方法会回调相应的`Aware`方法。
+In `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#initializeBean`, `invokeAwareMethods(beanName, bean)` is an important step. It handles beans that implement the Spring `Aware` interfaces (such as `BeanNameAware` and `BeanFactoryAware`). If the bean implements any of them, the matching `Aware` method is called.
 
 ```java
 protected Object initializeBean(String beanName, Object bean, @Nullable RootBeanDefinition mbd) {
 
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
     
     invokeAwareMethods(beanName, bean);
     
-    // ... [代码部分省略以简化]
+    // ... [code omitted for brevity]
 
     return wrappedBean;
 }
 ```
 
-在`org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#invokeAwareMethods`方法中，用于处理实现了 Spring `Aware` 接口族的 beans。当一个 bean 实现了如 `BeanNameAware`、`BeanClassLoaderAware` 或 `BeanFactoryAware` 等接口时，此方法确保正确的回调方法被调用，从而为 bean 提供关于其运行环境或其他相关信息。
+The method `org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#invokeAwareMethods` handles beans that implement the Spring `Aware` interfaces. When a bean implements an interface such as `BeanNameAware`, `BeanClassLoaderAware`, or `BeanFactoryAware`, this method makes sure the right callback is called. This gives the bean information about its runtime environment.
 
 ```java
 private void invokeAwareMethods(String beanName, Object bean) {
     if (bean instanceof Aware) {
         if (bean instanceof BeanNameAware) {
-            // ... [代码部分省略以简化]
+            // ... [code omitted for brevity]
         }
         if (bean instanceof BeanClassLoaderAware) {
-            // ... [代码部分省略以简化]
+            // ... [code omitted for brevity]
         }
         if (bean instanceof BeanFactoryAware) {
             ((BeanFactoryAware) bean).setBeanFactory(AbstractAutowireCapableBeanFactory.this);
@@ -433,7 +433,7 @@ private void invokeAwareMethods(String beanName, Object bean) {
 }
 ```
 
-最后执行到我们自定义的逻辑中，容器将调用 `setBeanFactory()` 方法，并将当前的 bean factory 实例作为参数传递。
+Finally, execution reaches our own logic. The container calls `setBeanFactory()` and passes the current bean factory instance as the argument.
 
 ```java
 @Service
@@ -449,11 +449,11 @@ public class UserService implements BeanFactoryAware, InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
 
     public void validateUser(String username, String password) {
-        // ... [代码部分省略以简化]
+        // ... [code omitted for brevity]
     }
 
     private boolean someConfigurationMethod() {
@@ -462,58 +462,58 @@ public class UserService implements BeanFactoryAware, InitializingBean {
 }
 ```
 
-### 八、注意事项
+### 8. Notes
 
-1. **生命周期时机**
-   + `setBeanFactory` 方法是在 bean 属性设置之后但在其他初始化方法（如 `@PostConstruct`、`InitializingBean#afterPropertiesSet` 或指定的初始化方法）之前调用的。
+1. **Timing in the lifecycle**
+   + `setBeanFactory` is called after the bean properties are set, but before other initialization methods (such as `@PostConstruct`, `InitializingBean#afterPropertiesSet`, or a specified init method).
 
-2. **避免循环依赖**
-   + 当 beans 通过 `BeanFactory` 查找其他 beans 时，可能会出现循环依赖的情况。例如，bean A 在其 `setBeanFactory` 方法中查找 bean B，而 bean B 在其 `setBeanFactory` 方法中查找 bean A。这种情况会导致容器初始化失败。
+2. **Avoid circular dependencies**
+   + When beans look up other beans through the `BeanFactory`, a circular dependency can appear. For example, bean A looks up bean B in its `setBeanFactory` method, and bean B looks up bean A in its `setBeanFactory` method. This makes the container fail to initialize.
 
-3. **知道 bean 的作用域**
-   + 当从 `BeanFactory` 获取 beans 时，请记住 bean 的作用域。如果 bean 是原型作用域的，每次 `getBean` 调用都会返回一个新的实例。
+3. **Know the bean scope**
+   + When you get beans from the `BeanFactory`, remember their scope. If a bean has prototype scope, every `getBean` call returns a new instance.
 
-4. **不要过度自定义**
-   + 除非有很好的理由，否则应避免在 `setBeanFactory` 方法中执行大量的自定义逻辑。这会使 bean 的初始化过程变得复杂，并可能导致不可预见的副作用。
+4. **Do not over-customize**
+   + Unless there is a good reason, avoid heavy custom logic in `setBeanFactory`. It makes bean initialization complex and can cause unexpected side effects.
 
-### 九、总结
+### 9. Summary
 
-#### 最佳实践总结
+#### Best Practices Summary
 
-1. **构建与配置**
-   + 在 `BeanNameAwareApplication` 启动类中，使用了 `AnnotationConfigApplicationContext` 来基于 Java 配置类 (`MyConfiguration`) 初始化 Spring 上下文。这是一个 Java-based 的配置方法，与传统的 XML-based 配置相比，更加直观和灵活。
+1. **Build and configuration**
+   + In the `BeanNameAwareApplication` entry class, `AnnotationConfigApplicationContext` initializes the Spring context from a Java configuration class (`MyConfiguration`). This Java-based configuration is more direct and flexible than the traditional XML-based configuration.
 
-2. **组件扫描**
-   + `MyConfiguration` 配置类使用 `@ComponentScan` 注解指定了需要被扫描的包路径。Spring 容器会自动扫描这些包以及其子包下的组件，并将它们注册为 Spring beans。
+2. **Component scanning**
+   + The `MyConfiguration` class uses `@ComponentScan` to set the packages to scan. The Spring container scans these packages and their sub-packages for components and registers them as Spring beans.
 
-3. **验证器设计**
-   + 我们设计了一个 `UserValidator` 接口，以及两个实现该接口的类：`SimpleUserValidator` 和 `ComplexUserValidator`。这两个验证器具有不同的验证逻辑，以满足不同的验证需求。
+3. **Validator design**
+   + We designed a `UserValidator` interface and two classes that implement it: `SimpleUserValidator` and `ComplexUserValidator`. They have different validation logic for different needs.
 
-4. **动态选择验证器**
-   + `UserService` 类是此应用的核心，它根据某些配置动态地从 `BeanFactory` 中选择一个验证器。这是通过实现 `BeanFactoryAware` 和 `InitializingBean` 接口来完成的：`BeanFactoryAware` 允许 `UserService` 访问 Spring 容器的 `BeanFactory`。InitializingBean` 确保在所有属性（例如依赖注入）设置完毕后，选择合适的验证器。
+4. **Choose the validator dynamically**
+   + The `UserService` class is the core of this application. It chooses a validator from the `BeanFactory` dynamically, based on some configuration. It does this by implementing `BeanFactoryAware` and `InitializingBean`: `BeanFactoryAware` lets `UserService` access the `BeanFactory` of the Spring container. `InitializingBean` makes sure the right validator is chosen after all properties (for example injected dependencies) are set.
 
-5. **运行与输出**
-   + 当调用 `validateUser` 方法验证用户名和密码时，根据所选择的验证器（在此示例中是 `SimpleUserValidator`），将输出相应的验证信息。此外，验证器本身也输出了它正在使用的验证方法。
+5. **Run and output**
+   + When `validateUser` is called to check the user name and password, the matching message is printed for the chosen validator (here, `SimpleUserValidator`). The validator itself also prints which validation method it is using.
 
-#### 源码分析总结
+#### Source Code Analysis Summary
 
-1. **应用启动与上下文初始化**
-   + 当启动类 `BeanNameAwareApplication` 被执行，一个新的 `AnnotationConfigApplicationContext` 被创建并初始化，其中传入了配置类 `MyConfiguration`。
+1. **Application startup and context initialization**
+   + When the `BeanNameAwareApplication` entry class runs, a new `AnnotationConfigApplicationContext` is created and initialized with the configuration class `MyConfiguration`.
 
-2. **配置类与组件扫描**
-   + `MyConfiguration` 是一个 Java 配置类，它告诉 Spring 容器去扫描特定的包以查找组件。
+2. **Configuration class and component scanning**
+   + `MyConfiguration` is a Java configuration class. It tells the Spring container which packages to scan for components.
 
-3. **单例bean的预实例化**
-   + 在上下文的 `refresh()` 方法中，Spring 会预先实例化所有非懒加载的单例bean。这意味着在容器启动时，这些bean会被初始化。
+3. **Pre-instantiating singleton beans**
+   + In the context's `refresh()` method, Spring instantiates all non-lazy singleton beans up front. So these beans are initialized when the container starts.
 
-4. **Bean的实例化和初始化**
-   + 在上下文刷新的过程中，Spring 容器会逐个创建并初始化所有的单例bean。`doCreateBean` 方法负责实例化bean、注入依赖、并调用任何初始化方法。
+4. **Bean instantiation and initialization**
+   + While the context refreshes, the Spring container creates and initializes all singleton beans one by one. The `doCreateBean` method instantiates the bean, injects dependencies, and calls any initialization methods.
 
-5. **处理 Aware 接口**
-   + 对于实现了 `Aware` 接口的bean，如 `BeanFactoryAware`，在初始化过程中，Spring 容器会调用相应的 `Aware` 方法（例如，`setBeanFactory`）。这使得bean可以获得关于其运行环境的信息或其他 Spring 功能。
+5. **Handling Aware interfaces**
+   + For a bean that implements an `Aware` interface, such as `BeanFactoryAware`, the Spring container calls the matching `Aware` method (for example `setBeanFactory`) during initialization. This gives the bean information about its runtime environment or other Spring features.
 
-6. **自定义逻辑执行**
-   + 一旦bean被初始化，并且所有的 `Aware` 方法都被调用，就可以执行自定义逻辑。在这个例子中，这是通过 `UserService` 的 `validateUser` 方法来完成的。
+6. **Running custom logic**
+   + Once the bean is initialized and all `Aware` methods have been called, custom logic can run. In this example, it runs through the `validateUser` method of `UserService`.
 
-7. **BeanFactoryAware 的特性**
-   + 通过实现 `BeanFactoryAware`，`UserService` 能够获得对 `BeanFactory` 的访问权限。这使得它可以在运行时动态地从 `BeanFactory` 中获取bean，如在示例中的 `UserValidator`。
+7. **What BeanFactoryAware provides**
+   + By implementing `BeanFactoryAware`, `UserService` gets access to the `BeanFactory`. This lets it get beans from the `BeanFactory` at runtime, such as the `UserValidator` in this example.
