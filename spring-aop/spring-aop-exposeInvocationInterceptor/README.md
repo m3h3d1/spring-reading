@@ -1,50 +1,50 @@
 ## ExposeInvocationInterceptor
 
 - [ExposeInvocationInterceptor](#exposeinvocationinterceptor)
-	- [一、基本信息](#一基本信息)
-	- [二、基本描述](#二基本描述)
-	- [三、主要功能](#三主要功能)
-	- [四、类源码](#四类源码)
-	- [五、最佳实践](#五最佳实践)
-    - [六、时序图](#六时序图)
-    - [七、源码分析](#七源码分析)
+	- [1. Overview](#1-overview)
+	- [2. Description](#2-description)
+	- [3. Main Features](#3-main-features)
+	- [4. Class Source](#4-class-source)
+	- [5. Best Practices](#5-best-practices)
+    - [6. Sequence Diagram](#6-sequence-diagram)
+    - [7. Source Code Analysis](#7-source-code-analysis)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、基本描述
+### 2. Description
 
-`ExposeInvocationInterceptor`是Spring AOP中的一个拦截器类，主要功能是在AOP调用链中暴露当前方法调用的上下文信息，通过暴露`MethodInvocation`对象，使其他拦截器或切面能够访问并处理方法调用的相关信息。
+`ExposeInvocationInterceptor` is an interceptor class in Spring AOP. Its main job is to expose the context of the current method call in the AOP call chain. It exposes the `MethodInvocation` object, so other interceptors or aspects can read and use the details of the method call.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **暴露当前方法调用的上下文信息** 
+1. **Expose the context of the current method call**
 
-   + 通过暴露`MethodInvocation`对象，允许其他拦截器或切面访问当前方法调用的相关信息，如目标对象、方法、参数等。
+   + By exposing the `MethodInvocation` object, it lets other interceptors or aspects read the details of the current method call, such as the target object, the method, and the arguments.
 
-2. **提供`currentInvocation()`方法** 
+2. **Provide the `currentInvocation()` method**
 
-   + 允许在拦截器或切面中调用`currentInvocation()`方法来获取当前方法调用的`MethodInvocation`对象，从而获取方法调用的上下文信息。
+   + Interceptors or aspects can call `currentInvocation()` to get the `MethodInvocation` object of the current method call, and so get the context of the call.
 
-3. **支持AOP调用链的处理** 
+3. **Support the AOP call chain**
 
-   + 作为Spring AOP的一个拦截器，`ExposeInvocationInterceptor`能够被添加到AOP代理链中，确保在调用链的初始阶段就将`MethodInvocation`对象暴露出来，以便后续的拦截器或切面可以使用。
+   + As an interceptor of Spring AOP, `ExposeInvocationInterceptor` can be added to the AOP proxy chain. This makes sure the `MethodInvocation` object is exposed at the start of the call chain, so later interceptors or aspects can use it.
 
-### 四、类源码
+### 4. Class Source
 
- `ExposeInvocationInterceptor`拦截器，其主要目的是将当前的方法调用上下文暴露为线程本地对象。它允许在Spring AOP中获取方法调用的详细信息，例如目标对象、方法、参数等。这个拦截器在AOP链中通常是第一个，用于确保其他拦截器或切面能够访问方法调用的完整上下文。
+ The `ExposeInvocationInterceptor` interceptor exposes the current method call context as a thread-local object. It lets you get the details of a method call in Spring AOP, such as the target object, the method, and the arguments. This interceptor is usually the first one in the AOP chain, so other interceptors or aspects can access the full context of the method call.
 
 ```java
 /**
- * 拦截器，将当前{@link org.aopalliance.intercept.MethodInvocation}暴露为线程本地对象。
- * 仅在必要时使用此拦截器；例如，当切点（例如，AspectJ表达式切点）需要知道完整的调用上下文时。
+ * Interceptor that exposes the current {@link org.aopalliance.intercept.MethodInvocation} as a thread-local object.
+ * Use this interceptor only when necessary; for example, when a pointcut (such as an AspectJ expression pointcut) needs to know the full invocation context.
  *
- * <p>除非绝对必要，否则不要使用此拦截器。目标对象通常不应知道Spring AOP，
- * 因为这会创建对Spring API的依赖。目标对象应尽可能是纯POJO。
+ * <p>Do not use this interceptor unless it is absolutely necessary. A target object should normally not know about Spring AOP,
+ * because that creates a dependency on the Spring API. Target objects should be plain POJOs wherever possible.
  *
- * <p>如果使用，此拦截器通常将是拦截器链中的第一个。
+ * <p>If used, this interceptor will normally be the first in the interceptor chain.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -52,11 +52,11 @@
 @SuppressWarnings("serial")
 public final class ExposeInvocationInterceptor implements MethodInterceptor, PriorityOrdered, Serializable {
 
-	/** 此类的单例实例。 */
+	/** The singleton instance of this class. */
 	public static final ExposeInvocationInterceptor INSTANCE = new ExposeInvocationInterceptor();
 
 	/**
-	 * 此类的单例顾问。在使用Spring AOP时，请使用它，因为它可以避免创建新的Advisor来包装该实例。
+	 * The singleton advisor for this class. Use it when using Spring AOP, because it avoids creating a new Advisor to wrap the instance.
 	 */
 	public static final Advisor ADVISOR = new DefaultPointcutAdvisor(INSTANCE) {
 		@Override
@@ -70,10 +70,10 @@ public final class ExposeInvocationInterceptor implements MethodInterceptor, Pri
 
 
 	/**
-	 * 返回与当前调用关联的AOP Alliance MethodInvocation对象。
-	 * @return 与当前调用关联的调用对象
-	 * @throws IllegalStateException 如果当前没有AOP调用，
-	 * 或者ExposeInvocationInterceptor未添加到此拦截器链中
+	 * Return the AOP Alliance MethodInvocation object associated with the current invocation.
+	 * @return the invocation object associated with the current invocation
+	 * @throws IllegalStateException if there is no AOP invocation in progress,
+	 * or if the ExposeInvocationInterceptor was not added to this interceptor chain
 	 */
 	public static MethodInvocation currentInvocation() throws IllegalStateException {
 		MethodInvocation mi = invocation.get();
@@ -90,7 +90,7 @@ public final class ExposeInvocationInterceptor implements MethodInterceptor, Pri
 
 
 	/**
-	 * 确保只能创建规范实例。
+	 * Ensures that only the canonical instance can be created.
 	 */
 	private ExposeInvocationInterceptor() {
 	}
@@ -125,25 +125,25 @@ public final class ExposeInvocationInterceptor implements MethodInterceptor, Pri
 }
 ```
 
-### 五、最佳实践
+### 5. Best Practices
 
-创建了一个基于注解的应用程序上下文，从中获取了一个名为 `MyService` 的 bean，并调用了其 `foo()` 方法。
+This example creates an annotation-based application context, gets a bean named `MyService` from it, and calls its `foo()` method.
 
 ```java
 public class ExposeInvocationInterceptorDemo {
 
     public static void main(String[] args) {
-        // 创建一个基于注解的应用程序上下文
+        // Create an annotation-based application context
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
-        // 从上下文中获取 MyService
+        // Get MyService from the context
         MyService myService = context.getBean(MyService.class);
-        // 调用方法
+        // Call the method
         myService.foo();
     }
 }
 ```
 
-使用了 `@EnableAspectJAutoProxy` 注解启用了 AspectJ 自动代理功能，并且通过 `@ComponentScan` 注解扫描了包 `com.xcs.spring` 下的组件。
+It uses the `@EnableAspectJAutoProxy` annotation to turn on AspectJ auto proxy support, and the `@ComponentScan` annotation to scan the components in the package `com.xcs.spring`.
 
 ```java
 @EnableAspectJAutoProxy
@@ -154,7 +154,7 @@ public class AppConfig {
 }
 ```
 
-一个服务类，用于业务逻辑的实现。
+A service class that implements the business logic.
 
 ```java
 @Service
@@ -166,7 +166,7 @@ public class MyService {
 }
 ```
 
-`MyMethodInterceptor`标记为 `@Aspect` 和 `@Component`，表明它是一个切面，并且由 Spring 容器进行管理。其中包含一个名为 `before()` 的方法，使用 `@Before` 注解标记，表示在目标方法执行之前执行。方法内部调用了 `LogUtil.print()` 方法，用于记录日志或执行其他操作。这个切面主要是针对 `com.xcs.spring.MyService` 类中所有公共方法的执行，在方法执行之前添加了特定的逻辑。
+`MyMethodInterceptor` is marked with `@Aspect` and `@Component`. This means it is an aspect and is managed by the Spring container. It has a method named `before()`, marked with `@Before`, which runs before the target method. Inside the method, it calls `LogUtil.print()` to write a log or do other work. This aspect adds some logic before the execution of all public methods of the `com.xcs.spring.MyService` class.
 
 ```java
 @Aspect
@@ -180,7 +180,7 @@ public class MyMethodInterceptor {
 }
 ```
 
-通过 `ExposeInvocationInterceptor.currentInvocation()` 获取当前方法调用的 `ProxyMethodInvocation` 对象，然后打印了方法名称、参数长度、目标对象以及代理对象的类名。
+It gets the `ProxyMethodInvocation` object of the current method call with `ExposeInvocationInterceptor.currentInvocation()`. Then it prints the method name, the number of arguments, the target object, and the class name of the proxy object.
 
 ```java
 public class LogUtil {
@@ -195,7 +195,7 @@ public class LogUtil {
 }
 ```
 
-运行结果，通过`ExposeInvocationInterceptor.currentInvocation()`获取方法调用上下文实现日志打印。
+In the run result, the log is printed with the method call context obtained from `ExposeInvocationInterceptor.currentInvocation()`.
 
 ```java
 Method = public void com.xcs.spring.MyService.doSomething()
@@ -205,32 +205,32 @@ Proxy Class = class com.xcs.spring.MyService$$EnhancerBySpringCGLIB$$f30643a6
 Doing something...
 ```
 
-### 六、时序图
+### 6. Sequence Diagram
 
 ~~~mermaid
 sequenceDiagram
     AbstractAutowireCapableBeanFactory->>AbstractAutoProxyCreator: postProcessAfterInitialization()
-    Note over AbstractAutowireCapableBeanFactory,AbstractAutoProxyCreator: 调用后处理方法
+    Note over AbstractAutowireCapableBeanFactory,AbstractAutoProxyCreator: Call the post-processing method
     AbstractAutoProxyCreator->>AbstractAutoProxyCreator: wrapIfNecessary()
-    Note over AbstractAutoProxyCreator: 调用包装方法
+    Note over AbstractAutoProxyCreator: Call the wrap method
     AbstractAutoProxyCreator->>AbstractAdvisorAutoProxyCreator: getAdvicesAndAdvisorsForBean()
-    Note over AbstractAutoProxyCreator,AbstractAdvisorAutoProxyCreator: 获取通知和 Advisors
+    Note over AbstractAutoProxyCreator,AbstractAdvisorAutoProxyCreator: Get the advice and Advisors
     AbstractAdvisorAutoProxyCreator->>AbstractAdvisorAutoProxyCreator: findEligibleAdvisors()
-    Note over AbstractAdvisorAutoProxyCreator: 查找合适的 Advisors
+    Note over AbstractAdvisorAutoProxyCreator: Find eligible Advisors
     AbstractAdvisorAutoProxyCreator->>AspectJAwareAdvisorAutoProxyCreator: extendAdvisors()
-    Note over AbstractAdvisorAutoProxyCreator,AspectJAwareAdvisorAutoProxyCreator: Advisor 的扩展钩子
+    Note over AbstractAdvisorAutoProxyCreator,AspectJAwareAdvisorAutoProxyCreator: Extension hook for Advisors
     AspectJAwareAdvisorAutoProxyCreator->>AspectJProxyUtils:makeAdvisorChainAspectJCapableIfNecessary()
-    Note over AspectJAwareAdvisorAutoProxyCreator,AspectJProxyUtils: 添加特殊的拦截器
+    Note over AspectJAwareAdvisorAutoProxyCreator,AspectJProxyUtils: Add the special interceptor
 ~~~
 
-### 七、源码分析
+### 7. Source Code Analysis
 
-在`org.springframework.aop.aspectj.autoproxy.AspectJAwareAdvisorAutoProxyCreator#extendAdvisors`方法中，在开头添加了一个 `ExposeInvocationInterceptor`。
+The `org.springframework.aop.aspectj.autoproxy.AspectJAwareAdvisorAutoProxyCreator#extendAdvisors` method adds an `ExposeInvocationInterceptor` at the start.
 
 ```java
 /**
- * 将{@link ExposeInvocationInterceptor}添加到advice链的开头。
- * <p>在使用AspectJ切点表达式和AspectJ风格的advice时，需要此额外的Advisors。
+ * Add the {@link ExposeInvocationInterceptor} to the start of the advice chain.
+ * <p>These extra Advisors are needed when using AspectJ pointcut expressions and AspectJ-style advice.
  */
 @Override
 protected void extendAdvisors(List<Advisor> candidateAdvisors) {
@@ -238,33 +238,33 @@ protected void extendAdvisors(List<Advisor> candidateAdvisors) {
 }
 ```
 
-在`org.springframework.aop.aspectj.AspectJProxyUtils#makeAdvisorChainAspectJCapableIfNecessary`
-方法中，用于在代理链中添加特殊的拦截器，以确保与包含AspectJ建议的代理链一起正常工作。具体来说，它将 `ExposeInvocationInterceptor`
-添加到advisors列表的开头。这样做的目的是为了暴露当前Spring AOP调用（对于某些AspectJ切点匹配是必要的），并使当前AspectJ
-JoinPoint可用。如果advisors链中不存在AspectJ advisor，则此调用不会产生任何效果。方法返回 `true`
-表示成功向建议列表中添加了 `ExposeInvocationInterceptor`，否则返回 `false`。
+The `org.springframework.aop.aspectj.AspectJProxyUtils#makeAdvisorChainAspectJCapableIfNecessary`
+method adds a special interceptor to the proxy chain, to make sure it works with a chain that contains AspectJ advice. Specifically, it adds `ExposeInvocationInterceptor`
+to the start of the advisors list. The goal is to expose the current Spring AOP invocation (needed for some AspectJ pointcut matching) and to make the current AspectJ
+JoinPoint available. If there is no AspectJ advisor in the advisors chain, this call has no effect. The method returns `true`
+if `ExposeInvocationInterceptor` was added to the advice list, and `false` otherwise.
 
 ```java
 /**
- * 如果需要，向包含AspectJ建议的代理链中添加特殊的建议：
- * 具体来说，在列表的开头添加{@link ExposeInvocationInterceptor}。
- * <p>这将暴露当前Spring AOP调用（对于某些AspectJ切点匹配是必要的），
- * 并使当前AspectJ JoinPoint可用。如果建议链中没有AspectJ建议，则调用不会产生任何效果。
- * @param advisors 可用的建议列表
- * @return 如果向列表中添加了{@link ExposeInvocationInterceptor}，则返回{@code true}，否则返回{@code false}
+ * Add special advice to a proxy chain that contains AspectJ advice, if needed:
+ * specifically, add the {@link ExposeInvocationInterceptor} at the start of the list.
+ * <p>This exposes the current Spring AOP invocation (needed for some AspectJ pointcut matching),
+ * and makes the current AspectJ JoinPoint available. If there is no AspectJ advice in the advice chain, the call has no effect.
+ * @param advisors the list of available advisors
+ * @return {@code true} if the {@link ExposeInvocationInterceptor} was added to the list, otherwise {@code false}
  */
 public static boolean makeAdvisorChainAspectJCapableIfNecessary(List<Advisor> advisors) {
-    // 不要向空列表添加建议；这可能表示不需要代理
+    // Do not add advice to an empty list; this may mean no proxy is needed
     if (!advisors.isEmpty()) {
         boolean foundAspectJAdvice = false;
         for (Advisor advisor : advisors) {
-            // 谨慎使用不带保护的Advice，因为这可能会急切地实例化非单例的AspectJ切面...
+            // Use unguarded Advice with care, because it may eagerly instantiate non-singleton AspectJ aspects...
             if (isAspectJAdvice(advisor)) {
                 foundAspectJAdvice = true;
                 break;
             }
         }
-        // 如果在建议链中找到AspectJ建议，并且没有ExposeInvocationInterceptor.ADVISOR，则添加
+        // Add it if AspectJ advice is found in the advice chain and there is no ExposeInvocationInterceptor.ADVISOR
         if (foundAspectJAdvice && !advisors.contains(ExposeInvocationInterceptor.ADVISOR)) {
             advisors.add(0, ExposeInvocationInterceptor.ADVISOR);
             return true;
@@ -274,12 +274,12 @@ public static boolean makeAdvisorChainAspectJCapableIfNecessary(List<Advisor> ad
 }
 ```
 
-在`org.springframework.aop.aspectj.AspectJProxyUtils#isAspectJAdvice`方法中，判断给定的 Advisor 是否包含 AspectJ Advice。它检查 Advisor 实例是否属于特定类型或者其 Advice 是否是 AbstractAspectJAdvice 的子类，或者其 Pointcut 是否是 AspectJExpressionPointcut 的实例。
+The `org.springframework.aop.aspectj.AspectJProxyUtils#isAspectJAdvice` method checks whether the given Advisor contains AspectJ Advice. It checks whether the Advisor instance is of a specific type, or its Advice is a subclass of AbstractAspectJAdvice, or its Pointcut is an instance of AspectJExpressionPointcut.
 
 ```java
 /**
- * 判断给定的 Advisor 是否包含 AspectJ Advice。
- * @param advisor 要检查的 Advisor
+ * Check whether the given Advisor contains AspectJ Advice.
+ * @param advisor the Advisor to check
  */
 private static boolean isAspectJAdvice(Advisor advisor) {
     return (advisor instanceof InstantiationModelAwarePointcutAdvisor ||

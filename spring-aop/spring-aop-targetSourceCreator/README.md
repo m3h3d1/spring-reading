@@ -1,46 +1,46 @@
 ## TargetSourceCreator
 
 - [TargetSourceCreator](#targetsourcecreator)
-    - [一、基本信息](#一基本信息)
-    - [二、基本描述](#二基本描述)
-    - [三、主要功能](#三主要功能)
-    - [四、接口源码](#四接口源码)
-    - [五、主要实现](#五主要实现)
-    - [六、类关系图](#六类关系图)
-    - [七、最佳实践](#七最佳实践)
-    - [八、源码分析](#八源码分析)
+    - [1. Overview](#1-overview)
+    - [2. Description](#2-description)
+    - [3. Main Features](#3-main-features)
+    - [4. Interface Source](#4-interface-source)
+    - [5. Main Implementations](#5-main-implementations)
+    - [6. Class Diagram](#6-class-diagram)
+    - [7. Best Practices](#7-best-practices)
+    - [8. Source Code Analysis](#8-source-code-analysis)
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、基本描述
+### 2. Description
 
-`TargetSourceCreator`接口，主要用于创建目标对象的代理。通过实现该接口，你可以自定义代理对象的创建逻辑，例如根据不同的条件返回不同的代理对象。这在AOP（面向切面编程）和代理模式中非常有用，可以灵活地控制代理对象的生成过程。
+The `TargetSourceCreator` interface is mainly used to create the target source for the proxy of a target object. By implementing this interface, you can write your own logic for creating proxy objects, for example return different proxy objects under different conditions. This is very useful in AOP (aspect-oriented programming) and the proxy pattern, and gives flexible control over how proxy objects are created.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **创建代理对象的目标源（TargetSource）** 
+1. **Create the target source (TargetSource) of a proxy object**
 
-   + 该接口允许我们定义创建代理对象的逻辑，包括决定何时创建代理对象以及如何创建代理对象的目标源。
+   + This interface lets us define the logic for creating proxy objects, including when to create a proxy object and how to create its target source.
 
-2. **定制代理对象的创建过程** 
+2. **Customize how proxy objects are created**
 
-   + 通过实现该接口，你可以根据需要定制代理对象的创建过程。这包括根据不同的条件返回不同的目标源，或者在创建代理对象之前或之后执行特定的逻辑。
+   + By implementing this interface, you can customize how proxy objects are created. For example, return different target sources under different conditions, or run specific logic before or after the proxy object is created.
 
-3. **支持AOP的灵活配置** 
+3. **Support flexible AOP configuration**
 
-   + 在Spring框架中，AOP（面向切面编程）经常使用代理对象来实现横切关注点。`TargetSourceCreator`接口允许我们灵活地控制代理对象的生成过程，从而为AOP提供了更高的定制性和灵活性。
+   + In the Spring Framework, AOP (aspect-oriented programming) often uses proxy objects to handle cross-cutting concerns. The `TargetSourceCreator` interface lets us control how proxy objects are created, which makes AOP more customizable and flexible.
 
-### 四、接口源码
+### 4. Interface Source
 
-`TargetSourceCreator`接口，它允许实现类创建特殊的目标源（TargetSource），例如池化目标源，用于特定的bean。实现类可以基于目标类的属性，如池化属性，来决定选择哪种类型的目标源。`AbstractAutoProxyCreator`可以支持多个`TargetSourceCreators`，它们将按顺序应用，为Spring框架中的代理对象创建提供了灵活性和定制性。
+The `TargetSourceCreator` interface lets an implementation create a special target source (TargetSource), such as a pooling target source, for specific beans. An implementation can choose the type of target source from the properties of the target class, such as pooling properties. `AbstractAutoProxyCreator` can support several `TargetSourceCreators`, which are applied in order. This makes the creation of proxy objects in the Spring Framework flexible and customizable.
 
 ```java
 /**
- * 实现类可以为特定的bean创建特殊的目标源，例如池化目标源。例如，它们可以根据目标类上的属性（例如池化属性）来选择目标源。
+ * Implementations can create special target sources, such as pooling target sources, for specific beans. For example, they can choose the target source based on attributes of the target class (such as pooling attributes).
  *
- * <p>AbstractAutoProxyCreator 可以支持多个 TargetSourceCreators，它们将按顺序应用。
+ * <p>AbstractAutoProxyCreator can support several TargetSourceCreators, which are applied in order.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -49,10 +49,10 @@
 public interface TargetSourceCreator {
 
     /**
-     * 为给定的bean创建一个特殊的目标源（如果有的话）。
-     * @param beanClass bean的类
-     * @param beanName bean的名称
-     * @return 特殊的目标源，如果此 TargetSourceCreator 不感兴趣于特定的bean，则返回 {@code null}
+     * Create a special target source for the given bean, if any.
+     * @param beanClass the class of the bean
+     * @param beanName the name of the bean
+     * @return a special target source, or {@code null} if this TargetSourceCreator is not interested in the specific bean
      */
     @Nullable
     TargetSource getTargetSource(Class<?> beanClass, String beanName);
@@ -60,17 +60,17 @@ public interface TargetSourceCreator {
 }
 ```
 
-### 五、主要实现
+### 5. Main Implementations
 
 1. **QuickTargetSourceCreator**
 
-   + 用于快速创建目标源。它适用于那些不需要延迟加载的情况，通过特定的条件或策略，可以快速地生成目标源，以提高性能或满足其他需求。
+   + Used to create the target source quickly. It fits cases that do not need lazy loading. With specific conditions or strategies, it can create the target source quickly, to improve performance or meet other needs.
 
 2. **LazyInitTargetSourceCreator**
 
-   + 用于延迟创建目标源。它适用于需要延迟加载的场景，以减少启动时间或资源占用。根据特定的条件或策略，它会延迟地创建目标源，直到被请求时才进行加载。
+   + Used to create the target source lazily. It fits cases that need lazy loading, to reduce startup time or resource use. With specific conditions or strategies, it creates the target source later, and loads it only when it is requested.
 
-### 六、类关系图
+### 6. Class Diagram
 
 ~~~mermaid
 classDiagram
@@ -88,29 +88,29 @@ LazyInitTargetSourceCreator  -->  AbstractBeanFactoryBasedTargetSourceCreator
 QuickTargetSourceCreator  -->  AbstractBeanFactoryBasedTargetSourceCreator 
 ~~~
 
-### 七、最佳实践
+### 7. Best Practices
 
-使用Spring框架中的注解配置来创建应用程序上下文，并从上下文中获取`MyConnection` bean。然后，它打印了`MyConnection`实例的类名，并循环调用了`MyConnection`实例的`getName()`方法来获取实例的名称并打印输出。
+This example uses the annotation configuration of the Spring Framework to create the application context, and gets the `MyConnection` bean from the context. Then it prints the class name of the `MyConnection` instance, and calls the `getName()` method of the `MyConnection` instance in a loop to get the name of the instance and print it.
 
 ```java
 public class TargetSourceCreatorDemo {
     public static void main(String[] args) {
-        // 创建一个基于注解的应用程序上下文
+        // Create an annotation-based application context
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
-        // 从上下文中获取 MyConnection bean
+        // Get the MyConnection bean from the context
         MyConnection myConnection = context.getBean(MyConnection.class);
-        // 打印 MyConnection 实例的类名
+        // Print the class name of the MyConnection instance
         System.out.println("MyConnection Class = " + myConnection.getClass());
-        // 循环调用 MyConnection 实例的 getName() 方法
+        // Call the getName() method of the MyConnection instance in a loop
         for (int i = 0; i < 10; i++) {
-            // 打印 MyConnection 实例的名称
+            // Print the name of the MyConnection instance
             System.out.println("MyConnection Name = " + myConnection.getName());
         }
     }
 }
 ```
 
-通过`@EnableAspectJAutoProxy`注解启用了AspectJ自动代理功能，允许Spring框架创建和管理切面（Aspects）。同时，通过`@Configuration`注解标识这是一个配置类，并使用`@ComponentScan("com.xcs.spring")`注解来指定需要扫描的包，以便Spring能够自动装配Bean和发现组件。
+The `@EnableAspectJAutoProxy` annotation turns on AspectJ auto proxy support, which lets the Spring Framework create and manage aspects (Aspects). The `@Configuration` annotation marks this as a configuration class, and `@ComponentScan("com.xcs.spring")` sets the package to scan, so Spring can autowire beans and find components.
 
 ```java
 @EnableAspectJAutoProxy
@@ -121,7 +121,7 @@ public class AppConfig {
 }
 ```
 
-`SetMyTargetSourceCreator`类实现了Spring框架的`BeanPostProcessor`接口和`PriorityOrdered`接口。在`postProcessAfterInitialization`方法中，通过判断bean是否为`AbstractAutoProxyCreator`的实例，然后为其设置了自定义的目标源创建器`MyTargetSourceCreator`。通过实现`PriorityOrdered`接口并重写`getOrder`方法，确保了该后置处理器具有最高的优先级，以确保在其他后置处理器之前执行。
+The `SetMyTargetSourceCreator` class implements the Spring `BeanPostProcessor` interface and the `PriorityOrdered` interface. In the `postProcessAfterInitialization` method, it checks whether the bean is an instance of `AbstractAutoProxyCreator`, and then sets the custom target source creator `MyTargetSourceCreator` on it. By implementing `PriorityOrdered` and overriding `getOrder`, it makes sure this post processor has the highest priority and runs before other post processors.
 
 ```java
 @Component
@@ -142,7 +142,7 @@ public class SetMyTargetSourceCreator implements BeanPostProcessor , PriorityOrd
 }
 ```
 
-`MyTargetSourceCreator`类实现了`TargetSourceCreator`接口。在`getTargetSource`方法中，它根据传入的bean类和bean名称来判断是否需要为特定的bean创建目标源。如果传入的bean类是`MyConnection`类或其子类，它将返回一个具有连接池功能的目标源`ConnectionPoolTargetSource`，并设置连接池的大小为3。
+The `MyTargetSourceCreator` class implements the `TargetSourceCreator` interface. In the `getTargetSource` method, it uses the given bean class and bean name to decide whether to create a target source for the specific bean. If the given bean class is the `MyConnection` class or a subclass, it returns a target source with connection pool support, `ConnectionPoolTargetSource`, and sets the pool size to 3.
 
 ```java
 public class MyTargetSourceCreator implements TargetSourceCreator {
@@ -156,26 +156,26 @@ public class MyTargetSourceCreator implements TargetSourceCreator {
 }
 ```
 
-`ConnectionPoolTargetSource` 类实现了 Spring 的 `TargetSource` 接口，用于管理自定义连接对象的连接池。在构造函数中，它会初始化一个固定大小的阻塞队列作为连接池，并填充连接对象。通过实现 `getTarget()` 方法，它能够从连接池中获取连接对象，并在 `releaseTarget()` 方法中释放连接对象。
+The `ConnectionPoolTargetSource` class implements the Spring `TargetSource` interface. It manages a connection pool of custom connection objects. In the constructor, it creates a blocking queue of fixed size as the connection pool and fills it with connection objects. With the `getTarget()` method, it gets a connection object from the pool, and with the `releaseTarget()` method, it releases the connection object.
 
 ```java
 /**
- * 连接池目标源，用于管理自定义连接对象的连接池。
+ * Connection pool target source that manages a connection pool of custom connection objects.
  *
  * @author xcs
- * @date 2024年4月9日15:26:28
+ * @date 2024-04-09 15:26
  */
 public class ConnectionPoolTargetSource implements TargetSource {
 
     /**
-     * 连接池
+     * Connection pool
      */
     private final BlockingQueue<MyConnection> connectionPool;
 
     /**
-     * 构造函数，初始化连接池。
+     * Constructor that initializes the connection pool.
      *
-     * @param poolSize 连接池大小
+     * @param poolSize the pool size
      */
     public ConnectionPoolTargetSource(int poolSize) {
         this.connectionPool = new ArrayBlockingQueue<>(poolSize);
@@ -183,9 +183,9 @@ public class ConnectionPoolTargetSource implements TargetSource {
     }
 
     /**
-     * 初始化连接池，填充连接对象。
+     * Initializes the connection pool and fills it with connection objects.
      *
-     * @param poolSize 连接池大小
+     * @param poolSize the pool size
      */
     private void initializeConnectionPool(int poolSize) {
         for (int i = 0; i < poolSize; i++) {
@@ -195,9 +195,9 @@ public class ConnectionPoolTargetSource implements TargetSource {
     }
 
     /**
-     * 获取目标类的类型。
+     * Gets the type of the target class.
      *
-     * @return 目标类的类型
+     * @return the type of the target class
      */
     @Override
     public Class<?> getTargetClass() {
@@ -205,9 +205,9 @@ public class ConnectionPoolTargetSource implements TargetSource {
     }
 
     /**
-     * 判断目标对象是否是静态的。
+     * Checks whether the target object is static.
      *
-     * @return 如果目标对象是静态的，则返回true，否则返回false
+     * @return true if the target object is static, otherwise false
      */
     @Override
     public boolean isStatic() {
@@ -215,10 +215,10 @@ public class ConnectionPoolTargetSource implements TargetSource {
     }
 
     /**
-     * 获取连接对象。
+     * Gets a connection object.
      *
-     * @return 连接对象
-     * @throws Exception 如果获取连接对象时发生异常
+     * @return the connection object
+     * @throws Exception if an exception occurs while getting the connection object
      */
     @Override
     public Object getTarget() throws Exception {
@@ -226,10 +226,10 @@ public class ConnectionPoolTargetSource implements TargetSource {
     }
 
     /**
-     * 释放连接对象。
+     * Releases a connection object.
      *
-     * @param target 待释放的连接对象
-     * @throws Exception 如果释放连接对象时发生异常
+     * @param target the connection object to release
+     * @throws Exception if an exception occurs while releasing the connection object
      */
     @Override
     public void releaseTarget(Object target) throws Exception {
@@ -240,7 +240,7 @@ public class ConnectionPoolTargetSource implements TargetSource {
 }
 ```
 
-`MyConnection` 类代表了一个自定义的连接对象。
+`MyConnection` class stands for a custom connection object.
 
 ```java
 public class MyConnection {
@@ -268,7 +268,7 @@ public class MyConnection {
 }
 ```
 
-运行结果，`MyTargetSourceCreator`类成功地为`MyConnection`类创建了一个连接池目标源。Spring框架通过CGLIB动态代理增强了`MyConnection`类，使其能够使用连接池功能。每次调用`getName()`方法时，都从连接池中获取连接，并返回连续的"Connection0"、"Connection1"和"Connection2"字符串，表明连接池的大小为3且连接名称在连接池中循环使用。
+In the run result, the `MyTargetSourceCreator` class creates a connection pool target source for the `MyConnection` class. The Spring Framework enhances the `MyConnection` class with a CGLIB dynamic proxy, so it can use the connection pool. Each call of the `getName()` method gets a connection from the pool and returns the strings "Connection0", "Connection1", and "Connection2" in turn. This shows that the pool size is 3 and the connection names are used in a cycle.
 
 ```java
 MyConnection Class = class com.xcs.spring.MyConnection$$EnhancerBySpringCGLIB$$fb2fa879
@@ -284,42 +284,42 @@ MyConnection Name = Connection2
 MyConnection Name = Connection0
 ```
 
-### 八、源码分析
+### 8. Source Code Analysis
 
-在`org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#postProcessBeforeInstantiation`方法中，在Bean实例化之前进行处理。首先，它检查缓存中是否存在目标Bean的信息，如果存在则直接返回null，否则继续执行。然后，它检查Bean是否是基础设施类或是否应该被跳过，如果是，则将其标记为不需要增强，并返回null。最后，如果存在自定义的目标源（TargetSource），则创建代理对象，并使用自定义的目标源处理目标实例，从而避免不必要的默认实例化过程。
+The `org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#postProcessBeforeInstantiation` method works before the bean is instantiated. First, it checks whether the cache has information about the target bean. If so, it returns null at once. Otherwise it continues. Then it checks whether the bean is an infrastructure class or should be skipped. If so, it marks the bean as not needing advice and returns null. Finally, if there is a custom target source (TargetSource), it creates the proxy object and lets the custom target source handle the target instance. This avoids the unneeded default instantiation.
 
 ```java
 @Override
 public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
-    // 获取缓存键
+    // Get the cache key
     Object cacheKey = getCacheKey(beanClass, beanName);
 
-    // 如果bean名称为空或不在目标源bean列表中，且缓存中存在该键，则返回null
+    // If the bean name is empty or not in the target source bean list, and the cache has this key, return null
     if (!StringUtils.hasLength(beanName) || !this.targetSourcedBeans.contains(beanName)) {
         if (this.advisedBeans.containsKey(cacheKey)) {
             return null;
         }
-        // 如果bean类是基础设施类或应跳过，则将其标记为不需要增强，并返回null
+        // If the bean class is an infrastructure class or should be skipped, mark it as not needing advice and return null
         if (isInfrastructureClass(beanClass) || shouldSkip(beanClass, beanName)) {
             this.advisedBeans.put(cacheKey, Boolean.FALSE);
             return null;
         }
     }
 
-    // 如果存在自定义的目标源，则在此处创建代理：
-    // 避免不必要的目标bean默认实例化：
-    // 目标源将以自定义方式处理目标实例。
+    // If there is a custom target source, create the proxy here:
+    // Avoid unneeded default instantiation of the target bean:
+    // the target source will handle the target instance in a custom way.
     TargetSource targetSource = getCustomTargetSource(beanClass, beanName);
     if (targetSource != null) {
-        // 如果bean名称不为空，则将其添加到目标源bean列表中
+        // If the bean name is not empty, add it to the target source bean list
         if (StringUtils.hasLength(beanName)) {
             this.targetSourcedBeans.add(beanName);
         }
-        // 获取适用于bean的特定拦截器和增强器
+        // Get the specific interceptors and advisors for the bean
         Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(beanClass, beanName, targetSource);
-        // 创建代理对象
+        // Create the proxy object
         Object proxy = createProxy(beanClass, beanName, specificInterceptors, targetSource);
-        // 将代理对象的类与缓存键关联
+        // Link the class of the proxy object with the cache key
         this.proxyTypes.put(cacheKey, proxy.getClass());
         return proxy;
     }
@@ -328,31 +328,31 @@ public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName
 }
 ```
 
-在`org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#getCustomTargetSource`方法中，根据bean的类和名称创建目标源（TargetSource）。如果设置了自定义的TargetSourceCreators，并且bean工厂中包含了指定名称的bean，则会尝试使用这些TargetSourceCreators来创建目标源。方法会遍历所有的TargetSourceCreators，调用它们的getTargetSource方法来获取目标源。如果找到了匹配的目标源，则返回该目标源；否则返回null。
+The `org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#getCustomTargetSource` method creates the target source (TargetSource) from the class and name of the bean. If custom TargetSourceCreators are set and the bean factory contains a bean with the given name, it tries to create the target source with these TargetSourceCreators. The method loops over all TargetSourceCreators and calls their getTargetSource method to get the target source. If a matching target source is found, it returns it. Otherwise it returns null.
 
 ```java
 /**
- * 为bean实例创建目标源。如果设置了任何TargetSourceCreators，则使用它们。
- * 如果不应使用自定义的TargetSource，则返回{@code null}。
- * <p>此实现使用"customTargetSourceCreators"属性。
- * 子类可以重写此方法以使用不同的机制。
- * @param beanClass bean的类
- * @param beanName bean的名称
- * @return 用于此bean的目标源
+ * Create the target source for a bean instance. If any TargetSourceCreators are set, they are used.
+ * Return {@code null} if no custom TargetSource should be used.
+ * <p>This implementation uses the "customTargetSourceCreators" property.
+ * Subclasses can override this method to use a different mechanism.
+ * @param beanClass the class of the bean
+ * @param beanName the name of the bean
+ * @return the target source to use for this bean
  * @see #setCustomTargetSourceCreators
  */
 @Nullable
 protected TargetSource getCustomTargetSource(Class<?> beanClass, String beanName) {
-    // 对于直接注册的单例bean，我们无法创建复杂的目标源。
+    // We cannot create a complex target source for a directly registered singleton bean.
     if (this.customTargetSourceCreators != null &&
         this.beanFactory != null && this.beanFactory.containsBean(beanName)) {
-        // 遍历所有的TargetSourceCreators
+        // Loop over all TargetSourceCreators
         for (TargetSourceCreator tsc : this.customTargetSourceCreators) {
-            // 通过TargetSourceCreator获取目标源
+            // Get the target source through the TargetSourceCreator
             TargetSource ts = tsc.getTargetSource(beanClass, beanName);
-            // 如果找到匹配的目标源，则返回
+            // If a matching target source is found, return it
             if (ts != null) {
-                // 找到了匹配的目标源。
+                // A matching target source was found.
                 if (logger.isTraceEnabled()) {
                     logger.trace("TargetSourceCreator [" + tsc +
                             "] found custom TargetSource for bean with name '" + beanName + "'");
@@ -362,7 +362,7 @@ protected TargetSource getCustomTargetSource(Class<?> beanClass, String beanName
         }
     }
 
-    // 没有找到自定义的目标源。
+    // No custom target source was found.
     return null;
 }
 ```

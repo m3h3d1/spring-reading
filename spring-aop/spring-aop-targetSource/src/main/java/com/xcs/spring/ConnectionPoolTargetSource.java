@@ -6,22 +6,22 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 /**
- * 连接池目标源，用于管理自定义连接对象的连接池。
+ * Connection pool target source that manages a connection pool of custom connection objects.
  *
  * @author xcs
- * @date 2024年4月9日15:26:28
+ * @date 2024-04-09 15:26
  */
 public class ConnectionPoolTargetSource implements TargetSource {
 
     /**
-     * 连接池
+     * Connection pool
      */
     private final BlockingQueue<MyConnection> connectionPool;
 
     /**
-     * 构造函数，初始化连接池。
+     * Constructor that initializes the connection pool.
      *
-     * @param poolSize 连接池大小
+     * @param poolSize the pool size
      */
     public ConnectionPoolTargetSource(int poolSize) {
         this.connectionPool = new ArrayBlockingQueue<>(poolSize);
@@ -29,9 +29,9 @@ public class ConnectionPoolTargetSource implements TargetSource {
     }
 
     /**
-     * 初始化连接池，填充连接对象。
+     * Initializes the connection pool and fills it with connection objects.
      *
-     * @param poolSize 连接池大小
+     * @param poolSize the pool size
      */
     private void initializeConnectionPool(int poolSize) {
         for (int i = 0; i < poolSize; i++) {
@@ -41,9 +41,9 @@ public class ConnectionPoolTargetSource implements TargetSource {
     }
 
     /**
-     * 获取目标类的类型。
+     * Gets the type of the target class.
      *
-     * @return 目标类的类型
+     * @return the type of the target class
      */
     @Override
     public Class<?> getTargetClass() {
@@ -51,9 +51,9 @@ public class ConnectionPoolTargetSource implements TargetSource {
     }
 
     /**
-     * 判断目标对象是否是静态的。
+     * Checks whether the target object is static.
      *
-     * @return 如果目标对象是静态的，则返回true，否则返回false
+     * @return true if the target object is static, otherwise false
      */
     @Override
     public boolean isStatic() {
@@ -61,10 +61,10 @@ public class ConnectionPoolTargetSource implements TargetSource {
     }
 
     /**
-     * 获取连接对象。
+     * Gets a connection object.
      *
-     * @return 连接对象
-     * @throws Exception 如果获取连接对象时发生异常
+     * @return the connection object
+     * @throws Exception if an exception occurs while getting the connection object
      */
     @Override
     public Object getTarget() throws Exception {
@@ -72,10 +72,10 @@ public class ConnectionPoolTargetSource implements TargetSource {
     }
 
     /**
-     * 释放连接对象。
+     * Releases a connection object.
      *
-     * @param target 待释放的连接对象
-     * @throws Exception 如果释放连接对象时发生异常
+     * @param target the connection object to release
+     * @throws Exception if an exception occurs while releasing the connection object
      */
     @Override
     public void releaseTarget(Object target) throws Exception {

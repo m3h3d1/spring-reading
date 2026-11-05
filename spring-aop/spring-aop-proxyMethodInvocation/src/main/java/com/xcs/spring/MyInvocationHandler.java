@@ -5,34 +5,34 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 /**
- * 自定义的 InvocationHandler 实现类，用于处理 Java 动态代理的方法调用。
+ * A custom InvocationHandler implementation that handles method calls of the Java dynamic proxy.
  */
 class MyInvocationHandler implements InvocationHandler {
 
-    // 目标对象
+    // The target object
     private final Object target;
 
     /**
-     * 构造方法，初始化目标对象。
-     * @param target 目标对象
+     * Constructor that initializes the target object.
+     * @param target the target object
      */
     public MyInvocationHandler(Object target) {
         this.target = target;
     }
 
     /**
-     * 处理方法调用的核心方法。
-     * @param proxy 代理对象
-     * @param method 被调用的方法对象
-     * @param args 方法参数
-     * @return 方法调用结果
-     * @throws Throwable 可能抛出的异常
+     * The core method that handles method calls.
+     * @param proxy the proxy object
+     * @param method the method object that is called
+     * @param args the method arguments
+     * @return the result of the method call
+     * @throws Throwable the exception that may be thrown
      */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        // 创建 MyReflectiveMethodInvocation 对象，用于执行方法调用链
+        // Create a MyReflectiveMethodInvocation object to run the method call chain
         MyReflectiveMethodInvocation invocation = new MyReflectiveMethodInvocation(proxy, target, method, args, target.getClass(), List.of(new MyMethodInterceptor()));
-        // 执行方法调用链，并返回结果
+        // Run the method call chain and return the result
         return invocation.proceed();
     }
 }

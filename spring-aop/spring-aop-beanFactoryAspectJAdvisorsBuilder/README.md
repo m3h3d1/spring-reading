@@ -1,62 +1,62 @@
 ## BeanFactoryAspectJAdvisorsBuilder
 
 - [BeanFactoryAspectJAdvisorsBuilder](#beanfactoryaspectjadvisorsbuilder)
-  - [一、基本信息](#一基本信息)
-  - [二、基本描述](#二基本描述)
-  - [三、主要功能](#三主要功能)
-  - [四、最佳实践](#四最佳实践)
-  - [五、时序图](#五时序图)
-  - [六、源码分析](#六源码分析)
+  - [1. Overview](#1-overview)
+  - [2. Description](#2-description)
+  - [3. Main Features](#3-main-features)
+  - [4. Best Practices](#4-best-practices)
+  - [5. Sequence Diagram](#5-sequence-diagram)
+  - [6. Source Code Analysis](#6-source-code-analysis)
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、基本描述
+### 2. Description
 
-`BeanFactoryAspectJAdvisorsBuilder` 是 Spring AOP 中的一个重要类，负责将应用中使用 AspectJ 注解标记的切面解析并转换为 Spring AOP 中的通知器，从而实现基于注解的切面编程。
+`BeanFactoryAspectJAdvisorsBuilder` is an important class in Spring AOP. It parses the aspects marked with AspectJ annotations in the application and turns them into Spring AOP Advisors. This makes annotation-based aspect programming work.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **扫描 AspectJ 注解** 
+1. **Scan AspectJ annotations**
 
-   + 这个类会扫描应用中的类，查找带有 AspectJ 注解的类，比如 `@Aspect`。它会识别这些类，并将它们转换成 Spring AOP 中的通知器。
+   + This class scans the classes in the application and looks for classes with AspectJ annotations, such as `@Aspect`. It recognizes these classes and turns them into Spring AOP Advisors.
 
-2. **解析切面和通知** 
+2. **Parse aspects and advice**
 
-   + 一旦发现带有 AspectJ 注解的类，`BeanFactoryAspectJAdvisorsBuilder` 将解析这些类，找到其中定义的切面以及切面中的通知。
+   + When it finds a class with AspectJ annotations, `BeanFactoryAspectJAdvisorsBuilder` parses it to find the aspect and the advice defined in the aspect.
 
-3. **创建通知器（advisors）** 
+3. **Create Advisors**
 
-   + 基于解析得到的切面和通知信息，这个类会创建对应的通知器。通知器包含了切面逻辑以及连接点（切入点）信息，它们将被应用到目标对象的方法调用中。
+   + From the parsed aspect and advice data, this class creates the matching Advisors. An Advisor holds the aspect logic and the join point (pointcut) data. It is applied to the method calls of the target object.
 
-4. **注册通知器** 
+4. **Register Advisors**
 
-   + 最后，`BeanFactoryAspectJAdvisorsBuilder` 将创建的通知器注册到 Spring 的 AOP 框架中，以便在应用程序运行时生效。
+   + Finally, `BeanFactoryAspectJAdvisorsBuilder` registers the created Advisors in the Spring AOP framework, so they take effect while the application runs.
 
-### 四、最佳实践
+### 4. Best Practices
 
-使用基于注解的应用上下文来获取并调用 `MyService` Bean 的 `foo()`
-方法。首先，创建了一个 `AnnotationConfigApplicationContext` 实例，通过传入 `AppConfig.class`
-来初始化基于注解的应用上下文。然后，通过 `context.getBean(MyService.class)` 获取了 `MyService` Bean
-的实例，并调用了其 `foo()` 方法。
+This example uses an annotation-based application context to get the `MyService` bean and call its `foo()`
+method. First, it creates an `AnnotationConfigApplicationContext` instance and passes `AppConfig.class`
+to set up the context. Then it gets the `MyService` bean with `context.getBean(MyService.class)`
+and calls its `foo()` method.
 
 ```java
 public class BeanFactoryAspectJAdvisorsBuilderDemo {
 
     public static void main(String[] args) {
-        // 创建基于注解的应用上下文
+        // Create the annotation-based application context
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
-        // 从应用上下文中获取MyService bean
+        // Get the MyService bean from the application context
         MyService myService = context.getBean(MyService.class);
-        // 调用MyService的方法
+        // Call the method of MyService
         myService.foo();
     }
 }
 ```
 
-`AppConfig` 类是一个使用 `@Configuration` 注解标记的配置类，通过 `@EnableAspectJAutoProxy` 开启了 AspectJ
-自动代理功能，并通过 `@ComponentScan` 启用了组件扫描，用于自动发现和注册 Spring 组件。
+The `AppConfig` class is a configuration class marked with `@Configuration`. It turns on AspectJ auto proxy support with `@EnableAspectJAutoProxy`
+and turns on component scanning with `@ComponentScan`, to find and register Spring components automatically.
 
 ```java
 
@@ -68,8 +68,8 @@ public class AppConfig {
 }
 ```
 
-通过 @Aspect 和 @Component 注解将其标记为 Spring 组件，并定义了一个在 com.xcs.spring.MyService 类的 foo
-方法执行前执行的前置通知（Before advice）。
+It is marked as a Spring component with the @Aspect and @Component annotations, and it defines a before advice (Before advice) that runs before the foo
+method of the com.xcs.spring.MyService class.
 
 ```java
 @Aspect
@@ -83,7 +83,7 @@ class MyAspect {
 }
 ```
 
-`MyService` 类是一个使用 `@Service` 注解标记的服务类，提供了一个名为 `foo()` 的方法，该方法在调用时会打印消息 "foo..."。
+The `MyService` class is a service class marked with `@Service`. It has a method named `foo()` that prints the message "foo..." when called.
 
 ```java
 
@@ -96,8 +96,8 @@ public class MyService {
 }
 ```
 
-运行结果，调用 `MyService` 类的 `foo()` 方法之前，成功地执行了一个切面通知，输出了 "Before method execution"
-的消息，然后执行了 `foo()` 方法，输出了 "foo..." 的消息。
+In the run result, before the `foo()` method of the `MyService` class is called, the aspect advice runs and prints "Before method execution".
+Then the `foo()` method runs and prints "foo...".
 
 ```java
 Before method
@@ -105,77 +105,77 @@ execution
 foo...
 ```
 
-### 五、时序图
+### 5. Sequence Diagram
 
 ~~~mermaid
 sequenceDiagram
     AbstractAutowireCapableBeanFactory->>AbstractAutoProxyCreator: postProcessAfterInitialization()
-    Note over AbstractAutowireCapableBeanFactory,AbstractAutoProxyCreator: 调用后处理方法
+    Note over AbstractAutowireCapableBeanFactory,AbstractAutoProxyCreator: Call the post-processing method
     AbstractAutoProxyCreator->>AbstractAutoProxyCreator: wrapIfNecessary()
-    Note over AbstractAutoProxyCreator: 调用包装方法
+    Note over AbstractAutoProxyCreator: Call the wrap method
     AbstractAutoProxyCreator->>AbstractAdvisorAutoProxyCreator: getAdvicesAndAdvisorsForBean()
-    Note over AbstractAutoProxyCreator,AbstractAdvisorAutoProxyCreator: 获取通知和 Advisors
+    Note over AbstractAutoProxyCreator,AbstractAdvisorAutoProxyCreator: Get the advice and Advisors
     AbstractAdvisorAutoProxyCreator->>AbstractAdvisorAutoProxyCreator: findEligibleAdvisors()
-    Note over AbstractAdvisorAutoProxyCreator: 查找合适的 Advisors
+    Note over AbstractAdvisorAutoProxyCreator: Find eligible Advisors
     AbstractAdvisorAutoProxyCreator->>AnnotationAwareAspectJAutoProxyCreator: findCandidateAdvisors()
-    Note over AbstractAdvisorAutoProxyCreator,AnnotationAwareAspectJAutoProxyCreator: 查找候选的 Advisors
+    Note over AbstractAdvisorAutoProxyCreator,AnnotationAwareAspectJAutoProxyCreator: Find candidate Advisors
     AnnotationAwareAspectJAutoProxyCreator->>BeanFactoryAspectJAdvisorsBuilder: buildAspectJAdvisors()
-    Note over AnnotationAwareAspectJAutoProxyCreator,BeanFactoryAspectJAdvisorsBuilder: 构建 AspectJ Advisors
-    BeanFactoryAspectJAdvisorsBuilder->>AbstractAutoProxyCreator: 返回 advisors
+    Note over AnnotationAwareAspectJAutoProxyCreator,BeanFactoryAspectJAdvisorsBuilder: Build AspectJ Advisors
+    BeanFactoryAspectJAdvisorsBuilder->>AbstractAutoProxyCreator: Return advisors
 ~~~
 
-### 六、源码分析
+### 6. Source Code Analysis
 
-在`org.springframework.aop.aspectj.annotation.BeanFactoryAspectJAdvisorsBuilder#buildAspectJAdvisors`方法中，主要负责在当前的 Bean 工厂中查找使用 AspectJ 注解标记的切面 Bean，并将其转换为 Spring AOP Advisors 的列表。它遍历所有的 Bean 名称，识别切面 Bean，并根据其实例化模型（单例或多例）创建对应的 AspectJ Advisors。在处理过程中，还会缓存单例切面的 Advisors，以提高性能。
+The `org.springframework.aop.aspectj.annotation.BeanFactoryAspectJAdvisorsBuilder#buildAspectJAdvisors` method finds the aspect beans marked with AspectJ annotations in the current bean factory and turns them into a list of Spring AOP Advisors. It loops over all bean names, recognizes the aspect beans, and creates the AspectJ Advisors based on the instantiation model (singleton or prototype). It also caches the Advisors of singleton aspects to improve performance.
 
 ```java
 /**
- * 在当前 Bean 工厂中查找使用 AspectJ 注解标记的切面 Bean，并返回表示它们的 Spring AOP Advisors 列表。
- * <p>为每个 AspectJ 的通知方法创建一个 Spring Advisor。
- * @return 包含 {@link org.springframework.aop.Advisor} beans 的列表
+ * Find the aspect beans marked with AspectJ annotations in the current bean factory, and return the list of Spring AOP Advisors that represent them.
+ * <p>Creates one Spring Advisor for each AspectJ advice method.
+ * @return a list of {@link org.springframework.aop.Advisor} beans
  * @see #isEligibleBean
  */
 public List<Advisor> buildAspectJAdvisors() {
-    // 如果切面 Bean 名称列表为空，则进行查找
+    // If the list of aspect bean names is empty, look them up
     List<String> aspectNames = this.aspectBeanNames;
 
     if (aspectNames == null) {
         synchronized (this) {
             aspectNames = this.aspectBeanNames;
             if (aspectNames == null) {
-                // 初始化切面 Advisors 列表和切面 Bean 名称列表
+                // Initialize the list of aspect Advisors and the list of aspect bean names
                 List<Advisor> advisors = new ArrayList<>();
                 aspectNames = new ArrayList<>();
-                // 获取当前 Bean 工厂中的所有 Bean 名称
+                // Get all bean names in the current bean factory
                 String[] beanNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
                         this.beanFactory, Object.class, true, false);
-                // 遍历所有 Bean 名称
+                // Loop over all bean names
                 for (String beanName : beanNames) {
-                    // 检查 Bean 是否符合条件
+                    // Check whether the bean is eligible
                     if (!isEligibleBean(beanName)) {
                         continue;
                     }
-                    // 获取 Bean 的类型
+                    // Get the type of the bean
                     Class<?> beanType = this.beanFactory.getType(beanName, false);
-                    // 如果无法获取类型，则跳过
+                    // If the type cannot be found, skip it
                     if (beanType == null) {
                         continue;
                     }
-                    // 判断 Bean 是否是切面
+                    // Check whether the bean is an aspect
                     if (this.advisorFactory.isAspect(beanType)) {
-                        // 将切面 Bean 名称加入列表
+                        // Add the aspect bean name to the list
                         aspectNames.add(beanName);
-                        // 获取切面元数据
+                        // Get the aspect metadata
                         AspectMetadata amd = new AspectMetadata(beanType, beanName);
-                        // 判断切面的实例化模型
+                        // Check the instantiation model of the aspect
                         if (amd.getAjType().getPerClause().getKind() == PerClauseKind.SINGLETON) {
-                            // 单例模式
-                            // 创建单例模式的切面实例工厂
+                            // Singleton model
+                            // Create the aspect instance factory for the singleton model
                             MetadataAwareAspectInstanceFactory factory =
                                     new BeanFactoryAspectInstanceFactory(this.beanFactory, beanName);
-                            // 获取切面的 Advisors
+                            // Get the Advisors of the aspect
                             List<Advisor> classAdvisors = this.advisorFactory.getAdvisors(factory);
-                            // 缓存单例切面的 Advisors
+                            // Cache the Advisors of the singleton aspect
                             if (this.beanFactory.isSingleton(beanName)) {
                                 this.advisorsCache.put(beanName, classAdvisors);
                             } else {
@@ -183,44 +183,44 @@ public List<Advisor> buildAspectJAdvisors() {
                             }
                             advisors.addAll(classAdvisors);
                         } else {
-                            // 多例模式
+                            // Prototype model
                             if (this.beanFactory.isSingleton(beanName)) {
-                                // 如果切面实例化模型为多例，但 Bean 是单例，则抛出异常
+                                // If the aspect instantiation model is prototype but the bean is a singleton, throw an exception
                                 throw new IllegalArgumentException("Bean with name '" + beanName +
                                         "' is a singleton, but aspect instantiation model is not singleton");
                             }
-                            // 创建多例模式的切面实例工厂
+                            // Create the aspect instance factory for the prototype model
                             MetadataAwareAspectInstanceFactory factory =
                                     new PrototypeAspectInstanceFactory(this.beanFactory, beanName);
-                            // 缓存切面实例工厂
+                            // Cache the aspect instance factory
                             this.aspectFactoryCache.put(beanName, factory);
-                            // 获取切面的 Advisors
+                            // Get the Advisors of the aspect
                             advisors.addAll(this.advisorFactory.getAdvisors(factory));
                         }
                     }
                 }
-                // 将切面 Bean 名称列表缓存起来
+                // Cache the list of aspect bean names
                 this.aspectBeanNames = aspectNames;
                 return advisors;
             }
         }
     }
 
-    // 如果切面 Bean 名称列表为空，则返回空列表
+    // If the list of aspect bean names is empty, return an empty list
     if (aspectNames.isEmpty()) {
         return Collections.emptyList();
     }
-    // 创建用于存储所有 Advisors 的列表
+    // Create a list to hold all Advisors
     List<Advisor> advisors = new ArrayList<>();
-    // 遍历切面 Bean 名称列表
+    // Loop over the list of aspect bean names
     for (String aspectName : aspectNames) {
-        // 从缓存中获取 Advisors
+        // Get the Advisors from the cache
         List<Advisor> cachedAdvisors = this.advisorsCache.get(aspectName);
         if (cachedAdvisors != null) {
-            // 如果缓存中有 Advisors，则加入到结果列表中
+            // If the cache has Advisors, add them to the result list
             advisors.addAll(cachedAdvisors);
         } else {
-            // 如果缓存中没有 Advisors，则从切面实例工厂中获取 Advisors
+            // If the cache has no Advisors, get them from the aspect instance factory
             MetadataAwareAspectInstanceFactory factory = this.aspectFactoryCache.get(aspectName);
             advisors.addAll(this.advisorFactory.getAdvisors(factory));
         }
@@ -229,31 +229,31 @@ public List<Advisor> buildAspectJAdvisors() {
 }
 ```
 
-在org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactory#isAspect方法中，判断给定的类是否是一个切面。它首先检查类是否带有 AspectJ 注解，然后再确认该类不是由 AspectJ 编译器编译的。如果符合这两个条件，则返回 true，表示该类是一个切面；否则返回 false。
+The `org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactory#isAspect` method checks whether the given class is an aspect. It first checks whether the class has an AspectJ annotation, and then checks that the class was not compiled by the AspectJ compiler. If both conditions are met, it returns true, which means the class is an aspect. Otherwise it returns false.
 
 ```java
 /**
- * 判断给定的类是否是切面。
- * @param clazz 要检查的类
- * @return 如果类是切面，则返回 true；否则返回 false
+ * Check whether the given class is an aspect.
+ * @param clazz the class to check
+ * @return true if the class is an aspect, otherwise false
  */
 @Override
 public boolean isAspect(Class<?> clazz) {
-    // 判断类是否带有 AspectJ 注解，并且不是由 AspectJ 编译器编译的
+    // Check that the class has an AspectJ annotation and was not compiled by the AspectJ compiler
     return (hasAspectAnnotation(clazz) && !compiledByAjc(clazz));
 }
 ```
 
-在`org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactory#hasAspectAnnotation`方法中，检查给定的类是否带有 AspectJ 注解。
+The `org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactory#hasAspectAnnotation` method checks whether the given class has an AspectJ annotation.
 
 ```java
 /**
- * 判断给定的类是否带有 AspectJ 注解。
- * @param clazz 要检查的类
- * @return 如果类带有 AspectJ 注解，则返回 true；否则返回 false
+ * Check whether the given class has an AspectJ annotation.
+ * @param clazz the class to check
+ * @return true if the class has an AspectJ annotation, otherwise false
  */
 private boolean hasAspectAnnotation(Class<?> clazz) {
-    // 使用 AnnotationUtils.findAnnotation 方法查找类上的 Aspect 注解
+    // Use the AnnotationUtils.findAnnotation method to find the Aspect annotation on the class
     return (AnnotationUtils.findAnnotation(clazz, Aspect.class) != null);
 }
 ```

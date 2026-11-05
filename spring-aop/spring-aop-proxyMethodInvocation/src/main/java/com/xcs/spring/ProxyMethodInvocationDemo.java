@@ -5,13 +5,13 @@ import java.lang.reflect.Proxy;
 public class ProxyMethodInvocationDemo {
 
     public static void main(String[] args) {
-        // 创建目标对象
+        // Create the target object
         MyService target = new MyServiceImpl();
-        // 获取目标对象的类对象
+        // Get the class object of the target object
         Class<? extends MyService> clz = target.getClass();
-        // 创建代理对象，并指定目标对象的类加载器、实现的接口以及调用处理器
+        // Create the proxy object with the class loader of the target object, the interfaces it implements, and the invocation handler
         MyService proxyObject = (MyService) Proxy.newProxyInstance(clz.getClassLoader(), clz.getInterfaces(), new MyInvocationHandler(target));
-        // 通过代理对象调用方法，实际上会调用 MyInvocationHandler 中的 invoke 方法
+        // Call the method through the proxy object, which actually calls the invoke method in MyInvocationHandler
         proxyObject.foo();
     }
 }

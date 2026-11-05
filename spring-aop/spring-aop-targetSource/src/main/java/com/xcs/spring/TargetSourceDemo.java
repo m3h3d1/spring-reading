@@ -5,14 +5,14 @@ import org.springframework.aop.framework.ProxyFactory;
 public class TargetSourceDemo {
 
     public static void main(String[] args) {
-        // 创建代理工厂
+        // Create the proxy factory
         ProxyFactory proxyFactory = new ProxyFactory();
-        // 设置目标源为连接池目标源，连接池大小为3
+        // Set the target source to the connection pool target source, with a pool size of 3
         proxyFactory.setTargetSource(new ConnectionPoolTargetSource(3));
-        // 获取代理对象
+        // Get the proxy object
         MyConnection proxy = (MyConnection) proxyFactory.getProxy();
 
-        // 调用10次方法
+        // Call the method 10 times
         for (int i = 0; i < 10; i++) {
             System.out.println("MyConnection Name = " + proxy.getName());
         }

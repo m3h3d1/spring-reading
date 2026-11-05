@@ -5,11 +5,11 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 public class EnableAspectJAutoProxyDemo {
 
     public static void main(String[] args) {
-        // 创建基于注解的应用上下文
+        // Create the annotation-based application context
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
-        // 从应用上下文中获取MyService bean
+        // Get the MyService bean from the application context
         MyService myService = context.getBean(MyService.class);
-        // 调用MyService的方法
+        // Call the method of MyService
         myService.foo();
     }
 }

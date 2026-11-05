@@ -1,56 +1,56 @@
 ## ProxyMethodInvocation
 
 - [ProxyMethodInvocation](#proxymethodinvocation)
-    - [一、基本信息](#一基本信息)
-    - [二、基本描述](#二基本描述)
-    - [三、主要功能](#三主要功能)
-    - [四、接口源码](#四接口源码)
-    - [五、主要实现](#五主要实现)
-    - [六、类关系图](#六类关系图)
-    - [七、最佳实践](#七最佳实践)
-    - [八、源码分析](#八源码分析)
+    - [1. Overview](#1-overview)
+    - [2. Description](#2-description)
+    - [3. Main Features](#3-main-features)
+    - [4. Interface Source](#4-interface-source)
+    - [5. Main Implementations](#5-main-implementations)
+    - [6. Class Diagram](#6-class-diagram)
+    - [7. Best Practices](#7-best-practices)
+    - [8. Source Code Analysis](#8-source-code-analysis)
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、基本描述
+### 2. Description
 
-`ProxyMethodInvocation`是Spring AOP中的核心接口之一，用于表示代理方法调用，提供了获取方法、参数、目标对象等信息的方法，并允许拦截器链中的拦截器对方法调用进行处理，是实现方法拦截和增强逻辑的关键组件。
+`ProxyMethodInvocation` is one of the core interfaces in Spring AOP. It represents a proxy method call. It has methods to get the method, the arguments, the target object, and more, and it lets the interceptors in the interceptor chain handle the method call. It is a key part of method interception and enhancement.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **获取方法信息**
+1. **Get method information**
 
-   + 通过`getMethod()`方法可以获取当前正在调用的方法对象，包括方法名、参数类型等信息。
+   + The `getMethod()` method returns the method object that is being called, including the method name, the parameter types, and more.
 
-2. **获取方法参数**
+2. **Get method arguments**
 
-   + 使用`getArguments()`方法可以获取方法调用时传递的参数数组，允许拦截器对参数进行处理或检查。
+   + The `getArguments()` method returns the array of arguments passed in the method call. Interceptors can handle or check the arguments.
 
-3. **执行下一个拦截器或目标方法**
+3. **Run the next interceptor or the target method**
 
-   + 通过`proceed()`方法可以继续执行拦截器链中的下一个拦截器或者调用目标方法。如果`proceed()`方法不被调用，拦截器链可能会被终止，不会执行目标方法。
+   + The `proceed()` method continues with the next interceptor in the chain, or calls the target method. If `proceed()` is not called, the interceptor chain may stop and the target method does not run.
 
-4. **获取目标对象**
+4. **Get the target object**
 
-   + `getThis()`方法允许获取被代理的目标对象，即被拦截的对象实例。
+   + The `getThis()` method returns the target object being proxied, that is, the object instance that is intercepted.
 
-5. **获取代理对象**
+5. **Get the proxy object**
 
-   + 通过`getProxy()`方法获取执行当前方法调用的代理对象，这对于需要在拦截器中替换返回值为代理对象的情况非常有用。
+   + The `getProxy()` method returns the proxy object that runs the current method call. This is useful when an interceptor needs to replace the return value with the proxy object.
 
-### 四、接口源码
+### 4. Interface Source
 
-`ProxyMethodInvocation`接口，它是AOP联盟 `MethodInvocation` 接口的扩展，允许访问通过方法调用所使用的代理对象。该接口提供了获取代理对象、创建方法调用的克隆、设置方法调用的参数、添加和获取用户属性等功能，用于在AOP环境中处理方法调用并进行增强。
+The `ProxyMethodInvocation` interface extends the AOP Alliance `MethodInvocation` interface and gives access to the proxy object used for the method call. The interface can get the proxy object, create a clone of the method call, set the arguments of the method call, and add and get user attributes. It is used to handle method calls and enhance them in an AOP environment.
 
 ```java
 /**
- * 扩展了AOP联盟 {@link org.aopalliance.intercept.MethodInvocation} 接口，
- * 允许访问通过方法调用所使用的代理对象。
+ * Extends the AOP Alliance {@link org.aopalliance.intercept.MethodInvocation} interface,
+ * and allows access to the proxy object used for the method call.
  *
- * <p>如果需要的话，通过此接口可以方便地使用代理对象替换返回值，
- * 例如如果调用目标返回了自身对象。
+ * <p>If needed, this interface makes it easy to replace a return value with the proxy object,
+ * for example if the invocation target returned itself.
  *
  * @author Juergen Hoeller
  * @author Adrian Colyer
@@ -61,47 +61,47 @@
 public interface ProxyMethodInvocation extends MethodInvocation {
 
     /**
-     * 返回执行此方法调用的代理对象。
-     * @return 原始代理对象
+     * Return the proxy object that runs this method call.
+     * @return the original proxy object
      */
     Object getProxy();
 
     /**
-     * 创建此对象的克隆。如果在此对象上调用 {@code proceed()} 之前进行克隆，
-     * 则每个克隆可以调用 {@code proceed()} 一次，以多次调用连接点（以及其余的通知链）。
-     * @return 此调用的可调用克隆。
-     * {@code proceed()} 可以每个克隆调用一次。
+     * Create a clone of this object. If cloning is done before {@code proceed()} is called on this object,
+     * each clone can call {@code proceed()} once, to invoke the join point (and the rest of the advice chain) multiple times.
+     * @return a callable clone of this invocation.
+     * {@code proceed()} can be called once per clone.
      */
     MethodInvocation invocableClone();
 
     /**
-     * 创建此对象的克隆，并指定克隆对象所使用的参数。如果在此对象上调用 {@code proceed()} 之前进行克隆，
-     * 则每个克隆可以调用 {@code proceed()} 一次，以多次调用连接点（以及其余的通知链）。
-     * @param arguments 克隆调用所使用的参数，覆盖原始参数
-     * @return 此调用的可调用克隆。
-     * {@code proceed()} 可以每个克隆调用一次。
+     * Create a clone of this object with the given arguments for the clone. If cloning is done before {@code proceed()} is called on this object,
+     * each clone can call {@code proceed()} once, to invoke the join point (and the rest of the advice chain) multiple times.
+     * @param arguments the arguments for the cloned invocation, which override the original arguments
+     * @return a callable clone of this invocation.
+     * {@code proceed()} can be called once per clone.
      */
     MethodInvocation invocableClone(Object... arguments);
 
     /**
-     * 设置将在此链中的后续调用中使用的参数。
-     * @param arguments 参数数组
+     * Set the arguments to be used on subsequent calls in this chain.
+     * @param arguments the array of arguments
      */
     void setArguments(Object... arguments);
 
     /**
-     * 向此方法调用添加指定的用户属性和给定的值。
-     * <p>这些属性在AOP框架内部不使用。它们只是作为调用对象的一部分保留，
-     * 供特殊拦截器使用。
-     * @param key 属性的名称
-     * @param value 属性的值，如果要重置则传入 {@code null}
+     * Add the given user attribute with the given value to this method call.
+     * <p>These attributes are not used inside the AOP framework. They are just kept as part of the invocation object,
+     * for use by special interceptors.
+     * @param key the name of the attribute
+     * @param value the value of the attribute, or {@code null} to reset it
      */
     void setUserAttribute(String key, @Nullable Object value);
 
     /**
-     * 返回指定用户属性的值。
-     * @param key 属性的名称
-     * @return 属性的值，如果未设置则返回 {@code null}
+     * Return the value of the given user attribute.
+     * @param key the name of the attribute
+     * @return the value of the attribute, or {@code null} if it is not set
      * @see #setUserAttribute
      */
     @Nullable
@@ -110,17 +110,17 @@ public interface ProxyMethodInvocation extends MethodInvocation {
 }
 ```
 
-### 五、主要实现
+### 5. Main Implementations
 
 1. **ReflectiveMethodInvocation**
 
-   + 通过Java反射机制执行方法调用。当目标对象是基于接口的JDK动态代理时，Spring会使用`ReflectiveMethodInvocation`来处理方法调用。它具有通用性但性能较低，适用于代理接口类型的目标对象。
+   + Runs the method call through Java reflection. When the target object uses an interface-based JDK dynamic proxy, Spring uses `ReflectiveMethodInvocation` to handle the method call. It is general, but slower. It fits target objects that are proxied by interface.
 
 2. **CglibMethodInvocation** 
 
-   + 基于CGLIB动态代理生成子类来执行方法调用。当目标对象是基于类的CGLIB代理时，Spring会使用`CglibMethodInvocation`来处理方法调用。它通常比`ReflectiveMethodInvocation`性能更高，主要用于代理非接口类型的目标对象。
+   + Runs the method call through a subclass generated by the CGLIB dynamic proxy. When the target object uses a class-based CGLIB proxy, Spring uses `CglibMethodInvocation` to handle the method call. It is usually faster than `ReflectiveMethodInvocation`, and is mainly used to proxy target objects that are not interface types.
 
-### 六、类关系图
+### 6. Class Diagram
 
 ~~~mermaid
 classDiagram
@@ -151,80 +151,80 @@ ProxyMethodInvocation  -->  MethodInvocation
 ReflectiveMethodInvocation  ..>  ProxyMethodInvocation 
 ~~~
 
-### 七、最佳实践
+### 7. Best Practices
 
-使用Java动态代理创建代理对象并调用方法。首先，创建了一个目标对象 `MyService target = new MyServiceImpl()`，然后通过 `Proxy.newProxyInstance()` 方法创建了代理对象，指定了目标对象的类加载器、实现的接口以及调用处理器。最后，通过代理对象调用方法，实际上会触发调用处理器中的 `invoke()` 方法来执行额外的逻辑。
+This example uses the Java dynamic proxy to create a proxy object and call a method. First, it creates a target object `MyService target = new MyServiceImpl()`. Then it creates the proxy object with the `Proxy.newProxyInstance()` method, giving the class loader of the target object, the interfaces it implements, and the invocation handler. Finally, when a method is called on the proxy object, the `invoke()` method of the invocation handler runs the extra logic.
 
 ```java
 public class ProxyMethodInvocationDemo {
 
     public static void main(String[] args) {
-        // 创建目标对象
+        // Create the target object
         MyService target = new MyServiceImpl();
-        // 获取目标对象的类对象
+        // Get the class object of the target object
         Class<? extends MyService> clz = target.getClass();
-        // 创建代理对象，并指定目标对象的类加载器、实现的接口以及调用处理器
+        // Create the proxy object with the class loader of the target object, the interfaces it implements, and the invocation handler
         MyService proxyObject = (MyService) Proxy.newProxyInstance(clz.getClassLoader(), clz.getInterfaces(), new MyInvocationHandler(target));
-        // 通过代理对象调用方法，实际上会调用 MyInvocationHandler 中的 invoke 方法
+        // Call the method through the proxy object, which actually calls the invoke method in MyInvocationHandler
         proxyObject.foo();
     }
 }
 ```
 
- `MyInvocationHandler` 类实现了 `InvocationHandler` 接口，作为 Java 动态代理的调用处理器。在 `invoke()` 方法中，它接收代理对象、方法对象和方法参数，并使用这些信息创建一个 `MyReflectiveMethodInvocation` 对象，然后调用 `proceed()` 方法来执行方法调用链。这个类的目的是将方法调用转发给拦截器链处理，以实现额外的逻辑或增强功能。
+ The `MyInvocationHandler` class implements the `InvocationHandler` interface and works as the invocation handler of the Java dynamic proxy. In the `invoke()` method, it receives the proxy object, the method object, and the method arguments, uses them to create a `MyReflectiveMethodInvocation` object, and calls the `proceed()` method to run the method call chain. The purpose of this class is to pass the method call to the interceptor chain, to add extra logic or enhancement.
 
 ```java
 /**
- * 自定义的 InvocationHandler 实现类，用于处理 Java 动态代理的方法调用。
+ * A custom InvocationHandler implementation that handles method calls of the Java dynamic proxy.
  */
 class MyInvocationHandler implements InvocationHandler {
 
-    // 目标对象
+    // The target object
     private final Object target;
 
     /**
-     * 构造方法，初始化目标对象。
-     * @param target 目标对象
+     * Constructor that initializes the target object.
+     * @param target the target object
      */
     public MyInvocationHandler(Object target) {
         this.target = target;
     }
 
     /**
-     * 处理方法调用的核心方法。
-     * @param proxy 代理对象
-     * @param method 被调用的方法对象
-     * @param args 方法参数
-     * @return 方法调用结果
-     * @throws Throwable 可能抛出的异常
+     * The core method that handles method calls.
+     * @param proxy the proxy object
+     * @param method the method object that is called
+     * @param args the method arguments
+     * @return the result of the method call
+     * @throws Throwable the exception that may be thrown
      */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        // 创建 MyReflectiveMethodInvocation 对象，用于执行方法调用链
+        // Create a MyReflectiveMethodInvocation object to run the method call chain
         MyReflectiveMethodInvocation invocation = new MyReflectiveMethodInvocation(proxy, target, method, args, target.getClass(), List.of(new MyMethodInterceptor()));
-        // 执行方法调用链，并返回结果
+        // Run the method call chain and return the result
         return invocation.proceed();
     }
 }
 ```
 
-我们自定义 `MyReflectiveMethodInvocation` 类是为了继承 Spring AOP 中的 `ReflectiveMethodInvocation` 并提供一个公开的构造方法。这样做允许你在自定义的方法调用对象中添加额外的逻辑或功能，并且可以在其它地方使用这个自定义的方法调用对象。
+We define our own `MyReflectiveMethodInvocation` class to extend `ReflectiveMethodInvocation` in Spring AOP and give it a public constructor. This lets you add extra logic or features in a custom method invocation object, and use this custom object in other places.
 
 ```java
 /**
- * 自定义的方法调用对象，继承自 Spring AOP 的 ReflectiveMethodInvocation 类。
- * 用于在方法调用中加入自定义逻辑或增强功能。
+ * A custom method invocation object that extends the ReflectiveMethodInvocation class of Spring AOP.
+ * It is used to add custom logic or enhancements to a method call.
  */
 public class MyReflectiveMethodInvocation extends ReflectiveMethodInvocation {
 
     /**
-     * 构造方法，初始化方法调用对象。
-     * @param proxy 代理对象
-     * @param target 目标对象
-     * @param method 被调用的方法对象
-     * @param arguments 方法参数
-     * @param targetClass 目标对象的类
-     * @param interceptorsAndDynamicMethodMatchers 拦截器链和动态方法匹配器列表
+     * Constructor that initializes the method invocation object.
+     * @param proxy the proxy object
+     * @param target the target object
+     * @param method the method object that is called
+     * @param arguments the method arguments
+     * @param targetClass the class of the target object
+     * @param interceptorsAndDynamicMethodMatchers the interceptor chain and the list of dynamic method matchers
      */
     public MyReflectiveMethodInvocation(Object proxy, Object target, Method method, Object[] arguments, Class<?> targetClass, List<Object> interceptorsAndDynamicMethodMatchers) {
         super(proxy, target, method, arguments, targetClass, interceptorsAndDynamicMethodMatchers);
@@ -232,24 +232,24 @@ public class MyReflectiveMethodInvocation extends ReflectiveMethodInvocation {
 }
 ```
 
-`MyMethodInterceptor` 类用于实现方法拦截和增强的功能。在 `invoke()` 方法中，首先通过 `MethodInvocation` 对象获取被调用方法的信息，例如方法名等，并在方法调用之前输出方法被调用的信息。然后调用 `invocation.proceed()` 方法来执行原始方法，获取方法执行结果。最后并将其返回。
+The `MyMethodInterceptor` class implements method interception and enhancement. In the `invoke()` method, it first gets information about the called method, such as the method name, from the `MethodInvocation` object, and prints that the method was called, before the method call. Then it calls `invocation.proceed()` to run the original method and get the result. Finally it returns the result.
 
 ```java
 public class MyMethodInterceptor implements MethodInterceptor {
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
-        // 在方法调用之前执行的逻辑
+        // Logic that runs before the method call
         System.out.println("Before Method " + invocation.getMethod().getName());
-        // 调用原始方法
+        // Call the original method
         Object result = invocation.proceed();
-        // 在方法调用之后执行的逻辑
+        // Logic that runs after the method call
         System.out.println("After Method " + invocation.getMethod().getName());
         return result;
     }
 }
 ```
 
-运行结果，在调用 `MyService` 实例的 `foo()` 方法时，`MyMethodInterceptor` 拦截器成功地拦截了方法的执行，并在方法执行前后添加了额外的逻辑处理。
+In the run result, when the `foo()` method of the `MyService` instance is called, the `MyMethodInterceptor` interceptor intercepts the method execution, and adds extra logic before and after it.
 
 ```java
 Before Method foo
@@ -257,132 +257,132 @@ foo...
 After Method foo
 ```
 
-### 八、源码分析
+### 8. Source Code Analysis
 
-在`org.springframework.aop.framework.ReflectiveMethodInvocation#ReflectiveMethodInvocation`方法中，`ReflectiveMethodInvocation`类的构造函数，用于创建一个反射方法调用对象。它接收代理对象、目标对象、要调用的方法、方法参数、目标类以及拦截器和动态方法匹配器列表作为参数，并在构造过程中对这些参数进行初始化。
+The `org.springframework.aop.framework.ReflectiveMethodInvocation#ReflectiveMethodInvocation` method is the constructor of the `ReflectiveMethodInvocation` class. It creates a reflective method invocation object. It takes the proxy object, the target object, the method to call, the method arguments, the target class, and the list of interceptors and dynamic method matchers as parameters, and initializes them during construction.
 
 ```java
 /**
- * 使用给定参数构造一个新的 ReflectiveMethodInvocation。
- * @param proxy 调用所在的代理对象
- * @param target 要调用的目标对象
- * @param method 要调用的方法
- * @param arguments 调用方法时传入的参数
- * @param targetClass 目标类，用于方法匹配器的调用
- * @param interceptorsAndDynamicMethodMatchers 应该应用的拦截器，以及需要在运行时进行评估的任何 InterceptorAndDynamicMethodMatchers。
- * 此结构中包含的 MethodMatchers 必须已经被找到并匹配，尽可能地是静态的。传递一个数组可能会快约10%，但会使代码复杂化。并且它只能用于静态切入点。
+ * Construct a new ReflectiveMethodInvocation with the given arguments.
+ * @param proxy the proxy object the invocation is made on
+ * @param target the target object to invoke
+ * @param method the method to invoke
+ * @param arguments the arguments to pass in the method call
+ * @param targetClass the target class, used for method matcher calls
+ * @param interceptorsAndDynamicMethodMatchers the interceptors that should be applied, and any InterceptorAndDynamicMethodMatchers that need to be evaluated at runtime.
+ * The MethodMatchers in this structure must already have been found and matched, as static as possible. Passing an array might be about 10% faster, but it complicates the code. And it can only be used for static pointcuts.
  */
 protected ReflectiveMethodInvocation(
         Object proxy, @Nullable Object target, Method method, @Nullable Object[] arguments,
         @Nullable Class<?> targetClass, List<Object> interceptorsAndDynamicMethodMatchers) {
-	// 代理对象
+	// The proxy object
     this.proxy = proxy;
-    // 目标对象
+    // The target object
     this.target = target; 
-    // 目标类
+    // The target class
     this.targetClass = targetClass; 
-    // 找到桥接方法
+    // Find the bridged method
     this.method = BridgeMethodResolver.findBridgedMethod(method); 
-    // 调整参数
+    // Adapt the arguments
     this.arguments = AopProxyUtils.adaptArgumentsIfNecessary(method, arguments); 
-    // 拦截器和动态方法匹配器列表
+    // The list of interceptors and dynamic method matchers
     this.interceptorsAndDynamicMethodMatchers = interceptorsAndDynamicMethodMatchers; 
 }
 ```
 
-在`org.springframework.aop.framework.ReflectiveMethodInvocation#proceed`方法中，首先判断当前拦截器索引是否到达了拦截器链的末尾，如果是，则调用连接点方法；否则，获取下一个拦截器或拦截器与动态方法匹配器对象，并进行动态方法匹配。如果方法匹配成功，则调用拦截器的 `invoke()` 方法；如果方法匹配失败，则跳过当前拦截器并调用链中的下一个拦截器。如果获取的是拦截器对象，则直接调用拦截器的 `invoke()` 方法。这个方法负责在方法调用链中依次执行拦截器或目标方法，实现了方法调用链的顺序执行。
+The `org.springframework.aop.framework.ReflectiveMethodInvocation#proceed` method first checks whether the current interceptor index has reached the end of the interceptor chain. If so, it calls the join point method. Otherwise, it gets the next interceptor, or the interceptor and dynamic method matcher object, and does the dynamic method match. If the method matches, it calls the `invoke()` method of the interceptor. If the method does not match, it skips the current interceptor and calls the next interceptor in the chain. If what it got is an interceptor object, it calls the `invoke()` method of the interceptor directly. This method runs the interceptors or the target method one by one in the method call chain, so the method call chain runs in order.
 
 ```java
 /**
- * 执行拦截器链中的下一个拦截器或目标方法。
- * @return 方法调用结果
- * @throws Throwable 可能抛出的异常
+ * Run the next interceptor in the interceptor chain, or the target method.
+ * @return the result of the method call
+ * @throws Throwable the exception that may be thrown
  */
 @Override
 @Nullable
 public Object proceed() throws Throwable {
-    // 我们从索引 -1 开始并提前递增。
+    // We start with an index of -1 and increment early.
     if (this.currentInterceptorIndex == this.interceptorsAndDynamicMethodMatchers.size() - 1) {
-       // 如果当前拦截器索引达到了拦截器链的末尾，则调用连接点方法。
+       // If the current interceptor index has reached the end of the interceptor chain, call the join point method.
        return invokeJoinpoint();
     }
 
-    // 获取下一个拦截器或拦截器与动态方法匹配器对象
+    // Get the next interceptor, or the interceptor and dynamic method matcher object
     Object interceptorOrInterceptionAdvice =
           this.interceptorsAndDynamicMethodMatchers.get(++this.currentInterceptorIndex);
     if (interceptorOrInterceptionAdvice instanceof InterceptorAndDynamicMethodMatcher) {
-       // 如果是拦截器与动态方法匹配器，则进行动态方法匹配
+       // If it is an interceptor and dynamic method matcher, do the dynamic method match
        InterceptorAndDynamicMethodMatcher dm =
              (InterceptorAndDynamicMethodMatcher) interceptorOrInterceptionAdvice;
-       // 获取目标类对象，如果目标类对象不为空则使用目标类对象，否则使用方法的声明类对象
+       // Get the target class object. Use it if it is not null, otherwise use the declaring class of the method
        Class<?> targetClass = (this.targetClass != null ? this.targetClass : this.method.getDeclaringClass());
        if (dm.methodMatcher.matches(this.method, targetClass, this.arguments)) {
-          // 如果方法匹配成功，则调用拦截器的invoke方法
+          // If the method matches, call the invoke method of the interceptor
           return dm.interceptor.invoke(this);
        }
        else {
-          // 动态匹配失败，跳过当前拦截器并调用链中的下一个拦截器
+          // The dynamic match failed, skip the current interceptor and call the next interceptor in the chain
           return proceed();
        }
     }
     else {
-       // 如果是拦截器，则直接调用拦截器的invoke方法
+       // If it is an interceptor, call the invoke method of the interceptor directly
        return ((MethodInterceptor) interceptorOrInterceptionAdvice).invoke(this);
     }
 }
 ```
 
-在`org.springframework.aop.framework.ReflectiveMethodInvocation#invokeJoinpoint`方法中，使用反射调用连接点。
+The `org.springframework.aop.framework.ReflectiveMethodInvocation#invokeJoinpoint` method calls the join point by reflection.
 
 ```java
 /**
- * 使用反射调用连接点。
- * 子类可以重写此方法以使用自定义调用。
- * @return 连接点的返回值
- * @throws Throwable 如果调用连接点导致异常
+ * Call the join point by reflection.
+ * Subclasses can override this method to use a custom invocation.
+ * @return the return value of the join point
+ * @throws Throwable if calling the join point throws an exception
  */
 @Nullable
 protected Object invokeJoinpoint() throws Throwable {
-    // 使用反射调用连接点
+    // Call the join point by reflection
     return AopUtils.invokeJoinpointUsingReflection(this.target, this.method, this.arguments);
 }
 ```
 
-在`org.springframework.aop.support.AopUtils#invokeJoinpointUsingReflection`方法中，通过反射调用目标方法，作为AOP方法调用的一部分。它接收目标对象、要调用的方法以及方法的参数作为输入，并尝试使用反射机制来调用方法。
+The `org.springframework.aop.support.AopUtils#invokeJoinpointUsingReflection` method calls the target method by reflection, as part of an AOP method call. It takes the target object, the method to call, and the method arguments as input, and tries to call the method by reflection.
 
 ```java
 /**
- * 使用反射调用给定的目标方法，作为AOP方法调用的一部分。
- * @param target 目标对象
- * @param method 要调用的方法
- * @param args 方法的参数
- * @return 调用结果，如果有的话
- * @throws Throwable 如果目标方法抛出异常
- * @throws org.springframework.aop.AopInvocationException 如果发生反射错误
+ * Call the given target method by reflection, as part of an AOP method call.
+ * @param target the target object
+ * @param method the method to call
+ * @param args the arguments of the method
+ * @return the result of the call, if any
+ * @throws Throwable if the target method throws an exception
+ * @throws org.springframework.aop.AopInvocationException if a reflection error occurs
  */
 @Nullable
 public static Object invokeJoinpointUsingReflection(@Nullable Object target, Method method, Object[] args)
        throws Throwable {
 
-    // 使用反射调用方法。
+    // Call the method by reflection.
     try {
-       // 设置方法可访问性
+       // Set the method accessibility
        ReflectionUtils.makeAccessible(method);
-       // 调用方法
+       // Call the method
        return method.invoke(target, args);
     }
     catch (InvocationTargetException ex) {
-       // 调用的方法抛出了已检查的异常。
-       // 我们必须重新抛出它。客户端不会看到拦截器。
+       // The called method threw a checked exception.
+       // We must rethrow it. The client will not see the interceptor.
        throw ex.getTargetException();
     }
     catch (IllegalArgumentException ex) {
-       // 如果发生参数错误，则抛出AOP调用异常
+       // If an argument error occurs, throw an AOP invocation exception
        throw new AopInvocationException("AOP configuration seems to be invalid: tried calling method [" +
 					method + "] on target [" + target + "]", ex);
     }
     catch (IllegalAccessException ex) {
-       // 如果无法访问方法，则抛出AOP调用异常
+       // If the method cannot be accessed, throw an AOP invocation exception
        throw new AopInvocationException("Could not access method [" + method + "]", ex);
     }
 }

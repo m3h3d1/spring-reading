@@ -10,7 +10,7 @@ class MyCustomPointcut implements Pointcut {
 
     @Override
     public ClassFilter getClassFilter() {
-        // 匹配所有类
+        // Match all classes
         return clazz -> true;
     }
 
@@ -19,19 +19,19 @@ class MyCustomPointcut implements Pointcut {
         return new MethodMatcher() {
             @Override
             public boolean matches(Method method, Class<?> targetClass) {
-                // 匹配所有以 "get" 开头的方法
+                // Match all methods whose names start with "get"
                 return method.getName().startsWith("get");
             }
 
             @Override
             public boolean isRuntime() {
-                // 是否需要在运行时动态匹配
+                // Whether dynamic matching is needed at runtime
                 return false;
             }
 
             @Override
             public boolean matches(Method method, Class<?> targetClass, Object... args) {
-                // 运行时匹配，这里不需要，所以简单返回 false
+                // Runtime matching is not needed here, so simply return false
                 return false;
             }
         };

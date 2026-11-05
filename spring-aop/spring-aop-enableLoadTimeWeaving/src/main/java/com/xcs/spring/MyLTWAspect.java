@@ -10,11 +10,11 @@ public class MyLTWAspect {
 
     @Around("ltwPointcut()")
     public Object around(ProceedingJoinPoint pjp) throws Throwable {
-        // 在方法调用之前执行的逻辑
+        // Logic that runs before the method call
         System.out.println("Before Method " + pjp.getSignature().getName());
-        // 调用原始方法
+        // Call the original method
         Object result = pjp.proceed();
-        // 在方法调用之后执行的逻辑
+        // Logic that runs after the method call
         System.out.println("After Method " + pjp.getSignature().getName());
         return result;
     }

@@ -1,50 +1,50 @@
 ## Pointcut
 
 - [Pointcut](#pointcut)
-  - [一、基本信息](#一基本信息)
-  - [二、基本描述](#二基本描述)
-  - [三、主要功能](#三主要功能)
-  - [四、接口源码](#四接口源码)
-  - [五、主要实现](#五主要实现)
-  - [六、类关系图](#六类关系图)
-  - [七、最佳实践](#七最佳实践)
+  - [1. Overview](#1-overview)
+  - [2. Description](#2-description)
+  - [3. Main Features](#3-main-features)
+  - [4. Interface Source](#4-interface-source)
+  - [5. Main Implementations](#5-main-implementations)
+  - [6. Class Diagram](#6-class-diagram)
+  - [7. Best Practices](#7-best-practices)
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、基本描述
+### 2. Description
 
-`Pointcut` 接口主要用于定义切入点，即确定哪些方法应该被切面所影响。Pointcut 接口提供了匹配规则，以确定在哪些类的哪些方法上应用切面，以及在何种情况下应该应用切面。
+The `Pointcut` interface defines pointcuts, that is, it decides which methods an aspect should affect. The Pointcut interface provides the matching rules that decide on which methods of which classes the aspect applies, and under which conditions.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **定义切入点**
+1. **Define pointcuts**
 
-   + Pointcut 接口用于定义切入点，即确定哪些方法应该被切面所影响。它允许我们指定在哪些类的哪些方法上应用切面。
+   + The Pointcut interface defines pointcuts, that is, it decides which methods an aspect should affect. It lets us say on which methods of which classes the aspect applies.
 
-2. **匹配规则** 
+2. **Matching rules**
 
-   + 提供了匹配规则，以确定在哪些方法上应用切面。这些规则可以基于方法的名称、参数、返回类型、类名称等多种条件来定义，从而实现对切入点的精确定位。
+   + It provides the matching rules that decide on which methods the aspect applies. The rules can be based on the method name, the parameters, the return type, the class name, and other conditions, so the pointcut can be located exactly.
 
-3. **获取类过滤器**
+3. **Get the class filter**
 
-   + `getClassFilter()` 方法用于获取一个 `ClassFilter` 对象，该对象用于确定哪些类应该被匹配。我们可以根据自己的需求自定义类过滤逻辑。
+   + The `getClassFilter()` method returns a `ClassFilter` object that decides which classes should be matched. We can write our own class filter logic for our needs.
    
-4. **获取方法匹配器**
+4. **Get the method matcher**
 
-   + `getMethodMatcher()` 方法用于获取一个 `MethodMatcher` 对象，该对象用于确定哪些方法应该被匹配。我们可以根据自己的需求自定义方法匹配逻辑。
+   + The `getMethodMatcher()` method returns a `MethodMatcher` object that decides which methods should be matched. We can write our own method matching logic for our needs.
 
-### 四、接口源码
+### 4. Interface Source
 
-`Pointcut`接口定义了 Spring AOP 中的切入点的核心抽象，由 `ClassFilter` 和 `MethodMatcher` 组成，分别用于确定哪些类和方法应该被匹配。通过这个接口，可以创建不同的切入点，并灵活地组合它们来定义复杂的切面。接口中还定义了一个常量 `TRUE`，代表始终匹配的切入点。
+The `Pointcut` interface is the core abstraction of a pointcut in Spring AOP. It is made of a `ClassFilter` and a `MethodMatcher`, which decide which classes and methods should be matched. With this interface, you can create different pointcuts and combine them flexibly to define complex aspects. The interface also defines a constant `TRUE`, a pointcut that always matches.
 
 ```java
 /**
- * 核心的 Spring 切入点抽象。
+ * The core Spring pointcut abstraction.
  *
- * <p>一个切入点由一个 {@link ClassFilter} 和一个 {@link MethodMatcher} 组成。
- * 这两个基本术语以及一个切入点本身可以组合起来构建组合（例如通过 {@link org.springframework.aop.support.ComposablePointcut}）。
+ * <p>A pointcut is made of a {@link ClassFilter} and a {@link MethodMatcher}.
+ * These two basic parts, and a pointcut itself, can be combined to build a composition (for example through {@link org.springframework.aop.support.ComposablePointcut}).
  *
  * @author Rod Johnson
  * @see ClassFilter
@@ -56,57 +56,57 @@
 public interface Pointcut {
 
 	/**
-	 * 返回此切入点的 ClassFilter。
-	 * @return ClassFilter（永不为 {@code null}）
+	 * Return the ClassFilter of this pointcut.
+	 * @return the ClassFilter (never {@code null})
 	 */
 	ClassFilter getClassFilter();
 
 	/**
-	 * 返回此切入点的 MethodMatcher。
-	 * @return MethodMatcher（永不为 {@code null}）
+	 * Return the MethodMatcher of this pointcut.
+	 * @return the MethodMatcher (never {@code null})
 	 */
 	MethodMatcher getMethodMatcher();
 
 
 	/**
-	 * 始终匹配的规范切入点实例。
+	 * Canonical pointcut instance that always matches.
 	 */
 	Pointcut TRUE = TruePointcut.INSTANCE;
 
 }
 ```
 
-### 五、主要实现
+### 5. Main Implementations
 
 1. **NameMatchMethodPointcut** 
 
-   + 根据方法名称匹配的切入点。可以配置指定的方法名称或通配符，以匹配目标类中的方法。
+   + A pointcut that matches by method name. You can configure given method names or wildcards to match the methods of the target class.
 
 2. **JdkRegexpMethodPointcut** 
 
-   + 使用正则表达式匹配方法的切入点。可以使用正则表达式指定方法的匹配规则。
+   + A pointcut that matches methods with regular expressions. You can use a regular expression to set the matching rule of methods.
    
 3. **AspectJExpressionPointcut** 
 
-   + 使用 AspectJ 切入点表达式匹配方法的切入点。可以使用 AspectJ 的语法来定义更灵活的切入点匹配规则。
+   + A pointcut that matches methods with an AspectJ pointcut expression. You can use the AspectJ syntax to define more flexible pointcut matching rules.
 
 4. **ComposablePointcut** 
 
-   + 可组合的切入点，允许将多个切入点组合起来使用，支持与、或、非等逻辑操作。
+   + A composable pointcut. It lets you combine several pointcuts, and supports logic operations such as AND, OR, and NOT.
 
 5. **StaticMethodMatcherPointcut** 
 
-   + 静态方法匹配器切入点，用于直接指定方法匹配规则，不支持动态匹配。
+   + A static method matcher pointcut. It sets the method matching rule directly and does not support dynamic matching.
 
 6. **TruePointcut** 
 
-   + 始终匹配的切入点，代表不进行任何匹配，即匹配所有的类和方法。
+   + A pointcut that always matches. It does no matching at all, so it matches all classes and methods.
 
 7. **AnnotationMatchingPointcut**
 
-   + 用于基于注解匹配的切入点定义。它可以根据指定的注解类型匹配类或方法，并用于将通知应用于带有特定注解的目标对象的方法。
+   + A pointcut defined by annotation matching. It matches classes or methods by the given annotation type, and is used to apply advice to the methods of target objects that have a specific annotation.
 
-### 六、类关系图
+### 6. Class Diagram
 
 ~~~mermaid
 classDiagram
@@ -141,11 +141,11 @@ StaticMethodMatcherPointcut  ..>  Pointcut
 TruePointcut  ..>  Pointcut 
 ~~~
 
-### 七、最佳实践
+### 7. Best Practices
 
 **MyCustomPointcut**
 
-使用自定义的 `Pointcut` 对象 `MyCustomPointcut`。在 `customPointcut` 方法中，我们创建了 `MyCustomPointcut` 的实例，并通过 `showMatchesLog` 方法展示了其对类和方法的匹配情况。最后，我们通过调用 `showMatchesLog` 方法来检查 `MyCustomPointcut` 对象对目标类 `MyService` 中的方法的匹配情况，并输出匹配结果。
+This example uses a custom `Pointcut` object `MyCustomPointcut`. In the `customPointcut` method, we create an instance of `MyCustomPointcut` and show how it matches classes and methods with the `showMatchesLog` method. Finally, we call the `showMatchesLog` method to check how the `MyCustomPointcut` object matches the methods of the target class `MyService`, and print the match results.
 
 ```java
 public class PointcutDemo {
@@ -154,7 +154,7 @@ public class PointcutDemo {
     }
 
     /**
-     * 自定义 Pointcut 
+     * Custom Pointcut
      */
     private static void customPointcut() {
         MyCustomPointcut pointcut = new MyCustomPointcut();
@@ -182,14 +182,14 @@ public class PointcutDemo {
 }
 ```
 
-自定义了一个自定义的切入点 `MyCustomPointcut`，该切入点匹配所有类，并且匹配所有方法名以 "get" 开头的方法。这意味着通过该切入点定义的切面将会拦截所有类的所有以 "get" 开头的方法调用。
+This defines a custom pointcut `MyCustomPointcut`. It matches all classes, and all methods whose names start with "get". This means an aspect defined with this pointcut intercepts calls of all methods that start with "get" in all classes.
 
 ```java
 class MyCustomPointcut implements Pointcut {
 
     @Override
     public ClassFilter getClassFilter() {
-        // 匹配所有类
+        // Match all classes
         return clazz -> true;
     }
 
@@ -198,19 +198,19 @@ class MyCustomPointcut implements Pointcut {
         return new MethodMatcher() {
             @Override
             public boolean matches(Method method, Class<?> targetClass) {
-                // 匹配所有以 "get" 开头的方法
+                // Match all methods whose names start with "get"
                 return method.getName().startsWith("get");
             }
 
             @Override
             public boolean isRuntime() {
-                // 是否需要在运行时动态匹配
+                // Whether dynamic matching is needed at runtime
                 return false;
             }
 
             @Override
             public boolean matches(Method method, Class<?> targetClass, Object... args) {
-                // 运行时匹配，这里不需要，所以简单返回 false
+                // Runtime matching is not needed here, so simply return false
                 return false;
             }
         };
@@ -218,7 +218,7 @@ class MyCustomPointcut implements Pointcut {
 }
 ```
 
-`MyService` 类是一个示例服务类，标注了类级别的 `@MyClassAnnotation` 注解，其中包含了三个方法：`getName()`、`setName()` 和 `getAge()`。其中，`setName()` 方法标注了方法级别的 `@MyMethodAnnotation` 注解。
+The `MyService` class is an example service class. It is marked with the class-level `@MyClassAnnotation` annotation and has three methods: `getName()`, `setName()`, and `getAge()`. The `setName()` method is marked with the method-level `@MyMethodAnnotation` annotation.
 
 ```java
 @MyClassAnnotation
@@ -239,7 +239,7 @@ public class MyService {
 }
 ```
 
-运行结果，`MyService` 类级别的过滤器匹配成功，而在方法级别，`getName` 和 `getAge` 方法成功匹配，但 `setName` 方法未匹配成功。
+In the run result, the class-level filter of `MyService` matches. At the method level, the `getName` and `getAge` methods match, but the `setName` method does not.
 
 ```java
 ClassFilter MyService = true
@@ -250,7 +250,7 @@ MethodMatcher MyService setName = false
 
 **AspectJExpressionPointcut**
 
-使用 `AspectJExpressionPointcut` 创建一个基于 AspectJ 表达式的切入点。在 `aspectJExpressionPointcut` 方法中，我们创建了 `AspectJExpressionPointcut` 的实例，并设置了 AspectJ 表达式 `"execution(* com.xcs.spring.MyService.get*())"`，该表达式匹配了 `com.xcs.spring.MyService` 类中以 `get` 开头的所有方法。最后，我们通过调用 `showMatchesLog` 方法来检查 `AspectJExpressionPointcut` 对象对指定类中的方法的匹配情况，并输出匹配结果。
+This example uses `AspectJExpressionPointcut` to create a pointcut based on an AspectJ expression. In the `aspectJExpressionPointcut` method, we create an instance of `AspectJExpressionPointcut` and set the AspectJ expression `"execution(* com.xcs.spring.MyService.get*())"`, which matches all methods that start with `get` in the `com.xcs.spring.MyService` class. Finally, we call the `showMatchesLog` method to check how the `AspectJExpressionPointcut` object matches the methods of the given class, and print the match results.
 
 ```java
 public class PointcutDemo {
@@ -262,7 +262,7 @@ public class PointcutDemo {
      * AspectJExpressionPointcut
      */
     private static void aspectJExpressionPointcut() {
-        // 创建 AspectJ 表达式切入点
+        // Create the AspectJ expression pointcut
         AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
         pointcut.setExpression("execution(* com.xcs.spring.MyService.get*())");
         showMatchesLog(pointcut);
@@ -270,7 +270,7 @@ public class PointcutDemo {
 }
 ```
 
-运行结果，`MyService` 类级别的过滤器匹配成功，而在方法级别，`getName` 和 `getAge` 方法成功匹配，但 `setName` 方法未匹配成功。
+In the run result, the class-level filter of `MyService` matches. At the method level, the `getName` and `getAge` methods match, but the `setName` method does not.
 
 ```java
 ClassFilter MyService = true
@@ -281,7 +281,7 @@ MethodMatcher MyService setName = false
 
 **AnnotationMatchingPointcut**
 
-使用 `AnnotationMatchingPointcut` 创建一个基于注解匹配的切入点。在 `annotationMatchingPointcut` 方法中，我们创建了 `AnnotationMatchingPointcut` 的实例，并指定了类级别注解 `MyClassAnnotation` 和方法级别注解 `MyMethodAnnotation`，同时设置了不检查继承的方法。最后，我们通过调用 `showMatchesLog` 方法来检查 `AnnotationMatchingPointcut` 对象对指定类中的方法的匹配情况，并输出匹配结果。
+This example uses `AnnotationMatchingPointcut` to create a pointcut based on annotation matching. In the `annotationMatchingPointcut` method, we create an instance of `AnnotationMatchingPointcut`, give the class-level annotation `MyClassAnnotation` and the method-level annotation `MyMethodAnnotation`, and set it not to check inherited methods. Finally, we call the `showMatchesLog` method to check how the `AnnotationMatchingPointcut` object matches the methods of the given class, and print the match results.
 
 ```java
 public class PointcutDemo {
@@ -293,14 +293,14 @@ public class PointcutDemo {
      * AnnotationMatchingPointcut
      */
     private static void annotationMatchingPointcut() {
-        // 使用AnnotationMatchingPointcut切入点
+        // Use the AnnotationMatchingPointcut pointcut
         AnnotationMatchingPointcut pointcut = new AnnotationMatchingPointcut(MyClassAnnotation.class, MyMethodAnnotation.class, false);
         showMatchesLog(pointcut);
     }
 }
 ```
 
-运行结果，`MyService` 类级别的过滤器匹配成功，而方法级别的匹配器成功匹配了 `setName` 方法，但未匹配 `getName` 和 `getAge` 方法。
+In the run result, the class-level filter of `MyService` matches. At the method level, the matcher matches the `setName` method, but not the `getName` and `getAge` methods.
 
 ```java
 ClassFilter MyService = true
@@ -311,7 +311,7 @@ MethodMatcher MyService setName = true
 
 **NameMatchMethodPointcut**
 
-使用 `NameMatchMethodPointcut` 创建一个基于方法名匹配的切入点。在 `nameMatchMethodPointcut` 方法中，我们创建了 `NameMatchMethodPointcut` 的实例，并添加了要匹配的方法名 `getAge`。然后，我们通过调用 `showMatchesLog` 方法来检查 `NameMatchMethodPointcut` 对象对指定类中的方法的匹配情况，并输出匹配结果。
+This example uses `NameMatchMethodPointcut` to create a pointcut based on method names. In the `nameMatchMethodPointcut` method, we create an instance of `NameMatchMethodPointcut` and add the method name to match, `getAge`. Then we call the `showMatchesLog` method to check how the `NameMatchMethodPointcut` object matches the methods of the given class, and print the match results.
 
 ```java
 public class PointcutDemo {
@@ -323,7 +323,7 @@ public class PointcutDemo {
      * AspectJExpressionPointcut
      */
     private static void nameMatchMethodPointcut() {
-        // 使用AnnotationMatchingPointcut切入点
+        // Use the AnnotationMatchingPointcut pointcut
         NameMatchMethodPointcut pointcut = new NameMatchMethodPointcut();
         pointcut.addMethodName("getAge");
         showMatchesLog(pointcut);
@@ -331,7 +331,7 @@ public class PointcutDemo {
 }
 ```
 
-运行结果， `MyService` 类级别的过滤器匹配成功，而方法级别的匹配器成功匹配了 `getAge` 方法，但未匹配 `getName` 和 `setName` 方法。
+In the run result, the class-level filter of `MyService` matches. At the method level, the matcher matches the `getAge` method, but not the `getName` and `setName` methods.
 
 ```java
 ClassFilter MyService = true
@@ -342,7 +342,7 @@ MethodMatcher MyService setName = false
 
 **JdkRegexpMethodPointcut**
 
-使用 `JdkRegexpMethodPointcut` 创建一个基于 JDK 正则表达式匹配的切入点。在 `jdkRegexpMethodPointcut` 方法中，我们创建了 `JdkRegexpMethodPointcut` 的实例，并设置了正则表达式模式 `".*set.*"`，该模式匹配了所有包含 "set" 字符串的方法名。然后，我们通过调用 `showMatchesLog` 方法来检查 `JdkRegexpMethodPointcut` 对象对指定类中的方法的匹配情况，并输出匹配结果。
+This example uses `JdkRegexpMethodPointcut` to create a pointcut based on JDK regular expressions. In the `jdkRegexpMethodPointcut` method, we create an instance of `JdkRegexpMethodPointcut` and set the regular expression pattern `".*set.*"`, which matches all method names that contain the string "set". Then we call the `showMatchesLog` method to check how the `JdkRegexpMethodPointcut` object matches the methods of the given class, and print the match results.
 
 ```java
 public class PointcutDemo {
@@ -361,7 +361,7 @@ public class PointcutDemo {
 }
 ```
 
-运行结果，`MyService` 类级别的过滤器匹配成功，而方法级别的匹配器成功匹配了 `setName` 方法，但未匹配 `getName` 和 `getAge` 方法。
+In the run result, the class-level filter of `MyService` matches. At the method level, the matcher matches the `setName` method, but not the `getName` and `getAge` methods.
 
 ```java
 ClassFilter MyService = true

@@ -5,17 +5,17 @@ import org.springframework.cglib.proxy.Enhancer;
 public class CglibProxyDemo {
 
     public static void main(String[] args) {
-        // 创建 Enhancer 对象，用于生成代理类
+        // Create an Enhancer object to generate the proxy class
         Enhancer enhancer = new Enhancer();
-        // 设置目标对象的父类
+        // Set the superclass of the target object
         enhancer.setSuperclass(MyServiceImpl.class);
-        // 设置回调拦截器
+        // Set the callback interceptor
         enhancer.setCallback(new MyMethodInterceptor());
-        // 创建代理对象
+        // Create the proxy object
         MyService proxyObject = (MyService) enhancer.create();
-        // 输出代理对象的类名
+        // Print the class name of the proxy object
         System.out.println("ProxyObject = " + proxyObject.getClass());
-        // 调用代理对象的方法
+        // Call the method of the proxy object
         proxyObject.doSomething();
     }
 }

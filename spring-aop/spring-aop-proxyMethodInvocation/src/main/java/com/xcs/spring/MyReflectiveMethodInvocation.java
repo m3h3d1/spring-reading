@@ -6,19 +6,19 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 /**
- * 自定义的方法调用对象，继承自 Spring AOP 的 ReflectiveMethodInvocation 类。
- * 用于在方法调用中加入自定义逻辑或增强功能。
+ * A custom method invocation object that extends the ReflectiveMethodInvocation class of Spring AOP.
+ * It is used to add custom logic or enhancements to a method call.
  */
 public class MyReflectiveMethodInvocation extends ReflectiveMethodInvocation {
 
     /**
-     * 构造方法，初始化方法调用对象。
-     * @param proxy 代理对象
-     * @param target 目标对象
-     * @param method 被调用的方法对象
-     * @param arguments 方法参数
-     * @param targetClass 目标对象的类
-     * @param interceptorsAndDynamicMethodMatchers 拦截器链和动态方法匹配器列表
+     * Constructor that initializes the method invocation object.
+     * @param proxy the proxy object
+     * @param target the target object
+     * @param method the method object that is called
+     * @param arguments the method arguments
+     * @param targetClass the class of the target object
+     * @param interceptorsAndDynamicMethodMatchers the interceptor chain and the list of dynamic method matchers
      */
     public MyReflectiveMethodInvocation(Object proxy, Object target, Method method, Object[] arguments, Class<?> targetClass, List<Object> interceptorsAndDynamicMethodMatchers) {
         super(proxy, target, method, arguments, targetClass, interceptorsAndDynamicMethodMatchers);

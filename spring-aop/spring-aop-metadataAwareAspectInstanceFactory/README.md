@@ -1,47 +1,47 @@
 ## MetadataAwareAspectInstanceFactory
 
 - [MetadataAwareAspectInstanceFactory](#metadataawareaspectinstancefactory)
-  - [一、基本信息](#一基本信息)
-  - [二、基本描述](#二基本描述)
-  - [三、主要功能](#三主要功能)
-  - [四、接口源码](#四接口源码)
-  - [五、主要实现](#五主要实现)
-  - [六、类关系图](#六类关系图)
-  - [七、最佳实践](#七最佳实践)
-  - [八、源码分析](#八源码分析)
+  - [1. Overview](#1-overview)
+  - [2. Description](#2-description)
+  - [3. Main Features](#3-main-features)
+  - [4. Interface Source](#4-interface-source)
+  - [5. Main Implementations](#5-main-implementations)
+  - [6. Class Diagram](#6-class-diagram)
+  - [7. Best Practices](#7-best-practices)
+  - [8. Source Code Analysis](#8-source-code-analysis)
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https//juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https//github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、基本描述
+### 2. Description
 
-`MetadataAwareAspectInstanceFactory` 接口是 Spring AOP 中的关键接口，用于实例化切面并处理其元数据信息，为 Spring 框架提供了对 AspectJ 注解风格的 AOP 切面的支持。
+The `MetadataAwareAspectInstanceFactory` interface is a key interface in Spring AOP. It creates aspect instances and handles their metadata. It gives the Spring Framework support for AOP aspects written in the AspectJ annotation style.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **实例化切面**
+1. **Create aspect instances**
 
-   + 通过 `getAspectInstance()` 方法，提供切面实例，以便在运行时应用切面的通知。
+   + The `getAspectInstance()` method provides the aspect instance, so the advice of the aspect can be applied at runtime.
    
-2. **处理元数据信息**
+2. **Handle metadata**
 
-   + 通过 `getAspectMetadata()` 方法，获取切面类的元数据信息，如类名、所属的类、切点表达式等，以便在运行时能够正确地应用切面。
+   + The `getAspectMetadata()` method returns the metadata of the aspect class, such as the class name, the owning class, and the pointcut expression, so the aspect can be applied correctly at runtime.
    
-3. **支持 AspectJ 注解风格的 AOP**
+3. **Support AspectJ annotation-style AOP**
 
-   + 通过这个接口，Spring AOP 能够实现对 AspectJ 注解风格的 AOP 切面的实例化和元数据处理，从而支持在 Spring 应用中使用 AspectJ 注解定义切面。
+   + With this interface, Spring AOP can create instances of AOP aspects written in the AspectJ annotation style and handle their metadata. So you can define aspects with AspectJ annotations in a Spring application.
 
-### 四、接口源码
+### 4. Interface Source
 
-`MetadataAwareAspectInstanceFactory` 接口是 `AspectInstanceFactory` 的子接口，用于返回与 AspectJ 注解类关联的 `AspectMetadata`。`AspectMetadata` 包含与切面相关的元数据信息。此接口还定义了一个方法 `getAspectCreationMutex()`，用于返回此工厂的最佳创建互斥锁。由于 `AspectMetadata` 使用了 Java 5 专用的 `org.aspectj.lang.reflect.AjType`，因此需要将此方法拆分到这个子接口中。
+The `MetadataAwareAspectInstanceFactory` interface is a sub-interface of `AspectInstanceFactory`. It returns the `AspectMetadata` linked to an AspectJ annotated class. `AspectMetadata` holds the metadata of the aspect. The interface also defines a method `getAspectCreationMutex()` that returns the best creation mutex for this factory. `AspectMetadata` uses the Java 5 specific `org.aspectj.lang.reflect.AjType`, so this method had to be split out into this sub-interface.
 
 ```java
 /**
- * {@link org.springframework.aop.aspectj.AspectInstanceFactory} 的子接口，用于返回与 AspectJ 注解类关联的 {@link AspectMetadata}。
+ * Sub-interface of {@link org.springframework.aop.aspectj.AspectInstanceFactory} that returns the {@link AspectMetadata} linked to an AspectJ annotated class.
  *
- * <p>理想情况下，AspectInstanceFactory 本身应该包括此方法，但由于 AspectMetadata 使用了 Java 5 专用的 {@link org.aspectj.lang.reflect.AjType}，
- * 我们需要拆分出这个子接口。
+ * <p>Ideally, AspectInstanceFactory itself would include this method, but because AspectMetadata uses the Java 5 specific {@link org.aspectj.lang.reflect.AjType},
+ * we need to split out this sub-interface.
  *
  * @author Rod Johnson
  * @since 2.0
@@ -51,14 +51,14 @@
 public interface MetadataAwareAspectInstanceFactory extends AspectInstanceFactory {
 
 	/**
-	 * 返回此工厂的切面的 AspectJ AspectMetadata。
-	 * @return 切面元数据
+	 * Return the AspectJ AspectMetadata of the aspect of this factory.
+	 * @return the aspect metadata
 	 */
 	AspectMetadata getAspectMetadata();
 
 	/**
-	 * 返回此工厂的最佳创建互斥锁。
-	 * @return 互斥锁对象（如果不需要使用锁，则可能为 {@code null}）
+	 * Return the best creation mutex for this factory.
+	 * @return the mutex object (may be {@code null} if no lock is needed)
 	 * @since 4.3
 	 */
 	@Nullable
@@ -67,29 +67,29 @@ public interface MetadataAwareAspectInstanceFactory extends AspectInstanceFactor
 }
 ```
 
-### 五、主要实现
+### 5. Main Implementations
 
 1. **SimpleMetadataAwareAspectInstanceFactory**
 
-   - 这个实现类是最简单的一种，它用于创建单例的切面实例。它简单地实例化切面类，并提供其实例作为切面的实例。
+   - The simplest implementation. It creates aspect instances in singleton style. It just instantiates the aspect class and provides that instance as the aspect instance.
 
 2. **SingletonMetadataAwareAspectInstanceFactory**
 
-   - 与 `SimpleMetadataAwareAspectInstanceFactory` 类似，这个实现类也用于创建单例的切面实例，但是它可以与 Spring 的容器集成，以便将切面实例作为容器中的单例 bean 进行管理。
+   - Like `SimpleMetadataAwareAspectInstanceFactory`, this implementation also creates singleton aspect instances. But it can work with the Spring container, so the aspect instance is managed as a singleton bean in the container.
 
 3. **BeanFactoryAspectInstanceFactory**
 
-   - 这个实现类与 Spring 的 BeanFactory 集成，它用于创建切面实例，并且能够处理切面类的依赖注入。它可以在切面类中注入其他 Spring 管理的 bean，实现更复杂的业务逻辑。
+   - This implementation works with the Spring BeanFactory. It creates aspect instances and can handle dependency injection into the aspect class. You can inject other Spring-managed beans into the aspect class, to build more complex business logic.
 
 4. **PrototypeAspectInstanceFactory**
 
-   - 这个实现类用于创建原型（prototype）的切面实例。与单例不同，原型实例每次请求时都会创建一个新的实例，适用于需要在每次使用时都重新创建实例的场景。
+   - This implementation creates prototype aspect instances. Unlike a singleton, a prototype creates a new instance on every request. It fits cases where a new instance is needed each time.
 
 5. **LazySingletonAspectInstanceFactoryDecorator**
 
-   - 这个实现类是一个装饰器，用于延迟初始化单例的切面实例。它在首次请求切面实例时才进行实例化，以提高性能并延迟资源消耗。
+   - This implementation is a decorator that lazily initializes a singleton aspect instance. It creates the instance only when the aspect instance is first requested, which improves performance and delays resource use.
 
-### 六、类关系图
+### 6. Class Diagram
 
 ~~~mermaid
 classDiagram
@@ -122,29 +122,29 @@ SingletonMetadataAwareAspectInstanceFactory  ..>  MetadataAwareAspectInstanceFac
 SingletonMetadataAwareAspectInstanceFactory  -->  SingletonAspectInstanceFactory 
 ~~~
 
-### 七、最佳实践
+### 7. Best Practices
 
-使用不同的 `MetadataAwareAspectInstanceFactory` 实现类来实例化切面，并展示了它们的不同行为。首先，使用 `SimpleMetadataAwareAspectInstanceFactory` 和 `SingletonMetadataAwareAspectInstanceFactory` 分别创建单例的切面实例，然后使用 `BeanFactoryAspectInstanceFactory` 在 Spring Bean 工厂中注册并实例化切面，最后使用 `LazySingletonAspectInstanceFactoryDecorator` 延迟初始化单例切面实例。在每个步骤中，都输出了切面实例及其元数据信息。
+This example uses different `MetadataAwareAspectInstanceFactory` implementations to create aspects and shows how they behave differently. First, `SimpleMetadataAwareAspectInstanceFactory` and `SingletonMetadataAwareAspectInstanceFactory` each create a singleton aspect instance. Then `BeanFactoryAspectInstanceFactory` registers and creates the aspect in a Spring bean factory. Finally, `LazySingletonAspectInstanceFactoryDecorator` lazily initializes the singleton aspect instance. At each step, the aspect instance and its metadata are printed.
 
 ```java
 public class MetadataAwareAspectInstanceFactoryDemo {
 
     public static void main(String[] args) {
-        // 使用 SimpleMetadataAwareAspectInstanceFactory 实例化切面
+        // Create the aspect with SimpleMetadataAwareAspectInstanceFactory
         SimpleMetadataAwareAspectInstanceFactory simpleMetadataAwareAif = new SimpleMetadataAwareAspectInstanceFactory(MyAspect.class, "myAspect");
         System.out.println("SimpleMetadataAwareAspectInstanceFactory (1) = " + simpleMetadataAwareAif.getAspectInstance());
         System.out.println("SimpleMetadataAwareAspectInstanceFactory (2) = " + simpleMetadataAwareAif.getAspectInstance());
         System.out.println("SimpleMetadataAwareAspectInstanceFactory AspectMetadata = " + JSONUtil.toJsonStr(simpleMetadataAwareAif.getAspectMetadata()));
         System.out.println();
 
-        // 使用 SingletonMetadataAwareAspectInstanceFactory 实例化切面
+        // Create the aspect with SingletonMetadataAwareAspectInstanceFactory
         SingletonMetadataAwareAspectInstanceFactory singletonMetadataAwareAif = new SingletonMetadataAwareAspectInstanceFactory(new MyAspect(), "myAspect");
         System.out.println("SingletonMetadataAwareAspectInstanceFactory (1) = " + singletonMetadataAwareAif.getAspectInstance());
         System.out.println("SingletonMetadataAwareAspectInstanceFactory (2) = " + singletonMetadataAwareAif.getAspectInstance());
         System.out.println("SimpleMetadataAwareAspectInstanceFactory AspectMetadata = " + JSONUtil.toJsonStr(singletonMetadataAwareAif.getAspectMetadata()));
         System.out.println();
 
-        // 使用 BeanFactoryAspectInstanceFactory 实例化切面
+        // Create the aspect with BeanFactoryAspectInstanceFactory
         DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
         beanFactory.registerSingleton("myAspect", new MyAspect());
         BeanFactoryAspectInstanceFactory banFactoryAif = new BeanFactoryAspectInstanceFactory(beanFactory, "myAspect");
@@ -153,7 +153,7 @@ public class MetadataAwareAspectInstanceFactoryDemo {
         System.out.println("SimpleMetadataAwareAspectInstanceFactory AspectMetadata = " + JSONUtil.toJsonStr(banFactoryAif.getAspectMetadata()));
         System.out.println();
 
-        // 使用 LazySingletonAspectInstanceFactoryDecorator 实例化切面
+        // Create the aspect with LazySingletonAspectInstanceFactoryDecorator
         LazySingletonAspectInstanceFactoryDecorator lazySingletonAifD = new LazySingletonAspectInstanceFactoryDecorator(banFactoryAif);
         System.out.println("LazySingletonAspectInstanceFactoryDecorator (1) = " + lazySingletonAifD.getAspectInstance());
         System.out.println("LazySingletonAspectInstanceFactoryDecorator (2) = " + lazySingletonAifD.getAspectInstance());
@@ -164,7 +164,7 @@ public class MetadataAwareAspectInstanceFactoryDemo {
 }
 ```
 
-运行结果，展示了不同类型的 `MetadataAwareAspectInstanceFactory` 实现类的行为。`SimpleMetadataAwareAspectInstanceFactory` 每次返回不同的切面实例，而 `SingletonMetadataAwareAspectInstanceFactory` 每次返回相同的实例，说明了它们的单例和非单例的行为。`BeanFactoryAspectInstanceFactory` 在 Spring Bean 工厂中注册并实例化切面，表现出与前两者类似的行为。`LazySingletonAspectInstanceFactoryDecorator` 是对 `BeanFactoryAspectInstanceFactory` 的装饰器，延迟初始化单例切面实例，但最终结果与 `BeanFactoryAspectInstanceFactory` 相同。
+The run result shows how the different `MetadataAwareAspectInstanceFactory` implementations behave. `SimpleMetadataAwareAspectInstanceFactory` returns a different aspect instance each time, while `SingletonMetadataAwareAspectInstanceFactory` returns the same instance each time. This shows their non-singleton and singleton behavior. `BeanFactoryAspectInstanceFactory` registers and creates the aspect in a Spring bean factory, and behaves like the first two. `LazySingletonAspectInstanceFactoryDecorator` is a decorator of `BeanFactoryAspectInstanceFactory`. It lazily initializes the singleton aspect instance, but the final result is the same as `BeanFactoryAspectInstanceFactory`.
 
 ```java
 SimpleMetadataAwareAspectInstanceFactory (1) = com.xcs.spring.MyAspect@5f341870
@@ -185,15 +185,15 @@ LazySingletonAspectInstanceFactoryDecorator AspectCreationMutex = null
 LazySingletonAspectInstanceFactoryDecorator AspectMetadata = {"aspectName":"myAspect","aspectClass":"com.xcs.spring.MyAspect","perClausePointcut":{}}
 ```
 
-### 八、源码分析
+### 8. Source Code Analysis
 
 **SimpleMetadataAwareAspectInstanceFactory**
 
-`SimpleMetadataAwareAspectInstanceFactory` 是一个实现了 `MetadataAwareAspectInstanceFactory` 接口的类，它在每次调用 `getAspectInstance()` 方法时都会为指定的切面类创建一个新的实例。这个类通过 `AspectMetadata` 对象来管理切面的元数据信息，并且实现了 `getAspectMetadata()` 方法来提供这些元数据。它还实现了 `getAspectCreationMutex()` 方法来返回切面实例的创建锁，以及 `getOrderForAspectClass()` 方法来确定切面类的顺序。
+`SimpleMetadataAwareAspectInstanceFactory` is a class that implements the `MetadataAwareAspectInstanceFactory` interface. It creates a new instance of the given aspect class each time the `getAspectInstance()` method is called. It manages the metadata of the aspect with an `AspectMetadata` object, and provides it through the `getAspectMetadata()` method. It also implements the `getAspectCreationMutex()` method to return the creation lock of the aspect instance, and the `getOrderForAspectClass()` method to decide the order of the aspect class.
 
 ```java
 /**
- * 实现了 {@link MetadataAwareAspectInstanceFactory} 接口的类，每次调用 {@link #getAspectInstance()} 方法都会为指定的切面类创建一个新的实例。
+ * A class that implements the {@link MetadataAwareAspectInstanceFactory} interface. Each call of the {@link #getAspectInstance()} method creates a new instance of the given aspect class.
  *
  * @author Juergen Hoeller
  * @since 2.0.4
@@ -201,23 +201,23 @@ LazySingletonAspectInstanceFactoryDecorator AspectMetadata = {"aspectName":"myAs
 public class SimpleMetadataAwareAspectInstanceFactory extends SimpleAspectInstanceFactory
         implements MetadataAwareAspectInstanceFactory {
 
-    private final AspectMetadata metadata; // 切面的元数据信息
+    private final AspectMetadata metadata; // The metadata of the aspect
 
     /**
-     * 创建一个新的 SimpleMetadataAwareAspectInstanceFactory 实例，用于给定的切面类。
+     * Create a new SimpleMetadataAwareAspectInstanceFactory for the given aspect class.
      *
-     * @param aspectClass 切面类
-     * @param aspectName  切面名称
+     * @param aspectClass the aspect class
+     * @param aspectName  the aspect name
      */
     public SimpleMetadataAwareAspectInstanceFactory(Class<?> aspectClass, String aspectName) {
         super(aspectClass);
-        this.metadata = new AspectMetadata(aspectClass, aspectName); // 创建切面的元数据信息
+        this.metadata = new AspectMetadata(aspectClass, aspectName); // Create the metadata of the aspect
     }
 
     /**
-     * 获取切面的元数据信息。
+     * Get the metadata of the aspect.
      *
-     * @return 切面的元数据信息
+     * @return the metadata of the aspect
      */
     @Override
     public final AspectMetadata getAspectMetadata() {
@@ -225,9 +225,9 @@ public class SimpleMetadataAwareAspectInstanceFactory extends SimpleAspectInstan
     }
 
     /**
-     * 获取切面实例的创建锁。
+     * Get the creation lock of the aspect instance.
      *
-     * @return 切面实例的创建锁
+     * @return the creation lock of the aspect instance
      */
     @Override
     public Object getAspectCreationMutex() {
@@ -235,14 +235,14 @@ public class SimpleMetadataAwareAspectInstanceFactory extends SimpleAspectInstan
     }
 
     /**
-     * 获取切面类的顺序。
+     * Get the order of the aspect class.
      *
-     * @param aspectClass 切面类
-     * @return 切面类的顺序
+     * @param aspectClass the aspect class
+     * @return the order of the aspect class
      */
     @Override
     protected int getOrderForAspectClass(Class<?> aspectClass) {
-        return OrderUtils.getOrder(aspectClass, Ordered.LOWEST_PRECEDENCE); // 获取切面类的顺序
+        return OrderUtils.getOrder(aspectClass, Ordered.LOWEST_PRECEDENCE); // Get the order of the aspect class
     }
 
 }
@@ -250,15 +250,15 @@ public class SimpleMetadataAwareAspectInstanceFactory extends SimpleAspectInstan
 
 **SingletonMetadataAwareAspectInstanceFactory**
 
-`SingletonMetadataAwareAspectInstanceFactory` 是一个实现了 `MetadataAwareAspectInstanceFactory` 接口的类，它通过指定的单例对象支持切面实例的创建，每次调用 `getAspectInstance()` 方法都返回相同的实例。该类使用一个单例的切面实例，并通过 `AspectMetadata` 对象管理切面的元数据信息。它也实现了 `Serializable` 接口以支持序列化，并且继承自 `SingletonAspectInstanceFactory`，提供了获取切面实例的相关方法和逻辑。
+`SingletonMetadataAwareAspectInstanceFactory` is a class that implements the `MetadataAwareAspectInstanceFactory` interface. It supports creating aspect instances from a given singleton object, and returns the same instance each time the `getAspectInstance()` method is called. The class uses one singleton aspect instance and manages the metadata of the aspect with an `AspectMetadata` object. It also implements the `Serializable` interface to support serialization, and extends `SingletonAspectInstanceFactory`, which provides the methods and logic for getting the aspect instance.
 
 ```java
 /**
- * 实现了 {@link MetadataAwareAspectInstanceFactory} 接口的类，通过指定的单例对象支持切面实例的创建，每次调用 {@link #getAspectInstance()} 方法都返回同一个实例。
+ * A class that implements the {@link MetadataAwareAspectInstanceFactory} interface. It supports creating aspect instances from a given singleton object, and returns the same instance each time the {@link #getAspectInstance()} method is called.
  * 
- * 该类通过 {@link AspectMetadata} 对象管理切面的元数据信息，并且实现了 {@link Serializable} 接口以支持序列化。
+ * The class manages the metadata of the aspect with an {@link AspectMetadata} object, and implements the {@link Serializable} interface to support serialization.
  * 
- * 作者：Rod Johnson, Juergen Hoeller
+ * Authors: Rod Johnson, Juergen Hoeller
  * @since 2.0
  * @see SimpleMetadataAwareAspectInstanceFactory
  */
@@ -266,23 +266,23 @@ public class SimpleMetadataAwareAspectInstanceFactory extends SimpleAspectInstan
 public class SingletonMetadataAwareAspectInstanceFactory extends SingletonAspectInstanceFactory
         implements MetadataAwareAspectInstanceFactory, Serializable {
 
-    private final AspectMetadata metadata; // 切面的元数据信息
+    private final AspectMetadata metadata; // The metadata of the aspect
 
     /**
-     * 为给定的切面创建一个新的 SingletonMetadataAwareAspectInstanceFactory。
+     * Create a new SingletonMetadataAwareAspectInstanceFactory for the given aspect.
      * 
-     * @param aspectInstance 切面的单例实例
-     * @param aspectName 切面的名称
+     * @param aspectInstance the singleton instance of the aspect
+     * @param aspectName the name of the aspect
      */
     public SingletonMetadataAwareAspectInstanceFactory(Object aspectInstance, String aspectName) {
-        super(aspectInstance); // 调用父类的构造方法，传入切面的单例实例
-        this.metadata = new AspectMetadata(aspectInstance.getClass(), aspectName); // 创建切面的元数据信息
+        super(aspectInstance); // Call the superclass constructor with the singleton instance of the aspect
+        this.metadata = new AspectMetadata(aspectInstance.getClass(), aspectName); // Create the metadata of the aspect
     }
 
     /**
-     * 获取切面的元数据信息。
+     * Get the metadata of the aspect.
      * 
-     * @return 切面的元数据信息
+     * @return the metadata of the aspect
      */
     @Override
     public final AspectMetadata getAspectMetadata() {
@@ -290,9 +290,9 @@ public class SingletonMetadataAwareAspectInstanceFactory extends SingletonAspect
     }
 
     /**
-     * 获取切面实例的创建锁。
+     * Get the creation lock of the aspect instance.
      * 
-     * @return 切面实例的创建锁
+     * @return the creation lock of the aspect instance
      */
     @Override
     public Object getAspectCreationMutex() {
@@ -300,14 +300,14 @@ public class SingletonMetadataAwareAspectInstanceFactory extends SingletonAspect
     }
 
     /**
-     * 获取切面类的顺序。
+     * Get the order of the aspect class.
      * 
-     * @param aspectClass 切面类
-     * @return 切面类的顺序
+     * @param aspectClass the aspect class
+     * @return the order of the aspect class
      */
     @Override
     protected int getOrderForAspectClass(Class<?> aspectClass) {
-        return OrderUtils.getOrder(aspectClass, Ordered.LOWEST_PRECEDENCE); // 获取切面类的顺序
+        return OrderUtils.getOrder(aspectClass, Ordered.LOWEST_PRECEDENCE); // Get the order of the aspect class
     }
 
 }
@@ -315,18 +315,18 @@ public class SingletonMetadataAwareAspectInstanceFactory extends SingletonAspect
 
 **BeanFactoryAspectInstanceFactory**
 
-`BeanFactoryAspectInstanceFactory` 是一个实现了 `MetadataAwareAspectInstanceFactory` 接口的类，它通过 Spring 的 `BeanFactory` 支持切面实例的创建。这个工厂可以通过指定的 bean 名称从 `BeanFactory` 中获取切面实例，并且可以通过提供的类型来自省以创建 AspectJ 的元数据信息。它可以处理单例和非单例的情况，并且能够确定切面的顺序，支持使用 `Ordered` 接口或 `@Order` 注解来定义顺序。
+`BeanFactoryAspectInstanceFactory` is a class that implements the `MetadataAwareAspectInstanceFactory` interface. It supports creating aspect instances through the Spring `BeanFactory`. This factory gets the aspect instance from the `BeanFactory` by the given bean name, and can introspect the given type to create the AspectJ metadata. It handles both singleton and non-singleton cases, and can decide the order of the aspect. The order can be set with the `Ordered` interface or the `@Order` annotation.
 
 ```java
 /**
- * {@link org.springframework.aop.aspectj.AspectInstanceFactory} 接口的实现，
- * 由 Spring {@link org.springframework.beans.factory.BeanFactory} 支持。
+ * Implementation of the {@link org.springframework.aop.aspectj.AspectInstanceFactory} interface,
+ * backed by a Spring {@link org.springframework.beans.factory.BeanFactory}.
  *
- * <p>注意，如果使用原型模式可能会多次实例化，这可能不会得到您期望的语义。
- * 使用 {@link LazySingletonAspectInstanceFactoryDecorator} 来包装这个工厂，
- * 以确保只返回一个新的切面。
+ * <p>Note that this may instantiate the aspect multiple times if a prototype is used, which may not give the semantics you expect.
+ * Use {@link LazySingletonAspectInstanceFactoryDecorator} to wrap this factory,
+ * to make sure only one new aspect is returned.
  *
- * 作者：Rod Johnson, Juergen Hoeller
+ * Authors: Rod Johnson, Juergen Hoeller
  * @since 2.0
  * @see org.springframework.beans.factory.BeanFactory
  * @see LazySingletonAspectInstanceFactoryDecorator
@@ -334,28 +334,28 @@ public class SingletonMetadataAwareAspectInstanceFactory extends SingletonAspect
 @SuppressWarnings("serial")
 public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInstanceFactory, Serializable {
 
-    private final BeanFactory beanFactory; // Bean 工厂
-    private final String name; // Bean 名称
-    private final AspectMetadata aspectMetadata; // 切面的元数据信息
+    private final BeanFactory beanFactory; // The bean factory
+    private final String name; // The bean name
+    private final AspectMetadata aspectMetadata; // The metadata of the aspect
 
     /**
-     * 创建一个 BeanFactoryAspectInstanceFactory。AspectJ 将被调用来自省，
-     * 使用从 BeanFactory 中为给定的 bean 名称返回的类型创建 AJType 元数据。
+     * Create a BeanFactoryAspectInstanceFactory. AspectJ will be called to introspect,
+     * to create AJType metadata using the type returned from the BeanFactory for the given bean name.
      *
-     * @param beanFactory BeanFactory，用于获取实例
-     * @param name bean 的名称
+     * @param beanFactory the BeanFactory to get instances from
+     * @param name the name of the bean
      */
     public BeanFactoryAspectInstanceFactory(BeanFactory beanFactory, String name) {
         this(beanFactory, name, null);
     }
 
     /**
-     * 创建一个 BeanFactoryAspectInstanceFactory，提供一个类型，AspectJ 应该自省以创建 AJType 元数据。
-     * 如果 BeanFactory 可能将类型视为子类（例如使用 CGLIB），并且信息应该与超类相关，则使用此选项。
+     * Create a BeanFactoryAspectInstanceFactory with a given type that AspectJ should introspect to create AJType metadata.
+     * Use this if the BeanFactory may consider the type to be a subclass (for example with CGLIB) and the information should relate to the superclass.
      *
-     * @param beanFactory BeanFactory，用于获取实例
-     * @param name bean 的名称
-     * @param type AspectJ 应该自省的类型（{@code null} 表示通过 bean 名称解析通过 {@link BeanFactory#getType} 的类型）
+     * @param beanFactory the BeanFactory to get instances from
+     * @param name the name of the bean
+     * @param type the type AspectJ should introspect ({@code null} means resolve the type from the bean name through {@link BeanFactory#getType})
      */
     public BeanFactoryAspectInstanceFactory(BeanFactory beanFactory, String name, @Nullable Class<?> type) {
         Assert.notNull(beanFactory, "BeanFactory must not be null");
@@ -367,13 +367,13 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
             resolvedType = beanFactory.getType(name);
             Assert.notNull(resolvedType, "Unresolvable bean type - explicitly specify the aspect class");
         }
-        this.aspectMetadata = new AspectMetadata(resolvedType, name); // 创建切面的元数据信息
+        this.aspectMetadata = new AspectMetadata(resolvedType, name); // Create the metadata of the aspect
     }
 
     /**
-     * 获取切面实例。
+     * Get the aspect instance.
      *
-     * @return 切面实例
+     * @return the aspect instance
      */
     @Override
     public Object getAspectInstance() {
@@ -381,9 +381,9 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
     }
 
     /**
-     * 获取切面的类加载器。
+     * Get the class loader of the aspect.
      *
-     * @return 切面的类加载器
+     * @return the class loader of the aspect
      */
     @Override
     @Nullable
@@ -394,9 +394,9 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
     }
 
     /**
-     * 获取切面的元数据信息。
+     * Get the metadata of the aspect.
      *
-     * @return 切面的元数据信息
+     * @return the metadata of the aspect
      */
     @Override
     public AspectMetadata getAspectMetadata() {
@@ -404,19 +404,19 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
     }
 
     /**
-     * 获取切面实例的创建锁。
+     * Get the creation lock of the aspect instance.
      *
-     * @return 切面实例的创建锁
+     * @return the creation lock of the aspect instance
      */
     @Override
     @Nullable
     public Object getAspectCreationMutex() {
         if (this.beanFactory.isSingleton(this.name)) {
-            // 依赖于工厂提供的单例语义 -> 没有本地锁。
+            // Rely on the singleton semantics provided by the factory -> no local lock.
             return null;
         } else if (this.beanFactory instanceof ConfigurableBeanFactory) {
-            // 从工厂中没有单例保证 -> 让我们本地锁定，但重用工厂的单例锁，以防万一我们的通知 bean 的惰性依赖项
-            // 不小心触发了单例锁隐式...
+            // No singleton guarantee from the factory -> let's lock locally, but reuse the factory's singleton lock, in case a lazy dependency of our advice bean
+            // accidentally triggers the singleton lock implicitly...
             return ((ConfigurableBeanFactory) this.beanFactory).getSingletonMutex();
         } else {
             return this;
@@ -424,8 +424,8 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
     }
 
     /**
-     * 确定此工厂目标切面的顺序，可以通过实现 {@link org.springframework.core.Ordered} 接口来表达实例特定的顺序
-     * （仅对单例 bean 进行检查），也可以通过 {@link org.springframework.core.annotation.Order} 注解在类级别表达顺序。
+     * Determine the order of the target aspect of this factory. It can be expressed with an instance-specific order by implementing the {@link org.springframework.core.Ordered} interface
+     * (checked only for singleton beans), or with the {@link org.springframework.core.annotation.Order} annotation at class level.
      *
      * @see org.springframework.core.Ordered
      * @see org.springframework.core.annotation.Order
@@ -451,26 +451,26 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 
 **LazySingletonAspectInstanceFactoryDecorator**
 
-`LazySingletonAspectInstanceFactoryDecorator`类是一个装饰器，用于确保一个 `MetadataAwareAspectInstanceFactory` 只实例化一次。它包装了另一个 `MetadataAwareAspectInstanceFactory` 实例，并在首次调用 `getAspectInstance()` 方法时进行实例化。在后续的调用中，它将返回已经实例化的对象，而不会再次实例化。
+The `LazySingletonAspectInstanceFactoryDecorator` class is a decorator that makes sure a `MetadataAwareAspectInstanceFactory` is instantiated only once. It wraps another `MetadataAwareAspectInstanceFactory` instance and creates the instance when the `getAspectInstance()` method is called for the first time. In later calls, it returns the instance that already exists and does not create it again.
 
 ```java
 /**
- * 修饰器，使 {@link MetadataAwareAspectInstanceFactory} 仅实例化一次。
+ * Decorator that makes a {@link MetadataAwareAspectInstanceFactory} instantiate only once.
  * 
- * 作者：Rod Johnson, Juergen Hoeller
+ * Authors: Rod Johnson, Juergen Hoeller
  * @since 2.0
  */
 @SuppressWarnings("serial")
 public class LazySingletonAspectInstanceFactoryDecorator implements MetadataAwareAspectInstanceFactory, Serializable {
 
-	private final MetadataAwareAspectInstanceFactory maaif; // 要装饰的 MetadataAwareAspectInstanceFactory 实例
+	private final MetadataAwareAspectInstanceFactory maaif; // The MetadataAwareAspectInstanceFactory instance to decorate
 
 	@Nullable
-	private volatile Object materialized; // 实例化的对象
+	private volatile Object materialized; // The instantiated object
 
 	/**
-	 * 创建一个对给定 AspectInstanceFactory 进行懒初始化的修饰器。
-	 * @param maaif 要装饰的 MetadataAwareAspectInstanceFactory
+	 * Create a decorator that lazily initializes the given AspectInstanceFactory.
+	 * @param maaif the MetadataAwareAspectInstanceFactory to decorate
 	 */
 	public LazySingletonAspectInstanceFactoryDecorator(MetadataAwareAspectInstanceFactory maaif) {
 		Assert.notNull(maaif, "AspectInstanceFactory must not be null");
@@ -478,48 +478,48 @@ public class LazySingletonAspectInstanceFactoryDecorator implements MetadataAwar
 	}
 
 	/**
-     * 获取切面实例。
-     * 如果实例化过程中已经存在一个实例，则直接返回该实例；
-     * 否则，根据实例化互斥锁（如果存在）保证多线程环境下只实例化一次。
-     * 如果没有互斥锁，则直接实例化切面对象并将其赋值给 materialized 变量，然后返回该实例。
-     * 如果存在互斥锁，则使用该锁来保护实例化过程，确保在多线程环境下只有一个线程可以执行实例化操作。
+     * Get the aspect instance.
+     * If an instance already exists, return it directly;
+     * otherwise, use the instantiation mutex (if there is one) to make sure it is instantiated only once in a multi-threaded environment.
+     * If there is no mutex, instantiate the aspect object directly, assign it to the materialized variable, and return the instance.
+     * If there is a mutex, use the lock to protect the instantiation, so only one thread can do the instantiation in a multi-threaded environment.
      * 
-     * @return 切面实例
+     * @return the aspect instance
      */
     @Override
     public Object getAspectInstance() {
-        // 尝试获取已实例化的对象
+        // Try to get the instance that already exists
         Object aspectInstance = this.materialized; 
-        // 如果不存在已实例化的对象
+        // If no instance exists yet
         if (aspectInstance == null) { 
-            // 获取实例化互斥锁
+            // Get the instantiation mutex
             Object mutex = this.maaif.getAspectCreationMutex(); 
-            // 如果不存在互斥锁
+            // If there is no mutex
             if (mutex == null) { 
-                // 直接实例化切面对象
+                // Instantiate the aspect object directly
                 aspectInstance = this.maaif.getAspectInstance(); 
-                // 将实例化后的对象赋值给 materialized 变量
+                // Assign the instantiated object to the materialized variable
                 this.materialized = aspectInstance; 
             } else { 
-                // 使用互斥锁保护实例化过程
+                // Use the mutex to protect the instantiation
                 synchronized (mutex) {
-                    // 再次尝试获取已实例化的对象
+                    // Try to get the instance that already exists again
                     aspectInstance = this.materialized; 
-                    // 双重检查，确保在锁内部只实例化一次
+                    // Double check, to make sure it is instantiated only once inside the lock
                     if (aspectInstance == null) { 
-                        // 实例化切面对象
+                        // Instantiate the aspect object
                         aspectInstance = this.maaif.getAspectInstance(); 
-                        // 将实例化后的对象赋值给 materialized 变量
+                        // Assign the instantiated object to the materialized variable
                         this.materialized = aspectInstance; 
                     }
                 }
             }
         }
-        return aspectInstance; // 返回切面实例
+        return aspectInstance; // Return the aspect instance
     }
 
 	/**
-	 * 返回是否已经实例化。
+	 * Return whether it has already been instantiated.
 	 */
 	public boolean isMaterialized() {
 		return (this.materialized != null);

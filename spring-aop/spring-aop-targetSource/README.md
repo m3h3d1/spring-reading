@@ -1,55 +1,55 @@
 ## TargetSource
 
 - [TargetSource](#targetsource)
-    - [一、基本信息](#一基本信息)
-    - [二、基本描述](#二基本描述)
-    - [三、主要功能](#三主要功能)
-    - [四、接口源码](#四接口源码)
-    - [五、主要实现](#五主要实现)
-    - [六、类关系图](#六类关系图)
-    - [七、最佳实践](#七最佳实践)
+    - [1. Overview](#1-overview)
+    - [2. Description](#2-description)
+    - [3. Main Features](#3-main-features)
+    - [4. Interface Source](#4-interface-source)
+    - [5. Main Implementations](#5-main-implementations)
+    - [6. Class Diagram](#6-class-diagram)
+    - [7. Best Practices](#7-best-practices)
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、基本描述
+### 2. Description
 
-`TargetSource` 接口是 Spring AOP 框架中的一个关键组件，用于定义获取目标对象的策略，允许我们灵活地管理目标对象的创建和管理。通过实现该接口，可以实现各种目标对象的获取方式，如单例、原型、池化等，从而为 AOP 切面提供了更高度的可定制性和灵活性。
+The `TargetSource` interface is a key part of the Spring AOP framework. It defines the strategy for getting the target object, so you can manage the creation and handling of target objects in a flexible way. By implementing this interface, you can get target objects in many ways, such as singleton, prototype, and pooling. This makes AOP aspects more customizable and flexible.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **目标对象获取方法**
+1. **Method to get the target object**
 
-   + `getTarget()`，该方法根据具体的策略获取目标对象，如单例、原型、池化等。
+   + `getTarget()` gets the target object by a specific strategy, such as singleton, prototype, or pooling.
 
-2. **目标对象释放方法**
+2. **Method to release the target object**
 
-   + `releaseTarget(Object target)`，一些实现可能需要释放目标对象，如将对象返回到对象池中。
+   + `releaseTarget(Object target)`: some implementations may need to release the target object, for example by returning it to an object pool.
 
-3. **灵活的目标对象管理**
+3. **Flexible target object management**
 
-   + 可以根据应用程序的需求实现自定义的目标对象获取策略，从而实现对目标对象的灵活管理。
+   + You can write your own strategy for getting target objects to fit the needs of the application. This gives flexible management of target objects.
 
-4. **内置的目标源实现**
+4. **Built-in target source implementations**
 
-   + Spring AOP 提供了几种内置的 `TargetSource` 实现，如 `SingletonTargetSource`、`PrototypeTargetSource`、`ThreadLocalTargetSource` 等，可以根据具体情况选择合适的目标源实现。
+   + Spring AOP provides several built-in `TargetSource` implementations, such as `SingletonTargetSource`, `PrototypeTargetSource`, and `ThreadLocalTargetSource`. You can choose the one that fits your case.
 
-5. **扩展性和定制性**
+5. **Extensibility and customization**
 
-   + 我们可以通过实现 `TargetSource` 接口来实现自定义的目标源，从而满足特定场景下的需求，如基于线程的对象管理、对象池管理等。
+   + We can implement the `TargetSource` interface to write our own target source for special cases, such as thread-based object management and object pool management.
 
-### 四、接口源码
+### 4. Interface Source
 
-`TargetSource` 接口用于获取当前 AOP 调用的目标对象，通过 `getTarget()` 方法获取目标对象，并通过 `releaseTarget(Object target)` 方法释放目标对象。接口定义了 `getTargetClass()` 方法用于返回目标对象的类型，`isStatic()` 方法用于检查是否所有调用 `getTarget()` 方法的返回值都是相同的对象。此接口支持静态和动态目标源，静态目标源始终返回相同的目标对象，而动态目标源支持池化、热交换等功能。
+The `TargetSource` interface gets the target object of the current AOP call. The `getTarget()` method gets the target object, and the `releaseTarget(Object target)` method releases it. The interface defines the `getTargetClass()` method to return the type of the target object, and the `isStatic()` method to check whether all calls of `getTarget()` return the same object. The interface supports static and dynamic target sources. A static target source always returns the same target object. A dynamic target source can support pooling, hot swapping, and more.
 
 ```java
 /**
- * TargetSource 接口用于获取 AOP 调用的当前目标对象，如果没有环绕通知选择结束拦截器链，则将通过反射调用目标对象。
+ * The TargetSource interface is used to get the current target object of an AOP call. If no around advice chooses to end the interceptor chain, the target object is called by reflection.
  *
- * <p>如果 TargetSource 是 "static"，它将始终返回相同的目标对象，从而允许 AOP 框架进行优化。动态目标源可以支持池化、热交换等。
+ * <p>If a TargetSource is "static", it always returns the same target object, which allows the AOP framework to optimize. Dynamic target sources can support pooling, hot swapping, and more.
  *
- * <p>应用程序开发人员通常不需要直接使用 TargetSources：这是一个 AOP 框架接口。
+ * <p>Application developers usually do not need to use TargetSources directly: this is an AOP framework interface.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -57,63 +57,63 @@
 public interface TargetSource extends TargetClassAware {
 
     /**
-     * 返回此 TargetSource 返回的目标类型。
-     * <p>可以返回 {@code null}，尽管某些 TargetSource 的用法可能只使用预定的目标类。
+     * Return the type of target returned by this TargetSource.
+     * <p>Can return {@code null}, although certain uses of a TargetSource might just work with a predetermined target class.
      *
-     * @return 此 TargetSource 返回的目标类型
+     * @return the type of target returned by this TargetSource
      */
     @Override
     @Nullable
     Class<?> getTargetClass();
 
     /**
-     * 所有对 getTarget() 的调用是否将返回相同的对象？
-     * <p>在这种情况下，不需要调用 releaseTarget(Object)，并且 AOP 框架可以缓存 getTarget() 的返回值。
+     * Will all calls to getTarget() return the same object?
+     * <p>In that case, there is no need to call releaseTarget(Object), and the AOP framework can cache the return value of getTarget().
      *
-     * @return 如果目标是不可变的，则为 true
+     * @return true if the target is immutable
      * @see #getTarget
      */
     boolean isStatic();
 
     /**
-     * 返回一个目标实例。在 AOP 框架调用 AOP 方法调用的目标之前立即调用此方法。
+     * Return a target instance. Called immediately before the AOP framework calls the target of an AOP method invocation.
      *
-     * @return 包含连接点的目标对象，如果没有实际目标实例，则为 {@code null}
-     * @throws Exception 如果无法解析目标对象
+     * @return the target object that contains the join point, or {@code null} if there is no actual target instance
+     * @throws Exception if the target object cannot be resolved
      */
     @Nullable
     Object getTarget() throws Exception;
 
     /**
-     * 释放从 getTarget() 方法获取的给定目标对象（如果有）。
+     * Release the given target object obtained from the getTarget() method, if any.
      *
-     * @param target 从调用 getTarget() 获取的对象
-     * @throws Exception 如果无法释放对象
+     * @param target the object obtained from a call to getTarget()
+     * @throws Exception if the object cannot be released
      */
     void releaseTarget(Object target) throws Exception;
 
 }	
 ```
 
-### 五、主要实现
+### 5. Main Implementations
 
 1. **SingletonTargetSource**
 
-   + 用于管理单例对象的目标源。该实现每次调用 `getTarget()` 方法都返回同一个单例对象，适用于目标对象是单例的情况。
+   + A target source that manages a singleton object. This implementation returns the same singleton object on every `getTarget()` call. It fits cases where the target object is a singleton.
 
 2. **PrototypeTargetSource**
 
-   + 用于每次调用时创建新对象的目标源。该实现每次调用 `getTarget()` 方法都返回一个新的目标对象实例，适用于目标对象需要频繁更新或重置的情况。
+   + A target source that creates a new object on every call. This implementation returns a new target object instance on every `getTarget()` call. It fits cases where the target object must be refreshed or reset often.
 
 3. **ThreadLocalTargetSource**
 
-   + 用于在每个线程中保持一个目标对象的引用。该实现在每个线程中都维护一个目标对象的副本，适用于需要在多线程环境中使用不同的目标对象实例的情况。
+   + A target source that keeps one target object per thread. This implementation keeps a copy of the target object in each thread. It fits cases where different target object instances are needed in a multi-threaded environment.
 
 4. **CommonsPool2TargetSource**
 
-   + 用于使用 Apache Commons Pool 来管理目标对象的池化目标源。该实现通过对象池管理目标对象的创建和销毁，以提高对象的重用性和性能。
+   + A pooling target source that uses Apache Commons Pool to manage target objects. This implementation manages the creation and destruction of target objects through an object pool, to improve reuse and performance.
 
-### 六、类关系图
+### 6. Class Diagram
 
 ~~~mermaid
 classDiagram
@@ -138,22 +138,22 @@ TargetSource  -->  TargetClassAware
 ThreadLocalTargetSource  ..>  TargetSource 
 ~~~
 
-### 七、最佳实践
+### 7. Best Practices
 
-使用 Spring 的代理工厂（`ProxyFactory`）和目标源（`TargetSource`）来创建代理对象。在这个示例中，我们创建了一个连接池目标源（`ConnectionPoolTargetSource`），设置连接池的大小为 3。然后，我们将这个连接池目标源设置为代理工厂的目标源，并通过代理工厂获取代理对象。最后，我们通过代理对象调用了10次方法。
+This example uses the Spring proxy factory (`ProxyFactory`) and a target source (`TargetSource`) to create a proxy object. We create a connection pool target source (`ConnectionPoolTargetSource`) and set the pool size to 3. Then we set this connection pool target source as the target source of the proxy factory, and get the proxy object from the proxy factory. Finally, we call a method on the proxy object 10 times.
 
 ```java
 public class TargetSourceDemo {
 
     public static void main(String[] args) {
-        // 创建代理工厂
+        // Create the proxy factory
         ProxyFactory proxyFactory = new ProxyFactory();
-        // 设置目标源为连接池目标源，连接池大小为3
+        // Set the target source to the connection pool target source, with a pool size of 3
         proxyFactory.setTargetSource(new ConnectionPoolTargetSource(3));
-        // 获取代理对象
+        // Get the proxy object
         MyConnection proxy = (MyConnection) proxyFactory.getProxy();
 
-        // 调用10次方法
+        // Call the method 10 times
         for (int i = 0; i < 10; i++) {
             System.out.println("MyConnection Name = " + proxy.getName());
         }
@@ -161,26 +161,26 @@ public class TargetSourceDemo {
 }
 ```
 
-`ConnectionPoolTargetSource` 类实现了 Spring 的 `TargetSource` 接口，用于管理自定义连接对象的连接池。在构造函数中，它会初始化一个固定大小的阻塞队列作为连接池，并填充连接对象。通过实现 `getTarget()` 方法，它能够从连接池中获取连接对象，并在 `releaseTarget()` 方法中释放连接对象。
+The `ConnectionPoolTargetSource` class implements the Spring `TargetSource` interface. It manages a connection pool of custom connection objects. In the constructor, it creates a blocking queue of fixed size as the connection pool and fills it with connection objects. With the `getTarget()` method, it gets a connection object from the pool, and with the `releaseTarget()` method, it releases the connection object.
 
 ```java
 /**
- * 连接池目标源，用于管理自定义连接对象的连接池。
+ * Connection pool target source that manages a connection pool of custom connection objects.
  *
  * @author xcs
- * @date 2024年4月9日15:26:28
+ * @date 2024-04-09 15:26
  */
 public class ConnectionPoolTargetSource implements TargetSource {
 
     /**
-     * 连接池
+     * Connection pool
      */
     private final BlockingQueue<MyConnection> connectionPool;
 
     /**
-     * 构造函数，初始化连接池。
+     * Constructor that initializes the connection pool.
      *
-     * @param poolSize 连接池大小
+     * @param poolSize the pool size
      */
     public ConnectionPoolTargetSource(int poolSize) {
         this.connectionPool = new ArrayBlockingQueue<>(poolSize);
@@ -188,9 +188,9 @@ public class ConnectionPoolTargetSource implements TargetSource {
     }
 
     /**
-     * 初始化连接池，填充连接对象。
+     * Initializes the connection pool and fills it with connection objects.
      *
-     * @param poolSize 连接池大小
+     * @param poolSize the pool size
      */
     private void initializeConnectionPool(int poolSize) {
         for (int i = 0; i < poolSize; i++) {
@@ -200,9 +200,9 @@ public class ConnectionPoolTargetSource implements TargetSource {
     }
 
     /**
-     * 获取目标类的类型。
+     * Gets the type of the target class.
      *
-     * @return 目标类的类型
+     * @return the type of the target class
      */
     @Override
     public Class<?> getTargetClass() {
@@ -210,9 +210,9 @@ public class ConnectionPoolTargetSource implements TargetSource {
     }
 
     /**
-     * 判断目标对象是否是静态的。
+     * Checks whether the target object is static.
      *
-     * @return 如果目标对象是静态的，则返回true，否则返回false
+     * @return true if the target object is static, otherwise false
      */
     @Override
     public boolean isStatic() {
@@ -220,10 +220,10 @@ public class ConnectionPoolTargetSource implements TargetSource {
     }
 
     /**
-     * 获取连接对象。
+     * Gets a connection object.
      *
-     * @return 连接对象
-     * @throws Exception 如果获取连接对象时发生异常
+     * @return the connection object
+     * @throws Exception if an exception occurs while getting the connection object
      */
     @Override
     public Object getTarget() throws Exception {
@@ -231,10 +231,10 @@ public class ConnectionPoolTargetSource implements TargetSource {
     }
 
     /**
-     * 释放连接对象。
+     * Releases a connection object.
      *
-     * @param target 待释放的连接对象
-     * @throws Exception 如果释放连接对象时发生异常
+     * @param target the connection object to release
+     * @throws Exception if an exception occurs while releasing the connection object
      */
     @Override
     public void releaseTarget(Object target) throws Exception {
@@ -245,7 +245,7 @@ public class ConnectionPoolTargetSource implements TargetSource {
 }
 ```
 
-`MyConnection` 类代表了一个自定义的连接对象。
+`MyConnection` class stands for a custom connection object.
 
 ```java
 public class MyConnection {
@@ -273,7 +273,7 @@ public class MyConnection {
 }
 ```
 
-运行结果，连接池会循环地提供连接对象，直到连接池中的所有连接对象都被使用过一次后，再重新开始循环。这与预期的连接池行为一致，确保了连接对象的复用和管理。
+In the run result, the connection pool provides the connection objects in a cycle. After every connection object in the pool has been used once, it starts again from the first one. This matches the expected behavior of a connection pool, and shows that connection objects are reused and managed.
 
 ```java
 MyConnection Name = Connection0

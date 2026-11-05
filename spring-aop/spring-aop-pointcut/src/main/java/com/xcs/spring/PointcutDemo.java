@@ -12,7 +12,7 @@ import java.lang.reflect.Method;
 
 /**
  * @author xcs
- * @date 2024年4月7日15:42:49
+ * @date 2024-04-07 15:42
  */
 public class PointcutDemo {
     public static void main(String[] args) {
@@ -24,7 +24,7 @@ public class PointcutDemo {
     }
 
     /**
-     * 自定义 Pointcut
+     * Custom Pointcut
      */
     private static void customPointcut() {
         MyCustomPointcut pointcut = new MyCustomPointcut();
@@ -35,7 +35,7 @@ public class PointcutDemo {
      * AspectJExpressionPointcut
      */
     private static void aspectJExpressionPointcut() {
-        // 创建 AspectJ 表达式切入点
+        // Create the AspectJ expression pointcut
         AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
         pointcut.setExpression("execution(* com.xcs.spring.MyService.get*())");
         showMatchesLog(pointcut);
@@ -45,7 +45,7 @@ public class PointcutDemo {
      * AnnotationMatchingPointcut
      */
     private static void annotationMatchingPointcut() {
-        // 使用AnnotationMatchingPointcut切入点
+        // Use the AnnotationMatchingPointcut pointcut
         AnnotationMatchingPointcut pointcut = new AnnotationMatchingPointcut(MyClassAnnotation.class, MyMethodAnnotation.class, false);
         showMatchesLog(pointcut);
     }
@@ -54,7 +54,7 @@ public class PointcutDemo {
      * AspectJExpressionPointcut
      */
     private static void nameMatchMethodPointcut() {
-        // 使用AnnotationMatchingPointcut切入点
+        // Use the AnnotationMatchingPointcut pointcut
         NameMatchMethodPointcut pointcut = new NameMatchMethodPointcut();
         pointcut.addMethodName("getAge");
         showMatchesLog(pointcut);

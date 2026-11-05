@@ -1,53 +1,53 @@
 ## @EnableAspectJAutoProxy
 
 - [@EnableAspectJAutoProxy](#enableaspectjautoproxy)
-  - [一、基本信息](#一基本信息)
-  - [二、基本描述](#二基本描述)
-  - [三、主要功能](#三主要功能)
-  - [四、注解源码](#四注解源码)
-  - [五、最佳实践](#五最佳实践)
-  - [六、源码分析](#六源码分析)
+  - [1. Overview](#1-overview)
+  - [2. Description](#2-description)
+  - [3. Main Features](#3-main-features)
+  - [4. Annotation Source](#4-annotation-source)
+  - [5. Best Practices](#5-best-practices)
+  - [6. Source Code Analysis](#6-source-code-analysis)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、基本描述
+### 2. Description
 
-`EnableAspectJAutoProxy`注解是Spring框架中的一个注解，用于启用AspectJ自动代理功能，它能够自动将AspectJ切面与Spring的IoC容器集成，无需显式配置大量AOP相关的内容，从而简化AOP的使用和配置。
+The `EnableAspectJAutoProxy` annotation in the Spring Framework turns on AspectJ auto proxy support. It joins AspectJ aspects with the Spring IoC container automatically, so you do not need to configure many AOP settings by hand. This makes AOP simpler to use and configure.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **启用AspectJ自动代理功能**
+1. **Enable AspectJ auto proxy support**
 
-   + 通过在配置类上添加该注解，Spring会自动启用AspectJ自动代理功能，无需显式配置大量AOP相关内容。
+   + When you add this annotation to a configuration class, Spring turns on AspectJ auto proxy support. You do not need to configure many AOP settings by hand.
 
-2. **自动创建代理对象**
+2. **Create proxy objects automatically**
 
-   + Spring会自动创建代理对象来应用切面，将切面逻辑与目标对象进行结合。
+   + Spring creates proxy objects automatically to apply aspects, and combines the aspect logic with the target object.
 
-3. **集成AspectJ切面与Spring容器**
+3. **Integrate AspectJ aspects with the Spring container**
 
-   + 能够方便地将AspectJ切面与Spring的IoC容器集成，实现横切关注点的模块化管理。
+   + It is easy to integrate AspectJ aspects with the Spring IoC container, so cross-cutting concerns are managed in separate modules.
 
-4. **简化AOP配置**
+4. **Simplify AOP configuration**
 
-   + 减少了手动配置AOP所需的繁琐步骤，提高了开发效率。
+   + It removes the tedious steps of configuring AOP by hand and makes development faster.
 
-5. **自动扫描切面**
+5. **Scan aspects automatically**
 
-+ Spring会自动扫描应用中的AspectJ切面，并将其应用到相应的目标对象中，无需手动配置切面。
++ Spring scans the AspectJ aspects in the application and applies them to the matching target objects. You do not need to configure aspects by hand.
 
-### 四、注解源码
+### 4. Annotation Source
 
-`EnableAspectJAutoProxy`注解，用于启用支持处理使用AspectJ的`@Aspect`注解标记的组件，在Spring中类似于XML配置中的`<aop:aspectj-autoproxy>`功能。它允许通过配置类轻松集成AspectJ切面，并控制代理类型和代理的可见性。
+The `EnableAspectJAutoProxy` annotation turns on support for components marked with the AspectJ `@Aspect` annotation. In Spring, it works like the `<aop:aspectj-autoproxy>` element in XML configuration. It lets you integrate AspectJ aspects easily through a configuration class, and control the proxy type and the visibility of the proxy.
 
 ```java
 /**
- * 启用支持处理使用AspectJ的{@code @Aspect}注解标记的组件，
- * 类似于Spring的{@code <aop:aspectj-autoproxy>} XML元素中的功能。
- * 应用在如下的@{@link Configuration}类上：
+ * Enables support for handling components marked with AspectJ's {@code @Aspect} annotation,
+ * similar to the functionality of Spring's {@code <aop:aspectj-autoproxy>} XML element.
+ * Applied to a @{@link Configuration} class as follows:
  *
  * <pre class="code">
  * &#064;Configuration
@@ -65,13 +65,13 @@
  *     }
  * }</pre>
  *
- * 这里的{@code FooService}是一个典型的POJO组件，{@code MyAspect}是一个
- * {@code @Aspect}-风格的切面：
+ * Here {@code FooService} is a typical POJO component and {@code MyAspect} is an
+ * {@code @Aspect}-style aspect:
  *
  * <pre class="code">
  * public class FooService {
  *
- *     // 各种方法
+ *     // various methods
  * }</pre>
  *
  * <pre class="code">
@@ -80,15 +80,15 @@
  *
  *     &#064;Before("execution(* FooService+.*(..))")
  *     public void advice() {
- *         // 适当地提供FooService方法的建议
+ *         // advise the FooService methods as appropriate
  *     }
  * }</pre>
  *
- * 在上述场景中，{@code @EnableAspectJAutoProxy}确保{@code MyAspect}
- * 将被正确处理，并且{@code FooService}将被代理，混合其中的建议。
+ * In the scenario above, {@code @EnableAspectJAutoProxy} ensures that {@code MyAspect}
+ * will be properly processed and that {@code FooService} will be proxied, mixing in the advice.
  *
- * <p>用户可以通过{@link #proxyTargetClass()}属性控制为{@code FooService}创建的代理类型。
- * 以下示例启用了CGLIB风格的“子类”代理，而不是默认的基于接口的JDK代理方式。
+ * <p>Users can control the type of proxy created for {@code FooService} through the {@link #proxyTargetClass()} attribute.
+ * The following example enables CGLIB-style "subclass" proxying instead of the default interface-based JDK proxy approach.
  *
  * <pre class="code">
  * &#064;Configuration
@@ -97,8 +97,8 @@
  *     // ...
  * }</pre>
  *
- * <p>注意，{@code @Aspect} bean可以像任何其他组件一样进行组件扫描。
- * 只需将切面标记为{@code @Aspect}和{@code @Component}：
+ * <p>Note that {@code @Aspect} beans can be component-scanned like any other component.
+ * Simply mark the aspect with both {@code @Aspect} and {@code @Component}:
  *
  * <pre class="code">
  * package com.foo;
@@ -110,7 +110,7 @@
  * &#064;Component
  * public class MyAspect { ... }</pre>
  *
- * 然后使用@{@link ComponentScan}注解来同时选择它们：
+ * Then use the @{@link ComponentScan} annotation to pick them up together:
  *
  * <pre class="code">
  * &#064;Configuration
@@ -118,16 +118,16 @@
  * &#064;EnableAspectJAutoProxy
  * public class AppConfig {
  *
- *     // 不需要显式的{@code @Bean}定义
+ *     // no explicit {@code @Bean} definitions needed
  * }</pre>
  *
- * <b>注意：{@code @EnableAspectJAutoProxy}仅适用于其本地应用上下文，
- * 允许在不同级别选择性地对bean进行代理。</b>
- * 如果需要在多个级别应用其行为，例如常见的根Web应用程序上下文和任何单独的{@code DispatcherServlet}应用程序上下文中，
- * 请在每个单独的上下文中重新声明{@code @EnableAspectJAutoProxy}。
+ * <b>Note: {@code @EnableAspectJAutoProxy} applies only to its local application context,
+ * which allows beans to be proxied selectively at different levels.</b>
+ * If you need its behavior at several levels, for example in a common root web application context and in any separate {@code DispatcherServlet} application context,
+ * redeclare {@code @EnableAspectJAutoProxy} in each separate context.
  *
- * <p>该功能要求类路径上存在{@code aspectjweaver}。
- * 虽然{@code spring-aop}一般情况下对该依赖是可选的，但是对于{@code @EnableAspectJAutoProxy}及其基础设施，它是必需的。
+ * <p>This feature requires {@code aspectjweaver} on the classpath.
+ * While {@code spring-aop} generally treats this dependency as optional, it is required for {@code @EnableAspectJAutoProxy} and its infrastructure.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -141,13 +141,13 @@
 public @interface EnableAspectJAutoProxy {
 
     /**
-     * 指示是否创建基于子类（CGLIB）的代理，而不是标准的基于Java接口的代理。默认值为{@code false}。
+     * Indicates whether subclass-based (CGLIB) proxies are to be created, as opposed to standard Java interface-based proxies. The default is {@code false}.
      */
     boolean proxyTargetClass() default false;
 
     /**
-     * 指示代理是否应该被AOP框架公开为一个{@code ThreadLocal}，以便通过{@link org.springframework.aop.framework.AopContext}类进行检索。
-     * 默认情况下关闭，即不保证{@code AopContext}访问将起作用。
+     * Indicates whether the proxy should be exposed by the AOP framework as a {@code ThreadLocal} for retrieval through the {@link org.springframework.aop.framework.AopContext} class.
+     * Off by default, which means there is no guarantee that {@code AopContext} access will work.
      * @since 4.3.1
      */
     boolean exposeProxy() default false;
@@ -155,28 +155,28 @@ public @interface EnableAspectJAutoProxy {
 }
 ```
 
-### 五、最佳实践
+### 5. Best Practices
 
-使用`EnableAspectJAutoProxy`
-注解和Spring的基于注解的应用上下文来启用AspectJ自动代理功能。在程序中，首先创建了一个基于注解的应用上下文，然后通过该上下文获取了`MyService`
-bean，并调用了其方法。
+This example uses the `EnableAspectJAutoProxy`
+annotation and the Spring annotation-based application context to turn on AspectJ auto proxy support. The program first creates an annotation-based application context, then gets the `MyService`
+bean from it and calls its method.
 
 ```java
 public class EnableAspectJAutoProxyDemo {
 
     public static void main(String[] args) {
-        // 创建基于注解的应用上下文
+        // Create the annotation-based application context
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
-        // 从应用上下文中获取MyService bean
+        // Get the MyService bean from the application context
         MyService myService = context.getBean(MyService.class);
-        // 调用MyService的方法
+        // Call the method of MyService
         myService.foo();
     }
 }
 ```
 
-`AppConfig` 类是一个使用 `@Configuration` 注解标记的配置类，通过 `@EnableAspectJAutoProxy` 开启了 AspectJ
-自动代理功能，并通过 `@ComponentScan` 启用了组件扫描，用于自动发现和注册 Spring 组件。
+The `AppConfig` class is a configuration class marked with `@Configuration`. It turns on AspectJ auto proxy support with `@EnableAspectJAutoProxy`
+and turns on component scanning with `@ComponentScan`, to find and register Spring components automatically.
 
 ```java
 @Configuration
@@ -187,7 +187,7 @@ public class AppConfig {
 }
 ```
 
-`MyService` 类是一个使用 `@Service` 注解标记的服务类，提供了一个名为 `foo()` 的方法，该方法在调用时会打印消息 "foo..."。
+The `MyService` class is a service class marked with `@Service`. It has a method named `foo()` that prints the message "foo..." when called.
 
 ```java
 
@@ -200,7 +200,7 @@ public class MyService {
 }
 ```
 
-`MyAspect`是一个使用了`@Aspect`注解的Java类，表示它是一个切面。在这个类中，定义了一个名为`advice`的方法，并使用了`@Before`注解来指定在目标方法执行之前执行的通知。
+`MyAspect` is a Java class marked with the `@Aspect` annotation, which means it is an aspect. It defines a method named `advice` and uses the `@Before` annotation to set the advice that runs before the target method.
 
 ```java
 @Aspect
@@ -214,8 +214,8 @@ public class MyAspect {
 }
 ```
 
-运行结果，调用 `MyService` 类的 `foo()` 方法之前，成功地执行了一个切面通知，输出了 "Before method execution"
-的消息，然后执行了 `foo()` 方法，输出了 "foo..." 的消息。
+In the run result, before the `foo()` method of the `MyService` class is called, the aspect advice runs and prints "Before method execution".
+Then the `foo()` method runs and prints "foo...".
 
 ```java
 Before method
@@ -223,27 +223,27 @@ execution
 foo...
 ```
 
-### 六、源码分析
+### 6. Source Code Analysis
 
-在`org.springframework.context.annotation.AspectJAutoProxyRegistrar#registerBeanDefinitions`方法中，首先注册了AspectJ注解自动代理创建器，然后获取了`@EnableAspectJAutoProxy`注解的属性。如果`@EnableAspectJAutoProxy`注解中指定了`proxyTargetClass`属性为true，则强制使用CGLIB代理；如果指定了`exposeProxy`属性为true，则强制代理对象暴露为ThreadLocal。
+The `org.springframework.context.annotation.AspectJAutoProxyRegistrar#registerBeanDefinitions` method first registers the AspectJ annotation auto proxy creator. Then it reads the attributes of the `@EnableAspectJAutoProxy` annotation. If `proxyTargetClass` is true in the annotation, it forces the use of CGLIB proxies. If `exposeProxy` is true, it forces the proxy object to be exposed as a ThreadLocal.
 
 ```java
 @Override
 public void registerBeanDefinitions(
         AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
 
-    // 1、注册AspectJ注解自动代理创建器
+    // 1. Register the AspectJ annotation auto proxy creator
     AopConfigUtils.registerAspectJAnnotationAutoProxyCreatorIfNecessary(registry);
 
-    // 获取@EnableAspectJAutoProxy注解的属性
+    // Get the attributes of the @EnableAspectJAutoProxy annotation
     AnnotationAttributes enableAspectJAutoProxy =
             AnnotationConfigUtils.attributesFor(importingClassMetadata, EnableAspectJAutoProxy.class);
     if (enableAspectJAutoProxy != null) {
-        ///2.如果@EnableAspectJAutoProxy注解指定了proxyTargetClass属性为true，则强制使用CGLIB代理
+        // 2. If the @EnableAspectJAutoProxy annotation sets proxyTargetClass to true, force the use of CGLIB proxies
         if (enableAspectJAutoProxy.getBoolean("proxyTargetClass")) {
             AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(registry);
         }
-        // 3.如果@EnableAspectJAutoProxy注解指定了exposeProxy属性为true，则强制代理对象暴露为ThreadLocal
+        // 3. If the @EnableAspectJAutoProxy annotation sets exposeProxy to true, force the proxy object to be exposed as a ThreadLocal
         if (enableAspectJAutoProxy.getBoolean("exposeProxy")) {
             AopConfigUtils.forceAutoProxyCreatorToExposeProxy(registry);
         }
@@ -252,7 +252,7 @@ public void registerBeanDefinitions(
 
 ```
 
-在`org.springframework.aop.config.AopConfigUtils#registerAspectJAnnotationAutoProxyCreatorIfNecessary(registry)`方法中，注册AspectJ注解自动代理创建器。它提供了一个重载方法，允许传入一个额外的参数，但这里调用的是没有额外参数的版本。在方法中，它会根据给定的`BeanDefinitionRegistry`对象来注册AspectJ注解自动代理创建器，并返回相应的BeanDefinition。
+The `org.springframework.aop.config.AopConfigUtils#registerAspectJAnnotationAutoProxyCreatorIfNecessary(registry)` method registers the AspectJ annotation auto proxy creator. An overloaded method accepts an extra parameter, but here the version without the extra parameter is called. The method registers the AspectJ annotation auto proxy creator in the given `BeanDefinitionRegistry` and returns the matching BeanDefinition.
 
 ```java
 @Nullable
@@ -261,9 +261,9 @@ public static BeanDefinition registerAspectJAnnotationAutoProxyCreatorIfNecessar
 }
 ```
 
-在`org.springframework.aop.config.AopConfigUtils#registerAspectJAnnotationAutoProxyCreatorIfNecessary(registry,source)`方法中，注册AspectJ注解自动代理创建器，并且可以指定源对象。在方法中，它调用了一个辅助方法`registerOrEscalateApcAsRequired`，该方法会根据需要注册或升级AspectJ注解自动代理创建器，并返回相应的BeanDefinition。
+The `org.springframework.aop.config.AopConfigUtils#registerAspectJAnnotationAutoProxyCreatorIfNecessary(registry,source)` method registers the AspectJ annotation auto proxy creator, and lets you give a source object. It calls the helper method `registerOrEscalateApcAsRequired`, which registers or upgrades the AspectJ annotation auto proxy creator as needed and returns the matching BeanDefinition.
 
-[AnnotationAwareAspectJAutoProxyCreator源码分析](../spring-aop-annotationAwareAspectJAutoProxyCreator/README.md)
+[AnnotationAwareAspectJAutoProxyCreator Source Analysis](../spring-aop-annotationAwareAspectJAutoProxyCreator/README.md)
 
 ```java
 @Nullable
@@ -274,25 +274,25 @@ public static BeanDefinition registerAspectJAnnotationAutoProxyCreatorIfNecessar
 }
 ```
 
-在`org.springframework.aop.config.AopConfigUtils#registerOrEscalateApcAsRequired`方法中，首先检查给定的`BeanDefinitionRegistry`中是否已经存在了自动代理创建器的定义。如果存在，则比较现有自动代理创建器与指定类的优先级，如果指定类的优先级更高，则进行升级操作；如果不存在，则创建一个新的自动代理创建器的定义，并将其注册到给定的`BeanDefinitionRegistry`中。
+The `org.springframework.aop.config.AopConfigUtils#registerOrEscalateApcAsRequired` method first checks whether the given `BeanDefinitionRegistry` already has an auto proxy creator definition. If it does, it compares the priority of the existing auto proxy creator with the given class, and upgrades it if the given class has a higher priority. If it does not, it creates a new auto proxy creator definition and registers it in the given `BeanDefinitionRegistry`.
 
 ```java
 @Nullable
 private static BeanDefinition registerOrEscalateApcAsRequired(
        Class<?> cls, BeanDefinitionRegistry registry, @Nullable Object source) {
 
-    // 检查BeanDefinitionRegistry对象是否为null
+    // Check whether the BeanDefinitionRegistry object is null
     Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 
-    // 如果已经存在相同名称的自动代理创建器，则进行升级操作
+    // If an auto proxy creator with the same name already exists, upgrade it
     if (registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
-       // 获取已存在的自动代理创建器的BeanDefinition
+       // Get the BeanDefinition of the existing auto proxy creator
        BeanDefinition apcDefinition = registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
-       // 比较已存在的自动代理创建器与指定类的优先级
+       // Compare the priority of the existing auto proxy creator with the given class
        if (!cls.getName().equals(apcDefinition.getBeanClassName())) {
           int currentPriority = findPriorityForClass(apcDefinition.getBeanClassName());
           int requiredPriority = findPriorityForClass(cls);
-          // 如果指定类的优先级高于已存在的自动代理创建器，则进行升级
+          // If the given class has a higher priority than the existing auto proxy creator, upgrade it
           if (currentPriority < requiredPriority) {
              apcDefinition.setBeanClassName(cls.getName());
           }
@@ -300,41 +300,41 @@ private static BeanDefinition registerOrEscalateApcAsRequired(
        return null;
     }
 
-    // 如果不存在相同名称的自动代理创建器，则进行注册操作
-    // 创建新的自动代理创建器的BeanDefinition
+    // If no auto proxy creator with the same name exists, register one
+    // Create the BeanDefinition of the new auto proxy creator
     RootBeanDefinition beanDefinition = new RootBeanDefinition(cls);
     beanDefinition.setSource(source);
     beanDefinition.getPropertyValues().add("order", Ordered.HIGHEST_PRECEDENCE);
     beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-    // 注册新的自动代理创建器的BeanDefinition
+    // Register the BeanDefinition of the new auto proxy creator
     registry.registerBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME, beanDefinition);
     return beanDefinition;
 }
 ```
 
-在`org.springframework.aop.config.AopConfigUtils#forceAutoProxyCreatorToUseClassProxying`方法中，强制自动代理创建器使用基于类的代理。它首先检查给定的`BeanDefinitionRegistry`中是否已经存在了自动代理创建器的定义。如果存在，则获取该定义并设置其`proxyTargetClass`属性为`true`，表示使用基于类的代理。
+The `org.springframework.aop.config.AopConfigUtils#forceAutoProxyCreatorToUseClassProxying` method forces the auto proxy creator to use class-based proxies. It first checks whether the given `BeanDefinitionRegistry` already has an auto proxy creator definition. If it does, it gets the definition and sets its `proxyTargetClass` property to `true`, which means class-based proxies are used.
 
 ```java
 public static void forceAutoProxyCreatorToUseClassProxying(BeanDefinitionRegistry registry) {
-    // 检查是否存在自动代理创建器的BeanDefinition
+    // Check whether the BeanDefinition of the auto proxy creator exists
     if (registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
-        // 获取自动代理创建器的BeanDefinition
+        // Get the BeanDefinition of the auto proxy creator
         BeanDefinition definition = registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
-        // 设置proxyTargetClass属性为true，表示使用基于类的代理
+        // Set the proxyTargetClass property to true, to use class-based proxies
         definition.getPropertyValues().add("proxyTargetClass", Boolean.TRUE);
     }
 }
 ```
 
-在`org.springframework.aop.config.AopConfigUtils#forceAutoProxyCreatorToExposeProxy`方法中，强制自动代理创建器暴露代理对象。它首先检查给定的`BeanDefinitionRegistry`中是否已经存在了自动代理创建器的定义。如果存在，则获取该定义并设置其`exposeProxy`属性为`true`，表示暴露代理对象。
+The `org.springframework.aop.config.AopConfigUtils#forceAutoProxyCreatorToExposeProxy` method forces the auto proxy creator to expose the proxy object. It first checks whether the given `BeanDefinitionRegistry` already has an auto proxy creator definition. If it does, it gets the definition and sets its `exposeProxy` property to `true`, which means the proxy object is exposed.
 
 ```java
 public static void forceAutoProxyCreatorToExposeProxy(BeanDefinitionRegistry registry) {
-    // 检查是否存在自动代理创建器的BeanDefinition
+    // Check whether the BeanDefinition of the auto proxy creator exists
     if (registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
-        // 获取自动代理创建器的BeanDefinition
+        // Get the BeanDefinition of the auto proxy creator
         BeanDefinition definition = registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
-        // 设置exposeProxy属性为true，表示暴露代理对象
+        // Set the exposeProxy property to true, to expose the proxy object
         definition.getPropertyValues().add("exposeProxy", Boolean.TRUE);
     }
 }

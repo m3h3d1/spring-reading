@@ -1,59 +1,59 @@
 ## BeanFactoryAdvisorRetrievalHelper
 
 - [BeanFactoryAdvisorRetrievalHelper](#beanfactoryadvisorretrievalhelper)
-  - [一、基本信息](#一基本信息)
-  - [二、基本描述](#二基本描述)
-  - [三、主要功能](#三主要功能)
-  - [四、最佳实践](#四最佳实践)
-  - [五、时序图](#五时序图)
-  - [六、源码分析](#六源码分析)
+  - [1. Overview](#1-overview)
+  - [2. Description](#2-description)
+  - [3. Main Features](#3-main-features)
+  - [4. Best Practices](#4-best-practices)
+  - [5. Sequence Diagram](#5-sequence-diagram)
+  - [6. Source Code Analysis](#6-source-code-analysis)
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、基本描述
+### 2. Description
 
-`BeanFactoryAdvisorRetrievalHelper` 类是 Spring AOP 框架中的辅助工具，用于在 Bean 工厂中检索 Advisor，这些 Advisor 定义了切面逻辑，可以在目标 Bean 的方法调用中织入相应的通知。
+The `BeanFactoryAdvisorRetrievalHelper` class is a helper in the Spring AOP framework. It finds Advisors in the bean factory. These Advisors define the aspect logic, so the advice can be woven into the method calls of target beans.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **协助Advisor的检索**
-   + 帮助 Spring AOP 框架在应用程序的 Bean 工厂中查找与目标 Bean 相关的 Advisor。
+1. **Help retrieve Advisors**
+   + Helps the Spring AOP framework find the Advisors related to a target bean in the bean factory of the application.
    
-2. **解析Advisor的Bean名称**
-   + 解析 Advisor 在 Spring 容器中的 Bean 名称，并根据名称从 Bean 工厂中获取相应的 Advisor 实例。
+2. **Resolve Advisor bean names**
+   + Resolves the bean names of Advisors in the Spring container, and gets the matching Advisor instances from the bean factory by name.
    
-3. **适配不同类型的Advisor**
-   + 支持不同类型的 Advisor，包括前置通知（BeforeAdvice）、后置通知（AfterAdvice）、环绕通知（AroundAdvice）等，能够正确地应用到目标 Bean 上。
+3. **Support different types of Advisors**
+   + Supports different types of Advisors, including before advice (BeforeAdvice), after advice (AfterAdvice), and around advice (AroundAdvice), and applies them correctly to the target bean.
    
-4. **辅助创建代理**
+4. **Help create proxies**
 
-   + 辅助 Spring 容器创建代理对象，并将 Advisor 中定义的通知逻辑织入到目标 Bean 的方法调用中。
+   + Helps the Spring container create proxy objects and weave the advice logic defined in the Advisors into the method calls of the target bean.
 
-### 四、最佳实践
+### 4. Best Practices
 
-使用基于注解的应用上下文来获取并调用 `MyService` Bean 的 `foo()`
-方法。首先，创建了一个 `AnnotationConfigApplicationContext` 实例，通过传入 `AppConfig.class`
-来初始化基于注解的应用上下文。然后，通过 `context.getBean(MyService.class)` 获取了 `MyService` Bean
-的实例，并调用了其 `foo()` 方法。
+This example uses an annotation-based application context to get the `MyService` bean and call its `foo()`
+method. First, it creates an `AnnotationConfigApplicationContext` instance and passes `AppConfig.class`
+to set up the context. Then it gets the `MyService` bean with `context.getBean(MyService.class)`
+and calls its `foo()` method.
 
 ```java
 public class BeanFactoryAdvisorRetrievalHelperDemo {
 
     public static void main(String[] args) {
-        // 创建基于注解的应用上下文
+        // Create the annotation-based application context
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
-        // 从应用上下文中获取MyService bean
+        // Get the MyService bean from the application context
         MyService myService = context.getBean(MyService.class);
-        // 调用MyService的方法
+        // Call the method of MyService
         myService.foo();
     }
 }
 ```
 
-`AppConfig` 类是一个使用 `@Configuration` 注解标记的配置类，通过 `@EnableAspectJAutoProxy` 开启了 AspectJ
-自动代理功能，并通过 `@ComponentScan` 启用了组件扫描，用于自动发现和注册 Spring 组件。
+The `AppConfig` class is a configuration class marked with `@Configuration`. It turns on AspectJ auto proxy support with `@EnableAspectJAutoProxy`
+and turns on component scanning with `@ComponentScan`, to find and register Spring components automatically.
 
 ```java
 
@@ -65,8 +65,8 @@ public class AppConfig {
 }
 ```
 
-使用 `@Component` 注解标记的自定义 Advisor，继承自 `AbstractPointcutAdvisor`。它定义了一个总是返回真值的 Pointcut，并将一个自定义的
-Advice `MyAdvice` 应用于目标方法上。
+A custom Advisor marked with `@Component`. It extends `AbstractPointcutAdvisor`. It defines a Pointcut that always returns true, and applies a custom
+Advice `MyAdvice` to the target methods.
 
 ```java
 
@@ -85,8 +85,8 @@ public class MyAdvisor extends AbstractPointcutAdvisor {
 }
 ```
 
-`MyAdvice` 类是一个实现了 `MethodBeforeAdvice` 接口的自定义通知类，用于在目标方法执行前执行特定逻辑。在 `before()`
-方法中，它打印了一条消息："Before method execution"。
+The `MyAdvice` class is a custom advice that implements the `MethodBeforeAdvice` interface. It runs some logic before the target method runs. In the `before()`
+method, it prints the message "Before method execution".
 
 ```java
 public class MyAdvice implements MethodBeforeAdvice {
@@ -97,7 +97,7 @@ public class MyAdvice implements MethodBeforeAdvice {
 }
 ```
 
-`MyService` 类是一个使用 `@Service` 注解标记的服务类，提供了一个名为 `foo()` 的方法，该方法在调用时会打印消息 "foo..."。
+The `MyService` class is a service class marked with `@Service`. It has a method named `foo()` that prints the message "foo..." when called.
 
 ```java
 
@@ -110,8 +110,8 @@ public class MyService {
 }
 ```
 
-运行结果，调用 `MyService` 类的 `foo()` 方法之前，成功地执行了一个切面通知，输出了 "Before method execution"
-的消息，然后执行了 `foo()` 方法，输出了 "foo..." 的消息。
+In the run result, before the `foo()` method of the `MyService` class is called, the aspect advice runs and prints "Before method execution".
+Then the `foo()` method runs and prints "foo...".
 
 ```java
 Before method
@@ -119,43 +119,43 @@ execution
 foo...
 ```
 
-### 五、时序图
+### 5. Sequence Diagram
 
 ~~~mermaid
 sequenceDiagram
     AbstractAutowireCapableBeanFactory->>AbstractAutoProxyCreator: postProcessAfterInitialization()
-    Note over AbstractAutowireCapableBeanFactory,AbstractAutoProxyCreator: 调用后处理方法
+    Note over AbstractAutowireCapableBeanFactory,AbstractAutoProxyCreator: Call the post-processing method
     AbstractAutoProxyCreator->>AbstractAutoProxyCreator: wrapIfNecessary()
-    Note over AbstractAutoProxyCreator: 调用包装方法
+    Note over AbstractAutoProxyCreator: Call the wrap method
     AbstractAutoProxyCreator->>AbstractAdvisorAutoProxyCreator: getAdvicesAndAdvisorsForBean()
-    Note over AbstractAutoProxyCreator,AbstractAdvisorAutoProxyCreator: 获取通知和 Advisors
+    Note over AbstractAutoProxyCreator,AbstractAdvisorAutoProxyCreator: Get the advice and Advisors
     AbstractAdvisorAutoProxyCreator->>AbstractAdvisorAutoProxyCreator: findEligibleAdvisors()
-    Note over AbstractAdvisorAutoProxyCreator: 查找合适的 Advisors
+    Note over AbstractAdvisorAutoProxyCreator: Find eligible Advisors
     AbstractAdvisorAutoProxyCreator->>AnnotationAwareAspectJAutoProxyCreator: findCandidateAdvisors()
-    Note over AbstractAdvisorAutoProxyCreator,AnnotationAwareAspectJAutoProxyCreator: 查找候选的 Advisors
+    Note over AbstractAdvisorAutoProxyCreator,AnnotationAwareAspectJAutoProxyCreator: Find candidate Advisors
     AnnotationAwareAspectJAutoProxyCreator->>AbstractAdvisorAutoProxyCreator: super.findCandidateAdvisors()
-    Note over AnnotationAwareAspectJAutoProxyCreator,AbstractAdvisorAutoProxyCreator: 调用父类的查找候选的 Advisors
+    Note over AnnotationAwareAspectJAutoProxyCreator,AbstractAdvisorAutoProxyCreator: Call the parent class method to find candidate Advisors
     AbstractAdvisorAutoProxyCreator->>BeanFactoryAdvisorRetrievalHelper: findAdvisorBeans()
-    Note over AbstractAdvisorAutoProxyCreator,BeanFactoryAdvisorRetrievalHelper: 查找当前Bean工厂中所有符合条件的Advisor
-    BeanFactoryAdvisorRetrievalHelper->>AbstractAutoProxyCreator: 返回 advisors
+    Note over AbstractAdvisorAutoProxyCreator,BeanFactoryAdvisorRetrievalHelper: Find all eligible Advisors in the current bean factory
+    BeanFactoryAdvisorRetrievalHelper->>AbstractAutoProxyCreator: Return advisors
 ~~~
 
-### 六、源码分析
+### 6. Source Code Analysis
 
-在`org.springframework.aop.framework.autoproxy.BeanFactoryAdvisorRetrievalHelper#findAdvisorBeans`方法中，主要功能是在当前的 Bean 工厂中查找所有符合条件的 Advisor Beans。它忽略了 FactoryBeans，并排除了当前正在创建中的 Beans。该方法首先确定 Advisor Bean 的名称列表，如果尚未缓存，则通过 `BeanFactoryUtils.beanNamesForTypeIncludingAncestors()` 方法获取。然后，它遍历这些 Advisor Bean 的名称，检查它们是否符合条件，并将符合条件的 Advisor Bean 添加到结果列表中。在添加之前，它会检查该 Bean 是否当前正在创建中，如果是，则跳过。最后，返回包含所有符合条件的 Advisor Beans 的列表。
+The main job of the `org.springframework.aop.framework.autoproxy.BeanFactoryAdvisorRetrievalHelper#findAdvisorBeans` method is to find all eligible Advisor beans in the current bean factory. It ignores FactoryBeans and skips beans that are currently being created. First, it gets the list of Advisor bean names. If the list is not cached yet, it gets it with `BeanFactoryUtils.beanNamesForTypeIncludingAncestors()`. Then it loops over these names, checks whether each one is eligible, and adds the eligible Advisor beans to the result list. Before adding, it checks whether the bean is currently being created, and skips it if so. Finally, it returns the list of all eligible Advisor beans.
 
 ```java
 /**
- * 在当前 Bean 工厂中查找所有符合条件的 Advisor Bean，
- * 忽略 FactoryBeans，并排除当前正在创建的 Bean。
- * @return {@link org.springframework.aop.Advisor} Bean 的列表
+ * Find all eligible Advisor beans in the current bean factory,
+ * ignoring FactoryBeans and excluding beans that are currently being created.
+ * @return the list of {@link org.springframework.aop.Advisor} beans
  * @see #isEligibleBean
  */
 public List<Advisor> findAdvisorBeans() {
-    // 如果未缓存 Advisor Bean 的名称列表，则确定该列表。
+    // If the list of Advisor bean names is not cached yet, determine it.
     String[] advisorNames = this.cachedAdvisorBeanNames;
     if (advisorNames == null) {
-        // 不要在这里初始化 FactoryBeans我们需要保持所有常规 Bean 未初始化，以便自动代理创建器应用到它们上！
+        // Do not initialize FactoryBeans here: we need to keep all regular beans uninitialized so the auto-proxy creator can apply to them!
         advisorNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
                 this.beanFactory, Advisor.class, true, false);
         this.cachedAdvisorBeanNames = advisorNames;
@@ -165,11 +165,11 @@ public List<Advisor> findAdvisorBeans() {
     }
 
     List<Advisor> advisors = new ArrayList<>();
-    // 遍历 Advisor Bean 名称列表
+    // Loop over the list of Advisor bean names
     for (String name : advisorNames) {
-        // 检查 Bean 是否符合条件
+        // Check whether the bean is eligible
         if (isEligibleBean(name)) {
-            // 如果 Bean 当前正在创建中，则跳过
+            // If the bean is currently being created, skip it
             if (this.beanFactory.isCurrentlyInCreation(name)) {
                 if (logger.isTraceEnabled()) {
                     logger.trace("Skipping currently created advisor '" + name + "'");
@@ -177,7 +177,7 @@ public List<Advisor> findAdvisorBeans() {
             }
             else {
                 try {
-                    // 尝试获取 Advisor Bean，并添加到列表中
+                    // Try to get the Advisor bean and add it to the list
                     advisors.add(this.beanFactory.getBean(name, Advisor.class));
                 }
                 catch (BeanCreationException ex) {
@@ -185,18 +185,18 @@ public List<Advisor> findAdvisorBeans() {
                     if (rootCause instanceof BeanCurrentlyInCreationException) {
                         BeanCreationException bce = (BeanCreationException) rootCause;
                         String bceBeanName = bce.getBeanName();
-                        // 如果当前 Bean 依赖于正在创建的 Bean，则跳过
+                        // If the current bean depends on a bean that is being created, skip it
                         if (bceBeanName != null && this.beanFactory.isCurrentlyInCreation(bceBeanName)) {
                             if (logger.isTraceEnabled()) {
                                 logger.trace("Skipping advisor '" + name +
                                         "' with dependency on currently created bean: " + ex.getMessage());
                             }
-                            // 忽略表示对当前正在尝试进行通知的 Bean 的引用。
-                            // 我们希望找到除当前正在创建的 Bean 本身之外的其他 Advisor。
+                            // Ignore the reference to the bean that is currently being advised.
+                            // We want to find Advisors other than the bean that is being created itself.
                             continue;
                         }
                     }
-                    // 如果获取 Advisor Bean 失败，则抛出异常
+                    // If getting the Advisor bean fails, throw an exception
                     throw ex;
                 }
             }

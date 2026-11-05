@@ -1,67 +1,67 @@
-## JDK动态代理
+## JDK Dynamic Proxy
 
-- [JDK动态代理](#jdk动态代理)
-  - [一、基本信息](#一基本信息)
-  - [二、基本描述](#二基本描述)
-  - [三、主要功能](#三主要功能)
-  - [四、最佳实践](#四最佳实践)
-  - [五、源码分析](#五源码分析)
-  - [六、常见问题](#六常见问题)
+- [JDK Dynamic Proxy](#jdk-dynamic-proxy)
+  - [1. Overview](#1-overview)
+  - [2. Description](#2-description)
+  - [3. Main Features](#3-main-features)
+  - [4. Best Practices](#4-best-practices)
+  - [5. Source Code Analysis](#5-source-code-analysis)
+  - [6. Common Problems](#6-common-problems)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、基本描述
+### 2. Description
 
-JDK动态代理是一种在运行时生成代理类的机制，它基于接口实现，通过在代理类中重定向方法调用到实际对象，并提供了InvocationHandler接口来实现代理对象方法调用的处理逻辑，适用于AOP、远程方法调用等场景，能够在不修改原始类的情况下实现横切关注点的统一管理，提供更灵活和可维护的代码结构。
+The JDK dynamic proxy creates proxy classes at runtime. It is based on interfaces. Method calls on the proxy are redirected to the real object, and the `InvocationHandler` interface holds the logic that handles these calls. It fits AOP, remote method calls, and similar cases. It manages cross-cutting concerns in one place without changing the original class, and gives a flexible and easy-to-maintain code structure.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **代理对象生成**
+1. **Proxy object generation**
 
-   + 在运行时生成代理对象，无需提前编写代理类的代码。
+   + Creates the proxy object at runtime. You do not need to write the proxy class in advance.
 
-2. **接口实现**
+2. **Interface implementation**
 
-   + 动态代理是基于接口的，可以为接口生成代理对象，而不是具体的类。
+   + The dynamic proxy is based on interfaces. It creates proxy objects for interfaces, not for concrete classes.
 
-3. **方法重定向**
+3. **Method redirection**
 
-   + 代理对象可以重定向方法调用到实际对象，允许在方法调用前后执行一些额外逻辑。
+   + The proxy object redirects method calls to the real object, and lets you run extra logic before and after the call.
 
-4. **横切关注点的统一管理**
+4. **One place for cross-cutting concerns**
 
-   + 通过代理对象，在方法调用前后执行统一的逻辑，如日志记录、权限验证、事务管理等，实现了横切关注点的统一管理。
+   + With the proxy object, the same logic runs before and after method calls, such as logging, permission checks, and transaction management. So cross-cutting concerns are managed in one place.
 
-5. **AOP的实现**
+5. **AOP implementation**
 
-   + 动态代理是AOP（面向切面编程）的基础之一，可以通过动态代理实现切面的横切关注点，将应用程序核心业务逻辑与横切关注点分离开来，提高了代码的可维护性和灵活性。
+   + The dynamic proxy is one of the bases of AOP (aspect-oriented programming). It can implement the cross-cutting concerns of an aspect and keep them apart from the core business logic of the application. This makes the code easier to maintain and more flexible.
 
-### 四、最佳实践
+### 4. Best Practices
 
-使用 JDK 动态代理的基本流程。首先，创建目标对象 `MyService` 的实例，然后获取目标对象的类信息。接着，通过调用 `Proxy.newProxyInstance` 方法创建代理对象，传入目标对象的类加载器、实现的接口以及调用处理器。最后，通过代理对象调用方法，实际上会调用 `MyInvocationHandler` 中的 `invoke` 方法来处理方法调用，并在方法执行前后添加额外的逻辑。
+This example shows the basic flow of a JDK dynamic proxy. First, it creates an instance of the target object `MyService`, and gets the class information of the target object. Then it creates the proxy object by calling `Proxy.newProxyInstance` with the class loader of the target object, the interfaces it implements, and the invocation handler. Finally, when a method is called on the proxy object, the `invoke` method in `MyInvocationHandler` handles the call and adds extra logic before and after the method.
 
 ```java
 public class JdkProxyDemo {
 
     public static void main(String[] args) {
-        // 创建目标对象
+        // Create the target object
         MyService target = new MyServiceImpl();
-        // 获取目标对象的类对象
+        // Get the class object of the target object
         Class clz = target.getClass();
-        // 创建代理对象，并指定目标对象的类加载器、实现的接口以及调用处理器
+        // Create the proxy object with the class loader of the target object, the interfaces it implements, and the invocation handler
         MyService proxyObject = (MyService) Proxy.newProxyInstance(clz.getClassLoader(), clz.getInterfaces(), new MyInvocationHandler(target));
-        // 打印代理对象的类信息
+        // Print the class information of the proxy object
         System.out.println("ProxyObject = " + proxyObject.getClass());
-        // 通过代理对象调用方法，实际上会调用 MyInvocationHandler 中的 invoke 方法
+        // Call the method through the proxy object, which actually calls the invoke method in MyInvocationHandler
         proxyObject.doSomething();
     }
 }
 ```
 
-实现了 `InvocationHandler` 接口，定义了一个名为 `MyInvocationHandler` 的类。该类包含一个私有属性 `target`，用于存储目标对象。构造函数接收一个目标对象作为参数，并将其存储在 `target` 属性中。在 `invoke` 方法中，会在目标方法执行前打印 "Before method execution"，然后通过反射调用目标对象的方法，并获取方法的返回结果。最后，在目标方法执行后打印 "After method execution"，并返回方法的结果。
+The class `MyInvocationHandler` implements the `InvocationHandler` interface. It has a private field `target` that stores the target object. The constructor takes a target object and stores it in the `target` field. In the `invoke` method, it prints "Before method execution" before the target method runs, then calls the method of the target object by reflection and gets the result. Finally, after the target method runs, it prints "After method execution" and returns the result.
 
 ```java
 class MyInvocationHandler implements InvocationHandler {
@@ -82,7 +82,7 @@ class MyInvocationHandler implements InvocationHandler {
 }
 ```
 
-定义了一个接口 `MyService`，其中包含一个抽象方法 `doSomething()`。然后，定义了一个实现了 `MyService` 接口的类 `MyServiceImpl`，并实现了 `doSomething()` 方法。
+This defines an interface `MyService` with one abstract method `doSomething()`. Then it defines a class `MyServiceImpl` that implements the `MyService` interface and the `doSomething()` method.
 
 ```java
 public interface MyService {
@@ -98,7 +98,7 @@ public class MyServiceImpl implements MyService {
 }
 ```
 
-运行结果，成功使用了 JDK 动态代理。首先打印了代理对象的类信息，确认了代理对象确实是由 `$Proxy0` 类生成的。接着，打印了 "Before method execution"，表示方法执行前的逻辑已经被执行。然后调用了目标对象的 `doSomething()` 方法，输出了 "hello world"。最后打印了 "After method execution"，表示方法执行后的逻辑也被执行了。这表明 JDK 动态代理成功地代理了目标对象的方法，并在方法执行前后执行了额外的逻辑。
+In the run result, the JDK dynamic proxy works. First, the class information of the proxy object is printed, which confirms that the proxy object is generated by the `$Proxy0` class. Then "Before method execution" is printed, which means the logic before the method has run. Then the `doSomething()` method of the target object is called and prints "hello world". Finally "After method execution" is printed, which means the logic after the method has run too. This shows that the JDK dynamic proxy proxied the method of the target object and ran extra logic before and after it.
 
 ```java
 ProxyObject = class com.sun.proxy.$Proxy0
@@ -107,9 +107,9 @@ hello world
 After method execution
 ```
 
-### 五、源码分析
+### 5. Source Code Analysis
 
-这段代码是通过 Arthas 工具反编译得到的结果。它是一个代理类，位于 `com.sun.proxy` 包下，命名为 `$Proxy0`。该类继承自 `Proxy` 类，并实现了 `MyService` 接口。在 `doSomething` 方法中，通过 `InvocationHandler` 对象的 `invoke` 方法调用了目标对象的 `doSomething` 方法。在静态代码块中，获取了 `java.lang.Object` 类中的 `equals`、`hashCode` 和 `toString` 方法，以及 `MyService` 接口中的 `doSomething` 方法的 `Method` 对象。
+This code is the result of decompiling with the Arthas tool. It is a proxy class named `$Proxy0` in the `com.sun.proxy` package. The class extends the `Proxy` class and implements the `MyService` interface. In the `doSomething` method, it calls the `doSomething` method of the target object through the `invoke` method of the `InvocationHandler` object. In the static block, it gets the `equals`, `hashCode`, and `toString` methods of the `java.lang.Object` class, and the `Method` object of the `doSomething` method of the `MyService` interface.
 
 ```java
 package com.sun.proxy;
@@ -144,9 +144,9 @@ public final class $Proxy0 extends Proxy implements MyService {
         }
     }
     
-    // ... [toString代码部分省略以简化]
-    // ... [hashCode代码部分省略以简化]
-    // ... [equals代码部分省略以简化]
+    // ... [toString code omitted for brevity]
+    // ... [hashCode code omitted for brevity]
+    // ... [equals code omitted for brevity]
 
     static {
         try {
@@ -166,28 +166,28 @@ public final class $Proxy0 extends Proxy implements MyService {
 }
 ```
 
-### 六、常见问题
+### 6. Common Problems
 
-1. **代理对象的类型限制**
+1. **Limit on the proxy type**
 
-   + 由于 JDK 动态代理是基于接口实现的，因此只能代理实现了接口的类。如果目标对象没有实现接口，就无法使用 JDK 动态代理。
+   + The JDK dynamic proxy is based on interfaces, so it can only proxy classes that implement interfaces. If the target object does not implement an interface, you cannot use the JDK dynamic proxy.
 
-2. **无法代理 final 类和方法**
+2. **Cannot proxy final classes and methods**
 
-   + JDK 动态代理无法代理 final 类和 final 方法。因为 final 类无法被继承，final 方法无法被重写，而动态代理需要生成代理类并继承目标类或实现目标接口。
+   + The JDK dynamic proxy cannot proxy final classes and final methods. A final class cannot be extended and a final method cannot be overridden, but the dynamic proxy needs to create a proxy class that extends the target class or implements the target interface.
 
-3. **无法代理静态方法**
+3. **Cannot proxy static methods**
 
-   + JDK 动态代理无法代理静态方法，因为动态代理是基于实例的，而静态方法是属于类的。
+   + The JDK dynamic proxy cannot proxy static methods, because the dynamic proxy works on instances and static methods belong to the class.
 
-4. **性能开销**
+4. **Performance cost**
 
-   + 与静态代理相比，JDK 动态代理的性能开销较大。动态代理在运行时生成代理类的字节码，并通过反射来调用方法，相比静态代理的直接方法调用，会增加额外的开销。
+   + Compared with a static proxy, the JDK dynamic proxy costs more. It creates the bytecode of the proxy class at runtime and calls methods by reflection. This adds extra cost compared with the direct method calls of a static proxy.
 
-5. **泛型的处理**
+5. **Handling of generics**
 
-   + 如果目标方法涉及泛型参数，代理对象可能无法正确处理。因为在泛型擦除后，代理对象无法获取到准确的泛型信息。
+   + If the target method uses generic parameters, the proxy object may not handle them correctly. After generic type erasure, the proxy object cannot get the exact generic information.
 
-6. **调用堆栈的可读性**
+6. **Readability of the call stack**
 
-   + 由于动态代理的调用会经过 `InvocationHandler`，可能会增加调用堆栈的深度，降低代码的可读性和调试的便利性。
+   + Calls on a dynamic proxy go through the `InvocationHandler`. This may make the call stack deeper and make the code harder to read and debug.

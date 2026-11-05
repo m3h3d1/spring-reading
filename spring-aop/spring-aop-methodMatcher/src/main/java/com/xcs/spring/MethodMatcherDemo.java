@@ -13,21 +13,21 @@ public class MethodMatcherDemo {
         Class<MyService> target = MyService.class;
         Method setNameMethod = target.getDeclaredMethod("setName");
 
-        // 使用 AnnotationMethodMatcher 检查是否具有特定注解
+        // Use AnnotationMethodMatcher to check for a specific annotation
         AnnotationMethodMatcher annotationMethodMatcher = new AnnotationMethodMatcher(MyMethodAnnotation.class);
         System.out.println("annotationMethodMatcher matches = " + annotationMethodMatcher.matches(setNameMethod, target));
 
-        // 使用 AspectJExpressionPointcut 基于 AspectJ 表达式匹配方法
+        // Use AspectJExpressionPointcut to match the method with an AspectJ expression
         AspectJExpressionPointcut aspectJExpressionPointcut = new AspectJExpressionPointcut();
         aspectJExpressionPointcut.setExpression("execution(* com.xcs.spring.MyService.*(..))");
         System.out.println("aspectJExpressionPointcut matches = " + aspectJExpressionPointcut.matches(setNameMethod, target));
 
-        // 使用 NameMatchMethodPointcut 基于方法名称匹配方法
+        // Use NameMatchMethodPointcut to match the method by name
         NameMatchMethodPointcut nameMatchMethodPointcut = new NameMatchMethodPointcut();
         nameMatchMethodPointcut.setMappedName("setName");
         System.out.println("nameMatchMethodPointcut matches = " + nameMatchMethodPointcut.matches(setNameMethod, target));
 
-        // 使用 JdkRegexpMethodPointcut 基于正则表达式匹配方法
+        // Use JdkRegexpMethodPointcut to match the method with a regular expression
         JdkRegexpMethodPointcut jdkRegexpMethodPointcut = new JdkRegexpMethodPointcut();
         jdkRegexpMethodPointcut.setPattern(".*set.*");
         System.out.println("jdkRegexpMethodPointcut matches = " + jdkRegexpMethodPointcut.matches(setNameMethod, target));
