@@ -10,12 +10,12 @@ import java.util.Map;
 
 /**
  * @author xcs
- * @date 2023年11月30日 15时27分
+ * @date 2023-11-30 15:27
  **/
 public class SimplePropertyResolverDemo {
 
     public static void main(String[] args) {
-        // 创建属性源
+        // Create the property source
         Map<String, Object> properties = new HashMap<>();
         properties.put("app.name", "Spring-Reading");
         properties.put("app.version", "1.0.0");
@@ -25,35 +25,35 @@ public class SimplePropertyResolverDemo {
         MutablePropertySources propertySources = new MutablePropertySources();
         propertySources.addLast(propertySource);
 
-        // 使用 PropertySourcesPropertyResolver
+        // Use PropertySourcesPropertyResolver
         PropertyResolver propertyResolver = new PropertySourcesPropertyResolver(propertySources);
 
-        // 获取属性
+        // Get property
         String appName = propertyResolver.getProperty("app.name");
         String appVersion = propertyResolver.getProperty("app.version");
-        System.out.println("获取属性 app.name: " + appName);
-        System.out.println("获取属性 app.version: " + appVersion);
+        System.out.println("Get property app.name: " + appName);
+        System.out.println("Get property app.version: " + appVersion);
 
-        // 检查属性是否存在
+        // Check whether the properties exist
         boolean containsDescription = propertyResolver.containsProperty("app.description");
         boolean containsReleaseDate = propertyResolver.containsProperty("app.releaseDate");
-        System.out.println("是否包含 'app.description' 属性: " + containsDescription);
-        System.out.println("是否包含 'app.releaseDate' 属性: " + containsReleaseDate);
+        System.out.println("Contains 'app.description' property: " + containsDescription);
+        System.out.println("Contains 'app.releaseDate' property: " + containsReleaseDate);
 
-        // 带默认值的属性获取
+        // Get property with default value
         String appReleaseDate = propertyResolver.getProperty("app.releaseDate", "2023-11-30");
-        System.out.println("带默认值的属性获取 app.releaseDate : " + appReleaseDate);
+        System.out.println("Get property with default value app.releaseDate : " + appReleaseDate);
 
-        // 获取必需属性
+        // Get required property
         String requiredAppName = propertyResolver.getRequiredProperty("app.name");
-        System.out.println("获取必需属性 app.name: " + requiredAppName);
+        System.out.println("Get required property app.name: " + requiredAppName);
 
-        // 解析占位符
+        // Resolve placeholders
         String appDescription = propertyResolver.resolvePlaceholders(properties.get("app.description").toString());
-        System.out.println("解析占位符 app.description: " + appDescription);
+        System.out.println("Resolve placeholders app.description: " + appDescription);
 
-        // 解析必需的占位符
+        // Resolve required placeholders
         String requiredAppDescription = propertyResolver.resolveRequiredPlaceholders("App Description: ${app.description}");
-        System.out.println("解析必需的占位符 : " + requiredAppDescription);
+        System.out.println("Resolve required placeholders : " + requiredAppDescription);
     }
 }

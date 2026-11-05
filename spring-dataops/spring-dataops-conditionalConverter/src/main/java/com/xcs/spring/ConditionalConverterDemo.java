@@ -5,25 +5,25 @@ import org.springframework.core.convert.TypeDescriptor;
 
 /**
  * @author xcs
- * @date 2023年12月08日 11时02分
+ * @date 2023-12-08 11:02
  **/
 public class ConditionalConverterDemo {
 
     public static void main(String[] args) {
-        // 创建自定义的转换器实例
+        // Create the custom converter instance
         StringToIntegerConditionalConverter converter = new StringToIntegerConditionalConverter();
 
-        // 定义源类型（String）和目标类型（Integer）的描述符
+        // Define descriptors for the source type (String) and target type (Integer)
         TypeDescriptor sourceType = TypeDescriptor.valueOf(String.class);
         TypeDescriptor targetType = TypeDescriptor.valueOf(Integer.class);
 
-        // 测试转换器是否适用于从 String 到 Integer 的转换
+        // Test whether the converter applies to String to Integer conversion
         if (converter.matches(sourceType, targetType)) {
-            // 如果转换条件匹配，则执行转换
+            // If the condition matches, run the conversion
             Integer result = converter.convert("8");
             System.out.println("Converted result: " + result);
         } else {
-            // 如果条件不匹配，打印不适用的消息
+            // If the condition does not match, print a not-applicable message
             System.out.println("Conversion not applicable.");
         }
     }

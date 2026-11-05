@@ -10,35 +10,35 @@ import java.util.Map;
 
 /**
  * @author xcs
- * @date 2023年12月01日 14时05分
+ * @date 2023-12-01 14:05
  **/
 public class ConfigurableEnvironmentDemo {
 
     public static void main(String[] args) {
-        // 创建 StandardEnvironment 实例，用于访问属性和配置文件信息
+        // Create a StandardEnvironment instance to access properties and profile information
         ConfigurableEnvironment environment = new StandardEnvironment();
 
-        // 设置配置文件
+        // Set profiles
         environment.setActiveProfiles("dev");
         System.out.println("Active Profiles: " + String.join(", ", environment.getActiveProfiles()));
 
-        // 添加配置文件
+        // Add a profile
         environment.addActiveProfile("test");
         System.out.println("Updated Active Profiles: " + String.join(", ", environment.getActiveProfiles()));
 
-        // 设置默认配置文件
+        // Set default profiles
         environment.setDefaultProfiles("default");
         System.out.println("Default Profiles: " + String.join(", ", environment.getDefaultProfiles()));
 
-        // 获取系统属性
+        // Get system properties
         Map<String, Object> systemProperties = environment.getSystemProperties();
         System.out.println("System Properties: " + systemProperties);
 
-        // 获取系统环境变量
+        // Get system environment variables
         Map<String, Object> systemEnvironment = environment.getSystemEnvironment();
         System.out.println("System Environment: " + systemEnvironment);
 
-        // 合并环境变量
+        // Merge environment variables
         Map<String, Object> properties = new HashMap<>();
         properties.put("app.name", "Spring-Reading");
         properties.put("app.version", "1.0.0");
@@ -46,7 +46,7 @@ public class ConfigurableEnvironmentDemo {
         standardEnvironment.getPropertySources().addFirst(new MapPropertySource("myEnvironment", properties));
         environment.merge(standardEnvironment);
 
-        // 获取可变属性源
+        // Get the mutable property sources
         MutablePropertySources propertySources = environment.getPropertySources();
         System.out.println("MutablePropertySources: " + propertySources);
     }

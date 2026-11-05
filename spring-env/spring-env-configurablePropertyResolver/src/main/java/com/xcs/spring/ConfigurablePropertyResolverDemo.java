@@ -11,12 +11,12 @@ import java.util.Map;
 
 /**
  * @author xcs
- * @date 2023年11月30日 16时40分
+ * @date 2023-11-30 16:40
  **/
 public class ConfigurablePropertyResolverDemo {
 
     public static void main(String[] args) {
-        // 创建属性源
+        // Create the property source
         Map<String, Object> properties = new HashMap<>();
         properties.put("app.name", "Spring-Reading");
         properties.put("app.version", "1.0.0");
@@ -25,31 +25,31 @@ public class ConfigurablePropertyResolverDemo {
         MutablePropertySources propertySources = new MutablePropertySources();
         propertySources.addLast(propertySource);
 
-        // 创建 ConfigurablePropertyResolver
+        // Create a ConfigurablePropertyResolver
         PropertySourcesPropertyResolver propertyResolver = new PropertySourcesPropertyResolver(propertySources);
 
-        // 设置和获取转换服务
+        // Set and get the conversion service
         ConfigurableConversionService conversionService = new DefaultConversionService();
         propertyResolver.setConversionService(conversionService);
 
-        // 设置占位符前后缀
+        // Set the placeholder prefix and suffix
         propertyResolver.setPlaceholderPrefix("${");
         propertyResolver.setPlaceholderSuffix("}");
 
-        // 设置默认值分隔符
+        // Set the default value separator
         propertyResolver.setValueSeparator(":");
 
-        // 设置未解析占位符的处理方式
+        // Set how unresolvable placeholders are handled
         propertyResolver.setIgnoreUnresolvableNestedPlaceholders(true);
 
-        // 设置并验证必需的属性
+        // Set and validate required properties
         propertyResolver.setRequiredProperties("app.name", "app.version");
         propertyResolver.validateRequiredProperties();
 
-        // 读取属性
+        // Read properties
         String appName = propertyResolver.getProperty("app.name");
         String appVersion = propertyResolver.getProperty("app.version", String.class, "Unknown Version");
-        System.out.println("获取属性 app.name: " + appName);
-        System.out.println("获取属性 app.version: " + appVersion);
+        System.out.println("Get property app.name: " + appName);
+        System.out.println("Get property app.version: " + appVersion);
     }
 }

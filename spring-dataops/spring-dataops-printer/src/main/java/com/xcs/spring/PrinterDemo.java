@@ -9,23 +9,23 @@ import java.util.Locale;
 public class PrinterDemo {
 
     public static void main(String[] args) {
-        // 创建一个 FormattingConversionService 实例
+        // Create a FormattingConversionService instance
         FormattingConversionService conversionService = new FormattingConversionService();
-        // 将自定义的 CurrencyPrinter 注册到 conversionService
+        // Register the custom CurrencyPrinter with conversionService
         conversionService.addPrinter(new CurrencyPrinter());
 
-        // 设置货币金额
+        // Set the currency amount
         double amount = 1234.56;
 
-        // 设置当前线程的 Locale 为美国
+        // Set the current thread's Locale to the US
         LocaleContextHolder.setLocale(Locale.US);
-        // 使用 conversionService 将金额转换为字符串，并应用美国的货币格式
+        // Use conversionService to convert the amount to a string with US currency format
         String formattedAmountForUS = conversionService.convert(amount, String.class);
         System.out.println("Formatted Currency (US): " + formattedAmountForUS);
 
-        // 设置当前线程的 Locale 为中国
+        // Set the current thread's Locale to China
         LocaleContextHolder.setLocale(Locale.CHINA);
-        // 使用 conversionService 将金额转换为字符串，并应用中国的货币格式
+        // Use conversionService to convert the amount to a string with Chinese currency format
         String formattedAmountForCHINA = conversionService.convert(amount, String.class);
         System.out.println("Formatted Currency (CHINA): " + formattedAmountForCHINA);
     }

@@ -11,21 +11,21 @@ import java.util.Date;
 public class PropertyEditorDemo {
 
     public static void main(String[] args) {
-        // 创建一个 BeanWrapperImpl 实例，用于操作 MyBean 类。
+        // Create a BeanWrapperImpl instance to work with the MyBean class.
         BeanWrapperImpl beanWrapper = new BeanWrapperImpl(MyBean.class);
 
-        // 为 Date 类型的属性注册自定义的属性编辑器 MyCustomDateEditor。
+        // Register the custom property editor MyCustomDateEditor for Date properties.
         beanWrapper.overrideDefaultEditor(Date.class, new MyCustomDateEditor());
 
-        // 设置 MyBean 类中名为 "date" 的属性值，使用字符串 "2023-12-5"。
-        // 这里会使用注册的 MyCustomDateEditor 来将字符串转换为 Date 对象。
+        // Set the "date" property of MyBean using the string "2023-12-5".
+        // The registered MyCustomDateEditor converts the string to a Date.
         beanWrapper.setPropertyValue("date", "2023-12-5");
 
-        // 设置 MyBean 类中名为 "path" 的属性值，使用字符串 "/opt/spring-reading"。
-        // 因为没有为 Path 类型注册特定的编辑器，所以使用默认转换逻辑。
+        // Set the "path" property of MyBean using the string "/opt/spring-reading".
+        // No editor is registered for Path, so the default conversion logic is used.
         beanWrapper.setPropertyValue("path", "/opt/spring-reading");
 
-        // 输出最终包装的 MyBean 实例。
+        // Print the wrapped MyBean instance.
         System.out.println("MyBean = " + beanWrapper.getWrappedInstance());
     }
 }

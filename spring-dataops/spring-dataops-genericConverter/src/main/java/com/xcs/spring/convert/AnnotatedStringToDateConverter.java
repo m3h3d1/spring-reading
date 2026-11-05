@@ -13,34 +13,34 @@ public class AnnotatedStringToDateConverter implements GenericConverter {
 
     @Override
     public Set<ConvertiblePair> getConvertibleTypes() {
-        // 定义可转换的类型对：从 String 到 Date
+        // Define the convertible type pair: String to Date
         return Collections.singleton(new ConvertiblePair(String.class, Date.class));
     }
 
     @Override
     public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-        // 如果源对象为空，直接返回 null
+        // If the source is null, return null
         if (source == null) {
             return null;
         }
 
-        // 将源对象转换为字符串
+        // Convert the source object to a string
         String dateString = (String) source;
-        // 获取目标类型（Date类型字段）上的 DateFormat 注解
+        // Get the DateFormat annotation on the target type (the Date field)
         DateFormat dateFormatAnnotation = targetType.getAnnotation(DateFormat.class);
-        // 如果目标字段上没有 DateFormat 注解，则抛出异常
+        // If the target field has no DateFormat annotation, throw an exception
         if (dateFormatAnnotation == null) {
-            throw new IllegalArgumentException("目标字段上缺少DateFormat注解");
+            throw new IllegalArgumentException("Missing DateFormat annotation on the target field");
         }
 
         try {
-            // 根据注解中提供的日期格式创建 SimpleDateFormat
+            // Create a SimpleDateFormat from the date pattern in the annotation
             SimpleDateFormat dateFormat = new SimpleDateFormat(dateFormatAnnotation.value());
-            // 使用 SimpleDateFormat 将字符串解析为日期对象
+            // Use SimpleDateFormat to parse the string into a Date
             return dateFormat.parse(dateString);
         } catch (Exception e) {
-            // 如果解析失败，抛出异常
-            throw new IllegalArgumentException("无法解析日期", e);
+            // If parsing fails, throw an exception
+            throw new IllegalArgumentException("Cannot parse date", e);
         }
     }
 }

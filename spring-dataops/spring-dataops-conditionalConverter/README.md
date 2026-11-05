@@ -1,73 +1,75 @@
 ## ConditionalConverter
 
 - [ConditionalConverter](#conditionalconverter)
-  - [一、基本信息](#一基本信息)
-  - [二、知识储备](#二知识储备)
-  - [三、基本描述](#三基本描述)
-  - [四、主要功能](#四主要功能)
-  - [五、接口源码](#五接口源码)
-  - [六、主要实现](#六主要实现)
-  - [七、最佳实践](#七最佳实践)
-  - [八、与其他组件的关系](#八与其他组件的关系)
-  - [九、常见问题](#九常见问题)
+  - [1. Overview](#1-overview)
+  - [2. Background Knowledge](#2-background-knowledge)
+  - [3. Description](#3-description)
+  - [4. Main Features](#4-main-features)
+  - [5. Interface Source](#5-interface-source)
+  - [6. Main Implementations](#6-main-implementations)
+  - [7. Best Practices](#7-best-practices)
+  - [8. Relationship with Other Components](#8-relationship-with-other-components)
+  - [9. FAQ](#9-faq)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、知识储备
+### 2. Background Knowledge
 
 1. **Converter**
 
-   + [Converter](/spring-dataops/spring-dataops-converter/README.md) 接口是 Spring 框架中用于实现类型转换的一个关键组件。定义了一个简单的方法，用于将一种类型（源类型 S）转换为另一种类型（目标类型 T）。通过实现这个接口，我们可以创建自定义的转换逻辑，以便在 Spring 应用程序中无缝地进行复杂的数据转换。
+   + The [Converter](/spring-dataops/spring-dataops-converter/README.md) interface is a key part of type conversion in Spring. It defines one simple method that converts a source type (S) to a target type (T). By implementing it, you can write your own conversion logic and handle complex data conversion in a Spring application.
 
 2. **ConverterFactory**
 
-   + [ConverterFactory](/spring-dataops/spring-dataops-converterFactory/README.md) 是 Spring 框架中的一个接口，用于实现类型转换的工厂。在 Spring 的类型转换体系中，`ConverterFactory` 接口扮演着创建特定类型转换器(`Converter`)的角色。这个接口主要用于那些有共同特性的一组类型转换场景。
+   + [ConverterFactory](/spring-dataops/spring-dataops-converterFactory/README.md) is a Spring interface for creating type converters. In Spring's type conversion system, it creates `Converter` objects for a specific target type. It is mainly used for a group of conversions that share the same traits.
 
 3. **GenericConverter**
 
-   + [GenericConverter](/spring-dataops/spring-dataops-genericConverter/README.md) 是 Spring 框架中的一个关键接口，专门用于类型转换。这个接口与 Spring 的类型转换系统紧密相关，其主要功能是将一个类型的对象转换为另一个类型。与 `Converter` 接口相比，`GenericConverter` 提供了更灵活的转换机制，允许转换操作在多个源目标类型和目标类型之间进行。
+   + [GenericConverter](/spring-dataops/spring-dataops-genericConverter/README.md) is a key Spring interface for type conversion. It is closely tied to Spring's type conversion system and converts an object of one type to another. Compared with `Converter`, `GenericConverter` is more flexible. It allows conversion between multiple pairs of source and target types.
 
-### 三、基本描述
+### 3. Description
 
-`ConditionalConverter` 是 Spring 框架中用于类型转换的一个接口，它是 Spring 类型转换系统的一部分。这个接口的主要目的是为转换器（Converter）提供一个条件检查的功能，使得在执行实际的类型转换之前，转换器能够根据特定的条件判断是否应该进行转换。
+`ConditionalConverter` is an interface in Spring's type conversion system. It lets a converter check a condition before it converts. The converter can then decide, based on specific conditions, whether it should do the conversion.
 
-### 四、主要功能
+### 4. Main Features
 
-1. **条件性检查**
+1. **Conditional check**
 
-   - `ConditionalConverter` 提供了一个 `matches(TypeDescriptor sourceType, TypeDescriptor targetType)` 方法，这是它的主要功能。这个方法允许转换器在执行实际的转换逻辑之前，根据源类型和目标类型判断是否应该进行转换。
+   - `ConditionalConverter` provides the `matches(TypeDescriptor sourceType, TypeDescriptor targetType)` method. This is its main feature. Before the real conversion, the converter uses the source and target types to decide whether it should convert.
 
-2. **灵活性**
+2. **Flexibility**
 
-   - 通过实现这个接口，我们可以编写更灵活的转换逻辑。转换器可以在运行时根据当前的上下文或特定的条件决定是否执行转换。这种方法特别适用于那些转换逻辑依赖于动态条件或环境变量的情况。
+   - By implementing this interface, you can write more flexible conversion logic. The converter can decide at runtime, based on the current context or other conditions, whether to convert. This suits cases where the conversion depends on dynamic conditions or environment variables.
 
-3. **与其他转换器接口的协作**
+3. **Works with other converter interfaces**
 
-   - 虽然 `ConditionalConverter` 可以单独实现，但通常它会与其他类型转换器接口（如 `Converter` 或 `GenericConverter`）结合使用。在这种情况下，`ConditionalConverter` 为转换提供了一个额外的决策层，允许转换器根据条件进行智能选择。
+   - You can implement `ConditionalConverter` alone. But it is usually combined with other converter interfaces such as `Converter` or `GenericConverter`. In that case, it adds an extra decision step, so the converter can choose based on conditions.
 
-4. **减少资源消耗**
+4. **Lower resource use**
 
-   - 对于资源密集型的转换操作，使用 `ConditionalConverter` 可以减少不必要的资源消耗，因为它允许转换器在确定转换是必要的之前，先进行条件判断。
+   - For expensive conversions, `ConditionalConverter` avoids wasted work. The converter checks the condition first, before it knows the conversion is needed.
 
-### 五、接口源码
+### 5. Interface Source
 
-`ConditionalConverter` 接口在 Spring 框架中用于有条件的类型转换。它允许转换器（Converter）、泛型转换器（GenericConverter）或转换器工厂（ConverterFactory）基于源对象和目标对象的类型特征（如注解或特定方法的存在）来决定是否执行特定的转换操作。
+The `ConditionalConverter` interface is used for conditional type conversion in Spring. It lets a `Converter`, `GenericConverter`, or `ConverterFactory` decide whether to convert. The decision is based on traits of the source and target types, such as annotations or the presence of certain methods.
 
 ```java
 /**
- * 允许一个 {@link Converter}、{@link GenericConverter} 或 {@link ConverterFactory} 
- * 根据 {@code source} 源类型和 {@code target} 目标类型的 {@link TypeDescriptor} 属性来有条件地执行转换。
+ * Allows a {@link Converter}, {@link GenericConverter} or {@link ConverterFactory} to
+ * conditionally execute based on attributes of the {@code source} and {@code target}
+ * {@link TypeDescriptor}.
  *
- * <p>这通常用于根据字段或类级特征（如注解或方法）的存在，有选择性地匹配自定义转换逻辑。
- * 例如，在将字符串字段转换为日期字段时，如果目标字段也用 {@code @DateTimeFormat} 注解标记，
- * 实现可能会返回 {@code true}。
+ * <p>Often used to selectively match custom conversion logic based on the presence of a
+ * field or class-level characteristic, such as an annotation or method. For example, when
+ * converting from a String field to a Date field, an implementation might return
+ * {@code true} if the target field has also been annotated with {@code @DateTimeFormat}.
  *
- * <p>另一个例子是，在将字符串字段转换为 {@code Account} 字段时，
- * 如果目标 Account 类定义了一个 {@code public static findAccount(String)} 方法，
- * 实现可能会返回 {@code true}。
+ * <p>As another example, when converting from a String field to an {@code Account} field,
+ * an implementation might return {@code true} if the target Account class defines a
+ * {@code public static findAccount(String)} method.
  *
  * @author Phillip Webb
  * @author Keith Donald
@@ -80,162 +82,163 @@
 public interface ConditionalConverter {
 
 	/**
-	 * 是否应该选择当前考虑的从 {@code sourceType} 源类型到 {@code targetType} 目标类型的转换？
-	 * @param sourceType 正在转换的字段的类型描述符
-	 * @param targetType 正在转换到的字段的类型描述符
-	 * @return 如果应该执行转换则为 true，否则为 false
+	 * Should the conversion from {@code sourceType} to {@code targetType} currently under
+	 * consideration be selected?
+	 * @param sourceType the type descriptor of the field we are converting from
+	 * @param targetType the type descriptor of the field we are converting to
+	 * @return true if conversion should be performed, false otherwise
 	 */
 	boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType);
 
 }
 ```
 
-### 六、主要实现
+### 6. Main Implementations
 
 1. **AnnotationParserConverter**
 
-   - 解析注解并转换为相应的对象。
+   - Parses an annotation and converts it to the matching object.
 
 2. **AnnotationPrinterConverter**
 
-   - 将对象转换为表示其注解的字符串形式。
+   - Converts an object to a string that represents its annotation.
 
 3. **ArrayToArrayConverter**
 
-   - 将一个数组转换为另一种类型的数组。
+   - Converts an array to an array of another type.
 
 4. **ArrayToCollectionConverter**
 
-   - 将数组转换为集合。
+   - Converts an array to a collection.
 
 5. **ArrayToDelimitedStringConverter**
 
-   - 将数组转换为由特定分隔符分隔的字符串。
+   - Converts an array to a string separated by a given delimiter.
 
 6. **ArrayToObjectConverter**
 
-   - 将数组转换为单个对象。
+   - Converts an array to a single object.
 
 7. **ArrayToStringConverter**
 
-   - 将数组转换为字符串表示形式。
+   - Converts an array to a string.
 
 8. **ByteBufferConverter**
 
-   - 转换字节缓冲区为其他类型。
+   - Converts a byte buffer to other types.
 
 9. **CharSequenceToObjectConverter**
 
-   - 将字符序列转换为对象。
+   - Converts a character sequence to an object.
 
 10. **CollectionToArrayConverter**
 
-    - 将集合转换为数组。
+    - Converts a collection to an array.
 
 11. **CollectionToCollectionConverter**
 
-    - 将一种类型的集合转换为另一种类型的集合。
+    - Converts a collection of one type to a collection of another type.
 
 12. **CollectionToDelimitedStringConverter**
 
-    - 将集合转换为由特定分隔符分隔的字符串。
+    - Converts a collection to a string separated by a given delimiter.
 
 13. **CollectionToObjectConverter**
 
-    - 将集合转换为单个对象。
+    - Converts a collection to a single object.
 
 14. **CollectionToStringConverter**
 
-    - 将集合转换为字符串表示形式。
+    - Converts a collection to a string.
 
 15. **DelimitedStringToArrayConverter**
 
-    - 将由特定分隔符分隔的字符串转换为数组。
+    - Converts a delimited string to an array.
 
 16. **DelimitedStringToCollectionConverter**
 
-    - 将由特定分隔符分隔的字符串转换为集合。
+    - Converts a delimited string to a collection.
 
 17. **FallbackObjectToStringConverter**
 
-    - 作为后备方案，将对象转换为字符串。
+    - Converts an object to a string as a fallback.
 
 18. **IdToEntityConverter**
 
-    - 将标识符转换为实体对象。
+    - Converts an identifier to an entity object.
 
 19. **MapToMapConverter**
 
-    - 将一种类型的映射（Map）转换为另一种类型的映射。
+    - Converts a `Map` of one type to a `Map` of another type.
 
 20. **ObjectToArrayConverter**
 
-    - 将对象转换为数组。
+    - Converts an object to an array.
 
 21. **ObjectToCollectionConverter**
 
-    - 将对象转换为集合。
+    - Converts an object to a collection.
 
 22. **ObjectToObjectConverter**
 
-    - 将一种类型的对象转换为另一种类型的对象。
+    - Converts an object of one type to an object of another type.
 
 23. **ObjectToOptionalConverter**
 
-    - 将对象转换为 `Optional` 类型。
+    - Converts an object to an `Optional`.
 
 24. **StreamConverter**
 
-    - 处理流（Stream）相关的转换。
+    - Handles conversions related to `Stream`.
 
 25. **StringToArrayConverter**
 
-    - 将字符串转换为数组。
+    - Converts a string to an array.
 
 26. **StringToCollectionConverter**
 
-    - 将字符串转换为集合。
+    - Converts a string to a collection.
 
 27. **TypeConverterConverter**
 
-    - 处理类型转换器之间的转换。
+    - Handles conversion between type converters.
 
-### 七、最佳实践
+### 7. Best Practices
 
-使用 `StringToIntegerConditionalConverter` 转换器。首先，它创建了转换器的实例，并为源类型（`String`）和目标类型（`Integer`）定义了类型描述符。然后，它使用 `matches` 方法检查是否满足从 `String` 到 `Integer` 的转换条件。如果条件匹配，则使用 `convert` 方法执行转换并打印结果；如果条件不匹配，则输出一条消息表明转换不适用。
+This example uses the `StringToIntegerConditionalConverter` converter. First, it creates the converter and defines type descriptors for the source type (`String`) and target type (`Integer`). Then it calls `matches` to check whether the String-to-Integer condition is met. If it matches, it calls `convert` and prints the result. If not, it prints a message saying the conversion does not apply.
 
 ```java
 public class ConditionalConverterDemo {
 
     public static void main(String[] args) {
-        // 创建自定义的转换器实例
+        // Create the custom converter instance
         StringToIntegerConditionalConverter converter = new StringToIntegerConditionalConverter();
 
-        // 定义源类型（String）和目标类型（Integer）的描述符
+        // Define descriptors for the source type (String) and target type (Integer)
         TypeDescriptor sourceType = TypeDescriptor.valueOf(String.class);
         TypeDescriptor targetType = TypeDescriptor.valueOf(Integer.class);
 
-        // 测试转换器是否适用于从 String 到 Integer 的转换
+        // Test whether the converter applies to String to Integer conversion
         if (converter.matches(sourceType, targetType)) {
-            // 如果转换条件匹配，则执行转换
+            // If the condition matches, run the conversion
             Integer result = converter.convert("8");
             System.out.println("Converted result: " + result);
         } else {
-            // 如果条件不匹配，打印不适用的消息
+            // If the condition does not match, print a not-applicable message
             System.out.println("Conversion not applicable.");
         }
     }
 }
 ```
 
-`StringToIntegerConditionalConverter` 是一个根据源类型和目标类型的类型信息来决定是否执行转换的条件转换器。它只在源类型为 `String` 且目标类型为 `Integer` 时执行转换操作，并且提供了字符串到整数的具体转换逻辑。
+`StringToIntegerConditionalConverter` is a conditional converter. It uses the source and target type information to decide whether to convert. It only converts when the source type is `String` and the target type is `Integer`. It also holds the actual String-to-Integer logic.
 
 ```java
 public class StringToIntegerConditionalConverter implements Converter<String, Integer>, ConditionalConverter {
 
     @Override
     public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-        // 判断条件：当源类型是 String 且目标类型是 Integer 时返回 true
+        // Condition: return true when the source type is String and the target type is Integer
         return String.class.equals(sourceType.getType()) && Integer.class.equals(targetType.getType());
     }
 
@@ -253,45 +256,44 @@ public class StringToIntegerConditionalConverter implements Converter<String, In
 }
 ```
 
-运行结果发现，字符串 `"8"` 被正确转换为了整数 `8`。这个输出证明了您的自定义转换器按预期工作，并能够在满足特定条件时将字符串转换为整数。
+The output shows that the string `"8"` was converted to the integer `8`. This proves the custom converter works as expected. It converts a string to an integer when the condition is met.
 
 ```java
 Converted result: 8
 ```
 
-### 八、与其他组件的关系
+### 8. Relationship with Other Components
 
 1. **Converter**
 
-   - `Converter<S, T>` 是一个简单的接口，用于将一种类型 `S` 转换为另一种类型 `T`。`ConditionalConverter` 可以与 `Converter` 接口结合使用，允许基于特定条件执行转换。
+   - `Converter<S, T>` is a simple interface that converts type `S` to type `T`. You can combine `ConditionalConverter` with `Converter` to convert only under certain conditions.
 
 2. **GenericConverter**
 
-   - `GenericConverter` 是一个更复杂的接口，允许更灵活的类型转换，包括集合和泛型类型。`ConditionalConverter` 可以与 `GenericConverter` 结合使用，为复杂的转换提供条件控制。
+   - `GenericConverter` is a more complex interface. It allows more flexible type conversion, including collections and generic types. You can combine `ConditionalConverter` with `GenericConverter` to add conditions to complex conversions.
 
 3. **ConverterFactory**
 
-   - `ConverterFactory` 用于创建特定类型之间的转换器。当与 `ConditionalConverter` 结合时，可以在创建转换器时加入条件判断的逻辑。
+   - `ConverterFactory` creates converters between specific types. Combined with `ConditionalConverter`, it can check conditions when it creates converters.
 
 4. **ConditionalGenericConverter**
 
-   - `ConditionalGenericConverter` 是 `GenericConverter` 和 `ConditionalConverter` 的结合体，用于复杂的转换场景，同时需要基于条件判断是否执行转换。
+   - `ConditionalGenericConverter` combines `GenericConverter` and `ConditionalConverter`. It is for complex conversions that also need a condition check.
 
 5. **ConversionService**
 
-   - `ConversionService` 是 Spring 提供的一个中心接口，用于在整个框架中执行类型转换操作。实现 `ConditionalConverter` 的转换器可以被注册到 `ConversionService` 中，使得转换操作可以在满足特定条件时自动触发。
+   - `ConversionService` is Spring's central interface for type conversion. Converters that implement `ConditionalConverter` can be registered in it. The conversion then runs automatically when its condition is met.
 
-### 九、常见问题
+### 9. FAQ
 
-1. **判断条件不清晰或过于复杂**
+1. **Unclear or overly complex conditions**
 
-   - 在实现 `matches` 方法时，需要明确和简洁地定义转换应用的条件。如果条件过于复杂，可能会导致理解困难和维护问题。确保条件逻辑既清晰又准确。
+   - When you write the `matches` method, define the condition clearly and simply. Complex conditions are hard to understand and maintain. Keep the condition logic both clear and accurate.
 
-2. **性能问题**
+2. **Performance problems**
 
-   - 条件判断逻辑如果不够高效，可能会对应用程序的性能产生负面影响。特别是在大量数据需要转换时，应该优化条件判断逻辑，避免不必要的复杂计算。
+   - Slow condition checks can hurt application performance. This matters most when you convert a lot of data. Optimize the check and avoid needless computation.
 
-3. **不正确的类型匹配**
+3. **Wrong type matching**
 
-   - 确保 `matches` 方法中的类型匹配逻辑正确无误。错误的类型匹配可能会导致转换器在不适当的情况下被调用，进而引发数据错误或异常。
-
+   - Make sure the type matching in `matches` is correct. Wrong matching can call the converter in the wrong cases and cause bad data or exceptions.

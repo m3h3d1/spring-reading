@@ -5,29 +5,29 @@ import org.springframework.validation.FieldError;
 
 /**
  * @author xcs
- * @date 2023年12月04日 14时06分
+ * @date 2023-12-04 14:06
  **/
 public class ValidatorDemo {
 
     public static void main(String[] args) {
-        // 创建一个 Person 对象实例
+        // Create a Person instance
         Person person = new Person();
         person.setName(null);
         person.setAge(130);
 
-        // 创建一个 BeanPropertyBindingResult 对象，用于存储验证过程中的错误
+        // Create a BeanPropertyBindingResult to hold validation errors
         BeanPropertyBindingResult result = new BeanPropertyBindingResult(person, "person");
 
-        // 创建一个 PersonValidator 实例，这是自定义的验证器
+        // Create a PersonValidator instance (a custom validator)
         PersonValidator validator = new PersonValidator();
 
-        // 检查 PersonValidator 是否支持 Person 类的验证
+        // Check whether PersonValidator supports the Person class
         if (validator.supports(person.getClass())) {
-            // 执行验证逻辑
+            // Run the validation
             validator.validate(person, result);
         }
 
-        // 检查是否存在验证错误，并打印出所有的字段错误
+        // Check for validation errors and print all field errors
         if (result.hasErrors()) {
             for (FieldError error : result.getFieldErrors()) {
                 System.out.println(error.getField() + ":" + error.getDefaultMessage());

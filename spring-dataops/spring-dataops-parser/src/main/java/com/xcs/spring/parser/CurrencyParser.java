@@ -9,9 +9,9 @@ import java.util.Locale;
 public class CurrencyParser implements Parser<Number> {
     @Override
     public Number parse(String text, Locale locale) throws ParseException {
-        // 创建适用于特定区域的货币格式化器
+        // Create a currency formatter for the given locale
         NumberFormat format = NumberFormat.getCurrencyInstance(locale);
-        // 解析字符串为数字
+        // Parse the string into a number
         return format.parse(text);
     }
 }

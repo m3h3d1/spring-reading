@@ -1,101 +1,103 @@
 ## Converter
 
 - [Converter](#converter)
-  - [一、基本信息](#一基本信息)
-  - [二、知识储备](#二知识储备)
-  - [三、基本描述](#三基本描述)
-  - [四、主要功能](#四主要功能)
-  - [五、接口源码](#五接口源码)
-  - [六、主要实现](#六主要实现)
-  - [七、最佳实践](#七最佳实践)
-  - [八、与其他组件的关系](#八与其他组件的关系)
-  - [九、常见问题](#九常见问题)
+  - [1. Overview](#1-overview)
+  - [2. Background Knowledge](#2-background-knowledge)
+  - [3. Description](#3-description)
+  - [4. Main Features](#4-main-features)
+  - [5. Interface Source](#5-interface-source)
+  - [6. Main Implementations](#6-main-implementations)
+  - [7. Best Practices](#7-best-practices)
+  - [8. Relationship with Other Components](#8-relationship-with-other-components)
+  - [9. FAQ](#9-faq)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、知识储备
+### 2. Background Knowledge
 
-1. **泛型（Generics）**
+1. **Generics**
 
-   + 由于 `Converter` 接口使用了 Java 泛型，因此对 Java 泛型有一定了解是必要的。理解如何使用泛型来创建类型安全的代码对实现自定义转换器非常重要。
+   + The `Converter` interface uses Java generics, so you need to know them. Knowing how to write type-safe code with generics is important when you write your own converters.
 
 2. **Spring MVC**
-+ 如果你打算在 Web 应用中使用 `Converter` 接口，了解 Spring MVC 的工作原理是有帮助的。这包括理解控制器（Controllers）、请求映射（Request Mappings）、视图解析（View Resolvers）等。
+
+   + If you plan to use `Converter` in a web application, it helps to know how Spring MVC works. This includes controllers, request mappings, and view resolvers.
   
-3. **类型转换与格式化**
+3. **Type conversion and formatting**
 
-   + 理解 Java 中的类型转换基础，以及如何格式化数据。这对编写有效的转换器逻辑至关重要。
+   + Know the basics of type conversion in Java and how to format data. This is key to writing good converter logic.
 
-### 三、基本描述
+### 3. Description
 
-`Converter` 接口是 Spring 框架中用于实现类型转换的一个关键组件。定义了一个简单的方法，用于将一种类型（源类型 S）转换为另一种类型（目标类型 T）。通过实现这个接口，我们可以创建自定义的转换逻辑，以便在 Spring 应用程序中无缝地进行复杂的数据转换。
+The `Converter` interface is a key part of type conversion in Spring. It defines one simple method that converts a source type (S) to a target type (T). By implementing it, you can write your own conversion logic and handle complex data conversion in a Spring application.
 
-### 四、主要功能
+### 4. Main Features
 
-1. **类型转换**
+1. **Type conversion**
 
-   + 主要功能是提供一种机制来将一个对象从一种类型转换为另一种类型。这对于处理不兼容的数据类型非常有用，特别是在需要将外部系统的数据格式转换为内部使用的格式时。
+   + It gives you a way to convert an object from one type to another. This helps with incompatible data types. For example, when data from an external system must be turned into the format your app uses.
 
-2. **数据格式化**
+2. **Data formatting**
 
-   + 在 Web 应用程序中，`Converter` 可用于将来自用户界面的数据（通常是字符串格式）转换为后端系统可识别的格式，或反之。这对于日期、时间、数字等复杂数据类型尤其重要。
+   + In web applications, a `Converter` can turn data from the user interface (usually strings) into a format the back end understands, or the other way round. This matters most for dates, times, and numbers.
 
-3. **数据绑定**
+3. **Data binding**
 
-   + 在 Spring MVC 中，`Converter` 接口用于将请求参数（例如，来自 HTTP 请求的字符串）转换为控制器方法参数的适当类型。
+   + In Spring MVC, `Converter` converts request parameters (for example, strings from an HTTP request) to the right types for controller method parameters.
 
-4. **提升代码可维护性和重用性**
+4. **Better maintenance and reuse**
 
-   + 通过定义清晰的转换规则，`Converter` 实现促进了代码的模块化，使得相同的转换逻辑可以在应用程序的不同部分重用。
+   + Clear conversion rules keep code modular. The same conversion logic can be reused in different parts of the application.
 
-5. **自定义转换逻辑**
+5. **Custom conversion logic**
 
-   + 与内置的转换器相比，自定义 `Converter` 实现允许我们定义特定于应用程序的转换逻辑，从而处理更复杂或特定的转换需求。
+   + Compared with the built-in converters, a custom `Converter` lets you write conversion logic for your own application. This handles more complex or special needs.
 
-6. **集成与扩展**
+6. **Integration and extension**
 
-   + `Converter` 接口可以轻松集成到 Spring 框架的其他部分，如数据访问层、Spring Boot 自动配置等，同时也可以被扩展以支持更复杂的转换需求。
+   + `Converter` fits easily into other parts of Spring, such as the data access layer and Spring Boot auto-configuration. You can also extend it for more complex needs.
 
-### 五、接口源码
+### 5. Interface Source
 
-`Converter<S, T>` 接口是 Spring 框架中用于实现从一种类型到另一种类型转换的标准机制。定义了一个单一的 `convert` 方法，用于执行实际的转换逻辑。这个接口是线程安全的，可在应用中共享和重复使用。除了基本的转换功能，该接口还提供了 `andThen` 方法，允许将多个转换器组合在一起，以实现更复杂的转换逻辑。
+The `Converter<S, T>` interface is Spring's standard way to convert from one type to another. It has a single `convert` method that does the conversion. The interface is thread-safe, so you can share and reuse it. It also has an `andThen` method. This lets you chain several converters for more complex conversions.
 
 ```java
 /**
- * 一个转换器，负责将类型为 {@code S} 的源对象转换为类型为 {@code T} 的目标对象。
+ * A converter converts a source object of type {@code S} to a target of type {@code T}.
  *
- * <p>该接口的实现应是线程安全的，并且可以共享。
+ * <p>Implementations of this interface are thread-safe and can be shared.
  *
- * <p>实现还可以选择实现 {@link ConditionalConverter}。
+ * <p>Implementations may additionally implement {@link ConditionalConverter}.
  *
- * @param <S> 源类型
- * @param <T> 目标类型
+ * @param <S> the source type
+ * @param <T> the target type
  */
 @FunctionalInterface
 public interface Converter<S, T> {
 
 	/**
-	 * 将类型为 {@code S} 的源对象转换为类型为 {@code T} 的目标对象。
-	 * @param source 要转换的源对象，必须是类型 {@code S} 的实例（不能是 {@code null}）
-	 * @return 转换后的对象，必须是类型 {@code T} 的实例（可能是 {@code null}）
-	 * @throws IllegalArgumentException 如果源对象无法转换为所需的目标类型
+	 * Convert the source object of type {@code S} to target type {@code T}.
+	 * @param source the source object to convert, which must be an instance of {@code S} (never {@code null})
+	 * @return the converted object, which must be an instance of {@code T} (potentially {@code null})
+	 * @throws IllegalArgumentException if the source cannot be converted to the desired target type
 	 */
 	@Nullable
 	T convert(S source);
 
 	/**
-	 * 构建一个组合的 {@link Converter}，该转换器首先对其输入应用此 {@link Converter}，
-	 * 然后将 {@code after} {@link Converter} 应用于结果。
-	 * @param after 在此 {@link Converter} 应用后要应用的 {@link Converter}
-	 * @param <U> both the {@code after} {@link Converter} 和组合的 {@link Converter} 的输出类型
-	 * @return 一个组合的 {@link Converter}，首先应用此 {@link Converter}，然后应用 {@code after} {@link Converter}
+	 * Construct a composed {@link Converter} that first applies this {@link Converter}
+	 * to its input, and then applies the {@code after} {@link Converter} to the result.
+	 * @param after the {@link Converter} to apply after this {@link Converter} is applied
+	 * @param <U> the type of output of both the {@code after} {@link Converter} and the composed {@link Converter}
+	 * @return a composed {@link Converter} that first applies this {@link Converter} and then
+	 * applies the {@code after} {@link Converter}
 	 * @since 5.3
 	 */
 	default <U> Converter<S, U> andThen(Converter<? super T, ? extends U> after) {
-		Assert.notNull(after, "After Converter 不能为空");
+		Assert.notNull(after, "After Converter must not be null");
 		return (S s) -> {
 			T initialResult = convert(s);
 			return (initialResult != null ? after.convert(initialResult) : null);
@@ -105,64 +107,64 @@ public interface Converter<S, T> {
 }
 ```
 
-### 六、主要实现
+### 6. Main Implementations
 
 1. **StringToArrayConverter**
 
-   - 将字符串转换为数组，例如将逗号分隔的值转换为字符串数组。
+   - Converts a string to an array. For example, a comma-separated value becomes a string array.
 
 2. **StringToBooleanConverter**
 
-   - 将字符串转换为布尔值。
+   - Converts a string to a boolean.
 
 3. **StringToCharacterConverter**
 
-   - 将字符串转换为字符。
+   - Converts a string to a character.
 
 4. **StringToCharsetConverter**
 
-   - 将字符串转换为 `Charset` 对象。
+   - Converts a string to a `Charset` object.
 
 5. **StringToCollectionConverter**
 
-   - 将字符串转换为集合，例如将逗号分隔的字符串转换为列表。
+   - Converts a string to a collection. For example, a comma-separated string becomes a list.
 
 6. **StringToCurrencyConverter**
 
-   - 将字符串转换为 `Currency` 对象。
+   - Converts a string to a `Currency` object.
 
 7. **StringToLocaleConverter**
 
-   - 将字符串转换为 `Locale` 对象。
+   - Converts a string to a `Locale` object.
 
-### 七、最佳实践
+### 7. Best Practices
 
-使用 `DefaultConversionService` 来管理和执行类型转换。首先，我们创建了一个转换服务的实例，并向其中注册了自定义的 `StringToLocalDateConverter` 和 `StringToBooleanConverter` 转换器。接着，代码通过 `canConvert` 方法检查是否可以执行特定的转换，并使用 `convert` 方法进行实际的转换。
+We use `DefaultConversionService` to manage and run type conversions. First, we create a conversion service and register our custom `StringToLocalDateConverter` and `StringToBooleanConverter`. Then the code calls `canConvert` to check whether a conversion is possible, and calls `convert` to do it.
 
 ```java
 public class ConverterDemo {
 
     public static void main(String[] args) {
-        // 创建一个默认的转换服务
+        // Create a default conversion service
         DefaultConversionService service = new DefaultConversionService();
 
-        // 向服务中添加自定义的转换器
+        // Add custom converters to the service
         service.addConverter(new StringToLocalDateConverter());
         service.addConverter(new StringToBooleanConverter());
 
-        // 检查是否可以将字符串转换为 LocalDate
+        // Check whether a String can be converted to LocalDate
         if (service.canConvert(String.class, LocalDate.class)) {
             LocalDate localDate = service.convert("2023-12-07", LocalDate.class);
             System.out.println("LocalDate = " + localDate);
         }
 
-        // 检查是否可以将字符串 "yes" 转换为 Boolean
+        // Check whether the String "yes" can be converted to Boolean
         if (service.canConvert(String.class, Boolean.class)) {
             Boolean boolValue = service.convert("yes", Boolean.class);
             System.out.println("yes = " + boolValue);
         }
 
-        // 检查是否可以将字符串 "no" 转换为 Boolean
+        // Check whether the String "no" can be converted to Boolean
         if (service.canConvert(String.class, Boolean.class)) {
             Boolean boolValue = service.convert("no", Boolean.class);
             System.out.println("no = " + boolValue);
@@ -171,7 +173,7 @@ public class ConverterDemo {
 }
 ```
 
-定义了一个 `StringToLocalDateConverter` 类，用于实现将格式为 "`yyyy-MM-dd`" 的字符串转换为 `LocalDate` 对象。我们通过实现 Spring 的 `Converter` 接口，使用 `DateTimeFormatter` 对字符串进行解析，从而实现类型重用的日期转换功能。
+The `StringToLocalDateConverter` class converts a string in the format "`yyyy-MM-dd`" to a `LocalDate`. It implements Spring's `Converter` interface and parses the string with `DateTimeFormatter`.
 
 ```java
 public class StringToLocalDateConverter implements Converter<String, LocalDate> {
@@ -184,7 +186,7 @@ public class StringToLocalDateConverter implements Converter<String, LocalDate> 
 }
 ```
 
-定义了 `StringToBooleanConverter` 类，实现了将字符串转换为布尔值的功能。我们通过预定义的字符串集合来识别表示真值（如 "true", "yes", "1"）和假值（如 "false", "no", "0"）的字符串，并相应地返回 `Boolean.TRUE` 或 `Boolean.FALSE`。
+The `StringToBooleanConverter` class converts a string to a boolean. It uses predefined sets of strings to find true values (such as "true", "yes", "1") and false values (such as "false", "no", "0"). It returns `Boolean.TRUE` or `Boolean.FALSE` to match.
 
 ```java
 public class StringToBooleanConverter implements Converter<String, Boolean> {
@@ -219,7 +221,7 @@ public class StringToBooleanConverter implements Converter<String, Boolean> {
 }
 ```
 
-运行结果发现，字符串 "2023-12-07" 被转换为了对应的 `LocalDate` 对象，而字符串 "yes" 和 "no" 分别被准确地转换为了布尔值 `true` 和 `false`。这证明了自定义转换器在处理日期和布尔值转换时的有效性。
+The output shows that the string "2023-12-07" became a `LocalDate`. The strings "yes" and "no" became the booleans `true` and `false`. This shows the custom converters work for dates and booleans.
 
 ```java
 LocalDate = 2023-12-07
@@ -227,54 +229,54 @@ yes = true
 no = false
 ```
 
-### 八、与其他组件的关系
+### 8. Relationship with Other Components
 
 1. **ConversionService**
 
-   - `ConversionService` 是一个中心接口，用于执行类型转换。`Converter` 接口的实现通常被注册到 `ConversionService` 中，以便在整个应用程序中使用。
+   - `ConversionService` is the central interface for type conversion. `Converter` implementations are usually registered in a `ConversionService` so the whole application can use them.
 
 2. **Data Binding**
 
-   - 在 Spring MVC 中，数据绑定过程利用 `Converter` 接口将 HTTP 请求参数转换为控制器方法参数的适当类型。这对于表单提交和查询参数处理尤其重要。
+   - In Spring MVC, data binding uses `Converter` to turn HTTP request parameters into the right types for controller method parameters. This matters most for form submission and query parameters.
 
 3. **Spring Boot and Spring Configuration**
 
-   - 在 Spring Boot 和 Spring 应用程序配置中，`Converter` 接口用于将配置属性（如属性文件中的值）转换为更复杂的对象或自定义类型。
+   - In Spring Boot and Spring configuration, `Converter` turns configuration properties (such as values in a properties file) into complex objects or custom types.
 
 4. **Spring Data**
 
-   - 在 Spring Data 的上下文中，`Converter` 接口可以用于在数据库实体和应用程序中使用的领域模型之间进行转换。
+   - In Spring Data, `Converter` can convert between database entities and the domain models used in the application.
 
 5. **Field Formatting**
 
-   - `Converter` 通常与 `Formatter` 接口一起使用，后者专注于字段的格式化和解析，特别是在 Web 环境中。`Formatter` 可以视为一种特殊类型的 `Converter`。
+   - `Converter` is often used together with the `Formatter` interface. `Formatter` focuses on formatting and parsing fields, especially in web environments. A `Formatter` can be seen as a special kind of `Converter`.
 
 6. **Bean Validation**
 
-   - 在处理 Bean 验证时，`Converter` 接口可以用于在验证逻辑之前或之后转换数据。
+   - In bean validation, `Converter` can convert data before or after the validation logic.
 
 7. **RestTemplate and WebClient**
 
-   - 在使用 Spring 的 RestTemplate 或 WebClient 时，`Converter` 接口可以用于序列化和反序列化 HTTP 请求和响应体。
+   - With Spring's RestTemplate or WebClient, `Converter` can help serialize and deserialize HTTP request and response bodies.
 
-### 九、常见问题
+### 9. FAQ
 
-1. **转换逻辑错误**
+1. **Wrong conversion logic**
 
-   - 错误地实现转换逻辑可能导致数据转换不正确或转换过程中发生异常。重要的是要确保转换逻辑正确，并且能够处理各种输入情况。
+   - A wrong implementation can give incorrect data or throw exceptions during conversion. Make sure the logic is correct and handles many kinds of input.
 
-2. **注册转换器失败**
+2. **Converter not registered**
 
-   - 有时我们可能忘记将自定义转换器注册到 Spring 的 `ConversionService` 中，导致预期的转换未能发生。
+   - You may forget to register the custom converter in Spring's `ConversionService`. Then the expected conversion does not happen.
 
-3. **处理空值**
+3. **Handling null values**
 
-   - 我们需要决定如何处理 `null` 输入。某些情况下可能需要将 `null` 转换为默认值，而在其他情况下则应保持为 `null` 或抛出异常。
+   - Decide how to handle `null` input. Sometimes `null` should become a default value. In other cases it should stay `null` or throw an exception.
 
-4. **类型检查和错误处理**
+4. **Type checks and error handling**
 
-   - 正确处理输入类型和转换过程中可能出现的错误是至关重要的。例如，转换方法应检查输入是否为预期类型，并在不合适的情况下抛出适当的异常。
+   - Handle input types and conversion errors properly. For example, the conversion method should check that the input has the expected type, and throw a suitable exception if not.
 
-5. **与其他转换器的冲突**
+5. **Conflicts with other converters**
 
-   - 在大型项目中，可能会有多个转换器能够处理相同的源和目标类型。这可能导致不明确的转换逻辑，需要小心管理以避免冲突。
+   - In large projects, several converters may handle the same source and target types. This makes the conversion logic unclear. Manage them carefully to avoid conflicts.

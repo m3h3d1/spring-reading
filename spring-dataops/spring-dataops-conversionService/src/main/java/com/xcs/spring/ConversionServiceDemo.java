@@ -7,30 +7,30 @@ import org.springframework.core.convert.support.GenericConversionService;
 
 /**
  * @author xcs
- * @date 2023年12月08日 16时30分
+ * @date 2023-12-08 16:30
  **/
 public class ConversionServiceDemo {
 
     public static void main(String[] args) {
-        // 创建 DefaultConversionService 实例
+        // Create a DefaultConversionService instance
         ConversionService conversionService = new DefaultConversionService();
 
-        // 使用 canConvert 检查转换是否可能
+        // Use canConvert to check whether the conversion is possible
         if (conversionService.canConvert(Integer.class, String.class)) {
             System.out.println("Can convert from Integer to String");
 
-            // 执行转换操作，将 Integer 转换为 String
+            // Run the conversion from Integer to String
             String converted = conversionService.convert(666, String.class);
             System.out.println("Converted: " + converted);
         }
 
-        // 使用 TypeDescriptor 检查转换是否可能
+        // Use TypeDescriptor to check whether the conversion is possible
         if (conversionService.canConvert(
                 TypeDescriptor.valueOf(Integer.class),
                 TypeDescriptor.valueOf(String.class))) {
             System.out.println("Can convert from Integer to String using TypeDescriptors");
 
-            // 使用 TypeDescriptor 执行转换
+            // Run the conversion with TypeDescriptor
             Object convertedWithTypeDescriptor = conversionService.convert(
                     888,
                     TypeDescriptor.valueOf(Integer.class),

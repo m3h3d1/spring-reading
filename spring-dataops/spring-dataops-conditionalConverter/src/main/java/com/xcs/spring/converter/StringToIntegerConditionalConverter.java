@@ -6,14 +6,14 @@ import org.springframework.core.convert.converter.Converter;
 
 /**
  * @author xcs
- * @date 2023年12月08日 11时05分
+ * @date 2023-12-08 11:05
  **/
 
 public class StringToIntegerConditionalConverter implements Converter<String, Integer>, ConditionalConverter {
 
     @Override
     public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-        // 判断条件：当源类型是 String 且目标类型是 Integer 时返回 true
+        // Condition: return true when the source type is String and the target type is Integer
         return String.class.equals(sourceType.getType()) && Integer.class.equals(targetType.getType());
     }
 

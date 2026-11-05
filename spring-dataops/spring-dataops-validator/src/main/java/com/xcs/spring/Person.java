@@ -2,7 +2,7 @@ package com.xcs.spring;
 
 /**
  * @author xcs
- * @date 2023年12月04日 14时13分
+ * @date 2023-12-04 14:13
  **/
 public class Person {
 

@@ -6,7 +6,7 @@ import org.springframework.validation.Validator;
 
 /**
  * @author xcs
- * @date 2023年12月04日 14时13分
+ * @date 2023-12-04 14:13
  **/
 public class PersonValidator implements Validator {
 
@@ -17,19 +17,19 @@ public class PersonValidator implements Validator {
 
     @Override
     public void validate(Object obj, Errors e) {
-        // 检查名称是否为空
-        ValidationUtils.rejectIfEmpty(e, "name", "name.empty", "姓名不能为空");
+        // Check that the name is not empty
+        ValidationUtils.rejectIfEmpty(e, "name", "name.empty", "Name must not be empty");
 
-        // 将对象转换为 Person 类型
+        // Cast the object to Person
         Person p = (Person) obj;
 
-        // 检查年龄是否为负数
+        // Check whether the age is negative
         if (p.getAge() < 0) {
-            e.rejectValue("age", "negative.value", "年龄不能为负数");
+            e.rejectValue("age", "negative.value", "Age must not be negative");
         }
-        // 检查年龄是否超过 120 岁
+        // Check whether the age is over 120
         else if (p.getAge() > 120) {
-            e.rejectValue("age", "too.darn.old", "目前年龄最大的是120岁");
+            e.rejectValue("age", "too.darn.old", "The oldest known age is 120");
         }
     }
 }

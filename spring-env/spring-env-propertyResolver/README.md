@@ -1,63 +1,63 @@
 ## PropertyResolver
 
 - [PropertyResolver](#propertyresolver)
-  - [一、基本信息](#一基本信息)
-  - [二、知识储备](#二知识储备)
-  - [三、基本描述](#三基本描述)
-  - [四、主要功能](#四主要功能)
-  - [五、接口源码](#五接口源码)
-  - [六、主要实现](#六主要实现)
-  - [七、最佳实践](#七最佳实践)
-  - [八、与其他组件的关系](#八与其他组件的关系)
-  - [九、常见问题](#九常见问题)
+  - [1. Overview](#1-overview)
+  - [2. Background Knowledge](#2-background-knowledge)
+  - [3. Description](#3-description)
+  - [4. Main Features](#4-main-features)
+  - [5. Interface Source](#5-interface-source)
+  - [6. Main Implementations](#6-main-implementations)
+  - [7. Best Practices](#7-best-practices)
+  - [8. Relationship with Other Components](#8-relationship-with-other-components)
+  - [9. FAQ](#9-faq)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、知识储备
+### 2. Background Knowledge
 
 1. **PropertySource**
 
-   - [PropertySource](https://github.com/xuchengsheng/spring-reading/blob/master/spring-env/spring-env-propertySources/spring-env/spring-env-propertySource/README.md) 类是 Spring 框架中的一个关键抽象类，专门用于封装不同来源的配置数据，如文件、环境变量、系统属性等。它为这些配置源提供了一个统一的接口，使得可以以一致的方式访问各种不同类型的配置数据。这个类的核心是其 `getProperty(String name)` 方法，它根据提供的属性名来检索属性值。在 Spring 的环境抽象中，`PropertySource` 的实例可以被添加到 `Environment` 对象中，从而允许我们在应用程序中方便地访问和管理这些属性。
+   - The [PropertySource](https://github.com/xuchengsheng/spring-reading/blob/master/spring-env/spring-env-propertySources/spring-env/spring-env-propertySource/README.md) class is a key abstract class in Spring. It wraps configuration data from different sources, such as files, environment variables, and system properties. It gives one unified interface to these sources, so you can access different kinds of configuration data in the same way. Its core is the `getProperty(String name)` method, which returns the property value for a given name. In Spring's environment abstraction, `PropertySource` instances can be added to an `Environment` object. This lets you access and manage these properties easily in your application.
 
-### 三、基本描述
+### 3. Description
 
-`PropertyResolver` 接口是 Spring 框架的一个核心组件，专注于提供一套灵活且强大的机制来处理应用程序配置属性。它定义了一系列方法，用于访问和操纵来自各种源（例如属性文件、环境变量、JVM 参数）的属性值。
+The `PropertyResolver` interface is a core component of Spring. It gives a flexible and powerful way to handle application configuration properties. It defines methods to access and work with property values from many sources, such as property files, environment variables, and JVM arguments.
 
-### 四、主要功能
+### 4. Main Features
 
-1. **获取属性值**
+1. **Get property values**
 
-   + 通过 `getProperty(key)` 方法可以获取给定键名的属性值。这是处理配置数据时最常用的功能。
+   + The `getProperty(key)` method returns the property value for a given key. This is the most common feature when you handle configuration data.
 
-2. **带默认值的属性获取**
+2. **Get properties with a default value**
 
-   + 如果指定的属性键不存在，`getProperty(key, defaultValue)` 方法允许返回一个默认值。
+   + If the property key does not exist, `getProperty(key, defaultValue)` returns a default value.
 
-3. **属性值类型转换**
-+ `getProperty(key, targetType)` 和 `getProperty(key,targetType,defaultValue)` 方法使得可以将属性值转换成指定的数据类型，如从字符串转换为整数或布尔值。
+3. **Property value type conversion**
+   + The `getProperty(key, targetType)` and `getProperty(key,targetType,defaultValue)` methods convert the property value to a given type, for example from a string to an integer or boolean.
   
-4. **检查属性存在性**
+4. **Check property existence**
 
-   + `containsProperty(key)` 方法用于判断是否存在特定的属性键。
+   + The `containsProperty(key)` method tells whether a property key exists.
 
-5. **获取必需属性**
+5. **Get required properties**
 
-   + `getRequiredProperty(key)` 和 `getRequiredProperty(key, targetType)` 方法用于获取必须存在的属性值。如果属性不存在，这些方法会抛出异常。
+   + The `getRequiredProperty(key)` and `getRequiredProperty(key, targetType)` methods get property values that must exist. If the property is missing, they throw an exception.
 
-6. **解析占位符**
+6. **Resolve placeholders**
 
-   + `resolvePlaceholders(text)` 方法支持解析字符串中的占位符，并用相应的属性值替换它们。这对于处理包含动态内容的配置文件非常有用。
+   + The `resolvePlaceholders(text)` method resolves placeholders in a string and replaces them with the matching property values. This is useful for config files with dynamic content.
 
-### 五、接口源码
+### 5. Interface Source
 
-`PropertyResolver` 接口提供了一系列方法来处理属性值的解析，包括检查属性是否存在，获取属性值，支持默认值，以及类型转换，另外它还包含用于解析字符串中的占位符的方法，允许动态替换配置值。
+The `PropertyResolver` interface has methods to resolve property values. They check whether a property exists, get property values, support default values, and convert types. It also has methods to resolve placeholders in strings, so configuration values can be replaced dynamically.
 
 ```java
 /**
- * 用于针对任何底层源解析属性的接口。
+ * Interface for resolving properties against any underlying source.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -68,95 +68,104 @@
 public interface PropertyResolver {
 
     /**
-     * 返回给定属性键是否可用于解析，即给定键的值是否不为 {@code null}。
+     * Return whether the given property key is available for resolution,
+     * i.e. if the value for the given key is not {@code null}.
      */
     boolean containsProperty(String key);
 
     /**
-     * 返回与给定键关联的属性值，或者如果无法解析该键，则返回 {@code null}。
-     * @param key 要解析的属性名称
+     * Return the property value associated with the given key,
+     * or {@code null} if the key cannot be resolved.
+     * @param key the property name to resolve
      */
     @Nullable
     String getProperty(String key);
 
     /**
-     * 返回与给定键关联的属性值，或者如果无法解析该键，则返回 {@code defaultValue}。
-     * @param key 要解析的属性名称
-     * @param defaultValue 如果找不到值，则返回的默认值
+     * Return the property value associated with the given key, or
+     * {@code defaultValue} if the key cannot be resolved.
+     * @param key the property name to resolve
+     * @param defaultValue the default value to return if no value is found
      */
     String getProperty(String key, String defaultValue);
 
     /**
-     * 返回与给定键关联的属性值，或者如果无法解析该键，则返回 {@code null}。
-     * @param key 要解析的属性名称
-     * @param targetType 期望的属性值类型
+     * Return the property value associated with the given key,
+     * or {@code null} if the key cannot be resolved.
+     * @param key the property name to resolve
+     * @param targetType the expected type of the property value
      */
     @Nullable
     <T> T getProperty(String key, Class<T> targetType);
 
     /**
-     * 返回与给定键关联的属性值，或者如果无法解析该键，则返回 {@code defaultValue}。
-     * @param key 要解析的属性名称
-     * @param targetType 期望的属性值类型
-     * @param defaultValue 如果找不到值，则返回的默认值
+     * Return the property value associated with the given key,
+     * or {@code defaultValue} if the key cannot be resolved.
+     * @param key the property name to resolve
+     * @param targetType the expected type of the property value
+     * @param defaultValue the default value to return if no value is found
      */
     <T> T getProperty(String key, Class<T> targetType, T defaultValue);
 
     /**
-     * 返回与给定键关联的属性值（永远不会是 {@code null}）。
-     * @throws IllegalStateException 如果无法解析该键
+     * Return the property value associated with the given key (never {@code null}).
+     * @throws IllegalStateException if the key cannot be resolved
      */
     String getRequiredProperty(String key) throws IllegalStateException;
 
     /**
-     * 返回与给定键关联的属性值，转换为给定的 targetType（永远不会是 {@code null}）。
-     * @throws IllegalStateException 如果无法解析给定键
+     * Return the property value associated with the given key, converted to the given
+     * targetType (never {@code null}).
+     * @throws IllegalStateException if the given key cannot be resolved
      */
     <T> T getRequiredProperty(String key, Class<T> targetType) throws IllegalStateException;
 
     /**
-     * 解析给定文本中的 ${...} 占位符，将它们替换为 {@link #getProperty} 解析的相应属性值。
-     * 无法解析且没有默认值的占位符将被忽略并保持不变。
-     * @param text 要解析的字符串
-     * @return 解析后的字符串（永远不会是 {@code null}）
-     * @throws IllegalArgumentException 如果给定的文本是 {@code null}
+     * Resolve ${...} placeholders in the given text, replacing them with corresponding
+     * property values as resolved by {@link #getProperty}. Unresolvable placeholders with
+     * no default value are ignored and passed through unchanged.
+     * @param text the String to resolve
+     * @return the resolved String (never {@code null})
+     * @throws IllegalArgumentException if given text is {@code null}
      */
     String resolvePlaceholders(String text);
 
     /**
-     * 解析给定文本中的 ${...} 占位符，将它们替换为 {@link #getProperty} 解析的相应属性值。
-     * 无法解析且没有默认值的占位符将导致抛出 IllegalArgumentException。
-     * @return 解析后的字符串（永远不会是 {@code null}）
-     * @throws IllegalArgumentException 如果给定文本是 {@code null} 或任何占位符无法解析
+     * Resolve ${...} placeholders in the given text, replacing them with corresponding
+     * property values as resolved by {@link #getProperty}. Unresolvable placeholders with
+     * no default value will cause an IllegalArgumentException to be thrown.
+     * @return the resolved String (never {@code null})
+     * @throws IllegalArgumentException if given text is {@code null}
+     * or if any placeholders are unresolvable
      */
     String resolveRequiredPlaceholders(String text) throws IllegalArgumentException;
 
 }
 ```
 
-### 六、主要实现
+### 6. Main Implementations
 
 1. **`PropertySourcesPropertyResolver`**
 
-   + 这是最常用的 `PropertyResolver` 实现之一。它使用 `PropertySource` 对象（可能包含多个，如环境变量、JVM 属性、配置文件等）来解析属性。
+   + One of the most used `PropertyResolver` implementations. It uses `PropertySource` objects (possibly many, such as environment variables, JVM properties, and config files) to resolve properties.
 
 2. **`AbstractEnvironment`**
 
-   + 虽然 `AbstractEnvironment` 本身不直接实现 `PropertyResolver` 接口，但它提供了访问 `PropertyResolver` 功能的接口。`AbstractEnvironment` 通过内部持有的 `PropertySourcesPropertyResolver` 实例来提供属性解析服务。
+   + `AbstractEnvironment` does not implement `PropertyResolver` directly, but it gives access to `PropertyResolver` features. It provides property resolution through an internal `PropertySourcesPropertyResolver` instance.
 
-3. **`StandardEnvironment` 和 `ConfigurableEnvironment`**
+3. **`StandardEnvironment` and `ConfigurableEnvironment`**
 
-   + 这些类扩展了 `AbstractEnvironment`，提供了更具体的环境配置。它们通过继承 `AbstractEnvironment` 间接提供 `PropertyResolver` 的功能。
+   + These classes extend `AbstractEnvironment` and give more specific environment configuration. They provide `PropertyResolver` features indirectly, by inheriting from `AbstractEnvironment`.
 
-### 七、最佳实践
+### 7. Best Practices
 
-使用  `PropertyResolver` 来演示配置属性的管理和解析。我们创建了一个包含应用信息的属性源，通过 `PropertySourcesPropertyResolver` 获取和检查属性，处理默认值，以及解析带有占位符的字符串。
+This example uses `PropertyResolver` to show how configuration properties are managed and resolved. We create a property source with application info. With `PropertySourcesPropertyResolver`, we get and check properties, handle default values, and resolve strings that contain placeholders.
 
 ```java
 public class SimplePropertyResolverDemo {
 
     public static void main(String[] args) {
-        // 创建属性源
+        // Create the property source
         Map<String, Object> properties = new HashMap<>();
         properties.put("app.name", "Spring-Reading");
         properties.put("app.version", "1.0.0");
@@ -166,105 +175,105 @@ public class SimplePropertyResolverDemo {
         MutablePropertySources propertySources = new MutablePropertySources();
         propertySources.addLast(propertySource);
 
-        // 使用 PropertySourcesPropertyResolver
+        // Use PropertySourcesPropertyResolver
         PropertyResolver propertyResolver = new PropertySourcesPropertyResolver(propertySources);
 
-        // 获取属性
+        // Get property
         String appName = propertyResolver.getProperty("app.name");
         String appVersion = propertyResolver.getProperty("app.version");
-        System.out.println("获取属性 app.name: " + appName);
-        System.out.println("获取属性 app.version: " + appVersion);
+        System.out.println("Get property app.name: " + appName);
+        System.out.println("Get property app.version: " + appVersion);
 
-        // 检查属性是否存在
+        // Check whether the properties exist
         boolean containsDescription = propertyResolver.containsProperty("app.description");
         boolean containsReleaseDate = propertyResolver.containsProperty("app.releaseDate");
-        System.out.println("是否包含 'app.description' 属性: " + containsDescription);
-        System.out.println("是否包含 'app.releaseDate' 属性: " + containsReleaseDate);
+        System.out.println("Contains 'app.description' property: " + containsDescription);
+        System.out.println("Contains 'app.releaseDate' property: " + containsReleaseDate);
 
-        // 带默认值的属性获取
+        // Get property with default value
         String appReleaseDate = propertyResolver.getProperty("app.releaseDate", "2023-11-30");
-        System.out.println("带默认值的属性获取 app.releaseDate : " + appReleaseDate);
+        System.out.println("Get property with default value app.releaseDate : " + appReleaseDate);
 
-        // 获取必需属性
+        // Get required property
         String requiredAppName = propertyResolver.getRequiredProperty("app.name");
-        System.out.println("获取必需属性 app.name: " + requiredAppName);
+        System.out.println("Get required property app.name: " + requiredAppName);
 
-        // 解析占位符
+        // Resolve placeholders
         String appDescription = propertyResolver.resolvePlaceholders(properties.get("app.description").toString());
-        System.out.println("解析占位符 app.description: " + appDescription);
+        System.out.println("Resolve placeholders app.description: " + appDescription);
 
-        // 解析必需的占位符
+        // Resolve required placeholders
         String requiredAppDescription = propertyResolver.resolveRequiredPlaceholders("App Description: ${app.description}");
-        System.out.println("解析必需的占位符 : " + requiredAppDescription);
+        System.out.println("Resolve required placeholders : " + requiredAppDescription);
     }
 }
 ```
 
-运行结果发现，`PropertyResolver` 成功地从配置中获取了属性值、验证了属性的存在性、提供了默认值、解析了包含占位符的字符串，
+The output shows that `PropertyResolver` got property values from the configuration, checked whether properties exist, provided a default value, and resolved strings with placeholders.
 
 ```java
-获取属性 app.name: Spring-Reading
-获取属性 app.version: 1.0.0
-是否包含 'app.description' 属性: true
-是否包含 'app.releaseDate' 属性: false
-带默认值的属性获取 app.releaseDate : 2023-11-30
-获取必需属性 app.name: Spring-Reading
-解析占位符 app.description: This is a Spring-Reading with version 1.0.0
-解析必需的占位符 : App Description: This is a Spring-Reading with version 1.0.0
+Get property app.name: Spring-Reading
+Get property app.version: 1.0.0
+Contains 'app.description' property: true
+Contains 'app.releaseDate' property: false
+Get property with default value app.releaseDate : 2023-11-30
+Get required property app.name: Spring-Reading
+Resolve placeholders app.description: This is a Spring-Reading with version 1.0.0
+Resolve required placeholders : App Description: This is a Spring-Reading with version 1.0.0
 ```
 
-### 八、与其他组件的关系
+### 8. Relationship with Other Components
 
-1. **`Environment` 抽象**
+1. **`Environment` abstraction**
 
-   - `PropertyResolver` 是 `Environment` 接口的一部分，而 `Environment` 提供了一个更为全面的配置和属性管理接口。`Environment` 抽象了属性源（Property Sources），如系统环境变量、JVM 属性、配置文件等。
+   - `PropertyResolver` is part of the `Environment` interface. `Environment` is a fuller interface for configuration and property management. It abstracts property sources, such as system environment variables, JVM properties, and config files.
 
-   - 在实际使用中，当我们操作 `Environment` 对象时，我们也在使用 `PropertyResolver` 的功能，因为 `Environment` 继承了 `PropertyResolver` 接口。
+   - In practice, when you use an `Environment` object, you also use `PropertyResolver` features, because `Environment` extends `PropertyResolver`.
 
-2. **`PropertySource(s)` 和 `PropertySourcesPropertyResolver`**
+2. **`PropertySource(s)` and `PropertySourcesPropertyResolver`**
 
-   - `PropertySource` 代表了一个属性的源头，比如一个 `.properties` 文件或者环境变量。`MutablePropertySources` 是一个包含多个 `PropertySource` 的容器。
+   - A `PropertySource` is the origin of properties, such as a `.properties` file or environment variables. `MutablePropertySources` is a container that holds many `PropertySource` objects.
 
-   - `PropertySourcesPropertyResolver` 是 `PropertyResolver` 的具体实现，它可以解析由一个或多个 `PropertySource` 提供的属性。
+   - `PropertySourcesPropertyResolver` is a concrete implementation of `PropertyResolver`. It resolves properties provided by one or more `PropertySource` objects.
 
-3. **占位符解析**
+3. **Placeholder resolution**
 
-   - `PropertyResolver` 提供了解析占位符（如 `${property.name}`）的能力，这在处理配置文件时特别有用。
+   - `PropertyResolver` can resolve placeholders (such as `${property.name}`). This is very useful when you handle config files.
 
-   - 它与 Spring 的 `PropertyPlaceholderConfigurer` 或者 `@Value` 注解协同工作，用于将配置文件中的属性值注入到 Spring 管理的 bean 中。
+   - It works with Spring's `PropertyPlaceholderConfigurer` or the `@Value` annotation to inject property values from config files into Spring-managed beans.
 
-4. **配置类和注解**
+4. **Configuration classes and annotations**
 
-   - 在使用基于注解的配置类（如使用 `@Configuration` 注解的类）时，`PropertyResolver` 可以用来动态解析和注入属性值，特别是结合 `@PropertySource` 注解使用时。
+   - With annotation-based configuration classes (such as classes marked with `@Configuration`), `PropertyResolver` can resolve and inject property values dynamically. This is most useful together with the `@PropertySource` annotation.
    
-   - 例如，可以使用 `@Value("${property.name}")` 注解来将属性值注入到配置类的字段或方法中。
+   - For example, you can use `@Value("${property.name}")` to inject a property value into a field or method of a configuration class.
 
-5. **Profile 管理**
+5. **Profile management**
 
-   - `PropertyResolver` 与 Spring Profiles 的概念紧密相连。通过 `PropertyResolver`，可以方便地访问和检查当前激活的 Profiles，这对于根据不同环境（开发、测试、生产等）来加载特定的配置非常有用。
+   - `PropertyResolver` is closely tied to the concept of Spring Profiles. With it, you can easily access and check the active profiles. This helps you load specific configuration for different environments (development, test, production, and so on).
 
-### 九、常见问题
+### 9. FAQ
 
-1. **属性值未找到**
+1. **Property value not found**
 
-   + 如果尝试解析不存在的属性，可以通过提前使用 `containsProperty` 方法来检查属性是否存在，以避免问题。同时，确认属性名是否正确，并确保属性源已经包含了对应的属性。
+   + If you resolve a property that does not exist, call `containsProperty` first to check whether it exists. Also check that the property name is correct and that the property source contains the property.
 
-2. **属性类型转换错误**
+2. **Property type conversion error**
 
-   + 在将属性值转换为不同的类型时，确保属性值的格式与目标类型兼容。如果格式不匹配，可以使用类型转换服务（如 Spring 的 `ConversionService`）进行显式转换。
+   + When you convert a property value to another type, make sure the value format fits the target type. If the format does not match, use a type conversion service (such as Spring's `ConversionService`) to convert it explicitly.
 
-3. **占位符未解析**
+3. **Placeholder not resolved**
 
-   + 如果属性值中的 `${...}` 占位符没有被正确解析，确保使用了合适的 `PropertyResolver` 实现（如 `PropertySourcesPropertyResolver`），并且相关的属性源已经包含了占位符引用的属性。
+   + If a `${...}` placeholder in a property value is not resolved, make sure you use a suitable `PropertyResolver` implementation (such as `PropertySourcesPropertyResolver`). Also make sure the property sources contain the properties that the placeholder refers to.
 
-4. **环境相关属性处理**
+4. **Environment-specific properties**
 
-   + 在处理不同环境（开发、测试、生产）下的属性时，可以使用 Spring Profiles 来定义环境特定的属性。启动应用时，确保激活了正确的 Profile。
+   + To handle properties for different environments (development, test, production), use Spring Profiles to define environment-specific properties. Make sure the right Profile is active when the application starts.
 
-5. **配置文件加载问题**
+5. **Config file loading problems**
 
-   + 如果属性文件没有被正确加载，检查属性文件的路径和格式是否正确，并确保在 Spring 配置类中使用了 `@PropertySource` 注解来指定属性文件。
+   + If a property file is not loaded, check that its path and format are correct. Also make sure the `@PropertySource` annotation in the Spring configuration class points to the property file.
 
-6. **使用 `@Value` 注解注入属性时出错**
+6. **Errors when injecting properties with `@Value`**
 
-   + 在使用 `@Value` 注解注入属性值时，确保 `PropertyPlaceholderConfigurer` 或 `PropertySourcesPlaceholderConfigurer` 被正确配置并加载到 Spring 容器中。
+   + When you inject property values with `@Value`, make sure `PropertyPlaceholderConfigurer` or `PropertySourcesPlaceholderConfigurer` is configured correctly and loaded into the Spring container.

@@ -1,200 +1,200 @@
 ## Parser
 
 - [Parser](#parser)
-  - [一、基本信息](#一基本信息)
-  - [二、知识储备](#二知识储备)
-  - [三、基本描述](#三基本描述)
-  - [四、主要功能](#四主要功能)
-  - [五、接口源码](#五接口源码)
-  - [六、主要实现](#六主要实现)
-  - [七、最佳实践](#七最佳实践)
-  - [八、与其他组件的关系](#八与其他组件的关系)
-  - [九、常见问题](#九常见问题)
+  - [1. Overview](#1-overview)
+  - [2. Background Knowledge](#2-background-knowledge)
+  - [3. Description](#3-description)
+  - [4. Main Features](#4-main-features)
+  - [5. Interface Source](#5-interface-source)
+  - [6. Main Implementations](#6-main-implementations)
+  - [7. Best Practices](#7-best-practices)
+  - [8. Relationship with Other Components](#8-relationship-with-other-components)
+  - [9. FAQ](#9-faq)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、知识储备
+### 2. Background Knowledge
 
-1. **本地化和国际化（i18n）**
+1. **Localization and internationalization (i18n)**
 
-   + 了解如何根据不同的地区设置（Locale）进行数据格式化，这在全球化的应用开发中非常重要。
+   + Know how to format data for different locales. This is important for global applications.
 
-2. **Java API for Formatting**
+2. **Java API for formatting**
 
-   + 熟悉 Java 的格式化相关 API，例如 `java.text.DateFormat`、`java.text.SimpleDateFormat` 和 `java.time.format.DateTimeFormatter`，因为这些通常在实现 `Printer` 接口时使用。
+   + Know the Java formatting APIs, such as `java.text.DateFormat`, `java.text.SimpleDateFormat`, and `java.time.format.DateTimeFormatter`. They are often used when you implement the `Printer` interface.
 
 3. **ConversionService** 
 
-   + `ConversionService` 是 Spring 中用于管理转换器（`Converters`）和格式化器（`Formatters`，包括 `Printer` 和 `Parser`）的服务。理解 `ConversionService` 如何工作，可以帮助您更好地集成和使用 `Printer` 接口。
+   + `ConversionService` is the Spring service that manages converters (`Converters`) and formatters (`Formatters`, including `Printer` and `Parser`). Knowing how it works helps you integrate and use the `Printer` interface.
 
-### 三、基本描述
+### 3. Description
 
-`Parser` 接口在Spring框架中是一个关键的数据转换工具，专门用于将字符串格式的数据转换为更复杂的对象类型。这个接口提供了一个简洁的方法，允许我们自定义如何将文本输入转换成所需的数据类型，如从或者字符串到 `Number`。此接口的灵活性在于支持国际化，因此可以根据不同地区的标准来解析数据。
+The `Parser` interface is a key data conversion tool in Spring. It converts string data to more complex object types. It has one simple method that lets you decide how to turn text input into the type you need, such as a string to a `Number`. It supports internationalization, so it can parse data by the standards of different regions.
 
-### 四、主要功能
+### 4. Main Features
 
-1. **字符串到对象的转换**
+1. **String to object conversion**
 
-   + 将字符串数据转换成更复杂的对象类型。这对于处理来自用户输入或外部数据源的文本数据尤其重要。
+   + Converts string data to more complex object types. This matters most for text from user input or external data sources.
 
-2. **支持自定义类型转换**
+2. **Custom type conversion**
 
-   + 我们可以创建自定义的解析器来处理特定类型的数据转换，例如日期时间、货币或任何自定义的数据类型。
+   + You can write your own parsers for specific data types, such as date and time, currency, or any custom type.
 
-3. **国际化支持**
+3. **Internationalization support**
 
-   + `Parser` 接口的方法通常包括一个 `Locale` 参数，这使得解析器可以根据不同的地区设置来正确解析字符串，支持多语言和区域的格式差异。
+   + The methods of `Parser` usually take a `Locale` parameter. This lets the parser read strings correctly for different regions. It supports different languages and format rules.
 
-### 五、接口源码
+### 5. Interface Source
 
-`Parser<T>` 接口是Spring框架中用于从字符串到特定对象类型转换的关键接口。它定义了一个单一的方法 `parse`，该方法接受一个字符串和区域设置（Locale），返回一个指定类型（T）的实例。
+The `Parser<T>` interface is a key Spring interface for converting a string to a specific object type. It defines one method, `parse`. The method takes a string and a `Locale`, and returns an instance of the given type (T).
 
 ```java
 /**
- * 用于将文本字符串解析为T类型实例的接口。
+ * Parses text strings to produce instances of T.
  *
  * @author Keith Donald
  * @since 3.0
- * @param <T> 这个解析器生成的对象类型
+ * @param <T> the type of object this Parser produces
  */
 @FunctionalInterface
 public interface Parser<T> {
 
 	/**
-	 * 解析文本字符串以生成T类型的实例。
-	 * @param text 要解析的文本字符串
-	 * @param locale 当前用户的区域设置
-	 * @return T类型的实例
-	 * @throws ParseException 当java.text解析库发生解析异常时抛出
-	 * @throws IllegalArgumentException 当发生解析异常时抛出
+	 * Parse a text String to produce a T.
+	 * @param text the text string
+	 * @param locale the current user locale
+	 * @return an instance of T
+	 * @throws ParseException when a parse exception occurs in a java.text parsing library
+	 * @throws IllegalArgumentException when a parse exception occurs
 	 */
 	T parse(String text, Locale locale) throws ParseException;
 
 }
 ```
 
-### 六、主要实现
+### 6. Main Implementations
 
 1. **`CharArrayFormatter`**
 
-   + 用于将字符串解析为字符数组。适用于需要将文本数据转换为字符数组形式的场景。
+   + Parses a string to a char array. It suits cases where text data must become a char array.
 
 2. **`CurrencyParser`**
 
-   + 专门用于解析货币值的字符串，例如将 "$1,234.56" 解析成相应的数值表示。
+   + Parses currency strings. For example, it parses "$1,234.56" into the matching number.
 
 3. **`CurrencyStyleFormatter`**
 
-   + 用于格式化和解析货币值，不仅支持解析还支持将数值格式化为货币字符串。
+   + Formats and parses currency values. It parses strings and also formats numbers as currency strings.
 
 4. **`CurrencyUnitFormatter`**
 
-   + 用于格式化和解析货币单位，例如将 "USD" 或 "EUR" 等货币代码转换成相应的货币单位对象。
+   + Formats and parses currency units. For example, it converts codes such as "USD" or "EUR" into currency unit objects.
 
 5. **`DateFormatter`**
 
-   + 专门用于解析日期字符串，如将 "2023-12-31" 转换成 `java.util.Date` 对象。
+   + Parses date strings. For example, "2023-12-31" becomes a `java.util.Date`.
 
 6. **`DateTimeParser`**
 
-   + 用于解析日期和时间的字符串，转换为 `java.time.LocalDateTime` 或类似的日期时间对象。
+   + Parses date and time strings into a `java.time.LocalDateTime` or a similar object.
 
 7. **`DurationFormatter`**
 
-   + 用于解析表示时间长度的字符串，如 "PT10M"（表示10分钟），转换为 `java.time.Duration` 对象。
+   + Parses strings that show a length of time, such as "PT10M" (10 minutes), into a `java.time.Duration`.
 
 8. **`InetAddressFormatter`**
 
-   + 用于解析IP地址的字符串，将其转换为 `java.net.InetAddress` 对象。
+   + Parses IP address strings into a `java.net.InetAddress`.
 
 9. **`InstantFormatter`**
 
-   + 用于解析表示特定时刻的字符串，如 "2020-01-01T00:00:00Z"，转换为 `java.time.Instant` 对象。
+   + Parses strings that show a point in time, such as "2020-01-01T00:00:00Z", into a `java.time.Instant`.
 
 10. **`IsoOffsetFormatter`**
 
-    + 用于解析带时区偏移的日期时间字符串，转换为 `java.time.OffsetDateTime` 等类型。
+    + Parses date-time strings with a time zone offset into types such as `java.time.OffsetDateTime`.
 
 11. **`LocalDateParser`**
 
-    + 专门用于解析仅包含日期部分的字符串，如 "2020-01-01"，转换为 `java.time.LocalDate` 对象。
+    + Parses strings that contain only a date, such as "2020-01-01", into a `java.time.LocalDate`.
 
 12. **`LocalDateTimeParser`**
 
-    + 用于解析包含日期和时间的字符串，转换为 `java.time.LocalDateTime` 对象。
+    + Parses strings with a date and a time into a `java.time.LocalDateTime`.
 
 13. **`LocalTimeParser`**
 
-    + 专门用于解析时间字符串，如 "23:59"，转换为 `java.time.LocalTime` 对象。
+    + Parses time strings, such as "23:59", into a `java.time.LocalTime`.
 
 14. **`MonetaryAmountFormatter`**
 
-    + 用于格式化和解析表示货币金额的字符串。
+    + Formats and parses strings that show a money amount.
 
 15. **`MonthDayFormatter`**
 
-    + 用于解析表示月和日的字符串，如 "12-31"，转换为 `java.time.MonthDay` 对象。
+    + Parses strings with a month and a day, such as "12-31", into a `java.time.MonthDay`.
 
 16. **`MonthFormatter`**
 
-    + 用于解析表示月份的字符串，如 "January" 或 "01"，转换为 `java.time.Month` 枚举。
+    + Parses strings that show a month, such as "January" or "01", into a `java.time.Month` enum.
 
 17. **`NumberDecoratingFormatter`**
 
-    + 一个装饰器，用于增强对数字的格式化和解析功能。
+    + A decorator that adds extra formatting and parsing features for numbers.
 
 18. **`PatternDecoratingFormatter`**
 
-    + 用于在解析和格式化时应用特定的模式或模板。
+    + Applies a specific pattern or template when parsing and formatting.
 
 19. **`PeriodFormatter`**
 
-    + 用于解析表示一段时间长度的字符串，如 "P1Y2M"（1年2个月），转换为 `java.time.Period` 对象。
+    + Parses strings that show a span of time, such as "P1Y2M" (1 year 2 months), into a `java.time.Period`.
 
 20. **`TemporalAccessorParser`**
 
-    + 用于解析 `java.time.temporal.TemporalAccessor` 的实现类，如 `LocalDate`、`LocalDateTime` 等。
+    + Parses implementations of `java.time.temporal.TemporalAccessor`, such as `LocalDate` and `LocalDateTime`.
 
 21. **`YearFormatter`**
 
-    + 用于解析年份字符串，如 "2020"，转换为 `java.time.Year` 对象。
+    + Parses year strings, such as "2020", into a `java.time.Year`.
 
 22. **`YearMonthFormatter`**
 
-    + 用于解析表示年和月的字符串，如 "2020-01"，转换为 `java.time.YearMonth` 对象。
+    + Parses strings with a year and a month, such as "2020-01", into a `java.time.YearMonth`.
 
-### 七、最佳实践
+### 7. Best Practices
 
-使用Spring框架的 `FormattingConversionService` 来进行货币字符串的解析。它首先创建了一个 `FormattingConversionService` 实例，并向其添加了一个 `CurrencyParser` 实现。通过设置 `LocaleContextHolder` 的区域设置，该代码能够根据不同的地区（美国和中国）解析相应格式的货币字符串（美元和人民币）。
+This example uses Spring's `FormattingConversionService` to parse currency strings. It creates a `FormattingConversionService` and adds a `CurrencyParser` to it. By setting the locale in `LocaleContextHolder`, the code parses currency strings in the format of each region (US dollars and Chinese yuan).
 
 ```java
 public class ParserDemo {
 
     public static void main(String[] args) {
-        // 创建一个格式化转换服务
+        // Create a formatting conversion service
         FormattingConversionService conversionService = new FormattingConversionService();
-        // 向转换服务中添加一个货币解析器
+        // Add a currency parser to the conversion service
         conversionService.addParser(new CurrencyParser());
 
-        // 设置当前线程的区域设置为美国
+        // Set the current thread's Locale to the US
         LocaleContextHolder.setLocale(Locale.US);
-        // 将美元格式的字符串转换为数值类型
+        // Convert a US dollar string to a number
         Number formattedAmountForUS = conversionService.convert("$1,234.56", Number.class);
         System.out.println("Parsed Currency (US): " + formattedAmountForUS);
 
-        // 改变区域设置为中国
+        // Change the Locale to China
         LocaleContextHolder.setLocale(Locale.CHINA);
-        // 将人民币格式的字符串转换为数值类型
+        // Convert a yuan string to a number
         Number formattedAmountForCHINA = conversionService.convert("￥1,234.56", Number.class);
         System.out.println("Parsed Currency (CHINA): " + formattedAmountForCHINA);
     }
 }
 ```
 
- `CurrencyParser` 类，它实现了 Spring 框架中的 `Parser<Number>` 接口，用于将货币格式的字符串解析为数值类型。这个类的 `parse` 方法接收一个货币格式的字符串和一个 `Locale` 对象作为参数。使用 `Locale` 参数，它创建了一个 `NumberFormat` 实例，这个实例专门用于解析特定区域（如美国、中国等）的货币格式。
+The `CurrencyParser` class implements Spring's `Parser<Number>` interface. It parses currency strings into numbers. Its `parse` method takes a currency string and a `Locale`. With the `Locale`, it creates a `NumberFormat` for the currency format of that region (such as the US or China).
 
 ```java
 public class CurrencyParser implements Parser<Number> {
@@ -203,61 +203,61 @@ public class CurrencyParser implements Parser<Number> {
         if (text == null) {
             throw new ParseException("Null string cannot be parsed to number", 0);
         }
-        // 创建适用于特定区域的货币格式化器
+        // Create a currency formatter for the given locale
         NumberFormat format = NumberFormat.getCurrencyInstance(locale);
-        // 解析字符串为数字
+        // Parse the string into a number
         return format.parse(text);
     }
 }
 ```
 
-运行结果发现，`CurrencyParser` 类如何成功地将不同地区格式的货币字符串解析为数值。无论是美国的 "$1,234.56" 还是中国的 "￥1,234.56"，都被正确地解析为相同的数值 `1234.56`。
+The output shows that `CurrencyParser` parsed currency strings in different regional formats. Both the US "$1,234.56" and the Chinese "￥1,234.56" became the same number, `1234.56`.
 
 ```java
 Parsed Currency (US): 1234.56
 Parsed Currency (CHINA): 1234.56
 ```
 
-### 八、与其他组件的关系
+### 8. Relationship with Other Components
 
 1. **Printer**
 
-   + `Printer` 接口的职责是将对象格式化为字符串。这在显示数据或将对象序列化为字符串形式以便于存储和传输时非常有用。
+   + The `Printer` interface formats an object as a string. This helps when you show data, or turn objects into strings for storage and transfer.
 
 2. **Formatter**
 
-   - `Formatter` 接口是 `Parser` 接口的补充，不仅提供了从字符串到对象的解析功能（与 `Parser` 相同），还提供了将对象格式化为字符串的功能。在实际应用中，很多时候 `Formatter` 同时实现了解析和格式化两种功能。
+   - The `Formatter` interface adds to `Parser`. It parses a string to an object (like `Parser`) and also formats an object as a string. In practice, a `Formatter` often does both.
 
 3. **FormattingConversionService**
 
-   - `FormattingConversionService` 是Spring的一个核心类，用于注册和使用格式化器和解析器。它可以注册实现了 `Parser` 接口的类，从而提供字符串到对象的类型转换服务。
+   - `FormattingConversionService` is a core Spring class for registering and using formatters and parsers. You can register classes that implement `Parser`. It then gives you string-to-object conversion.
 
-4. **DataBinder&WebDataBinder**
+4. **DataBinder & WebDataBinder**
 
-   - 这些类用于数据绑定和类型转换。在处理表单提交或其他用户输入时，`DataBinder` 和 `WebDataBinder` 可以利用注册到 `FormattingConversionService` 的 `Parser` 实现，将字符串转换为相应的对象类型。
+   - These classes handle data binding and type conversion. When a form or other user input is submitted, `DataBinder` and `WebDataBinder` can use the `Parser` implementations registered in `FormattingConversionService` to turn strings into objects.
 
 5. **LocaleContextHolder**
 
-   - `LocaleContextHolder` 提供了一种访问当前线程特定区域设置（Locale）的方式。由于 `Parser` 接口的 `parse` 方法通常需要一个 `Locale` 参数，`LocaleContextHolder` 可以在解析过程中提供必要的区域信息，使解析能够适应不同的地区特定格式。
+   - `LocaleContextHolder` gives access to the locale of the current thread. The `parse` method of `Parser` usually needs a `Locale`. `LocaleContextHolder` can supply it, so parsing fits the format of each region.
 
 6. **Locale**
 
-   - `Parser` 接口的 `parse` 方法接受一个 `Locale` 参数，这允许实现类根据不同的地区设置来格式化对象，支持国际化和本地化需求。
+   - The `parse` method of `Parser` takes a `Locale` parameter. This lets implementations handle different regions. It supports internationalization and localization.
 
-### 九、常见问题
+### 9. FAQ
 
-1. **复杂的解析逻辑**
+1. **Complex parsing logic**
 
-   - 面对复杂的数据类型或需支持多种地区设置的复杂解析逻辑时，建议利用现有的 Java API（如 `DateFormat`, `NumberFormat` 等）进行处理。同时，可以结合Spring的国际化支持（如 `MessageSource`）来简化实现。
+   - For complex data types, or when you must support many locales, use existing Java APIs such as `DateFormat` and `NumberFormat`. You can also use Spring's internationalization support, such as `MessageSource`, to keep the implementation simple.
 
-2. **处理不同的地区设置（Locale）**
+2. **Handling different locales**
 
-   - 在国际化应用程序中，正确处理不同地区设置是一个挑战。确保 `parse` 方法适当地使用传入的 `Locale` 参数，并在可能的情况下利用Spring的本地化和国际化支持，以确保数据正确地解析。
+   - Handling locales correctly is a challenge in international applications. Make sure `parse` uses the `Locale` parameter properly. Where possible, use Spring's localization and internationalization support so data is parsed correctly.
 
-3. **与Spring MVC的集成**
+3. **Integration with Spring MVC**
 
-   - 在Spring MVC应用程序中，正确注册和使用自定义的 `Parser` 实现需要确保它在 `FormattingConversionService` 中被正确注册。此外，应检查控制器方法是否正确使用了数据绑定和解析逻辑。
+   - In a Spring MVC application, make sure your custom `Parser` is registered in `FormattingConversionService`. Also check that controller methods use data binding and parsing logic correctly.
 
-4. **保证解析和格式化的一致性**
+4. **Keeping parsing and formatting consistent**
 
-   - 当同时使用 `Parser` 和对应的 `Printer` 时，非常重要的一点是保证它们对于相同类型的数据有着一致的解析和格式化规则。这意味着相同类型的数据应该能够在解析和格式化之间无缝转换，而不会引入任何不一致性。
+   - When you use a `Parser` with its matching `Printer`, they must follow the same rules for the same type of data. Data of one type should convert smoothly between parsing and formatting, with no differences.

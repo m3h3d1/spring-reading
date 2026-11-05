@@ -1,68 +1,78 @@
 ## Validator
 
 - [Validator](#validator)
-  - [一、基本信息](#一基本信息)
-  - [二、知识储备](#二知识储备)
-  - [三、基本描述](#三基本描述)
-  - [四、主要功能](#四主要功能)
-  - [五、接口源码](#五接口源码)
-  - [六、主要实现](#六主要实现)
-  - [七、最佳实践](#七最佳实践)
-  - [八、与其他组件的关系](#八与其他组件的关系)
-  - [九、常见问题](#九常见问题)
+  - [1. Overview](#1-overview)
+  - [2. Background Knowledge](#2-background-knowledge)
+  - [3. Description](#3-description)
+  - [4. Main Features](#4-main-features)
+  - [5. Interface Source](#5-interface-source)
+  - [6. Main Implementations](#6-main-implementations)
+  - [7. Best Practices](#7-best-practices)
+  - [8. Relationship with Other Components](#8-relationship-with-other-components)
+  - [9. FAQ](#9-faq)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、知识储备
+### 2. Background Knowledge
 
 1. **Spring MVC**
 
-   + 了解 Spring MVC 是很重要的。这包括控制器（Controllers）、请求映射（RequestMapping）、视图解析（View Resolution）等。理解如何处理 HTTP 请求和响应，以及 Spring MVC 中的数据绑定和表单处理。
+   + It is important to know Spring MVC. This includes controllers, `RequestMapping`, and view resolution. Understand how HTTP requests and responses are handled, and how Spring MVC does data binding and form handling.
 
-2. **Bean Validation（JSR 303/JSR 380）**
+2. **Bean Validation (JSR 303/JSR 380)**
 
-   + 虽然 `Validator` 接口是 Spring 的一部分，了解 JSR 303/JSR 380（Bean Validation API）也是有益的，因为 Spring 支持这些标准。了解常用的 Bean Validation 注解，如 `@NotNull`, `@Size`, `@Min`, `@Max` 等。
+   + The `Validator` interface is part of Spring. But it also helps to know JSR 303/JSR 380 (the Bean Validation API), because Spring supports these standards. Know the common Bean Validation annotations, such as `@NotNull`, `@Size`, `@Min`, and `@Max`.
 
-3. **错误处理**
+3. **Error handling**
 
-   + 理解 Spring 中的错误处理机制，特别是与数据验证相关的，如 `Errors` 和 `BindingResult` 接口。
+   + Understand Spring's error handling, especially for data validation. This includes the `Errors` and `BindingResult` interfaces.
 
-### 三、基本描述
+### 3. Description
 
-`Validator` 接口是 Spring 框架中用于实现对象数据验证的关键部分，它提供了一种标准化的方法来验证 Java 对象，特别是在处理用户输入和表单数据时。
+The `Validator` interface is a key part of Spring for validating object data. It gives a standard way to validate Java objects, especially for user input and form data.
 
-### 四、主要功能
+### 4. Main Features
 
-1. **自定义数据验证**
+1. **Custom data validation**
 
-   + 允许我们根据业务需求实现自定义的验证逻辑，用于检查对象属性是否符合特定的约束和条件。
+   + You can write custom validation logic for your business needs. It checks whether object properties meet specific rules and conditions.
 
-2. **支持多种对象类型**
+2. **Support for many object types**
 
-   + 通过 `supports(Class<?> clazz)` 方法，验证器可以指定它能够验证哪些类型的对象，使得同一个验证器可以用于不同类型的数据模型。
+   + The `supports(Class<?> clazz)` method tells which types of objects a validator can validate. So one validator can serve different data models.
 
-3. **错误记录**
+3. **Error recording**
 
-   + 在 `validate(Object target, Errors errors)` 方法中，验证器检查目标对象的属性，如果发现不符合要求的情况，可以将错误信息添加到 `Errors` 对象中，这些信息可用于错误展示和后续处理。
+   + In `validate(Object target, Errors errors)`, the validator checks the properties of the target object. If something is invalid, it adds an error to the `Errors` object. You can use these errors for display and later handling.
 
-4. **与 Spring MVC 集成**
+4. **Works with Spring MVC**
 
-   + 在 Spring MVC 中，`Validator` 可以集成到控制器流程中，自动验证模型对象，常与 `@Valid` 注解一同使用，用于处理表单提交和请求参数的验证。
+   + In Spring MVC, a `Validator` can be part of the controller flow. It validates model objects automatically. It is often used with the `@Valid` annotation to validate form submissions and request parameters.
 
-### 五、接口源码
+### 5. Interface Source
 
-`Validator` 接口，是一个用于自定义对象验证的关键组件。这个接口包含两个主要方法：`supports(Class<?> clazz)` 用于判断验证器是否支持特定类型的对象，通常通过检查对象是否为特定类或其子类来实现；`validate(Object target, Errors errors)` 用于执行实际的验证逻辑，其中 `target` 是待验证的对象，而 `errors` 用于记录验证中发现的错误。
+The `Validator` interface is a key component for custom object validation. It has two main methods. `supports(Class<?> clazz)` tells whether the validator supports a type of object. It is usually implemented by checking whether the object is a given class or a subclass. `validate(Object target, Errors errors)` runs the real validation. `target` is the object to validate, and `errors` records the errors found.
 
 ```java
 /**
- * 用于应用程序特定对象的验证器。
+ * A validator for application-specific objects.
  *
- * <p>此接口与任何基础设施或上下文完全脱离关系；也就是说，它不仅限于验证Web层、数据访问层或任何其他层的对象。因此，它适用于应用程序的任何层次，并支持将验证逻辑作为其本身的一等公民进行封装。
+ * <p>This interface is totally divorced from any infrastructure
+ * or context; that is to say it is not coupled to validating
+ * only objects in the web tier, the data-access tier, or the
+ * whatever-tier. As such it is amenable to being used in any layer
+ * of an application, and supports the encapsulation of validation
+ * logic as a first-class citizen in its own right.
  *
- * <p>下面是一个简单但完整的 {@code Validator} 实现示例，它验证了 {@code UserLogin} 实例的各种 {@link String} 属性不为空（即它们不是 {@code null} 并且不完全由空白字符组成），以及任何存在的密码至少是 {@code 'MINIMUM_PASSWORD_LENGTH'} 个字符长。
+ * <p>Find below a simple but complete {@code Validator}
+ * implementation, which validates that the various {@link String}
+ * properties of a {@code UserLogin} instance are not empty
+ * (they are not {@code null} and do not consist
+ * wholly of whitespace), and that any password that is present is
+ * at least {@code 'MINIMUM_PASSWORD_LENGTH'} characters in length.
  *
  * <pre class="code"> public class UserLoginValidator implements Validator {
  *
@@ -85,7 +95,9 @@
  *    }
  * }</pre>
  *
- * <p>有关 {@code Validator} 接口及其在企业应用中的角色的更全面讨论，请参阅 Spring 参考手册。
+ * <p>See also the Spring reference manual for a fuller discussion of
+ * the {@code Validator} interface and its role in an enterprise
+ * application.
  *
  * @author Rod Johnson
  * @see SmartValidator
@@ -95,20 +107,28 @@
 public interface Validator {
 
     /**
-     * 判断这个 Validator 是否能够验证提供的 clazz 类型的实例。
-     * <p>这个方法通常这样实现：
+     * Can this {@link Validator} {@link #validate(Object, Errors) validate}
+     * instances of the supplied {@code clazz}?
+     * <p>This method is <i>typically</i> implemented like so:
      * <pre class="code">return Foo.class.isAssignableFrom(clazz);</pre>
-     * （其中 Foo 是实际要被验证的对象实例的类或超类。）
-     * @param clazz 这个 Validator 被询问是否能验证的 Class 类型
-     * @return 如果这个 Validator 能验证提供的 clazz 类型的实例，返回 {@code true}
+     * (Where {@code Foo} is the class (or superclass) of the actual
+     * object instance that is to be {@link #validate(Object, Errors) validated}.)
+     * @param clazz the {@link Class} that this {@link Validator} is
+     * being asked if it can {@link #validate(Object, Errors) validate}
+     * @return {@code true} if this {@link Validator} can indeed
+     * {@link #validate(Object, Errors) validate} instances of the
+     * supplied {@code clazz}
      */
     boolean supports(Class<?> clazz);
 
     /**
-     * 对提供的目标对象进行验证，该目标对象必须是 supports(Class) 方法通常会（或可能会）返回 true 的 Class 类型。
-     * <p>提供的 Errors 实例可以用来报告任何验证错误。
-     * @param target 需要被验证的对象
-     * @param errors 验证过程中的上下文状态
+     * Validate the supplied {@code target} object, which must be
+     * of a {@link Class} for which the {@link #supports(Class)} method
+     * typically has (or would) return {@code true}.
+     * <p>The supplied {@link Errors errors} instance can be used to report
+     * any resulting validation errors.
+     * @param target the object that is to be validated
+     * @param errors contextual state about the validation process
      * @see ValidationUtils
      */
     void validate(Object target, Errors errors);
@@ -116,42 +136,42 @@ public interface Validator {
 }
 ```
 
-### 六、主要实现
+### 6. Main Implementations
 
 1. **LocalValidatorFactoryBean**
 
-   - 这是一个桥接类，用于在 Spring 应用中集成 JSR-303/JSR-380 Bean Validation API。它实现了 `Validator` 接口，允许使用标准的 Bean Validation 注解对对象进行验证。
+   - A bridge class that brings the JSR-303/JSR-380 Bean Validation API into a Spring application. It implements the `Validator` interface and lets you validate objects with standard Bean Validation annotations.
 
 2. **SpringValidatorAdapter**
 
-   - 这个类适配 JSR-303/JSR-380 标准验证器到 Spring 的 `Validator` 接口。它使得可以在 Spring 中使用标准的 Bean Validation API。
+   - This class adapts a standard JSR-303/JSR-380 validator to Spring's `Validator` interface. It lets you use the standard Bean Validation API in Spring.
 
-### 七、最佳实践
+### 7. Best Practices
 
-使用 Spring 的 `Validator` 接口来验证 `Person` 对象的属性。程序创建了一个 `Person` 实例并设置了潜在的无效值，接着实例化了一个自定义的 `PersonValidator` 来进行验证。通过 `BeanPropertyBindingResult` 对象来存储和追踪验证过程中的错误，最后检查并打印出所有验证错误。
+This example uses Spring's `Validator` interface to validate the properties of a `Person` object. The program creates a `Person` with possibly invalid values. Then it creates a custom `PersonValidator` to validate it. A `BeanPropertyBindingResult` stores and tracks the errors found. At the end, the program checks for errors and prints all of them.
 
 ```java
 public class ValidatorDemo {
 
     public static void main(String[] args) {
-        // 创建一个 Person 对象实例
+        // Create a Person instance
         Person person = new Person();
         person.setName(null);
         person.setAge(130);
 
-        // 创建一个 BeanPropertyBindingResult 对象，用于存储验证过程中的错误
+        // Create a BeanPropertyBindingResult to hold validation errors
         BeanPropertyBindingResult result = new BeanPropertyBindingResult(person, "person");
 
-        // 创建一个 PersonValidator 实例，这是自定义的验证器
+        // Create a PersonValidator instance (a custom validator)
         PersonValidator validator = new PersonValidator();
 
-        // 检查 PersonValidator 是否支持 Person 类的验证
+        // Check whether PersonValidator supports the Person class
         if (validator.supports(person.getClass())) {
-            // 执行验证逻辑
+            // Run the validation
             validator.validate(person, result);
         }
 
-        // 检查是否存在验证错误，并打印出所有的字段错误
+        // Check for validation errors and print all field errors
         if (result.hasErrors()) {
             for (FieldError error : result.getFieldErrors()) {
                 System.out.println(error.getField() + ":" + error.getDefaultMessage());
@@ -161,7 +181,7 @@ public class ValidatorDemo {
 }
 ```
 
- `PersonValidator` 类用于检查 `Person` 对象的 `name` 是否为空以及 `age` 是否在有效范围内。如果发现不符合规则的字段，将相应的错误信息记录到 `Errors` 对象中。
+The `PersonValidator` class checks that the `name` of a `Person` is not empty and that the `age` is in a valid range. If a field breaks a rule, it records an error in the `Errors` object.
 
 ```java
 public class PersonValidator implements Validator {
@@ -173,25 +193,25 @@ public class PersonValidator implements Validator {
 
     @Override
     public void validate(Object obj, Errors e) {
-        // 检查名称是否为空
-        ValidationUtils.rejectIfEmpty(e, "name", "name.empty", "姓名不能为空");
+        // Check that the name is not empty
+        ValidationUtils.rejectIfEmpty(e, "name", "name.empty", "Name must not be empty");
 
-        // 将对象转换为 Person 类型
+        // Cast the object to Person
         Person p = (Person) obj;
 
-        // 检查年龄是否为负数
+        // Check whether the age is negative
         if (p.getAge() < 0) {
-            e.rejectValue("age", "negative.value", "年龄不能为负数");
+            e.rejectValue("age", "negative.value", "Age must not be negative");
         }
-        // 检查年龄是否超过 120 岁
+        // Check whether the age is over 120
         else if (p.getAge() > 120) {
-            e.rejectValue("age", "too.darn.old", "目前年龄最大的是120岁");
+            e.rejectValue("age", "too.darn.old", "The oldest known age is 120");
         }
     }
 }
 ```
 
-定义了一个简单的 Java 类 `Person`。
+A simple Java class `Person`.
 
 ```java
 public class Person {
@@ -204,34 +224,33 @@ public class Person {
 }
 ```
 
-运行结果发现， `PersonValidator` 正确地根据定义的验证规则识别出了 `Person` 对象的不合规数据，并通过 `Errors` 对象生成了相应的错误消息。
+The output shows that `PersonValidator` found the invalid data in the `Person` object by the validation rules. It created the matching error messages in the `Errors` object.
 
 ```
-name:姓名不能为空
-age:目前年龄最大的是120岁
+name:Name must not be empty
+age:The oldest known age is 120
 ```
 
-### 八、与其他组件的关系
+### 8. Relationship with Other Components
 
-+ **Spring MVC框架**
++ **Spring MVC framework**
 
-  + `Validator` 接口的功能主要集中在处理和验证Web层的用户输入和模型数据。它与控制器紧密结合，用于在处理客户端请求（如表单提交）前验证模型数据。在数据绑定过程中，`Validator` 可用于检查绑定到模型对象的请求参数是否满足特定的验证规则。此外，Spring MVC 通过 `LocalValidatorFactoryBean` 支持与 JSR 303/JSR 380 Bean Validation 的集成，这允许我们在保持现有代码不变的情况下利用标准的 Bean Validation 注解。
+  + The `Validator` interface mainly validates user input and model data in the web layer. It works closely with controllers. It validates model data before a client request (such as a form submission) is handled. During data binding, a `Validator` can check whether the request parameters bound to a model object meet specific rules. Spring MVC also supports Bean Validation (JSR 303/JSR 380) through `LocalValidatorFactoryBean`. So you can use standard Bean Validation annotations without changing existing code.
 
-### 九、常见问题
+### 9. FAQ
 
-1. **正确实现 `supports` 方法**
+1. **Implementing `supports` correctly**
 
-   - 确保 `supports(Class<?> clazz)` 方法正确实现是常见的问题之一。这个方法需要正确判断验证器是否支持特定类型的对象，否则可能导致验证逻辑不被执行。
+   - Getting the `supports(Class<?> clazz)` method right is a common problem. It must correctly tell whether the validator supports a type of object. If not, the validation logic may never run.
 
-2. **逻辑的分离与国际化**
+2. **Separating logic and internationalization**
 
-   - 我们在保持验证逻辑与业务逻辑分离的同时，需要确保验证逻辑完整且与业务规则相符。另外管理和显示验证错误信息，特别是在需要支持多语言环境下进行错误信息国际化的情况。
+   - Keep validation logic separate from business logic. Make sure the validation is complete and matches the business rules. Also manage and show validation messages, especially when messages must be translated for many languages.
 
-3. **集成与 JSR 303/JSR 380 Bean Validation**
+3. **Integration with JSR 303/JSR 380 Bean Validation**
 
-   + 在使用 `Validator` 与 JSR 303/JSR 380 Bean Validation 标准共同工作时，了解二者之间的区别和如何有效集成是一个常见问题。
+   + When you use `Validator` together with the JSR 303/JSR 380 Bean Validation standard, it is common to be unsure how they differ and how to integrate them well.
 
-5. **嵌套属性和复杂对象的验证**
+4. **Validating nested properties and complex objects**
 
-   + 当验证对象具有嵌套属性或结构复杂时，实现有效且高效的验证逻辑可能会更加困难。
-
+   + When an object has nested properties or a complex structure, it is harder to write validation logic that is both effective and efficient.

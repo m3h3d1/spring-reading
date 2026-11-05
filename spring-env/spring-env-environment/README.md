@@ -1,90 +1,103 @@
 ## Environment
 
 - [Environment](#environment)
-  - [一、基本信息](#一基本信息)
-  - [二、知识储备](#二知识储备)
-  - [三、基本描述](#三基本描述)
-  - [四、主要功能](#四主要功能)
-  - [五、接口源码](#五接口源码)
-  - [六、主要实现](#六主要实现)
-  - [七、最佳实践](#七最佳实践)
-  - [八、与其他组件的关系](#八与其他组件的关系)
-  - [九、常见问题](#九常见问题)
+  - [1. Overview](#1-overview)
+  - [2. Background Knowledge](#2-background-knowledge)
+  - [3. Description](#3-description)
+  - [4. Main Features](#4-main-features)
+  - [5. Interface Source](#5-interface-source)
+  - [6. Main Implementations](#6-main-implementations)
+  - [7. Best Practices](#7-best-practices)
+  - [8. Relationship with Other Components](#8-relationship-with-other-components)
+  - [9. FAQ](#9-faq)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、知识储备
+### 2. Background Knowledge
 
 1. **PropertyResolver**
-   + [PropertyResolver](/spring-env/spring-env-propertyResolver/README.md) 接口是 Spring 框架的一个核心组件，专注于提供一套灵活且强大的机制来处理应用程序配置属性。它定义了一系列方法，用于访问和操纵来自各种源（例如属性文件、环境变量、JVM 参数）的属性值。
+   + The [PropertyResolver](/spring-env/spring-env-propertyResolver/README.md) interface is a core component of Spring. It gives a flexible and powerful way to handle application configuration properties. It defines methods to access and work with property values from many sources, such as property files, environment variables, and JVM arguments.
 
 2. **ConfigurablePropertyResolver**
-   + [ConfigurablePropertyResolver](/spring-env/spring-env-configurablePropertyResolver/README.md) 接口在Spring中关键作用是提供灵活的配置属性解析。它能从多种源读取并转换属性值，支持占位符解析以增强配置的动态性。接口提供类型转换，确保属性值符合期望格式。它还允许检查属性存在性，并处理默认值，增加健壮性。
+   + The [ConfigurablePropertyResolver](/spring-env/spring-env-configurablePropertyResolver/README.md) interface gives flexible resolution of configuration properties in Spring. It reads and converts property values from many sources. It supports placeholder resolution to make configuration more dynamic. It converts types so that property values have the expected format. It can also check whether a property exists and handle default values, which makes code more robust.
 
-### 三、基本描述
+### 3. Description
 
-`Environment` 接口是 Spring 框架中的一个核心部分，它提供了一个统一的方式来访问各种外部化的配置数据，例如环境变量、JVM 系统属性、命令行参数、以及应用程序配置文件（如 properties 或 YAML 文件）。这个接口允许我们在运行时方便地获取和操作这些配置数据，同时也支持配置文件（Profiles）的概念，这使得在不同环境（如开发、测试、生产）下进行条件性的配置变得简单。通过 `Environment`，我们可以查询和操作属性值，检查属性的存在，以及处理多个属性源。
+The `Environment` interface is a core part of Spring. It gives one unified way to access external configuration data, such as environment variables, JVM system properties, command-line arguments, and application config files (such as properties or YAML files). It lets you read and work with this data at runtime. It also supports the concept of profiles. Profiles make it easy to configure things conditionally for different environments (such as development, test, and production). With `Environment`, you can query and work with property values, check whether a property exists, and handle many property sources.
 
-### 四、主要功能
+### 4. Main Features
 
-1. **属性访问**
+1. **Property access**
 
-   + 它允许从不同的属性源（如环境变量、系统属性、配置文件等）访问属性值。提供了方法来检索字符串类型或类型安全的属性值。
+   + It reads property values from different property sources (such as environment variables, system properties, and config files). It has methods to get string values or type-safe values.
 
-2. **属性源管理**
+2. **Property source management**
 
-   + `Environment` 抽象支持多个属性源，并按优先级顺序检索属性。这意味着可以从多个地方（如不同的配置文件和环境变量）加载属性，并根据需要覆盖它们。
+   + The `Environment` abstraction supports many property sources and searches them in priority order. You can load properties from several places (such as different config files and environment variables) and override them as needed.
 
-3. **配置文件（Profiles）**
+3. **Profiles**
 
-   + 支持配置文件，这是一种用于根据不同环境（如开发、测试、生产）来分隔配置的机制。它允许应用程序根据当前激活的配置文件来调整其行为。
+   + It supports profiles, a way to separate configuration for different environments (such as development, test, and production). The application can change its behavior based on the active profiles.
 
-4. **属性存在性检查**
+4. **Property existence check**
 
-   + 提供了方法来检查是否存在特定的属性，这有助于在属性可能不存在的情况下编写更健壮的代码。
+   + It has methods to check whether a specific property exists. This helps you write more robust code when a property may be missing.
 
-5. **类型安全的属性访问**
+5. **Type-safe property access**
 
-   + 除了普通的属性访问方法外，`Environment` 还提供了类型安全的方法，允许直接将属性值转换为期望的类型。
+   + Besides the normal property methods, `Environment` has type-safe methods. They convert the property value directly to the expected type.
 
-6. **必需属性的访问**
+6. **Required properties**
 
-   + 可以获取标记为必需的属性，如果这些属性不存在，将抛出异常，这有助于在启动时捕捉配置错误。
+   + You can get properties that are marked as required. If they are missing, an exception is thrown. This helps catch configuration errors at startup.
 
-### 五、接口源码
+### 5. Interface Source
 
-`Environment` 接口是 Spring 应用程序环境的主要表现形式，重点关注两个方面：配置文件（profiles）和属性（properties）。配置文件是对一组逻辑分组的 Bean 定义的命名，只有在相应的配置文件被激活时才会注册这些 Bean。属性则是来自多种来源的配置数据，如文件、环境变量等。`Environment` 提供了一系列方法来激活和管理这些配置文件，以及方便地访问和解析这些属性。
+The `Environment` interface is the main model of the application environment in Spring. It focuses on two things: profiles and properties. A profile is a named, logical group of bean definitions. These beans are registered only when the profile is active. Properties are configuration data from many sources, such as files and environment variables. `Environment` has methods to activate and manage profiles, and to access and resolve properties.
 
 ```java
 /**
- * 代表当前应用程序运行环境的接口。
- * 模型化应用环境的两个关键方面：<em>配置文件（profiles）</em> 和 <em>属性（properties）</em>。
- * 与属性访问相关的方法通过 {@link PropertyResolver} 超接口暴露。
+ * Interface representing the environment in which the current application is running.
+ * Models two key aspects of the application environment: <em>profiles</em> and
+ * <em>properties</em>. Methods related to property access are exposed via the
+ * {@link PropertyResolver} superinterface.
  *
- * <p>一个 <em>配置文件</em> 是一组命名的、逻辑分组的 bean 定义，只有在给定的配置文件处于 <em>活跃</em> 状态时才会被容器注册。
- * 无论是在 XML 中定义还是通过注解定义，Beans 都可以被分配到一个配置文件中；
- * 有关语法细节，请参阅 spring-beans 3.1 schema 或 {@link org.springframework.context.annotation.Profile @Profile} 注解。
- * {@code Environment} 对象与配置文件相关的角色在于确定哪些配置文件（如果有的话）当前是 {@linkplain #getActiveProfiles 活跃的}，
- * 以及哪些配置文件（如果有的话）应该默认是活跃的。
+ * <p>A <em>profile</em> is a named, logical group of bean definitions to be registered
+ * with the container only if the given profile is <em>active</em>. Beans may be assigned
+ * to a profile whether defined in XML or via annotations; see the spring-beans 3.1 schema
+ * or the {@link org.springframework.context.annotation.Profile @Profile} annotation for
+ * syntax details. The role of the {@code Environment} object with relation to profiles is
+ * in determining which profiles (if any) are currently {@linkplain #getActiveProfiles
+ * active}, and which profiles (if any) should be {@linkplain #getDefaultProfiles active
+ * by default}.
  *
- * <p><em>属性</em> 在几乎所有应用程序中都扮演重要角色，可能来自多种来源：属性文件、JVM 系统属性、系统环境变量、JNDI、
- * servlet 上下文参数、临时 Properties 对象、Maps 等。环境对象与属性相关的角色在于为用户提供一个方便的服务接口，
- * 用于配置属性源并从中解析属性。
+ * <p><em>Properties</em> play an important role in almost all applications, and may
+ * originate from a variety of sources: properties files, JVM system properties, system
+ * environment variables, JNDI, servlet context parameters, ad-hoc Properties objects,
+ * Maps, and so on. The role of the environment object with relation to properties is to
+ * provide the user with a convenient service interface for configuring property sources
+ * and resolving properties from them.
  *
- * <p>在 {@code ApplicationContext} 中管理的 Beans 可以注册为 {@link org.springframework.context.EnvironmentAware EnvironmentAware} 
- * 或 {@code @Inject} {@code Environment}，以查询配置文件状态或直接解析属性。
+ * <p>Beans managed within an {@code ApplicationContext} may register to be {@link
+ * org.springframework.context.EnvironmentAware EnvironmentAware} or {@code @Inject} the
+ * {@code Environment} in order to query profile state or resolve properties directly.
  *
- * <p>然而，在大多数情况下，应用程序级别的 Beans 不应该直接与 {@code Environment} 交互，
- * 而应该通过像 {@link org.springframework.context.support.PropertySourcesPlaceholderConfigurer 
- * PropertySourcesPlaceholderConfigurer} 这样的属性占位符配置器来替换 {@code ${...}} 属性值，
- * 这个配置器本身是 {@code EnvironmentAware}，并且从 Spring 3.1 开始，使用 {@code <context:property-placeholder/>} 时默认会注册。
+ * <p>In most cases, however, application-level beans should not need to interact with the
+ * {@code Environment} directly but instead may have to have {@code ${...}} property
+ * values replaced by a property placeholder configurer such as
+ * {@link org.springframework.context.support.PropertySourcesPlaceholderConfigurer
+ * PropertySourcesPlaceholderConfigurer}, which itself is {@code EnvironmentAware} and
+ * as of Spring 3.1 is registered by default when using
+ * {@code <context:property-placeholder/>}.
  *
- * <p>必须通过 {@code ConfigurableEnvironment} 接口对环境对象进行配置，所有
- * {@code AbstractApplicationContext} 子类的 {@code getEnvironment()} 方法都返回此接口。
- * 请参阅 {@link ConfigurableEnvironment} Javadoc，了解在应用程序上下文 {@code refresh()} 之前操作属性源的示例。
+ * <p>Configuration of the environment object must be done through the
+ * {@code ConfigurableEnvironment} interface, returned from all
+ * {@code AbstractApplicationContext} subclass {@code getEnvironment()} methods. See
+ * {@link ConfigurableEnvironment} Javadoc for usage examples demonstrating manipulation
+ * of property sources prior to application context {@code refresh()}.
  *
  * @author Chris Beams
  * @since 3.1
@@ -101,10 +114,14 @@
 public interface Environment extends PropertyResolver {
 
 	/**
-	 * 返回为此环境显式激活的配置文件集。配置文件用于有条件地注册 bean 定义，例如基于部署环境创建逻辑分组。
-	 * 通过设置系统属性 {@linkplain AbstractEnvironment#ACTIVE_PROFILES_PROPERTY_NAME
-	 * "spring.profiles.active"} 或调用 {@link ConfigurableEnvironment#setActiveProfiles(String...)} 来激活配置文件。
-	 * <p>如果没有明确指定活跃的配置文件，则任何 {@linkplain #getDefaultProfiles() 默认配置文件} 将自动激活。
+	 * Return the set of profiles explicitly made active for this environment. Profiles
+	 * are used for creating logical groupings of bean definitions to be registered
+	 * conditionally, for example based on deployment environment. Profiles can be
+	 * activated by setting {@linkplain AbstractEnvironment#ACTIVE_PROFILES_PROPERTY_NAME
+	 * "spring.profiles.active"} as a system property or by calling
+	 * {@link ConfigurableEnvironment#setActiveProfiles(String...)}.
+	 * <p>If no profiles have explicitly been specified as active, then any
+	 * {@linkplain #getDefaultProfiles() default profiles} will automatically be activated.
 	 * @see #getDefaultProfiles
 	 * @see ConfigurableEnvironment#setActiveProfiles
 	 * @see AbstractEnvironment#ACTIVE_PROFILES_PROPERTY_NAME
@@ -112,7 +129,8 @@ public interface Environment extends PropertyResolver {
 	String[] getActiveProfiles();
 
 	/**
-	 * 当没有明确设置活跃配置文件时，默认激活的配置文件集。
+	 * Return the set of profiles to be active by default when no active profiles have
+	 * been set explicitly.
 	 * @see #getActiveProfiles
 	 * @see ConfigurableEnvironment#setDefaultProfiles
 	 * @see AbstractEnvironment#DEFAULT_PROFILES_PROPERTY_NAME
@@ -120,75 +138,80 @@ public interface Environment extends PropertyResolver {
 	String[] getDefaultProfiles();
 
 	/**
-	 * 返回一个或多个给定配置文件是否活跃，或者在没有明确活跃配置文件的情况下，给定配置文件是否包含在默认配置文件集中。
-	 * 如果配置文件以 '!' 开头，则逻辑被反转，即如果给定的配置文件 <em>不</em> 活跃，则方法将返回 {@code true}。
-	 * 例如，{@code env.acceptsProfiles("p1", "!p2")} 将在 'p1' 配置文件活跃或 'p2' 配置文件不活跃时返回 {@code true}。
-	 * @throws IllegalArgumentException 如果调用时没有参数，或者任何配置文件是 {@code null}、空的或只有空格
+	 * Return whether one or more of the given profiles is active or, in the case of no
+	 * explicit active profiles, whether one or more of the given profiles is included in
+	 * the set of default profiles. If a profile begins with '!' the logic is inverted,
+	 * i.e. the method will return {@code true} if the given profile is <em>not</em> active.
+	 * For example, {@code env.acceptsProfiles("p1", "!p2")} will return {@code true} if
+	 * profile 'p1' is active or 'p2' is not active.
+	 * @throws IllegalArgumentException if called with zero arguments
+	 * or if any profile is {@code null}, empty, or whitespace only
 	 * @see #getActiveProfiles
 	 * @see #getDefaultProfiles
 	 * @see #acceptsProfiles(Profiles)
-	 * @deprecated 从 5.1 版本开始，建议使用 {@link #acceptsProfiles(Profiles)}
+	 * @deprecated as of 5.1 in favor of {@link #acceptsProfiles(Profiles)}
 	 */
 	@Deprecated
 	boolean acceptsProfiles(String... profiles);
 
 	/**
-	 * 返回 {@linkplain #getActiveProfiles() 活跃配置文件} 是否匹配给定的 {@link Profiles} 谓词。
+	 * Return whether the {@linkplain #getActiveProfiles() active profiles}
+	 * match the given {@link Profiles} predicate.
 	 */
 	boolean acceptsProfiles(Profiles profiles);
 
 }
 ```
 
-### 六、主要实现
+### 6. Main Implementations
 
 1. **AbstractEnvironment**
 
-   + `Environment` 接口的抽象基类，提供了共通的实现机制，供其他具体实现类继承。
+   + The abstract base class of the `Environment` interface. It gives the common implementation that other classes extend.
 
 2. **StandardEnvironment**
 
-   + 通用实现，处理系统属性和环境变量，适用于大多数标准应用程序。
+   + A general implementation. It handles system properties and environment variables. It suits most standard applications.
 
 3. **StandardServletEnvironment**
 
-   + 针对 Servlet-based Web 应用程序，增加对 Servlet 上下文和配置参数的支持。
+   + For Servlet-based web applications. It adds support for the Servlet context and config parameters.
 
-### 七、最佳实践
+### 7. Best Practices
 
-使用 Spring 的 `StandardEnvironment` 在 Java 程序中模拟配置文件的激活和属性访问。它设置并展示了激活的配置文件（"test"），默认配置文件（"dev"），并检查了特定配置文件（"test"）的激活状态，以及获取并打印了系统的 Java 版本。
+This example uses Spring's `StandardEnvironment` to simulate profile activation and property access in a Java program. It sets and shows the active profile ("test") and the default profile ("dev"). It checks whether a specific profile ("test") is active. It also gets and prints the Java version of the system.
 
 ```java
 public class EnvironmentDemo {
 
     public static void main(String[] args) {
-        // 设置系统属性以模拟 Spring 的配置文件功能
+        // Set a system property to simulate Spring profile behavior
         System.setProperty("spring.profiles.default", "dev");
         System.setProperty("spring.profiles.active", "test");
 
-        // 创建 StandardEnvironment 实例，用于访问属性和配置文件信息
+        // Create a StandardEnvironment instance to access properties and profile information
         Environment environment = new StandardEnvironment();
 
-        // 使用 getProperty 方法获取系统属性。这里获取了 Java 版本
+        // Use getProperty to read a system property. Here it reads the Java version
         String javaVersion = environment.getProperty("java.version");
         System.out.println("java.version: " + javaVersion);
 
-        // 获取当前激活的配置文件（profiles）
+        // Get the active profiles
         String[] activeProfiles = environment.getActiveProfiles();
         System.out.println("activeProfiles = " + String.join(",", activeProfiles));
 
-        // 获取默认配置文件（当没有激活的配置文件时使用）
+        // Get the default profiles (used when no profile is active)
         String[] defaultProfiles = environment.getDefaultProfiles();
         System.out.println("defaultProfiles = " + String.join(",", defaultProfiles));
 
-        // 检查是否激活了指定的配置文件。这里检查的是 'test' 配置文件
+        // Check whether a given profile is active. Here it checks the 'test' profile
         boolean isDevProfileActive = environment.acceptsProfiles("test");
         System.out.println("acceptsProfiles('test'): " + isDevProfileActive);
     }
 }
 ```
 
-运行结果发现， `StandardEnvironment` 在模拟和管理 Spring 配置文件以及访问系统属性方面的有效性，特别是在不依赖于完整 Spring 应用程序上下文的场景中。
+The output shows that `StandardEnvironment` can simulate and manage Spring profiles and access system properties. It works even without a full Spring application context.
 
 ```java
 java.version: 11
@@ -197,42 +220,42 @@ defaultProfiles = dev
 acceptsProfiles('test'): true
 ```
 
-### 八、与其他组件的关系
+### 8. Relationship with Other Components
 
 1. **ApplicationContext**
 
-   - `ApplicationContext`（Spring 容器）在启动时会创建和使用 `Environment` 实例来加载和处理配置文件（profiles）和属性（properties）。它提供了对 `Environment` 的访问和定制的接口，例如，可以通过 `ApplicationContext` 获取或替换默认的 `Environment` 实例。
+   - When the `ApplicationContext` (the Spring container) starts, it creates and uses an `Environment` to load and handle profiles and properties. It lets you access and customize the `Environment`. For example, you can get or replace the default `Environment` through the `ApplicationContext`.
 
 2. **PropertySourcesPlaceholderConfigurer**
 
-   - 这是一个 `BeanFactoryPostProcessor`，用于解析属性占位符（例如 `${property.name}`）。它与 `Environment` 一起工作，从 `Environment` 管理的属性源中解析属性值。
+   - This is a `BeanFactoryPostProcessor` that resolves property placeholders (such as `${property.name}`). It works with `Environment` and resolves property values from the property sources that `Environment` manages.
 
-3. **@PropertySource** 和 **PropertySources**
+3. **@PropertySource** and **PropertySources**
 
-   - `@PropertySource` 注解和 `PropertySources` 类用于声明属性源（如 .properties 或 .yml 文件）。这些属性源被添加到 `Environment` 中，以便从中读取配置属性。
+   - The `@PropertySource` annotation and the `PropertySources` class declare property sources (such as .properties or .yml files). These sources are added to the `Environment`, so configuration properties can be read from them.
 
 4. **@ConfigurationProperties**
 
-   - 这个注解通常用于将配置属性绑定到具有字段的类。`@ConfigurationProperties` 类可以利用 `Environment` 来获取所需的属性值，并将它们映射到类的字段上。
+   - This annotation usually binds configuration properties to a class with fields. A `@ConfigurationProperties` class can use `Environment` to get the property values and map them to its fields.
 
-### 九、常见问题
+### 9. FAQ
 
-1. **属性值未找到**
+1. **Property value not found**
 
-   + 如果尝试访问一个不存在的属性值，可能得到 `null` 或抛出异常。为解决这个问题，确保属性名称正确，并检查该属性是否已在正确的属性源中定义。
+   + If you read a property that does not exist, you may get `null` or an exception. To fix this, make sure the property name is correct. Also check that the property is defined in the right property source.
 
-2. **配置文件未正确激活**
+2. **Profile not activated correctly**
 
-   + 当应用程序没有按预期激活特定的配置文件时，检查配置文件的激活方式（例如通过环境变量、JVM 参数等）是否正确，以及 `@Profile` 注解是否正确应用于相应的 Beans。
+   + If a profile is not active as expected, check how it is activated (for example through environment variables or JVM arguments). Also check that the `@Profile` annotation is applied to the right beans.
 
-3. **属性类型转换错误**
+3. **Property type conversion error**
 
-   + 在将属性值转换为目标类型时出错时，确保属性值可以被正确地转换为所需的类型，并考虑定义自定义转换器。
+   + If converting a property value to the target type fails, make sure the value can be converted to the needed type. You can also define a custom converter.
 
-4. **占位符未解析**
+4. **Placeholder not resolved**
 
-   + 当属性占位符（如 `${property.name}`）在应用程序中未被替换为实际的属性值时，检查 `PropertySourcesPlaceholderConfigurer` 或类似机制是否已正确配置在 Spring 上下文中。
+   + If a property placeholder (such as `${property.name}`) is not replaced by the real value, check that `PropertySourcesPlaceholderConfigurer` or a similar mechanism is configured in the Spring context.
 
-5. **属性源优先级问题**
+5. **Property source priority**
 
-   + 遇到多个属性源中存在同名属性，导致获取到的值不是预期的那个问题时，了解和管理不同属性源的优先级，确保正确的属性源被优先读取。
+   + If the same property exists in several property sources and you get an unexpected value, learn and manage the priority of the property sources. Make sure the right source is read first.

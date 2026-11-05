@@ -1,107 +1,108 @@
 ## PropertySource
 
 - [PropertySource](#propertysource)
-  - [一、基本信息](#一基本信息)
-  - [二、知识储备](#二知识储备)
-  - [三、基本描述](#三基本描述)
-  - [四、主要功能](#四主要功能)
-  - [五、接口源码](#五接口源码)
-  - [六、主要实现](#六主要实现)
-  - [七、最佳实践](#七最佳实践)
-  - [八、与其他组件的关系](#八与其他组件的关系)
-  - [九、常见问题](#九常见问题)
+  - [1. Overview](#1-overview)
+  - [2. Background Knowledge](#2-background-knowledge)
+  - [3. Description](#3-description)
+  - [4. Main Features](#4-main-features)
+  - [5. Class Source](#5-class-source)
+  - [6. Main Implementations](#6-main-implementations)
+  - [7. Best Practices](#7-best-practices)
+  - [8. Relationship with Other Components](#8-relationship-with-other-components)
+  - [9. FAQ](#9-faq)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、知识储备
+### 2. Background Knowledge
 
-1. **Java I/O 和文件处理**
+1. **Java I/O and file handling**
 
-   + 需要熟悉 Java 文件 I/O 操作，特别是如何读取和写入文件，理解处理 `.properties` 文件的 Java 类如 `Properties`，以及如何利用类路径和文件系统路径来定位和加载资源文件，这些知识对于从文件系统或类路径加载属性文件至关重要。
+   + You should know Java file I/O, especially how to read and write files. Know the Java classes that handle `.properties` files, such as `Properties`. Also know how to use classpath and file system paths to find and load resource files. This is key to loading property files from the file system or the classpath.
 
-2. **Spring 资源抽象**
+2. **Spring resource abstraction**
 
-   + 需要了解 Spring 的 [Resource](/spring-resources/spring-resource/README.md) 接口及其实现，比如 `ClassPathResource`、`FileSystemResource` 和 `UrlResource`，这包括理解如何利用 Spring 的强大资源加载机制来读取外部配置文件，这对于从各种位置加载配置文件非常有用。
+   + You should know Spring's [Resource](/spring-resources/spring-resource/README.md) interface and its implementations, such as `ClassPathResource`, `FileSystemResource`, and `UrlResource`. This includes using Spring's resource loading to read external config files. It helps you load config files from many locations.
 
-3. **Java 集合框架**
+3. **Java collections framework**
 
-   + 需要了解 Java 集合框架有深入了解，特别是 `Map` 接口及其实现如 `HashMap` 和 `LinkedHashMap`，这包括知道如何在 Map 中存储、检索和更新键值对，这对于从键值对集合中加载属性至关重要。
+   + You should know the Java collections framework well, especially the `Map` interface and its implementations such as `HashMap` and `LinkedHashMap`. This includes how to store, get, and update key-value pairs in a Map. It is key to loading properties from a collection of key-value pairs.
 
-4. **系统环境和 Java 系统属性**
+4. **System environment and Java system properties**
 
-   + 需要了解 Java 中如何访问和操作系统环境变量和系统属性，包括使用 `System.getenv()` 和 `System.getProperties()`，并理解这些变量在不同操作系统中如何设置和修改，这对于从操作系统环境中加载配置非常重要。
+   + You should know how to access operating system environment variables and system properties in Java. This includes `System.getenv()` and `System.getProperties()`. Understand how these variables are set and changed on different operating systems. This is important for loading configuration from the operating system environment.
 
-5. **命令行参数解析**
+5. **Command-line argument parsing**
 
-   + 需要了解如何在 Java 程序中解析命令行参数，包括不同的参数格式（如标志、键值对），以及如何使用第三方库简化命令行参数的解析，这对于从命令行参数中加载配置非常关键。
+   + You should know how to parse command-line arguments in a Java program. This includes different argument formats (such as flags and key-value pairs) and how to use third-party libraries to make parsing simpler. This is key to loading configuration from command-line arguments.
 
-### 三、基本描述
+### 3. Description
 
-`PropertySource` 类是 Spring 框架中的一个关键抽象类，专门用于封装不同来源的配置数据，如文件、环境变量、系统属性等。它为这些配置源提供了一个统一的接口，使得可以以一致的方式访问各种不同类型的配置数据。这个类的核心是其 `getProperty(String name)` 方法，它根据提供的属性名来检索属性值。在 Spring 的环境抽象中，`PropertySource` 的实例可以被添加到 `Environment` 对象中，从而允许我们在应用程序中方便地访问和管理这些属性。
+The `PropertySource` class is a key abstract class in Spring. It wraps configuration data from different sources, such as files, environment variables, and system properties. It gives one unified interface to these sources, so you can access different kinds of configuration data in the same way. Its core is the `getProperty(String name)` method, which returns the property value for a given name. In Spring's environment abstraction, `PropertySource` instances can be added to an `Environment` object. This lets you access and manage these properties easily in your application.
 
-### 四、主要功能
+### 4. Main Features
 
-1. **统一属性源接口**
+1. **Unified property source interface**
 
-   + `PropertySource` 提供了一个统一的接口来访问不同来源的属性，如文件、环境变量、系统属性等。这种统一性使得在不同环境下处理配置数据变得更加简单。
+   + `PropertySource` gives one interface to access properties from different sources, such as files, environment variables, and system properties. This makes it simpler to handle configuration data in different environments.
 
-2. **属性查找和访问**
+2. **Property lookup and access**
 
-   + 它允许通过键（属性名）来检索属性值。这是 `PropertySource` 最基本和直接的功能，支持对各种配置数据的读取。
+   + You can get a property value by its key (the property name). This is the most basic feature of `PropertySource`. It supports reading all kinds of configuration data.
 
-3. **属性源优先级和覆盖**
+3. **Property source priority and overrides**
 
-   + 在 Spring 的环境中可以注册多个 `PropertySource` 实例，它们按照一定的优先级顺序搜索。这意味着可以通过调整不同 `PropertySource` 的优先级来控制哪些属性将覆盖其他的属性。
+   + In a Spring environment, you can register many `PropertySource` instances. They are searched in a certain priority order. So you can change their priority to control which properties override others.
 
-4. **环境集成**
+4. **Environment integration**
 
-   + `PropertySource` 实例通常被整合到 Spring 的 `Environment` 抽象中，这使得在整个应用程序中访问属性变得更加方便。
+   + `PropertySource` instances are usually part of Spring's `Environment` abstraction. This makes it easier to access properties across the whole application.
 
-5. **可扩展性**
+5. **Extensible**
 
-   + 由于 `PropertySource` 是抽象的，开发者可以创建自定义 `PropertySource` 实现，从而支持从几乎任何数据源加载属性，例如数据库、远程服务、非标准格式的文件等。
+   + `PropertySource` is abstract, so you can write your own implementation. This lets you load properties from almost any data source, such as a database, a remote service, or a file in a non-standard format.
 
-6. **支持多种数据格式**
+6. **Many data formats**
 
-   + Spring 提供了多种 `PropertySource` 实现，支持从标凑属性文件、JSON 文件、YAML 文件等多种格式中加载属性。
+   + Spring provides many `PropertySource` implementations. They can load properties from formats such as standard property files, JSON files, and YAML files.
 
-7. **动态属性更新**
+7. **Dynamic property updates**
 
-   + 某些 `PropertySource` 实现支持动态更新属性，这对于需要在运行时改变配置的应用程序特别有用。
+   + Some `PropertySource` implementations support updating properties dynamically. This is very useful for applications that must change configuration at runtime.
 
-8. **配置隔离和模块化**
+8. **Configuration isolation and modularity**
 
-   + `PropertySource` 有助于将配置隔离到不同的模块中，使得配置管理更加模块化和清晰。
+   + `PropertySource` helps keep configuration in separate modules. This makes configuration management more modular and clear.
 
-### 五、接口源码
+### 5. Class Source
 
-`PropertySource` 类是 Spring 框架中用于封装属性源的抽象基类。它允许从多种来源（如属性文件、环境变量等）以统一的方式访问配置数据。类中定义了一些核心方法，如获取属性值的 `getProperty` 方法、检查属性是否存在的 `containsProperty` 方法，以及获取属性源名称和源对象的方法。
+The `PropertySource` class is the abstract base class that wraps property sources in Spring. It gives one unified way to access configuration data from many sources (such as property files and environment variables). It defines some core methods: `getProperty` to get a property value, `containsProperty` to check whether a property exists, and methods to get the name and the source object of the property source.
 
 ```java
 /**
- * 抽象基类，表示属性源。
- * 属性源是键值对的集合，它们可以从各种源（如属性文件、环境变量等）加载。
+ * Abstract base class representing a source of name/value property pairs.
+ * A property source is a collection of key-value pairs that can be loaded
+ * from various sources, such as properties files and environment variables.
  *
- * @param <T> 属性源的类型
+ * @param <T> the type of the property source
  */
 public abstract class PropertySource<T> {
 
     protected final Log logger = LogFactory.getLog(getClass());
 
-    // 属性源的名称
+    // The name of the property source
     protected final String name; 
 
-    // 属性源对象
+    // The source object of the property source
     protected final T source; 
 
     /**
-     * 构造一个新的 PropertySource，带有给定的名称和源对象。
+     * Create a new PropertySource with the given name and source object.
      *
-     * @param name 属性源的名称
-     * @param source 属性源对象
+     * @param name the name of the property source
+     * @param source the source object of the property source
      */
     public PropertySource(String name, T source) {
         Assert.hasText(name, "Property source name must contain at least one character");
@@ -111,10 +112,12 @@ public abstract class PropertySource<T> {
     }
 
     /**
-     * 构造函数重载，创建一个具有指定名称的 PropertySource，源对象为新的 Object 实例。
-     * 通常用于测试场景，创建匿名实现时不需要查询实际源。
+     * Overloaded constructor. Create a PropertySource with the given name and a new
+     * Object instance as the source.
+     * Usually used in tests, when you create an anonymous implementation
+     * that does not need to query an actual source.
      *
-     * @param name 属性源的名称
+     * @param name the name of the property source
      */
     @SuppressWarnings("unchecked")
     public PropertySource(String name) {
@@ -122,105 +125,107 @@ public abstract class PropertySource<T> {
     }
 
     /**
-     * 获取此 PropertySource 的名称。
+     * Return the name of this PropertySource.
      *
-     * @return 属性源的名称
+     * @return the name of the property source
      */
     public String getName() {
         return this.name;
     }
 
     /**
-     * 返回此 PropertySource 的底层源对象。
+     * Return the underlying source object for this PropertySource.
      *
-     * @return 属性源对象
+     * @return the source object of the property source
      */
     public T getSource() {
         return this.source;
     }
 
     /**
-     * 检查此 PropertySource 是否包含给定名称的属性。
-     * 默认实现仅检查 getProperty(String) 返回的值是否为 null。
-     * 子类可以实现更高效的算法。
+     * Return whether this PropertySource contains a property with the given name.
+     * The default implementation only checks whether the value returned by
+     * getProperty(String) is null.
+     * Subclasses may implement a more efficient algorithm.
      *
-     * @param name 要查找的属性名称
-     * @return 如果包含该属性，则返回 true
+     * @param name the property name to look for
+     * @return true if the property is contained
      */
     public boolean containsProperty(String name) {
         return (getProperty(name) != null);
     }
 
     /**
-     * 返回与给定名称关联的值，如果未找到，则返回 null。
+     * Return the value associated with the given name,
+     * or null if not found.
      * 
-     * @param name 要查找的属性名称
-     * @return 属性值或 null
+     * @param name the property name to look for
+     * @return the property value, or null
      */
     @Nullable
     public abstract Object getProperty(String name);
 
-    // 其他方法（equals、hashCode、toString）省略
+    // Other methods (equals, hashCode, toString) are omitted
 }
 ```
 
-### 六、主要实现
+### 6. Main Implementations
 
 1. **`RopertiesPropertySource`**
 
-   - 用于加载 `.properties` 文件中的属性。通常通过 `Properties` 对象来构造。
+   - Loads properties from `.properties` files. It is usually built from a `Properties` object.
 
 2. **`ResourcePropertySource`**
 
-   - 扩展自 `PropertiesPropertySource`。可以直接从 `Resource` 对象（如文件系统资源、类路径资源等）中加载属性。
+   - Extends `PropertiesPropertySource`. It can load properties directly from a `Resource` object (such as a file system resource or a classpath resource).
 
 3. **`MapPropertySource`**
 
-   - 从 `Map<String, Object>` 中加载属性。非常灵活，可以用于从任何键值对映射中提取属性。
+   - Loads properties from a `Map<String, Object>`. It is very flexible and can take properties from any key-value map.
 
 4. **`SystemEnvironmentPropertySource`**
 
-   - 用于访问操作系统环境变量。这个实现类特别处理了环境变量的命名约定（例如，将所有字符转换为小写，将非字母数字字符替换为下划线）。
+   - Accesses operating system environment variables. This class handles the naming rules of environment variables (for example, it converts all characters to lower case and replaces non-alphanumeric characters with underscores).
 
 5. **`CommandLinePropertySource`**
 
-   - 用于处理命令行参数。支持简单的命名参数以及更复杂的键值对参数。
+   - Handles command-line arguments. It supports simple named arguments and more complex key-value arguments.
 
 6. **`CompositePropertySource`**
 
-   - 一个组合类，可以包含多个 `PropertySource` 实例。用于将多个 `PropertySource` 对象合并为一个逻辑单元，以便统一处理。
+   - A composite class that can hold many `PropertySource` instances. It combines many `PropertySource` objects into one logical unit, so they can be handled together.
 
-### 七、最佳实践
+### 7. Best Practices
 
-演示了如何在 Java 应用中使用 Spring Framework 的 `PropertySource` 类来从不同来源（如属性文件、资源文件、Map 对象、系统环境变量和命令行参数）加载配置数据。最后，它使用 `CompositePropertySource` 将所有这些不同的属性源组合在一起，以便能够统一访问和管理这些来自不同来源的配置信息。
+This example shows how to use Spring's `PropertySource` class in a Java application to load configuration data from different sources: a property file, a resource file, a Map object, system environment variables, and command-line arguments. At the end, it uses `CompositePropertySource` to combine all these property sources, so the configuration from different sources can be accessed and managed together.
 
 ```java
 public class PropertySourceDemo {
 
     public static void main(String[] args) throws Exception {
-        // 从 .properties 文件加载属性
+        // Load properties from a .properties file
         Properties source = PropertiesLoaderUtils.loadProperties(new ClassPathResource("application.properties"));
         PropertySource propertySource = new PropertiesPropertySource("properties", source);
 
-        // 直接从Resource加载属性
+        // Load properties directly from a Resource
         ClassPathResource classPathResource = new ClassPathResource("application.properties");
         PropertySource resourcePropertySource = new ResourcePropertySource("resource", classPathResource);
 
-        // 从Map加载属性
+        // Load properties from a Map
         Map<String, Object> map = new HashMap<>();
         map.put("app.name", "Spring-Reading");
         map.put("app.version", "1.0.0");
         PropertySource mapPropertySource = new MapPropertySource("mapSource", map);
 
-        // 访问系统环境变量
+        // Access system environment variables
         Map mapEnv = System.getenv();
         PropertySource envPropertySource = new SystemEnvironmentPropertySource("systemEnv", mapEnv);
 
-        // 解析命令行参数
+        // Parse command-line arguments
         String[] myArgs = {"--appName=MyApplication", "--port=8080"};
         PropertySource commandLinePropertySource = new SimpleCommandLinePropertySource(myArgs);
 
-        // 组合多个 PropertySource 实例
+        // Combine multiple PropertySource instances
         CompositePropertySource composite = new CompositePropertySource("composite");
         composite.addPropertySource(propertySource);
         composite.addPropertySource(resourcePropertySource);
@@ -228,7 +233,7 @@ public class PropertySourceDemo {
         composite.addPropertySource(envPropertySource);
         composite.addPropertySource(commandLinePropertySource);
 
-        // 打印结果
+        // Print the result
         for (PropertySource<?> ps : composite.getPropertySources()) {
             System.out.printf("Name: %-15s || Source: %s%n", ps.getName(), ps.getSource());
         }
@@ -236,7 +241,7 @@ public class PropertySourceDemo {
 }
 ```
 
-运行结果发现，每个 `PropertySource` 实例显示了其特定的数据源和内容，如从文件中读取的配置项、环境变量的详细列表，以及命令行参数的封装。
+The output shows that each `PropertySource` instance has its own data source and content. For example, the config items read from a file, the full list of environment variables, and the wrapped command-line arguments.
 
 ```java
 Name: properties      || Source: {app.name=Spring-Reading}
@@ -246,62 +251,62 @@ Name: systemEnv       || Source: {USERDOMAIN_ROAMINGPROFILE=DESKTOP-HRS3987, PRO
 Name: commandLineArgs || Source: org.springframework.core.env.CommandLineArgs@6321e813
 ```
 
-### 八、与其他组件的关系
+### 8. Relationship with Other Components
 
 1. **Environment**
 
-   + `PropertySource` 提供配置数据给 `Environment`，后者是一个表示应用运行环境的接口，用于整合不同的属性源。
+   + `PropertySource` gives configuration data to `Environment`. `Environment` is an interface that represents the runtime environment of the application and combines different property sources.
 
 2. **ApplicationContext**
 
-   + `PropertySource` 中的属性被 `ApplicationContext` 加载，用于影响和配置应用上下文中的 bean 和其他配置。
+   + The properties in a `PropertySource` are loaded by the `ApplicationContext`. They affect and configure the beans and other configuration in the application context.
 
-3. **@PropertySource 注解**
+3. **@PropertySource annotation**
 
-   + 通过 `@PropertySource` 注解可以将外部配置文件声明为 `PropertySource`，进而集成到 Spring 的 `Environment` 中。
+   + The `@PropertySource` annotation declares an external config file as a `PropertySource`. It is then added to Spring's `Environment`.
 
 4. **PropertyResolver**
 
-   + `PropertyResolver` 接口提供从 `PropertySource` 解析属性的功能，是连接属性源和其查询机制的桥梁。
+   + The `PropertyResolver` interface resolves properties from a `PropertySource`. It is the bridge between property sources and the way they are queried.
 
-5. **@Value 注解**
+5. **@Value annotation**
 
-   + `@Value` 注解允许直接从 `PropertySource` 注入属性值到 Spring 管理的 bean 字段中。
+   + The `@Value` annotation injects property values from a `PropertySource` directly into fields of Spring-managed beans.
 
 6. **Profile**
 
-   + `PropertySource` 支持基于 Spring Profiles 的不同配置，使得可以根据应用运行的环境加载不同的属性集。
+   + `PropertySource` supports different configuration based on Spring Profiles. So you can load a different set of properties for the environment the application runs in.
 
-7. **PlaceholderConfigurer类**
+7. **PlaceholderConfigurer classes**
 
-   + 类似 `PropertySourcesPlaceholderConfigurer` 的配置器用于解析 `PropertySource` 中的属性占位符，并应用于 Spring bean 配置。
+   + Configurers such as `PropertySourcesPlaceholderConfigurer` resolve property placeholders in a `PropertySource` and apply them to Spring bean configuration.
 
-### 九、常见问题
+### 9. FAQ
 
-1. **属性值未找到**
+1. **Property value not found**
 
-   + 如果尝试访问不存在的属性值时返回 `null` 或抛出异常，确保属性文件或其他属性源已正确加载，并检查属性名是否拼写正确。
+   + If reading a property that does not exist returns `null` or throws an exception, make sure the property file or other property source is loaded correctly. Also check that the property name is spelled correctly.
 
-2. **属性覆盖问题**
+2. **Property override problems**
 
-   + 当多个 `PropertySource` 包含相同名称的属性时，为了避免不清楚哪个值会被使用的情况，需要明确 `PropertySource` 的优先级顺序，并了解 `Environment` 是如何处理多个属性源中相同属性的。
+   + When several `PropertySource` objects have a property with the same name, it may be unclear which value is used. Make the priority order of the `PropertySource` objects clear. Learn how `Environment` handles the same property in many property sources.
 
-3. **属性类型转换问题**
+3. **Property type conversion problems**
 
-   + 从 `PropertySource` 获取的属性值默认为字符串类型，可能需要转换为其他类型。使用合适的类型转换逻辑（如 `ConversionService`）或手动转换属性值。
+   + Property values from a `PropertySource` are strings by default. You may need to convert them to other types. Use suitable conversion logic (such as `ConversionService`) or convert the value by hand.
 
-4. **动态属性更新问题**
+4. **Dynamic property update problems**
 
-   + 在应用运行时动态更新 `PropertySource` 中的属性，并反映这些更改时，可以采用支持动态更新的 `PropertySource` 实现，如使用 Spring Cloud Config。
+   + To update properties in a `PropertySource` at runtime and reflect the changes, use a `PropertySource` implementation that supports dynamic updates, such as Spring Cloud Config.
 
-5. **环境变量和系统属性冲突**
+5. **Conflicts between environment variables and system properties**
 
-   + 系统环境变量和 Java 系统属性可能具有相同的键，导致预期之外的覆盖。理解并明确 `SystemEnvironmentPropertySource` 和 `SystemPropertiesPropertySource` 的优先级，适当调整以避免冲突。
+   + A system environment variable and a Java system property may have the same key. This can cause unexpected overrides. Understand the priority of `SystemEnvironmentPropertySource` and `SystemPropertiesPropertySource`, and adjust it to avoid conflicts.
 
-6. **`@Value` 注解不解析**
+6. **`@Value` is not resolved**
 
-   + 使用 `@Value` 注解注入属性时，如果无法正确解析属性值，确保有一个活跃的 `PropertySourcesPlaceholderConfigurer` 在上下文中，用于解析占位符。
+   + When you inject properties with `@Value` and the value is not resolved, make sure there is an active `PropertySourcesPlaceholderConfigurer` in the context to resolve the placeholders.
 
-7. **配置文件路径问题**
+7. **Config file path problems**
 
-   + 加载外部配置文件时，如果由于路径问题导致文件未被正确加载，检查文件路径是否正确，确保配置文件位于可访问的位置。
+   + When you load an external config file and it is not loaded because of a path problem, check that the file path is correct. Make sure the config file is in a location that can be accessed.

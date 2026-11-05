@@ -8,7 +8,7 @@ import java.util.Set;
 
 /**
  * @author xcs
- * @date 2023年12月07日 17时09分
+ * @date 2023-12-07 17:09
  **/
 public class StringToBooleanConverter implements Converter<String, Boolean> {
 

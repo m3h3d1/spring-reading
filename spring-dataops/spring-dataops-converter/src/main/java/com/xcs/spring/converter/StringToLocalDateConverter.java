@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * @author xcs
- * @date 2023年12月07日 17时00分
+ * @date 2023-12-07 17:00
  **/
 public class StringToLocalDateConverter implements Converter<String, LocalDate> {
 

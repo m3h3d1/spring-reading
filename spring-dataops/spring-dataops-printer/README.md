@@ -1,188 +1,189 @@
 ## Printer
 
 - [Printer](#printer)
-  - [一、基本信息](#一基本信息)
-  - [二、知识储备](#二知识储备)
-  - [三、基本描述](#三基本描述)
-  - [四、主要功能](#四主要功能)
-  - [五、接口源码](#五接口源码)
-  - [六、主要实现](#六主要实现)
-  - [七、最佳实践](#七最佳实践)
-  - [八、与其他组件的关系](#八与其他组件的关系)
-  - [九、常见问题](#九常见问题)
+  - [1. Overview](#1-overview)
+  - [2. Background Knowledge](#2-background-knowledge)
+  - [3. Description](#3-description)
+  - [4. Main Features](#4-main-features)
+  - [5. Interface Source](#5-interface-source)
+  - [6. Main Implementations](#6-main-implementations)
+  - [7. Best Practices](#7-best-practices)
+  - [8. Relationship with Other Components](#8-relationship-with-other-components)
+  - [9. FAQ](#9-faq)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、知识储备
+### 2. Background Knowledge
 
-1. **本地化和国际化（i18n）**
+1. **Localization and internationalization (i18n)**
 
-   + 了解如何根据不同的地区设置（Locale）进行数据格式化，这在全球化的应用开发中非常重要。
+   + Know how to format data for different locales. This is important for global applications.
 
-2. **Java API for Formatting**
+2. **Java API for formatting**
 
-   + 熟悉 Java 的格式化相关 API，例如 `java.text.DateFormat`、`java.text.SimpleDateFormat` 和 `java.time.format.DateTimeFormatter`，因为这些通常在实现 `Printer` 接口时使用。
+   + Know the Java formatting APIs, such as `java.text.DateFormat`, `java.text.SimpleDateFormat`, and `java.time.format.DateTimeFormatter`. They are often used when you implement the `Printer` interface.
 
 3. **ConversionService** 
 
-   + `ConversionService` 是 Spring 中用于管理转换器（`Converters`）和格式化器（`Formatters`，包括 `Printer` 和 `Parser`）的服务。理解 `ConversionService` 如何工作，可以帮助您更好地集成和使用 `Printer` 接口。
+   + `ConversionService` is the Spring service that manages converters (`Converters`) and formatters (`Formatters`, including `Printer` and `Parser`). Knowing how it works helps you integrate and use the `Printer` interface.
 
-### 三、基本描述
+### 3. Description
 
-`Printer` 接口是 Spring 框架中的一个关键部分，主要用于格式化对象到人类可读的字符串表示。这个接口定义了一个单一的方法 `String print(T object, Locale locale)`，其中 `T` 是要格式化的对象类型，`Locale` 是用于格式化操作的地区设置，允许根据不同的文化和地区标准来定制格式化输出。
+The `Printer` interface is a key part of Spring. It formats an object as a human-readable string. It defines one method, `String print(T object, Locale locale)`. `T` is the type of object to format. `Locale` is the locale used for formatting. This lets you adapt the output to different cultures and regions.
 
-### 四、主要功能
+### 4. Main Features
 
-1. **格式化对象为字符串**
+1. **Format objects as strings**
 
-   + 将各种类型的对象（如日期、时间、数字等）转换成人类可读的字符串形式。
+   + Turns objects of many types (such as dates, times, and numbers) into human-readable strings.
 
-2. **支持本地化**
+2. **Localization support**
 
-   + 通过接受 `Locale` 参数，`Printer` 接口允许根据不同的地区设置来进行格式化，支持国际化和本地化需求。
+   + `Printer` takes a `Locale` parameter. So it can format by locale and supports internationalization and localization.
 
-3. **用户界面友好**
+3. **User-friendly display**
 
-   + 使数据以一种对用户友好的方式展示，增强了数据在用户界面上的可读性和可理解性。
+   + Shows data in a way users find easy to read and understand on the user interface.
 
-### 五、接口源码
+### 5. Interface Source
 
-这个 `Printer<T>` 接口定义了一个专门用于显示目的的打印方法。它是一个功能性接口，其主要作用是将类型为 T 的对象转换为适合展示的字符串形式。该接口接受两个参数：一个是要打印的对象实例 `object`，另一个是表示当前用户地区设置的 `locale`。这样设计的目的是为了支持根据不同地区的标准来格式化对象，从而适应国际化和本地化的需求。
+The `Printer<T>` interface defines a print method for display. It is a functional interface. Its main job is to turn an object of type T into a string that is good for display. It takes two parameters: the object to print, `object`, and the current user's locale, `locale`. This design supports formatting by regional standards, for internationalization and localization.
 
 ```java
 /**
- * 用于显示目的打印类型为 T 的对象。
+ * Prints objects of type T for display.
  *
  * @author Keith Donald
  * @since 3.0
- * @param <T> 这个 Printer 打印的对象类型
+ * @param <T> the type of object this Printer prints
  */
 @FunctionalInterface
 public interface Printer<T> {
 
 	/**
-	 * 打印类型为 T 的对象以供显示。
-	 * @param object 要打印的实例
-	 * @param locale 当前用户的地区设置
-	 * @return 打印出的文本字符串
+	 * Print the object of type T for display.
+	 * @param object the instance to print
+	 * @param locale the current user locale
+	 * @return the printed text string
 	 */
 	String print(T object, Locale locale);
 
 }
 ```
 
-### 六、主要实现
+### 6. Main Implementations
 
 1. **CharArrayFormatter**
 
-   + 将字符数组格式化为字符串。这通常涉及将字符数组直接转换为相应的字符串表示。
+   + Formats a char array as a string. It usually turns the char array directly into the matching string.
 
 2. **CurrencyUnitFormatter**
-   + 用于格式化货币单位。它可能将像“USD”或“EUR”这样的货币代码转换为更完整或本地化的货币名称表示。
+
+   + Formats currency units. It may turn a currency code such as "USD" or "EUR" into a fuller or localized currency name.
    
 3. **DateFormatter**
 
-   + 用于将 `java.util.Date` 对象格式化为易读的日期字符串。它可以支持多种日期格式，并可能根据不同的地区设置进行调整。
+   + Formats a `java.util.Date` as a readable date string. It supports many date formats and may adjust to the locale.
 
 4. **DurationFormatter**
 
-   + 将 `java.time.Duration` 实例（表示时间间隔）格式化为易于阅读的字符串，例如，将时长转换为“2小时15分钟”等形式。
+   + Formats a `java.time.Duration` (a time interval) as a readable string. For example, "2 hours 15 minutes".
 
 5. **InetAddressFormatter**
 
-   + 专门用于将 `java.net.InetAddress` 对象（例如，IP 地址）格式化为标准的字符串表示，比如将IP地址从二进制形式转换为点分十进制格式。
+   + Formats a `java.net.InetAddress` object (for example, an IP address) as a standard string. For example, it turns the binary IP address into dotted decimal form.
 
 6. **InstantFormatter**
 
-   + 用于将 `java.time.Instant`（表示特定时间点的对象）格式化为日期和时间的字符串表示，通常包括日期和时间。
+   + Formats a `java.time.Instant` (a specific point in time) as a date and time string.
 
 7. **IsoOffsetFormatter**
 
-   + 专注于格式化带有时区偏移信息的日期时间对象，按照 ISO 8601 标准（例如 "2023-03-28T15:20:45+02:00"）。
+   + Formats date-time objects that have time zone offset information. It follows ISO 8601 (for example "2023-03-28T15:20:45+02:00").
 
 8. **MillisecondInstantPrinter**
 
-   + 将以毫秒为单位的时间戳转换为标准的日期和时间格式，通常用于将系统时间戳转换为人类可读的日期时间表示。
+   + Turns a timestamp in milliseconds into a standard date and time format. It is often used to turn system timestamps into human-readable date and time.
 
 9. **MonetaryAmountFormatter**
 
-   + 用于格式化表示货币金额的对象，可能包括数值与货币单位的结合，以及考虑货币格式的本地化。
+   + Formats objects that show a money amount. It may combine the value and the currency unit, and take currency format localization into account.
 
 10. **MonthDayFormatter**
 
-    + 格式化 `java.time.MonthDay` 对象，这种格式化通常涉及将月份和日子转换为特定的字符串格式，如“3月28日”。
+    + Formats a `java.time.MonthDay`. It usually turns the month and day into a specific string format, such as "March 28".
 
 11. **MonthFormatter**
 
-    + 专门用于格式化月份，将数字月份（如 1-12）转换为文本表示（如 "January", "February" 等）。
+    + Formats months. It turns a month number (1-12) into text (such as "January", "February").
 
 12. **NumberDecoratingFormatter**
 
-    + 为数字提供装饰性的格式化，可能包括添加前缀、后缀或将数字格式化为特定的显示格式。
+    + Adds decoration when formatting numbers. For example, it can add a prefix or suffix, or use a specific display format.
 
 13. **PatternDecoratingFormatter**
 
-    + 使用指定的模式来格式化和装饰字符串，这可能涉及到复杂的字符串处理和模式匹配。
+    + Formats and decorates strings with a given pattern. This may involve complex string handling and pattern matching.
 
 14. **PeriodFormatter**
 
-    + 用于将 `java.time.Period` 对象（表示日期间隔）格式化为易读的字符串，比如“2年6个月”。
+    + Formats a `java.time.Period` (a date interval) as a readable string, such as "2 years 6 months".
 
 15. **ReadableInstantPrinter**
 
-    + 用于 Joda-Time 库中的 `ReadableInstant` 对象，将它们转换为日期和时间的字符串表示。
+    + For `ReadableInstant` objects in the Joda-Time library. It turns them into date and time strings.
 
 16. **ReadablePartialPrinter**
 
-    + 用于 Joda-Time 库中的 `ReadablePartial` 对象，这些对象通常表示部分日期时间信息，如仅月日。
+    + For `ReadablePartial` objects in the Joda-Time library. These usually hold partial date-time information, such as only the month and day.
 
 17. **TemporalAccessorPrinter**
 
-    + 用于格式化任何实现了 `java.time.temporal.TemporalAccessor` 接口的日期时间对象，这包括大多数 Java 8 日期时间类型。
+    + Formats any date-time object that implements `java.time.temporal.TemporalAccessor`. This covers most Java 8 date-time types.
 
 18. **YearFormatter**
 
-    + 专门用于格式化年份，可能涉及将数字年份转换为特定的字符串表示。
+    + Formats years. It may turn a numeric year into a specific string.
 
 19. **YearMonthFormatter**
 
-    + 用于格式化 `java.time.YearMonth` 对象，通常将年和月结合为易读的格式，如“2023年3月”。
+    + Formats a `java.time.YearMonth`. It usually joins the year and month in a readable format, such as "March 2023".
 
-### 七、最佳实践
+### 7. Best Practices
 
-使用 Spring 的 `FormattingConversionService` 结合自定义的 `CurrencyPrinter` 来格式化货币。在这个示例中，首先创建了一个 `FormattingConversionService` 实例并注册了 `CurrencyPrinter`。接着，通过设置 `LocaleContextHolder` 的 `Locale`，代码分别以美国和中国的格式来显示同一金额的字符串表示。
+This example uses Spring's `FormattingConversionService` with a custom `CurrencyPrinter` to format currency. It creates a `FormattingConversionService` and registers the `CurrencyPrinter`. Then it sets the `Locale` in `LocaleContextHolder`. The code shows the same amount as a string in US format and in Chinese format.
 
 ```java
 public class PrinterDemo {
 
     public static void main(String[] args) {
-        // 创建一个 FormattingConversionService 实例
+        // Create a FormattingConversionService instance
         FormattingConversionService conversionService = new FormattingConversionService();
-        // 将自定义的 CurrencyPrinter 注册到 conversionService
+        // Register the custom CurrencyPrinter with conversionService
         conversionService.addPrinter(new CurrencyPrinter());
 
-        // 设置货币金额
+        // Set the currency amount
         double amount = 1234.56;
 
-        // 设置当前线程的 Locale 为美国
+        // Set the current thread's Locale to the US
         LocaleContextHolder.setLocale(Locale.US);
-        // 使用 conversionService 将金额转换为字符串，并应用美国的货币格式
+        // Use conversionService to convert the amount to a string with US currency format
         String formattedAmountForUS = conversionService.convert(amount, String.class);
         System.out.println("Formatted Currency (US): " + formattedAmountForUS);
 
-        // 设置当前线程的 Locale 为中国
+        // Set the current thread's Locale to China
         LocaleContextHolder.setLocale(Locale.CHINA);
-        // 使用 conversionService 将金额转换为字符串，并应用中国的货币格式
+        // Use conversionService to convert the amount to a string with Chinese currency format
         String formattedAmountForCHINA = conversionService.convert(amount, String.class);
         System.out.println("Formatted Currency (CHINA): " + formattedAmountForCHINA);
     }
 }
 ```
 
-`CurrencyPrinter` 类实现了 Spring 的 `Printer<Number>` 接口。它的主要功能是将数字（`Number` 类型）格式化为货币字符串。在 `print` 方法中，使用了 Java 的 `NumberFormat.getCurrencyInstance` 方法来获取相应地区的货币格式化器，并用它将数字转换为该地区特定的货币字符串格式。
+The `CurrencyPrinter` class implements Spring's `Printer<Number>` interface. It formats a number (`Number`) as a currency string. In the `print` method, it uses Java's `NumberFormat.getCurrencyInstance` to get the currency formatter for the locale. Then it uses that formatter to turn the number into the currency string of that region.
 
 ```java
 public class CurrencyPrinter implements Printer<Number> {
@@ -195,49 +196,49 @@ public class CurrencyPrinter implements Printer<Number> {
 }
 ```
 
-运行结果发现， `CurrencyPrinter` 类和 `Locale` 设置来处理货币的国际化表示，确保金额在不同地区都能以用户熟悉和易于理解的方式呈现。
+The output shows how `CurrencyPrinter` and the `Locale` setting handle international currency display. The amount is shown in a way users in each region know and understand.
 
 ```java
 Formatted Currency (US): $1,234.56
 Formatted Currency (CHINA): ￥1,234.56
 ```
 
-### 八、与其他组件的关系
+### 8. Relationship with Other Components
 
 1. **Parser**
 
-   - `Printer` 和 `Parser` 接口通常一起使用。`Printer` 负责将对象格式化为字符串，而 `Parser` 负责执行相反的操作，即将字符串解析回原始对象。这种组合在处理表单数据、展示和用户输入时非常有用。
+   - `Printer` and `Parser` are often used together. `Printer` formats an object as a string. `Parser` does the reverse and parses a string back to the object. This pair is useful for form data, display, and user input.
 
 2. **Formatter**
 
-   - `Formatter` 接口结合了 `Printer` 和 `Parser` 的功能，提供了一个统一的接口用于格式化和解析对象。任何实现了 `Formatter` 接口的类同时实现了 `print` 和 `parse` 方法，分别对应于 `Printer` 和 `Parser` 的功能。
+   - The `Formatter` interface combines `Printer` and `Parser`. It is one interface for formatting and parsing objects. A class that implements `Formatter` has both `print` and `parse` methods, matching `Printer` and `Parser`.
 
 3. **FormattingConversionService**
 
-   - `FormattingConversionService` 是 Spring 的一个核心组件，用于注册和管理格式化器（Formatters）和转换器（Converters）。`Printer` 接口的实现可以注册到 `FormattingConversionService` 中，这样，Spring 就可以在需要时自动使用这些实现来格式化数据。
+   - `FormattingConversionService` is a core Spring component for registering and managing formatters (Formatters) and converters (Converters). You can register `Printer` implementations in it. Spring then uses them automatically to format data when needed.
 
-4. **DataBinder&WebDataBinder**
+4. **DataBinder & WebDataBinder**
 
-   - 在数据绑定和表单处理中，`Printer` 接口的实现用于将对象属性转换为适合于显示的字符串。例如，在 Spring MVC 中，`WebDataBinder` 可以使用注册的 `Printer` 实现来格式化模型属性以便在视图中显示。
+   - In data binding and form handling, `Printer` implementations turn object properties into strings for display. For example, in Spring MVC, `WebDataBinder` can use registered `Printer` implementations to format model attributes for the view.
 
 5. **Locale**
 
-   - `Printer` 接口的 `print` 方法接受一个 `Locale` 参数，这允许实现类根据不同的地区设置来格式化对象，支持国际化和本地化需求。
+   - The `print` method of `Printer` takes a `Locale` parameter. This lets implementations format objects by locale. It supports internationalization and localization.
 
-### 九、常见问题
+### 9. FAQ
 
-1. **复杂的格式化逻辑**
+1. **Complex formatting logic**
 
-   + 对于处理复杂数据类型或支持多种地区设置的复杂格式化逻辑，建议使用现有的 Java API（如 `DateFormat`、`NumberFormat` 等），并结合 Spring 的国际化支持（如 `MessageSource`）来简化实现。
+   + For complex data types, or when you must support many locales, use existing Java APIs such as `DateFormat` and `NumberFormat`. You can also use Spring's internationalization support, such as `MessageSource`, to keep the implementation simple.
 
-2. **处理不同的地区设置（`Locale`）**
+2. **Handling different locales (`Locale`)**
 
-   + 在国际化应用程序中正确处理不同的地区设置可能是一个挑战。确保 `print` 方法适当地使用传入的 `Locale` 参数，并在可能的情况下利用 Spring 的本地化和国际化支持。
+   + Handling locales correctly is a challenge in international applications. Make sure `print` uses the `Locale` parameter properly. Where possible, use Spring's localization and internationalization support.
 
-3. **与 Spring MVC 的集成**
+3. **Integration with Spring MVC**
 
-   + 在 Spring MVC 应用程序中正确注册和使用自定义的 `Printer` 实现，需要确保在 `FormattingConversionService` 中正确注册了 `Printer` 实现，并检查控制器方法是否正确使用数据绑定和格式化。
+   + In a Spring MVC application, make sure your custom `Printer` is registered in `FormattingConversionService`. Also check that controller methods use data binding and formatting correctly.
 
-4. **保证格式化和解析的一致性**
+4. **Keeping formatting and parsing consistent**
 
-   + 当同时使用 `Printer` 和对应的 `Parser` 时，重要的是保证它们对于相同类型的数据有着一致的格式化和解析规则。
+   + When you use a `Printer` with its matching `Parser`, they must follow the same formatting and parsing rules for the same type of data.
