@@ -1,71 +1,76 @@
 ## PropertyAccessor
 
 - [PropertyAccessor](#propertyaccessor)
-  - [一、基本信息](#一基本信息)
-  - [二、知识储备](#二知识储备)
-  - [三、基本描述](#三基本描述)
-  - [四、主要功能](#四主要功能)
-  - [五、接口源码](#五接口源码)
-  - [六、主要实现](#六主要实现)
-  - [七、最佳实践](#七最佳实践)
-  - [八、与其他组件的关系](#八与其他组件的关系)
-  - [九、常见问题](#九常见问题)
+  - [1. Overview](#1-overview)
+  - [2. Background Knowledge](#2-background-knowledge)
+  - [3. Description](#3-description)
+  - [4. Main Features](#4-main-features)
+  - [5. Interface Source](#5-interface-source)
+  - [6. Main Implementations](#6-main-implementations)
+  - [7. Best Practices](#7-best-practices)
+  - [8. Relationship with Other Components](#8-relationship-with-other-components)
+  - [9. FAQ](#9-faq)
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、知识储备
+### 2. Background Knowledge
 
-1. **Spring 表达式语言（SpEL）**
+1. **Spring Expression Language (SpEL)**
 
-   + 了解 SpEL 的基本语法和功能，包括表达式的解析、运算符、变量、函数等。
+   + You should know the basic syntax and features of SpEL, including parsing expressions, operators, variables and functions.
 
-2. **对象属性访问与反射机制** 
+2. **Property access and reflection** 
 
-   + 了解如何使用 Java 的反射机制来访问和操作对象的属性，包括获取类的字段、调用对象的方法、设置字段的值等。
+   + You should know how to use Java reflection to access and change the properties of an object. This includes getting the fields of a class, calling methods of an object, and setting field values.
 
-3. **设计模式** 
+3. **Design patterns** 
 
-   + 理解常见的设计模式，如适配器模式、策略模式等，这些设计模式在实现自定义 `PropertyAccessor` 接口时可能会用到。
+   + You should know common design patterns, such as the adapter pattern and the strategy pattern. They may be useful when you write your own `PropertyAccessor`.
 
-### 三、基本描述
+### 3. Description
 
-`PropertyAccessor` 接口的作用在于定义了一套统一的属性访问规范，通过该接口可以实现对对象属性的读取和写入操作，使得 Spring 框架中的各个模块能够统一地访问对象的属性，从而实现更加灵活和可扩展的应用开发。通过实现这个接口，可以定制化对象属性的访问逻辑，以满足不同场景下的需求，例如在 Spring 表达式语言（SpEL）、数据绑定、AOP 编程等方面发挥作用。
+The `PropertyAccessor` interface defines one common way to access properties. With it, you can read and write the properties of an object. Different modules of the Spring Framework can then access object properties in the same way. This makes application development more flexible and extensible. By implementing this interface, you can customize how properties are accessed for different cases. It is useful in the Spring Expression Language (SpEL), data binding, AOP and more.
 
-### 四、主要功能
+### 4. Main Features
 
-1. **属性读取** 
+1. **Reading properties** 
 
-   + 提供了 `canRead()` 方法用于判断是否可以读取指定属性，以及 `read()` 方法用于读取属性的值。这使得可以通过统一的方式从对象中获取属性值。
+   + The `canRead()` method checks whether a given property can be read. The `read()` method reads the value of the property. This gives one common way to get property values from objects.
 
-2. **属性写入**
+2. **Writing properties**
 
-   + 提供了 `canWrite()` 方法用于判断是否可以写入指定属性，以及 `write()` 方法用于设置属性的值。这使得可以通过统一的方式向对象中设置属性值。
+   + The `canWrite()` method checks whether a given property can be written. The `write()` method sets the value of the property. This gives one common way to set property values on objects.
 
-3. **自定义属性访问逻辑** 
+3. **Custom property access logic** 
 
-   + 允许我们根据实际需求实现自定义的属性访问逻辑，例如通过自定义的 `PropertyAccessor` 实现类来访问对象的属性，从而实现特定的业务逻辑或行为。
+   + You can write your own property access logic as you need. For example, use your own `PropertyAccessor` implementation to access the properties of an object and run specific business logic.
 
-4. **适配不同的对象结构** 
+4. **Different object structures** 
 
-   + 可以针对不同的对象结构实现不同的 `PropertyAccessor` 实现类，以适应不同类型的对象，包括 JavaBean、Map、数组等。
+   + You can write different `PropertyAccessor` implementations for different object structures. These include JavaBeans, Maps and arrays.
 
-### 五、接口源码
+### 5. Interface Source
 
- `PropertyAccessor` 的接口，它用于读取和写入对象的属性。接口中包含了四个方法，分别用于判断是否能够读取属性、读取属性值、判断是否能够写入属性以及写入属性值。此外，接口中还包含了一个用于获取特定目标类数组的方法。该接口提供了一种统一的方式来访问对象的属性，使得可以实现自定义的属性访问逻辑，并能够适配不同的对象结构。
+This is the `PropertyAccessor` interface. It reads and writes the properties of an object. It has four methods. They check whether a property can be read, read the property value, check whether a property can be written, and write the property value. It also has a method that returns the specific target classes. This interface gives one common way to access object properties. You can write custom property access logic and adapt to different object structures.
 
 ```java
 /**
- * 属性访问器能够读取（可能写入）对象的属性。
+ * A property accessor is able to read (and possibly write) the properties of an object.
  *
- * <p>这个接口没有限制，因此实现者可以自由地直接访问属性作为字段，或通过getter方法或其他方式访问属性。
+ * <p>This interface places no restrictions, and so implementors are free to access properties
+ * directly as fields or through getters or in any other way they see as appropriate.
  *
- * <p>解析器可以选择指定一个目标类的数组，用于调用它。然而，如果从{@link #getSpecificTargetClasses()}返回{@code null}，它将被调用
- * 以尝试解析所有属性引用，并有机会确定它是否可以读取或写入它们。
+ * <p>A resolver can optionally specify an array of target classes for which it should be
+ * called. However, if it returns {@code null} from {@link #getSpecificTargetClasses()},
+ * it will be called for all property references and given a chance to determine if it
+ * can read or write them.
  *
- * <p>属性解析器被认为是有序的，并且每个都将依次被调用。影响调用顺序的唯一规则是，在{@link #getSpecificTargetClasses()}中直接命名目标类的任何解析器
- * 将在通用解析器之前首先被调用。
+ * <p>Property resolvers are considered to be ordered, and each will be called in turn.
+ * The only rule that affects the call order is that any resolver naming the target
+ * class directly in {@link #getSpecificTargetClasses()} will be called first, before
+ * the general resolvers.
  *
  * @author Andy Clement
  * @since 3.0
@@ -73,52 +78,56 @@
 public interface PropertyAccessor {
 
     /**
-     * 返回此解析器应该被调用的类数组。
-     * <p>返回{@code null}表示这是一个通用解析器，可以在任何类型上尝试解析属性。
-     * @return 适用于此解析器的类数组（或{@code null}如果是通用解析器）
+     * Return an array of classes for which this resolver should be called.
+     * <p>Returning {@code null} indicates this is a general resolver that
+     * can be called in an attempt to resolve a property on any type.
+     * @return an array of classes that this resolver is suitable for
+     * (or {@code null} if a general resolver)
      */
     @Nullable
     Class<?>[] getSpecificTargetClasses();
 
     /**
-     * 用于确定解析器实例是否能够访问指定目标对象上的指定属性。
-     * @param context 尝试进行访问的评估上下文
-     * @param target 要访问属性的目标对象
-     * @param name 要访问的属性的名称
-     * @return 如果此解析器能够读取属性，则为true
-     * @throws AccessException 如果有任何问题确定是否可以读取属性
+     * Called to determine if a resolver instance is able to access a specified property
+     * on a specified target object.
+     * @param context the evaluation context in which the access is being attempted
+     * @param target the target object upon which the property is being accessed
+     * @param name the name of the property being accessed
+     * @return true if this resolver is able to read the property
+     * @throws AccessException if there is any problem determining whether the property can be read
      */
     boolean canRead(EvaluationContext context, @Nullable Object target, String name) throws AccessException;
 
     /**
-     * 用于从指定的目标对象中读取属性。
-     * 只有当{@link #canRead}也返回{@code true}时才能成功。
-     * @param context 尝试进行访问的评估上下文
-     * @param target 要访问属性的目标对象
-     * @param name 要访问的属性的名称
-     * @return 包装读取的属性值和其类型描述符的TypedValue对象
-     * @throws AccessException 如果有任何问题访问属性值
+     * Called to read a property from a specified target object.
+     * Should only succeed if {@link #canRead} also returns {@code true}.
+     * @param context the evaluation context in which the access is being attempted
+     * @param target the target object upon which the property is being accessed
+     * @param name the name of the property being accessed
+     * @return a TypedValue object wrapping the property value read and a type descriptor for it
+     * @throws AccessException if there is any problem accessing the property value
      */
     TypedValue read(EvaluationContext context, @Nullable Object target, String name) throws AccessException;
 
     /**
-     * 用于确定解析器实例是否能够向指定目标对象上的指定属性写入。
-     * @param context 尝试进行访问的评估上下文
-     * @param target 要访问属性的目标对象
-     * @param name 要访问的属性的名称
-     * @return 如果此解析器能够写入属性，则为true
-     * @throws AccessException 如果有任何问题确定是否可以写入属性
+     * Called to determine if a resolver instance is able to write to a specified
+     * property on a specified target object.
+     * @param context the evaluation context in which the access is being attempted
+     * @param target the target object upon which the property is being accessed
+     * @param name the name of the property being accessed
+     * @return true if this resolver is able to write to the property
+     * @throws AccessException if there is any problem determining whether the property can be written to
      */
     boolean canWrite(EvaluationContext context, @Nullable Object target, String name) throws AccessException;
 
     /**
-     * 用于向指定目标对象的属性写入。
-     * 只有当{@link #canWrite}也返回{@code true}时才能成功。
-     * @param context 尝试进行访问的评估上下文
-     * @param target 要访问属性的目标对象
-     * @param name 要访问的属性的名称
-     * @param newValue 属性的新值
-     * @throws AccessException 如果有任何问题写入属性值
+     * Called to write to a property on a specified target object.
+     * Should only succeed if {@link #canWrite} also returns {@code true}.
+     * @param context the evaluation context in which the access is being attempted
+     * @param target the target object upon which the property is being accessed
+     * @param name the name of the property being accessed
+     * @param newValue the new value for the property
+     * @throws AccessException if there is any problem writing to the property value
      */
     void write(EvaluationContext context, @Nullable Object target, String name, @Nullable Object newValue)
             throws AccessException;
@@ -126,54 +135,54 @@ public interface PropertyAccessor {
 }
 ```
 
-### 六、主要实现
+### 6. Main Implementations
 
 1. **BeanExpressionContextAccessor**
 
-   +  允许在表达式中访问特定的对象和属性。通过 `BeanExpressionContextAccessor`，可以在 SpEL 表达式中直接访问上下文中的对象属性，这在某些场景下非常有用，例如在 Spring 的 `@Value` 注解中使用 SpEL 表达式读取配置属性。
+   +  It allows access to specific objects and properties in expressions. With `BeanExpressionContextAccessor`, you can access properties of objects in the context directly in SpEL expressions. This is very useful in some cases. For example, you can use a SpEL expression in the Spring `@Value` annotation to read a configuration property.
 
 2. **BeanFactoryAccessor** 
 
-   + 允许在 SpEL 表达式中访问 Spring `BeanFactory` 中注册的 Bean 对象的属性。`BeanFactory` 是 Spring IoC 容器的核心接口，用于管理和创建 Bean。通过 `BeanFactoryAccessor`，可以在 SpEL 表达式中访问 IoC 容器中注册的 Bean，读取和设置其属性值，这为在 SpEL 中访问 Spring Bean 提供了便利。
+   + It allows access to the properties of beans registered in a Spring `BeanFactory` from SpEL expressions. `BeanFactory` is the core interface of the Spring IoC container. It manages and creates beans. With `BeanFactoryAccessor`, you can access beans registered in the IoC container from SpEL expressions, and read and set their property values. This makes it easy to access Spring beans in SpEL.
 
 3. **CompilablePropertyAccessor**
 
-   + 允许对属性访问进行优化以提高性能。通过编译能力，可以在运行时对属性访问逻辑进行优化，从而减少不必要的计算和提高执行效率，这在某些性能要求较高的场景下非常有用。
+   + It allows property access to be optimized for better performance. With the compile feature, the property access logic can be optimized at runtime. This avoids needless work and makes execution faster. It is very useful where performance matters.
 
 4. **DataBindingPropertyAccessor** 
 
-   + 允许在 Spring 应用程序中读取和写入属性。数据绑定是将用户输入绑定到后端数据模型的过程，在 Web 应用程序中广泛应用。`DataBindingPropertyAccessor` 提供了方便的方式来读取和设置对象的属性值，用于处理数据绑定过程中的属性访问需求。
+   + It allows reading and writing properties in Spring applications. Data binding is the process of binding user input to a back-end data model. It is widely used in web applications. `DataBindingPropertyAccessor` gives an easy way to read and set the property values of an object. It handles the property access needed during data binding.
 
 5. **EnvironmentAccessor** 
 
-   + `EnvironmentAccessor` 用于从 Spring 环境中访问属性，例如读取配置文件中的属性值。Spring 的环境抽象提供了一种统一的方式来访问应用程序的环境属性，包括系统属性、环境变量、配置文件等。通过 `EnvironmentAccessor`，可以在 SpEL 表达式中直接访问 Spring 环境中的属性值，从而实现动态的配置和属性注入。
+   + `EnvironmentAccessor` accesses properties from the Spring environment, for example to read property values from a configuration file. The Spring environment abstraction gives one common way to access the environment properties of an application, such as system properties, environment variables and configuration files. With `EnvironmentAccessor`, you can access property values of the Spring environment directly in SpEL expressions. This gives dynamic configuration and property injection.
 
 6. **JspPropertyAccessor**
 
-   + 允许在 JSP 页面中使用 SpEL 表达式，并在 JSP 标签中访问对象的属性。JSP 是一种常见的 Web 视图技术，与 SpEL 结合使用可以实现更加灵活和动态的页面渲染。通过在 JSP 中使用 SpEL 表达式，并在自定义标签（如 `eval` 标签）内访问对象的属性，可以实现更加灵活和可配置的页面逻辑。
+   + It allows SpEL expressions to be used in JSP pages, and lets JSP tags access the properties of objects. JSP is a common web view technology. Used with SpEL, it gives more flexible and dynamic page rendering. You can use SpEL expressions in JSP and access object properties inside custom tags (such as the `eval` tag). This gives more flexible and configurable page logic.
 
 7. **MapAccessor** 
 
-   + `MapAccessor` 用于在 SpEL 表达式中直接访问 Map 对象中的键值对。Map 是一种常见的数据结构，用于存储键值对的集合。通过 `MapAccessor`，可以在 SpEL 表达式中直接访问 Map 对象中的键值对，读取和设置其属性值，这为在 SpEL 中操作 Map 提供了便利。
+   + `MapAccessor` accesses the key-value pairs of a Map object directly in SpEL expressions. A Map is a common data structure that stores a set of key-value pairs. With `MapAccessor`, you can read and set the values of a Map object directly in SpEL expressions. This makes it easy to work with Maps in SpEL.
 
 8. **OptimalPropertyAccessor** 
 
-   + `OptimalPropertyAccessor` 提供了属性访问的优化实现，通常在 `ReflectivePropertyAccessor` 内部使用，用于提高属性访问的性能。通过对属性访问逻辑的优化，可以减少不必要的计算和提高执行效率，从而更加高效地访问对象的属性值。
+   + `OptimalPropertyAccessor` is an optimized implementation of property access. It is usually used inside `ReflectivePropertyAccessor` to make property access faster. By optimizing the access logic, it avoids needless work and makes execution faster, so property values are accessed more efficiently.
 
-### 七、最佳实践
+### 7. Best Practices
 
-创建了一个 SpEL 表达式解析器对象 `ExpressionParser`，然后创建了一个 `StandardEvaluationContext` 对象作为 SpEL 表达式的上下文。在上下文中设置了一个名为 `myBean` 的变量，其值为一个 `MyBean` 对象。接着，通过 `parser.parseExpression("#myBean.name")` 解析了一个 SpEL 表达式，该表达式表示访问 `myBean` 对象的 `name` 属性。最后，通过 `getValue(context, String.class)` 方法获取了属性值，并将其输出。
+This example first creates a SpEL expression parser, `ExpressionParser`. Then it creates a `StandardEvaluationContext` as the context of the SpEL expression. In the context, it sets a variable named `myBean`. Its value is a `MyBean` object. Next, `parser.parseExpression("#myBean.name")` parses a SpEL expression that accesses the `name` property of the `myBean` object. Finally, `getValue(context, String.class)` gets the property value, and the example prints it.
 
 ```java
 public class PropertyAccessorDemo {
     public static void main(String[] args)  {
-        // 创建一个SpEL表达式解析器
+        // Create a SpEL expression parser
         ExpressionParser parser = new SpelExpressionParser();
 
         StandardEvaluationContext context = new StandardEvaluationContext();
         context.setVariable("myBean",new MyBean("spring-reading"));
 
-        // 解析SpEL表达式，并使用构造函数实例化对象
+        // Parse the SpEL expression and create the object with the constructor
         String name = parser.parseExpression("#myBean.name").getValue(context, String.class);
 
         System.out.println("name = " + name);
@@ -181,7 +190,7 @@ public class PropertyAccessorDemo {
 }
 ```
 
- `MyBean` 类定义了一个简单的 Java Bean，具有一个名为 `name` 的私有字段和相应的 getter 和 setter 方法。
+ The `MyBean` class is a simple Java bean. It has a private field `name` with a getter and a setter.
 
 ```java
 public class MyBean {
@@ -209,52 +218,52 @@ public class MyBean {
 }
 ```
 
-运行结果，通过 SpEL 表达式解析器访问了对象的属性，并得到了属性值 "spring-reading"。
+Output: the SpEL expression parser accessed the property of the object and got the value "spring-reading".
 
 ```properties
 name = spring-reading
 ```
 
-### 八、与其他组件的关系
+### 8. Relationship with Other Components
 
-1. **Spring 表达式语言（SpEL）** 
+1. **Spring Expression Language (SpEL)** 
 
-   + 在 SpEL 中，`PropertyAccessor` 接口被用于访问对象的属性。SpEL 提供了一种在运行时动态求值表达式的机制，通过 `PropertyAccessor` 接口可以实现对对象属性的读写操作。
+   + In SpEL, the `PropertyAccessor` interface is used to access the properties of objects. SpEL evaluates expressions dynamically at runtime. The `PropertyAccessor` interface lets it read and write object properties.
 
-2. **Spring 数据绑定** 
+2. **Spring data binding** 
 
-   + 在 Spring 中，数据绑定是一种常见的操作，用于将用户提交的数据绑定到后端数据模型上。`PropertyAccessor` 接口提供了一种统一的方式来访问对象的属性，可以在数据绑定过程中使用。
+   + In Spring, data binding is a common task. It binds data submitted by users to a back-end data model. The `PropertyAccessor` interface gives one common way to access object properties, and it can be used during data binding.
 
-3. **Spring AOP 编程** 
+3. **Spring AOP** 
 
-   + 在 Spring 的面向切面编程（AOP）中，`PropertyAccessor` 接口可以用于访问被增强对象的属性。通过 AOP 可以实现对被增强对象的属性进行拦截、修改等操作。
+   + In Spring aspect-oriented programming (AOP), the `PropertyAccessor` interface can be used to access the properties of the advised object. With AOP, you can intercept or change the properties of the advised object.
 
-4. **Spring IOC 容器** 
+4. **Spring IoC container** 
 
-   + 在 Spring 的控制反转（IoC）容器中，`PropertyAccessor` 接口可以用于访问注册在容器中的 Bean 对象的属性。通过 IoC 容器，可以方便地管理和访问对象的属性。
+   + In the Spring inversion of control (IoC) container, the `PropertyAccessor` interface can be used to access the properties of beans registered in the container. With the IoC container, it is easy to manage and access object properties.
 
-5. **其他自定义组件** 
+5. **Other custom components** 
 
-   + 除了以上提到的场景之外，`PropertyAccessor` 接口还可以被自定义组件使用。例如，在自定义的框架或库中，可以使用 `PropertyAccessor` 接口来实现对对象属性的访问操作，以实现特定的功能或逻辑。
+   + Besides the cases above, custom components can also use the `PropertyAccessor` interface. For example, a custom framework or library can use it to access object properties for specific features or logic.
 
-### 九、常见问题
+### 9. FAQ
 
-1. **属性访问权限问题** 
+1. **Property access permission problems** 
 
-   + 在使用 `PropertyAccessor` 接口时，可能会遇到对象的属性访问权限不足的问题，导致无法读取或写入属性。这可能涉及到对象的访问控制和权限设置。
+   + When you use the `PropertyAccessor` interface, you may not have enough permission to access a property of an object. Then you cannot read or write it. This is related to access control and permission settings of the object.
 
-2. **属性命名问题** 
+2. **Property naming problems** 
 
-   + 在访问对象的属性时，可能会出现属性命名不一致的问题，例如大小写不匹配、拼写错误等，导致无法正确访问属性。
+   + When you access a property, its name may not match. For example, the case may differ or the name may be misspelled. Then the property cannot be accessed correctly.
 
-3. **属性类型转换问题** 
+3. **Property type conversion problems** 
 
-   + 在进行属性读取或写入时，可能会遇到属性类型转换失败的问题，例如尝试将一个字符串值赋给一个整数类型的属性，导致转换异常。
+   + When you read or write a property, the type conversion may fail. For example, you may try to assign a string value to an integer property, which causes a conversion exception.
 
-4. **上下文环境配置问题** 
+4. **Context configuration problems** 
 
-   + 在使用 `PropertyAccessor` 接口时，需要提供一个合适的上下文环境（如 `EvaluationContext`），可能会出现配置错误或环境设置不当的问题，导致属性访问失败。
+   + When you use the `PropertyAccessor` interface, you need to give a suitable context (such as an `EvaluationContext`). If the configuration is wrong or the context is not set properly, property access fails.
 
-5. **异常处理问题** 
+5. **Exception handling problems** 
 
-   + 在属性访问过程中，可能会出现各种异常情况，例如空指针异常、访问权限异常等，需要进行适当的异常处理以保证程序的稳定性和可靠性。
+   + Many exceptions can happen during property access, such as null pointer exceptions and access permission exceptions. Handle them properly to keep the program stable and reliable.

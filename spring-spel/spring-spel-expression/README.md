@@ -1,68 +1,68 @@
 ## Expression
 
 - [Expression](#expression)
-  - [一、基本信息](#一基本信息)
-  - [二、知识储备](#二知识储备)
-  - [三、基本描述](#三基本描述)
-  - [四、主要功能](#四主要功能)
-  - [五、接口源码](#五接口源码)
-  - [六、主要实现](#六主要实现)
-  - [七、最佳实践](#七最佳实践)
-  - [八、时序图](#八时序图)
-  - [九、源码分析](#九源码分析)
-  - [十、与其他组件的关系](#十与其他组件的关系)
-  - [十一、常见问题](#十一常见问题)
+  - [1. Overview](#1-overview)
+  - [2. Background Knowledge](#2-background-knowledge)
+  - [3. Description](#3-description)
+  - [4. Main Features](#4-main-features)
+  - [5. Interface Source](#5-interface-source)
+  - [6. Main Implementations](#6-main-implementations)
+  - [7. Best Practices](#7-best-practices)
+  - [8. Sequence Diagram](#8-sequence-diagram)
+  - [9. Source Code Analysis](#9-source-code-analysis)
+  - [10. Relationship with Other Components](#10-relationship-with-other-components)
+  - [11. FAQ](#11-faq)
 
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、知识储备
+### 2. Background Knowledge
 
-1. **表达式语言（SpEL）**
+1. **Expression language (SpEL)**
 
-   + 理解表达式语言的基本语法和功能，包括表达式的结构、操作符、函数、变量引用等。熟悉 SpEL 的使用场景和用法，以及在 Spring 中如何应用 SpEL。
+   + You should understand the basic syntax and features of an expression language. This includes the structure of expressions, operators, functions and variable references. You should know where and how SpEL is used, and how it is applied in Spring.
 
-2. **评估上下文（Evaluation Context）**
+2. **Evaluation context**
 
-   + 了解评估表达式时的上下文环境，包括根对象、变量、函数注册等。理解如何在评估表达式时提供自定义的上下文。
+   + You should know the context in which an expression is evaluated, including the root object, variables and registered functions. You should understand how to give a custom context when you evaluate an expression.
 
-3. **类型转换和类型推断**
+3. **Type conversion and type inference**
 
-   + 理解表达式的类型转换机制，以及如何进行类型推断和类型安全的表达式评估。
+   + You should understand how expressions convert types, and how to do type inference and type-safe expression evaluation.
 
-4. **使用 SpEL 解析器**
+4. **Using the SpEL parser**
 
-   + 熟悉如何使用 `SpelExpressionParser` 类来解析表达式字符串并创建 `Expression` 对象，以及如何对表达式进行评估。
+   + You should know how to use the `SpelExpressionParser` class to parse an expression string into an `Expression` object, and how to evaluate the expression.
 
-### 三、基本描述
+### 3. Description
 
-`Expression` 接口是 Spring Framework 中表达式语言（SpEL）模块的关键组件之一，它定义了评估表达式和获取表达式字符串表示形式的方法。通过该接口，我们可以使用 SpEL 强大的语法对对象进行动态查询和操作，实现了在 Spring 应用程序中灵活地处理配置、条件和数据转换等需求。该接口的实现类通常由 `SpelExpressionParser` 解析表达式字符串而创建，为 Spring 框架提供了一种便捷的方式来实现动态性和可扩展性。
+The `Expression` interface is one of the key components of the expression language (SpEL) module in the Spring Framework. It defines methods to evaluate an expression and to get the string form of the expression. With this interface, we can use the powerful syntax of SpEL to query and operate on objects dynamically. This helps Spring applications handle configuration, conditions and data conversion in a flexible way. Implementations of this interface are usually created when `SpelExpressionParser` parses an expression string. They give the Spring Framework an easy way to be dynamic and extensible.
 
-### 四、主要功能
+### 4. Main Features
 
-1. **表达式求值（Evaluation）**
+1. **Evaluation**
 
-   + 该接口允许我们对表达式进行求值，从而获取表达式的结果。通过调用 `getValue()` 方法，可以在指定的评估上下文（Evaluation Context）中对表达式进行求值，并返回结果。这使得我们可以动态地在运行时获取表达式的结果，从而实现各种灵活的逻辑和业务需求。
+   + The interface lets us evaluate an expression and get its result. When you call the `getValue()` method, the expression is evaluated in the given evaluation context and the result is returned. So we can get the result of an expression dynamically at runtime. This supports many flexible logic and business needs.
 
-2. **类型转换（Type Conversion）**
+2. **Type conversion**
 
-   + `Expression` 接口允许我们指定期望的结果类型，并在求值过程中进行类型转换。通过调用带有 `expectedType` 参数的 `getValue()` 方法，可以将表达式的结果转换为指定的目标类型。这对于确保表达式求值结果的类型安全性非常重要，并且能够避免类型转换错误。
+   + The `Expression` interface lets us set the type we expect for the result, and the value is converted during evaluation. When you call the `getValue()` method with an `expectedType` parameter, the result is converted to the given target type. This is important to keep the result type safe, and it avoids type conversion errors.
 
-3. **获取表达式字符串（Get Expression String）**
+3. **Get the expression string**
 
-   + `Expression` 接口提供了 `getExpressionString()` 方法，用于获取表达式的字符串表示形式。这对于调试和日志记录非常有用，可以方便地查看表达式的实际内容，以便进行问题排查和分析。
+   + The `Expression` interface has a `getExpressionString()` method. It returns the string form of the expression. This is useful for debugging and logging. You can easily see the real content of the expression to find and analyze problems.
 
-### 五、接口源码
+### 5. Interface Source
 
-`Expression` 接口是 Spring Framework 中表达式语言（SpEL）模块的核心组件之一，它封装了先前解析的表达式字符串，并提供了获取原始表达式字符串和在默认标准上下文中对表达式进行评估的方法。
+The `Expression` interface is one of the core components of the expression language (SpEL) module in the Spring Framework. It wraps an expression string that was parsed before. It has methods to get the original expression string and to evaluate the expression in the default standard context.
 
 ```java
 /**
- * 一个能够针对上下文对象自我评估的表达式。
- * 封装了先前解析的表达式字符串的细节。
- * 提供了对表达式评估的通用抽象。
+ * An expression capable of evaluating itself against context objects.
+ * Encapsulates the details of a previously parsed expression string.
+ * Provides a common abstraction for expression evaluation.
  *
  * @author Keith Donald
  * @author Andy Clement
@@ -72,88 +72,88 @@
 public interface Expression {
 
 	/**
-	 * 返回用于创建此表达式的原始字符串（未修改）。
-	 * @return 原始表达式字符串
+	 * Return the original string used to create this expression (unmodified).
+	 * @return the original expression string
 	 */
 	String getExpressionString();
 
 	/**
-	 * 在默认标准上下文中评估此表达式。
-	 * @return 评估结果
-	 * @throws EvaluationException 如果在评估过程中出现问题
+	 * Evaluate this expression in the default standard context.
+	 * @return the evaluation result
+	 * @throws EvaluationException if there is a problem during evaluation
 	 */
 	@Nullable
 	Object getValue() throws EvaluationException;
 
-	// ... [代码部分省略以简化]
+	// ... [code omitted for brevity]
 }
 ```
 
-### 六、主要实现
+### 6. Main Implementations
 
 1. **CompositeStringExpression**
-   + 用于表示复合字符串表达式，它由多个子表达式组成，每个子表达式都是一个字符串。
+   + It represents a composite string expression. It is made of several sub-expressions, and each sub-expression is a string.
    
 2. **LiteralExpression**
-   + 用于表示字面值表达式，即直接返回给定的字面值，不进行任何计算或解析。
+   + It represents a literal expression. It returns the given literal value directly, without any calculation or parsing.
    
 3. **SpelExpression**
-+ SpEL 的默认实现之一，用于对 SpEL 表达式进行求值。
++ One of the default implementations of SpEL. It evaluates SpEL expressions.
 
-### 七、最佳实践
+### 7. Best Practices
 
-使用 Spring Expression Language（SpEL）解析器来解析并求值一个基本的数学表达式。首先，创建了一个 SpEL 解析器实例，然后使用该解析器将字符串表达式 `"100 + 10"` 解析成一个 `Expression` 对象。接着，通过调用 `getValue(Integer.class)` 方法计算表达式的值，并将结果打印输出。
+This example uses the Spring Expression Language (SpEL) parser to parse and evaluate a basic math expression. First, it creates a SpEL parser instance. Then it uses the parser to parse the string expression `"100 + 10"` into an `Expression` object. Next, it calls `getValue(Integer.class)` to compute the value of the expression, and prints the result.
 
 ```java
 public class ExpressionDemo {
     public static void main(String[] args) {
-        // 创建解析器实例
+        // Create the parser instance
         ExpressionParser parser = new SpelExpressionParser();
-        // 解析基本表达式
+        // Parse a basic expression
         Expression expression = parser.parseExpression("100 + 10");
-        // 为表达式计算结果
+        // Compute the expression result
         Integer result = expression.getValue(Integer.class);
-        System.out.println("表达式 '100 + 10' 的结果为: " + result);
+        System.out.println("Result of expression '100 + 10': " + result);
     }
 }
 ```
 
-运行结果，`Expression` 如何能够处理包括数学运算和变量替换在内的复杂表达式，并准确地计算出结果。
+Output: this shows that `Expression` can handle expressions such as math operations, and it computes the result correctly.
 
 ```properties
-表达式 '100 + 10' 的结果为: 110
+Result of expression '100 + 10': 110
 ```
 
-### 八、时序图
+### 8. Sequence Diagram
 
 ~~~mermaid
 sequenceDiagram
     autonumber
-    title: Expression时序图
+    title: Expression Sequence Diagram
     
 ExpressionDemo->>SpelExpression: getValue(expectedResultType)
-Note over ExpressionDemo,SpelExpression: 发起表达式求值请求
+Note over ExpressionDemo,SpelExpression: Send the expression evaluation request
 SpelExpression->>SpelNodeImpl: getTypedValue(expressionState)
-Note over SpelExpression,SpelNodeImpl: 调用内部节点获取值
+Note over SpelExpression,SpelNodeImpl: Call the inner node to get the value
 SpelNodeImpl->>OpPlus: getValueInternal(state)
-Note over SpelNodeImpl,OpPlus: 处理加法操作
-OpPlus->>SpelNodeImpl: 返回 TypedValue
-Note over OpPlus,SpelNodeImpl: 返回加法结果
-SpelNodeImpl->>SpelExpression: 返回 TypedValue
-Note over SpelNodeImpl,SpelExpression: 将结果返回给 SpEL 表达式
+Note over SpelNodeImpl,OpPlus: Handle the addition
+OpPlus->>SpelNodeImpl: Return TypedValue
+Note over OpPlus,SpelNodeImpl: Return the addition result
+SpelNodeImpl->>SpelExpression: Return TypedValue
+Note over SpelNodeImpl,SpelExpression: Return the result to the SpEL expression
 SpelExpression->>ExpressionUtils: convertTypedValue(context,typedValue,targetType)
-Note over SpelExpression,ExpressionUtils: 转换结果类型
-ExpressionUtils->>SpelExpression: 返回 SpEL 表达式结果
-Note over ExpressionUtils,SpelExpression: 返回转换后的结果
-SpelExpression->>ExpressionDemo: 返回 SpEL 表达式结果
-Note over SpelExpression,ExpressionDemo: 返回表达式求值结果
+Note over SpelExpression,ExpressionUtils: Convert the result type
+ExpressionUtils->>SpelExpression: Return the SpEL expression result
+Note over ExpressionUtils,SpelExpression: Return the converted result
+SpelExpression->>ExpressionDemo: Return the SpEL expression result
+Note over SpelExpression,ExpressionDemo: Return the expression evaluation result
 ~~~
 
 
 
-### 九、源码分析
+### 9. Source Code Analysis
 
-在`org.springframework.expression.spel.standard.SpelExpression#getValue(expectedResultType)`方法中，首先检查是否已经编译了表达式（通过检查 `compiledAst` 是否为 null），如果已编译，则尝试在编译后的抽象语法树上进行表达式求值。如果编译后的求值过程中出现异常，并且编译模式为 `SpelCompilerMode.MIXED`，则会将表达式恢复为解释模式。如果编译模式为 `SpelCompilerMode.IMMEDIATE`，则将异常抛出给调用者。如果尚未编译表达式，则在解释模式下对表达式进行求值。
+In the `org.springframework.expression.spel.standard.SpelExpression#getValue(expectedResultType)` method, it first checks whether the expression is already compiled (by checking that `compiledAst` is not null). If it is compiled, it tries to evaluate the expression on the compiled abstract syntax tree. If an exception happens during compiled evaluation and the compiler mode is `SpelCompilerMode.MIXED`, the expression goes back to interpreted mode. If the compiler mode is `SpelCompilerMode.IMMEDIATE`, the exception is thrown to the caller. If the expression is not compiled yet, it is evaluated in interpreted mode.
 
 ```java
 @Override
@@ -162,42 +162,42 @@ public <T> T getValue(@Nullable Class<T> expectedResultType) throws EvaluationEx
     CompiledExpression compiledAst = this.compiledAst;
     if (compiledAst != null) {
         try {
-            // 获取评估上下文
+            // Get the evaluation context
             EvaluationContext context = getEvaluationContext();
-            // 在编译后的抽象语法树上评估表达式
+            // Evaluate the expression on the compiled abstract syntax tree
             Object result = compiledAst.getValue(context.getRootObject().getValue(), context);
-            // 如果期望的结果类型为 null，则直接返回结果
+            // If the expected result type is null, return the result directly
             if (expectedResultType == null) {
                 return (T) result;
             } else {
-                // 否则将结果转换为期望的结果类型
+                // Otherwise convert the result to the expected result type
                 return ExpressionUtils.convertTypedValue(getEvaluationContext(), new TypedValue(result), expectedResultType);
             }
         } catch (Throwable ex) {
-            // 如果运行在混合模式下，则回退到解释模式
+            // In mixed mode, fall back to interpreted mode
             if (this.configuration.getCompilerMode() == SpelCompilerMode.MIXED) {
-                // 恢复为解释模式
+                // Go back to interpreted mode
                 this.compiledAst = null;
-                // 重置解释计数器
+                // Reset the interpretation counter
                 this.interpretedCount.set(0);
             } else {
-                // 如果运行在即时编译模式下，将异常传播给调用者
+                // In immediate compilation mode, pass the exception to the caller
                 throw new SpelEvaluationException(ex, SpelMessage.EXCEPTION_RUNNING_COMPILED_EXPRESSION);
             }
         }
     }
 
-    // 如果尚未编译表达式，则在解释模式下评估表达式
+    // If the expression is not compiled yet, evaluate it in interpreted mode
     ExpressionState expressionState = new ExpressionState(getEvaluationContext(), this.configuration);
     TypedValue typedResultValue = this.ast.getTypedValue(expressionState);
-    // 检查编译状态
+    // Check the compile state
     checkCompile(expressionState);
-    // 将结果转换为期望的结果类型并返回
+    // Convert the result to the expected result type and return it
     return ExpressionUtils.convertTypedValue(expressionState.getEvaluationContext(), typedResultValue, expectedResultType);
 }
 ```
 
-在`org.springframework.expression.spel.ast.SpelNodeImpl#getTypedValue`方法中，调用了 `getValueInternal()` 方法来获取表达式的值，并将其封装为 `TypedValue` 对象返回。这个方法用于在给定的表达式状态下获取表达式的值。
+The `org.springframework.expression.spel.ast.SpelNodeImpl#getTypedValue` method calls `getValueInternal()` to get the value of the expression. It wraps the value in a `TypedValue` object and returns it. This method gets the value of the expression in the given expression state.
 
 ```java
 @Override
@@ -206,28 +206,28 @@ public final TypedValue getTypedValue(ExpressionState expressionState) throws Ev
 }
 ```
 
-在`org.springframework.expression.spel.ast.OpPlus#getValueInternal`方法中，首先，它检查表达式的左操作数，如果只有一个操作数，则执行一元加法操作；如果有两个操作数，则执行加法操作。在执行加法操作时，它会根据操作数的类型进行相应的类型转换和计算，并返回计算结果。
+In the `org.springframework.expression.spel.ast.OpPlus#getValueInternal` method, it first checks the left operand. If there is only one operand, it does a unary plus. If there are two operands, it does an addition. For the addition, it converts and calculates according to the types of the operands, and returns the result.
 
 ```java
 /**
- * 执行表达式的内部求值逻辑，主要用于处理加法操作。
+ * Internal evaluation logic of the expression, mainly for the addition operation.
  * 
- * @param state 表达式的状态
- * @return 表达式的求值结果
- * @throws EvaluationException 如果在求值过程中出现问题
+ * @param state the state of the expression
+ * @return the result of the expression
+ * @throws EvaluationException if there is a problem during evaluation
  */
 @Override
 public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
-    // 获取左操作数
+    // Get the left operand
     SpelNodeImpl leftOp = getLeftOperand();
 
-    // 如果只有一个操作数，则执行一元加法操作
+    // If there is only one operand, do a unary plus
     if (this.children.length < 2) {
-        // 获取左操作数的值
+        // Get the value of the left operand
         Object operandOne = leftOp.getValueInternal(state).getValue();
-        // 如果左操作数是数字类型，则直接返回该数字
+        // If the left operand is a number, return the number directly
         if (operandOne instanceof Number) {
-            // 根据数字类型设置返回值的类型描述符
+            // Set the type descriptor of the return value by the number type
             if (operandOne instanceof Double) {
                 this.exitTypeDescriptor = "D";
             } else if (operandOne instanceof Float) {
@@ -239,133 +239,133 @@ public TypedValue getValueInternal(ExpressionState state) throws EvaluationExcep
             }
             return new TypedValue(operandOne);
         }
-        // 如果左操作数不是数字类型，则进行加法操作
+        // If the left operand is not a number, do the addition operation
         return state.operate(Operation.ADD, operandOne, null);
     }
 
-    // 获取左操作数的值
+    // Get the value of the left operand
     TypedValue operandOneValue = leftOp.getValueInternal(state);
     Object leftOperand = operandOneValue.getValue();
-    // 获取右操作数的值
+    // Get the value of the right operand
     TypedValue operandTwoValue = getRightOperand().getValueInternal(state);
     Object rightOperand = operandTwoValue.getValue();
 
-    // 如果左右操作数都是数字类型，则执行加法操作
+    // If both operands are numbers, do the addition
     if (leftOperand instanceof Number && rightOperand instanceof Number) {
         Number leftNumber = (Number) leftOperand;
         Number rightNumber = (Number) rightOperand;
-        // 处理不同类型的数字相加的情况
+        // Handle adding numbers of different types
         if (...) {
-            // 处理 BigDecimal 相加
+            // Add BigDecimal values
         } else if (...) {
-            // 处理 Double 相加
+            // Add Double values
         } else if (...) {
-            // 处理 Float 相加
+            // Add Float values
         } else if (...) {
-            // 处理 BigInteger 相加
+            // Add BigInteger values
         } else if (...) {
-            // 处理 Long 相加
+            // Add Long values
         } else if (...) {
-            // 处理 Integer 相加
+            // Add Integer values
         } else {
-            // 处理其他未知类型的相加，最佳猜测为 double 相加
+            // Add other unknown types, best guess is to add as double
         }
     }
 
-    // 如果左右操作数都是字符串类型，则执行字符串连接操作
+    // If both operands are strings, join the strings
     if (leftOperand instanceof String && rightOperand instanceof String) {
         this.exitTypeDescriptor = "Ljava/lang/String";
         return new TypedValue((String) leftOperand + rightOperand);
     }
 
-    // 如果左操作数是字符串，则将右操作数转换为字符串并执行字符串连接操作
+    // If the left operand is a string, convert the right operand to a string and join them
     if (leftOperand instanceof String) {
         return new TypedValue(
             leftOperand + (rightOperand == null ? "null" : convertTypedValueToString(operandTwoValue, state)));
     }
 
-    // 如果右操作数是字符串，则将左操作数转换为字符串并执行字符串连接操作
+    // If the right operand is a string, convert the left operand to a string and join them
     if (rightOperand instanceof String) {
         return new TypedValue(
             (leftOperand == null ? "null" : convertTypedValueToString(operandOneValue, state)) + rightOperand);
     }
 
-    // 如果左右操作数不是数字类型或字符串类型，则执行加法操作
+    // If the operands are neither numbers nor strings, do the addition operation
     return state.operate(Operation.ADD, leftOperand, rightOperand);
 }
 ```
 
-在`org.springframework.expression.common.ExpressionUtils#convertTypedValue`方法中，首先，它获取 `TypedValue` 中的值，并检查目标类型是否为 null，如果是则直接返回值。然后，如果给定了评估上下文 `context`，则使用上下文的类型转换器将值转换为目标类型。如果没有给定上下文，则尝试使用 `ClassUtils.isAssignableValue()` 方法检查值是否可以直接赋值给目标类型。
+In the `org.springframework.expression.common.ExpressionUtils#convertTypedValue` method, it first gets the value from the `TypedValue` and checks whether the target type is null. If it is null, the value is returned directly. Then, if an evaluation context `context` is given, the type converter of the context converts the value to the target type. If no context is given, it uses `ClassUtils.isAssignableValue()` to check whether the value can be assigned to the target type directly.
 
 ```java
 @Nullable
 public static <T> T convertTypedValue(
         @Nullable EvaluationContext context, TypedValue typedValue, @Nullable Class<T> targetType) {
 
-    // 获取 TypedValue 中的值
+    // Get the value of the TypedValue
     Object value = typedValue.getValue();
-    // 如果目标类型为 null，则直接返回值
+    // If the target type is null, return the value directly
     if (targetType == null) {
         return (T) value;
     }
-    // 如果给定了评估上下文，则使用上下文的类型转换器进行转换
+    // If an evaluation context is given, convert with the type converter of the context
     if (context != null) {
         return (T) context.getTypeConverter().convertValue(
                 value, typedValue.getTypeDescriptor(), TypeDescriptor.valueOf(targetType));
     }
-    // 如果没有给定评估上下文，则尝试直接将值转换为目标类型
+    // If no evaluation context is given, try to use the value as the target type directly
     if (ClassUtils.isAssignableValue(targetType, value)) {
         return (T) value;
     }
-    // 如果无法进行转换，则抛出异常
+    // If it cannot be converted, throw an exception
     throw new EvaluationException("Cannot convert value '" + value + "' to type '" + targetType.getName() + "'");
 }
 ```
 
-### 十、与其他组件的关系
+### 10. Relationship with Other Components
 
 1. **SpelExpressionParser**
 
-   + `SpelExpressionParser` 类是用于解析表达式字符串并创建 `Expression` 对象的工厂类。它与 `Expression` 接口的关系是，通过调用 `parseExpression()` 方法创建 `Expression` 实例，从而实现对表达式的解析和处理。
+   + The `SpelExpressionParser` class is a factory class that parses expression strings and creates `Expression` objects. Its relation to the `Expression` interface is that it creates `Expression` instances by calling `parseExpression()`, so expressions are parsed and handled.
 
 2. **EvaluationContext**
 
-   + `EvaluationContext` 接口定义了表达式的评估上下文，包括根对象、变量和函数注册等。`Expression` 接口通常需要一个 `EvaluationContext` 对象来执行表达式的求值操作。
+   + The `EvaluationContext` interface defines the evaluation context of an expression, including the root object, variables and registered functions. The `Expression` interface usually needs an `EvaluationContext` object to evaluate the expression.
 
 3. **TypedValue**
 
-   + `TypedValue` 类用于表示表达式的求值结果，包括值本身和值的类型描述符。在 `Expression` 接口的实现中，常常需要创建 `TypedValue` 对象来表示表达式的结果。
+   + The `TypedValue` class represents the result of an expression evaluation. It holds the value and the type descriptor of the value. Implementations of the `Expression` interface often create `TypedValue` objects to represent the result of an expression.
 
 4. **ExpressionParser**
 
-   + `ExpressionParser` 接口是用于解析表达式字符串并创建 `Expression` 对象的顶级接口，它定义了解析器的基本功能。`SpelExpressionParser` 类实现了 `ExpressionParser` 接口，因此与 `Expression` 接口的关系是，它是用于创建 `Expression` 实例的具体实现之一。
+   + The `ExpressionParser` interface is the top-level interface that parses expression strings and creates `Expression` objects. It defines the basic features of a parser. The `SpelExpressionParser` class implements `ExpressionParser`, so it is one concrete implementation that creates `Expression` instances.
 
 5. **EvaluationException**
 
-   + `EvaluationException` 类是用于表示表达式求值过程中的异常情况，如语法错误、类型转换错误等。`Expression` 接口的实现通常会抛出 `EvaluationException` 异常来指示求值过程中出现的问题。
+   + The `EvaluationException` class represents errors during expression evaluation, such as syntax errors and type conversion errors. Implementations of the `Expression` interface usually throw `EvaluationException` to report problems during evaluation.
 
-### 十一、常见问题
+### 11. FAQ
 
-1. **表达式语法错误**
+1. **Expression syntax errors**
 
-   + 在编写表达式时可能会出现语法错误，例如括号未匹配、操作符使用错误等。
+   + You may make syntax errors when you write an expression, such as unmatched brackets or a wrong operator.
 
-2. **类型转换错误**
+2. **Type conversion errors**
 
-   + 当表达式中的操作数类型与预期的结果类型不匹配时，可能会导致类型转换错误，例如将字符串转换为数字或将对象转换为不兼容的类型。
+   + When the type of an operand does not match the expected result type, a type conversion error can happen. For example, converting a string to a number, or an object to an incompatible type.
 
-3. **空指针异常**
+3. **Null pointer exceptions**
 
-   + 如果在评估表达式时上下文对象为 null，或者表达式中涉及到的对象属性为 null，可能会导致空指针异常。
+   + If the context object is null when you evaluate an expression, or a property of an object in the expression is null, a null pointer exception may happen.
 
-4. **表达式求值效率低下**
+4. **Slow expression evaluation**
 
-   + 某些复杂的表达式可能会导致求值效率较低，特别是在大数据量或高并发情况下。
+   + Some complex expressions can be slow to evaluate, especially with large data or high concurrency.
 
-5. **错误的结果**
+5. **Wrong results**
 
-   + 由于表达式求值逻辑错误或表达式解析错误，可能会导致错误的结果返回。
+   + A wrong evaluation logic or a wrong expression parse can return a wrong result.
 
-6. **不支持的操作**
+6. **Unsupported operations**
 
-   + 某些表达式可能包含不受支持的操作或函数调用，这可能会导致求值过程中抛出异常。
+   + Some expressions may contain operations or function calls that are not supported. This can throw an exception during evaluation.

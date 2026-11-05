@@ -6,12 +6,12 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 public class ExpressionDemo {
     public static void main(String[] args) {
-        // 创建解析器实例
+        // Create the parser instance
         ExpressionParser parser = new SpelExpressionParser();
-        // 解析基本表达式
+        // Parse a basic expression
         Expression expression = parser.parseExpression("100 + 10");
-        // 为表达式计算结果
+        // Compute the expression result
         Integer result = expression.getValue(Integer.class);
-        System.out.println("表达式 '100 + 10' 的结果为: " + result);
+        System.out.println("Result of expression '100 + 10': " + result);
     }
 }

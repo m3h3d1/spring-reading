@@ -1,72 +1,73 @@
 ## BeanResolver
 
-- [BeanResolver](#BeanResolver)
-    - [一、基本信息](#一基本信息)
-    - [二、知识储备](#二知识储备)
-    - [三、基本描述](#三基本描述)
-    - [四、主要功能](#四主要功能)
-    - [五、接口源码](#五接口源码)
-    - [六、主要实现](#六主要实现)
-    - [七、最佳实践](#七最佳实践)
-    - [八、与其他组件的关系](#八与其他组件的关系)
-    - [九、常见问题](#九常见问题)
+- [BeanResolver](#beanresolver)
+    - [1. Overview](#1-overview)
+    - [2. Background Knowledge](#2-background-knowledge)
+    - [3. Description](#3-description)
+    - [4. Main Features](#4-main-features)
+    - [5. Interface Source](#5-interface-source)
+    - [6. Main Implementations](#6-main-implementations)
+    - [7. Best Practices](#7-best-practices)
+    - [8. Relationship with Other Components](#8-relationship-with-other-components)
+    - [9. FAQ](#9-faq)
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、知识储备
+### 2. Background Knowledge
 
-1. **Spring表达式语言（SpEL）**
+1. **Spring Expression Language (SpEL)**
 
-   + 了解SpEL的语法和用法，包括如何使用表达式来访问和操作对象的属性、调用方法等。因为`BeanResolver`通常用于在SpEL中解析Bean，所以对SpEL的理解至关重要。
+   + You should know the syntax and usage of SpEL, such as how to use expressions to access properties of objects and call methods. `BeanResolver` is mostly used to resolve beans in SpEL, so it is important to understand SpEL.
 
-2. **Spring容器**
+2. **Spring container**
 
-   + 理解Spring容器的概念和工作原理，包括BeanFactory和ApplicationContext之间的区别、Bean的生命周期、Bean的作用域等。因为`BeanResolver`通常用于从Spring容器中解析Bean，所以对Spring容器的了解是必要的。
+   + You should understand what the Spring container is and how it works. This includes the difference between BeanFactory and ApplicationContext, the bean lifecycle, and bean scopes. `BeanResolver` is mostly used to resolve beans from the Spring container, so you need to know the container.
 
-3. **反射（Reflection）**
+3. **Reflection**
 
-   + 理解Java反射的基本原理和用法，包括如何在运行时获取和操作类的信息。`BeanResolver`通常需要使用反射来动态地创建和操作对象，所以对反射有一定的了解是很有帮助的。
+   + You should know the basics of Java reflection, such as how to get and use class information at runtime. `BeanResolver` often uses reflection to create and work with objects, so some knowledge of reflection helps.
 
-4. **设计模式**
+4. **Design patterns**
 
-   + 了解设计模式的基本原理和常见的设计模式，如工厂模式、策略模式等。因为`BeanResolver`接口通常用于实现依赖注入等功能，对设计模式的了解有助于编写更灵活、可扩展的解决方案。
+   + You should know the basics of design patterns and common ones, such as the factory pattern and the strategy pattern. The `BeanResolver` interface is often used for features like dependency injection. Knowing design patterns helps you write more flexible and extensible solutions.
 
-### 三、基本描述
+### 3. Description
 
-`BeanResolver`接口是Spring框架中的一个关键接口，用于在Spring表达式语言（SpEL）中解析Bean。它定义了一个`resolve`方法，接收一个`EvaluationContext`对象和一个Bean的名称作为参数，然后返回相应的Bean实例。通过实现`BeanResolver`接口，可以在SpEL表达式中轻松地引用和操作Spring容器中的Bean，使得表达式更加灵活和强大。
+The `BeanResolver` interface is a key interface in the Spring Framework. It resolves beans in the Spring Expression Language (SpEL). It defines a `resolve` method. The method takes an `EvaluationContext` and a bean name, and returns the matching bean instance. By implementing `BeanResolver`, you can refer to beans of the Spring container in SpEL expressions and work with them. This makes expressions more flexible and powerful.
 
-### 四、主要功能
+### 4. Main Features
 
-1. **解析Bean**
+1. **Resolve beans**
 
-   + 提供了解析Bean的方法，可以根据给定的Bean名称从Spring容器中获取相应的Bean实例。这样可以在运行时动态地获取和操作Spring容器中的Bean。
+   + It provides a method to get a bean instance from the Spring container by bean name. You can get and use beans of the Spring container at runtime.
 
-2. **支持SpEL**
+2. **SpEL support**
 
-   + 作为Spring表达式语言（SpEL）的一部分，`BeanResolver`允许在SpEL表达式中引用和操作Spring容器中的Bean。通过`BeanResolver`，可以在表达式中使用特殊的语法来引用Bean，并进行各种操作，如访问属性、调用方法等。
+   + As part of the Spring Expression Language (SpEL), `BeanResolver` lets you refer to beans of the Spring container in SpEL expressions. You use a special syntax in the expression to refer to a bean. Then you can do things like access properties and call methods.
 
-3. **提供上下文支持**
+3. **Context support**
 
-   + `BeanResolver`接口通常与`EvaluationContext`对象一起使用，它提供了表达式所需的上下文信息，包括变量、函数等。这样可以确保在解析Bean时具有必要的上下文信息。
+   + The `BeanResolver` interface is usually used with an `EvaluationContext` object. The context gives the expression the information it needs, such as variables and functions. This makes sure the needed context is available when a bean is resolved.
 
-4. **定制解析逻辑**
+4. **Custom resolving logic**
 
-   + 尽管默认情况下`BeanResolver`的实现由Spring容器提供，但你可以根据需要自定义`BeanResolver`的实现。这样可以灵活地定制Bean的解析逻辑，以满足特定的业务需求。例如，你可以实现一个特殊的`BeanResolver`，用于按照特定的规则解析Bean，或者从非标准的地方获取Bean实例。
+   + By default, the Spring container provides the `BeanResolver` implementation. But you can write your own if you need to. This lets you customize how beans are resolved to fit your business needs. For example, you can write a `BeanResolver` that resolves beans by special rules, or gets bean instances from a non-standard place.
 
-5. **解耦业务逻辑**
+5. **Decoupling business logic**
 
-   + 通过使用`BeanResolver`，可以将业务逻辑与具体的Bean获取方式解耦。这样，在不同的环境或场景下，可以轻松地切换和替换`BeanResolver`的实现，而不影响业务逻辑的其他部分。
+   + With `BeanResolver`, you can separate business logic from the way beans are obtained. In different environments or cases, you can switch the `BeanResolver` implementation easily. The rest of the business logic is not affected.
 
-### 五、接口源码
+### 5. Interface Source
 
-`BeanResolver` 接口允许在Spring的表达式语言（SpEL）中解析Bean引用。通过注册到评估上下文中，它可以根据给定的Bean名称查找相应的实例，支持使用 `@myBeanName` 和 `&myBeanName` 表达式来引用Bean，其中 `&` 前缀允许访问工厂Bean。
+The `BeanResolver` interface resolves bean references in the Spring Expression Language (SpEL). It is registered in the evaluation context. It finds the instance for a given bean name. It supports the `@myBeanName` and `&myBeanName` expressions to refer to beans. The `&` prefix gives access to a factory bean.
 
 ```java
 /**
- * BeanResolver接口可以注册到评估上下文中，并且会为Bean引用 {@code @myBeanName} 和 {@code &myBeanName} 表达式提供解析支持。
- * 当需要访问工厂Bean时，{@code &} 变体语法允许访问工厂Bean。
+ * A bean resolver can be registered with the evaluation context and will kick in
+ * for {@code @myBeanName} and {@code &myBeanName} expressions. The {@code &} variant
+ * syntax allows access to a factory bean.
  *
  * @author Andy Clement
  * @since 3.0.3
@@ -74,23 +75,24 @@
 public interface BeanResolver {
 
     /**
-     * 根据给定的名称查找Bean，并返回相应的实例。
-     * 对于尝试访问工厂Bean，名称需要以 <tt>&</tt> 前缀。
-     * @param context 当前的评估上下文
-     * @param beanName 要查找的Bean的名称
-     * @return 表示Bean的对象
-     * @throws AccessException 如果解析Bean时出现意外问题
+     * Look up the bean by the given name and return the corresponding instance for it.
+     * For attempting access to a factory bean, the name needs a {@code &} prefix.
+     * @param context the current evaluation context
+     * @param beanName the name of the bean to look up
+     * @return an object representing the bean
+     * @throws AccessException if there is an unexpected problem resolving the bean
      */
     Object resolve(EvaluationContext context, String beanName) throws AccessException;
 
 }
 ```
 
- `BeanFactoryResolver` 实现了 `BeanResolver` 接口，用于在Spring的Bean工厂中解析Bean。它包含一个构造函数用于初始化，并实现了 `resolve` 方法来根据给定的Bean名称从Bean工厂中获取相应的Bean实例。
+`BeanFactoryResolver` implements the `BeanResolver` interface. It resolves beans in a Spring bean factory. It has a constructor for setup. It implements the `resolve` method to get the bean instance from the bean factory by the given bean name.
 
 ```java
 /**
- * 用于与Spring的Bean工厂交互的EL bean解析器。
+ * EL bean resolver that operates against a Spring
+ * {@link org.springframework.beans.factory.BeanFactory}.
  * 
  * @author Juergen Hoeller
  * @since 3.0.4
@@ -100,9 +102,9 @@ public class BeanFactoryResolver implements BeanResolver {
 	private final BeanFactory beanFactory;
 
 	/**
-	 * 为给定的工厂创建一个新的BeanFactoryResolver。
+	 * Create a new {@code BeanFactoryResolver} for the given factory.
 	 * 
-	 * @param beanFactory 要解析Bean名称的Bean工厂
+	 * @param beanFactory the {@code BeanFactory} to resolve bean names against
 	 */
 	public BeanFactoryResolver(BeanFactory beanFactory) {
 		Assert.notNull(beanFactory, "BeanFactory must not be null");
@@ -114,81 +116,81 @@ public class BeanFactoryResolver implements BeanResolver {
 		try {
 			return this.beanFactory.getBean(beanName);
 		} catch (BeansException ex) {
-			throw new AccessException("无法根据Bean工厂解析Bean引用", ex);
+			throw new AccessException("Could not resolve bean reference against BeanFactory", ex);
 		}
 	}
 
 }
 ```
 
-### 六、主要实现
+### 6. Main Implementations
 
 1. **BeanFactoryResolver**
 
-   + `BeanFactoryResolver` 是一个实现了 `BeanResolver` 接口的类，在 Spring 框架中用于从 Bean 工厂中解析 Bean。通过构造函数接收一个 BeanFactory 实例，在调用 resolve 方法时，根据给定的 Bean 名称从 BeanFactory 中获取相应的 Bean 实例。
+   + `BeanFactoryResolver` is a class that implements the `BeanResolver` interface. In the Spring Framework, it resolves beans from a bean factory. It takes a BeanFactory instance in its constructor. When you call the resolve method, it gets the bean instance from the BeanFactory by the given bean name.
 
-### 七、最佳实践
+### 7. Best Practices
 
-使用 `BeanResolver` 接口和 `BeanFactoryResolver` 实现类来解析 Spring 容器中的 Bean。首先，通过注解配置方式创建了一个 BeanFactory，然后使用 SpEL 表达式解析器解析表达式 `@myBean`，并将 `BeanFactoryResolver` 设置为评估上下文的 BeanResolver。最后，通过解析 SpEL 表达式获取到相应的 Bean 实例，并进行打印输出。
+This example uses the `BeanResolver` interface and the `BeanFactoryResolver` class to resolve beans in the Spring container. First, it creates a BeanFactory from annotation configuration. Then it uses a SpEL expression parser to parse the expression `@myBean`, and sets `BeanFactoryResolver` as the BeanResolver of the evaluation context. Finally, it gets the bean instance by parsing the SpEL expression and prints it.
 
 ```java
 public class BeanResolverDemo {
     public static void main(String[] args) {
-        // 创建 BeanFactory
-        // 这里使用注解配置的方式创建 BeanFactory
+        // Create a BeanFactory
+        // Here the BeanFactory is created from annotation configuration
         BeanFactory beanFactory = new AnnotationConfigApplicationContext(MyBean.class).getBeanFactory();
 
-        // 创建一个SpEL表达式解析器
+        // Create a SpEL expression parser
         ExpressionParser parser = new SpelExpressionParser();
 
-        // 创建一个标准的评估上下文
+        // Create a standard evaluation context
         StandardEvaluationContext context = new StandardEvaluationContext();
-        // 将 BeanFactoryResolver 设置为上下文的 BeanResolver
+        // Set BeanFactoryResolver as the BeanResolver of the context
         context.setBeanResolver(new BeanFactoryResolver(beanFactory));
 
-        // 解析 SpEL 表达式，获取 Bean 实例
+        // Parse the SpEL expression to get the bean instance
         Object myBean = parser.parseExpression("@myBean").getValue(context);
 
-        // 打印 Bean 实例
+        // Print the bean instance
         System.out.println("myBean = " + myBean);
     }
 }
 ```
 
-运行结果，表达式 `@myBean` 成功解析，并获取到了名为 `myBean` 的 Bean 实例。
+Output: the expression `@myBean` is resolved, and the bean instance named `myBean` is returned.
 
 ```properties
 myBean = com.xcs.spring.MyBean@34123d65
 ```
 
-### 八、与其他组件的关系
+### 8. Relationship with Other Components
 
 1. **ExpressionParser**
 
-   +  `ExpressionParser` 是 Spring 框架中用于解析表达式的接口，它通常与 `BeanResolver` 接口一起使用。`ExpressionParser` 负责解析 SpEL 表达式，而 `BeanResolver` 则负责解析表达式中的 Bean 引用。
+   +  `ExpressionParser` is the Spring interface that parses expressions. It is usually used together with `BeanResolver`. `ExpressionParser` parses the SpEL expression, and `BeanResolver` resolves the bean references in it.
 
 2. **EvaluationContext**
 
-   + `EvaluationContext` 是 Spring 表达式解析过程中的上下文对象，用于提供表达式所需的变量、函数等信息。`BeanResolver` 接口通常作为 `EvaluationContext` 的一部分，用于解析表达式中的 Bean 引用。
+   + `EvaluationContext` is the context object used when Spring evaluates an expression. It gives the expression the variables, functions and other information it needs. `BeanResolver` is usually part of the `EvaluationContext`, and resolves bean references in the expression.
 
 3. **BeanFactory**: 
 
-   + `BeanFactory` 是 Spring 框架中的核心接口之一，用于管理和获取 Bean 实例。`BeanFactoryResolver` 类实现了 `BeanResolver` 接口，用于在 BeanFactory 中解析 Bean 引用。
+   + `BeanFactory` is one of the core interfaces of the Spring Framework. It manages and gets bean instances. The `BeanFactoryResolver` class implements the `BeanResolver` interface to resolve bean references in a BeanFactory.
 
-### 九、常见问题
+### 9. FAQ
 
-1. **如何自定义 BeanResolver 的实现？**
+1. **How do I write a custom BeanResolver?**
 
-   - 我们可能想要根据特定需求自定义 `BeanResolver` 的实现，例如从不同的数据源中获取 Bean 实例。解决方法通常包括创建一个新的类实现 `BeanResolver` 接口，并根据需要覆盖 `resolve` 方法。
+   - You may want your own `BeanResolver` for special needs, for example to get bean instances from a different data source. Usually you create a new class that implements the `BeanResolver` interface and override the `resolve` method as needed.
 
-2. **如何处理 Bean 解析失败的情况？**
+2. **How do I handle a bean that cannot be resolved?**
 
-   - 当 `BeanResolver` 无法解析请求的 Bean 时，可能会抛出异常。开发人员需要考虑如何处理这种异常情况，例如记录日志、返回默认值或者向用户提供友好的错误消息。
+   - When `BeanResolver` cannot resolve the requested bean, it may throw an exception. You need to decide how to handle it. For example, you can write a log, return a default value, or show a friendly error message to the user.
 
-3. **如何在 SpEL 表达式中引用 Bean？**
+3. **How do I refer to a bean in a SpEL expression?**
 
-   - 我们可能需要在 SpEL 表达式中引用 Spring 容器中的 Bean，以便执行特定的逻辑。通常情况下，可以使用 `@beanName` 或 `&beanName` 表达式来引用 Bean，其中 `@` 表示获取 Bean 实例，`&` 表示获取 Bean 的工厂实例。
+   - You may need to refer to a bean of the Spring container in a SpEL expression to run some logic. Usually you use the `@beanName` or `&beanName` expression. `@` gets the bean instance. `&` gets the factory bean itself.
 
-4. **如何解决循环依赖问题？**
+4. **How do I solve circular dependency problems?**
 
-   - 当存在循环依赖的 Bean 时，可能会导致 `BeanResolver` 无法正常解析 Bean。我们需要谨慎设计 Bean 之间的依赖关系，或者使用延迟初始化等技术来解决循环依赖问题。
+   - If beans have a circular dependency, `BeanResolver` may fail to resolve them. Design the dependencies between beans with care. You can also use techniques such as lazy initialization to solve circular dependencies.

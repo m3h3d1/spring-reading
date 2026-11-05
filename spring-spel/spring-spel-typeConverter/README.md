@@ -1,72 +1,74 @@
 ## TypeConverter
 
-- [TypeConverter](#TypeConverter)
-    - [一、基本信息](#一基本信息)
-    - [二、知识储备](#二知识储备)
-    - [三、基本描述](#三基本描述)
-    - [四、主要功能](#四主要功能)
-    - [五、接口源码](#五接口源码)
-    - [六、主要实现](#六主要实现)
-    - [七、最佳实践](#七最佳实践)
-    - [八、与其他组件的关系](#八与其他组件的关系)
-    - [九、常见问题](#九常见问题)
+- [TypeConverter](#typeconverter)
+    - [1. Overview](#1-overview)
+    - [2. Background Knowledge](#2-background-knowledge)
+    - [3. Description](#3-description)
+    - [4. Main Features](#4-main-features)
+    - [5. Interface Source](#5-interface-source)
+    - [6. Main Implementations](#6-main-implementations)
+    - [7. Best Practices](#7-best-practices)
+    - [8. Relationship with Other Components](#8-relationship-with-other-components)
+    - [9. FAQ](#9-faq)
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、知识储备
+### 2. Background Knowledge
 
-1. **类型转换概念**
+1. **Type conversion**
 
-   + 了解什么是类型转换以及为什么在软件开发中会经常需要进行类型转换是非常重要的。了解基本数据类型、对象之间的转换、类型兼容性等概念将有助于理解`TypeConverter`的作用和用法。
+   + It is important to know what type conversion is and why software often needs it. Knowing about basic data types, conversion between objects, and type compatibility helps you understand what `TypeConverter` does and how to use it.
 
-2. **Spring表达式语言（SpEL）**
+2. **Spring Expression Language (SpEL)**
 
-   + `TypeConverter`通常与Spring表达式语言（SpEL）一起使用，因此了解SpEL的基本语法和用法是很重要的。SpEL是一个强大的表达式语言，它可以用于在运行时评估和处理表达式。学习如何编写和解析SpEL表达式将有助于理解如何在SpEL中使用`TypeConverter`进行类型转换。
+   + `TypeConverter` is usually used with the Spring Expression Language (SpEL), so you should know the basic syntax and usage of SpEL. SpEL is a powerful expression language that evaluates expressions at runtime. Learning to write and parse SpEL expressions helps you use `TypeConverter` for type conversion in SpEL.
 
-3. **Java反射机制**
+3. **Java reflection**
 
-   + `TypeConverter`通常需要使用Java的反射机制来动态地获取对象的类型信息并进行转换。了解Java反射机制如何工作以及如何使用`Class`、`Method`、`Field`等反射API将有助于理解`TypeConverter`的实现原理。
+   + `TypeConverter` often uses Java reflection to get the type information of objects and convert them. Knowing how reflection works, and how to use reflection APIs such as `Class`, `Method` and `Field`, helps you understand how `TypeConverter` is implemented.
 
-4. **Spring类型转换器的扩展**
+4. **Extending Spring type converters**
 
-   + 了解如何自定义和扩展Spring框架中的类型转换器也是很有用的。Spring框架提供了许多内置的类型转换器，同时也支持自定义类型转换器来满足特定需求。学习如何编写自定义类型转换器将有助于更好地理解`TypeConverter`的用法和实现原理。
+   + It is also useful to know how to customize and extend type converters in the Spring Framework. Spring has many built-in type converters. It also lets you write your own for special needs. Learning to write a custom type converter helps you understand how `TypeConverter` is used and implemented.
 
-### 三、基本描述
+### 3. Description
 
-`TypeConverter`接口是Spring框架中用于在SpEL（Spring表达式语言）中进行类型转换的核心接口，它允许将不同类型的对象相互转换，例如将字符串转换为数字、将对象转换为字符串等，为Spring应用程序提供了统一且灵活的类型转换机制，以满足各种复杂场景下的类型转换需求。
+The `TypeConverter` interface is the core interface for type conversion in SpEL (Spring Expression Language). It converts objects from one type to another. For example, it converts a string to a number or an object to a string. It gives Spring applications one flexible way to convert types, so it can handle many complex cases.
 
-### 四、主要功能
+### 4. Main Features
 
-1. **类型转换**
+1. **Type conversion**
 
-   + 提供了将一个对象转换为另一个类型的能力，例如将字符串转换为数字、将对象转换为字符串等。
+   + It can convert an object to another type. For example, it converts a string to a number or an object to a string.
 
-2. **类型兼容性检查**
+2. **Type compatibility check**
 
-   + 可以检查某个对象是否可以转换为指定类型，以避免类型转换错误导致的异常。
+   + It can check whether an object can be converted to a given type. This avoids exceptions caused by wrong type conversions.
 
-3. **支持自定义转换规则**
+3. **Custom conversion rules**
 
-   + 可以根据实际需求自定义类型转换规则，扩展和定制类型转换器，以满足特定场景下的类型转换需求。
+   + You can define your own conversion rules. You can extend and customize the type converter for special cases.
 
-4. **与SpEL集成**
+4. **SpEL integration**
 
-   + 作为SpEL的一部分，`TypeConverter`接口与Spring表达式语言（SpEL）集成，可以在SpEL表达式中直接使用，实现灵活的类型转换功能。
+   + As part of SpEL, the `TypeConverter` interface works with the Spring Expression Language (SpEL). You can use it directly in SpEL expressions for flexible type conversion.
 
-5. **提供默认实现**
+5. **Default implementation**
 
-   + Spring框架提供了默认的`TypeConverter`实现，同时也支持用户自定义的类型转换器，以适应不同的应用场景和需求。
+   + Spring provides a default `TypeConverter` implementation. It also supports custom type converters, so you can fit different applications and needs.
 
-### 五、接口源码
+### 5. Interface Source
 
-`TypeConverter`接口定义了一种类型转换器，用于在表达式评估过程中将不同类型的值相互转换。它提供了判断是否可以进行类型转换的方法以及执行类型转换的方法，并支持对类型化集合进行转换。
+The `TypeConverter` interface defines a type converter. It converts values of different types into each other while an expression is evaluated. It has a method to check whether a conversion is possible and a method to do the conversion. It also supports converting typed collections.
 
 ```java
 /**
- * 类型转换器可以在表达式评估过程中将不同类型的值相互转换。这是表达式解析器的SPI；请参阅
- * {@link org.springframework.core.convert.ConversionService} 了解Spring转换功能的主要用户API。
+ * A type converter can convert values between different types encountered during
+ * expression evaluation. This is an SPI for the expression parser; see
+ * {@link org.springframework.core.convert.ConversionService} for the primary
+ * user API to Spring's conversion facilities.
  * 
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -75,22 +77,25 @@
 public interface TypeConverter {
 
 	/**
-	 * 如果类型转换器可以将指定类型转换为所需的目标类型，则返回{@code true}。
-	 * @param sourceType 描述源类型的类型描述符
-	 * @param targetType 描述所请求结果类型的类型描述符
-	 * @return 如果可以执行该转换，则返回{@code true}
+	 * Return {@code true} if the type converter can convert the specified type
+	 * to the desired target type.
+	 * @param sourceType a type descriptor that describes the source type
+	 * @param targetType a type descriptor that describes the requested result type
+	 * @return {@code true} if that conversion can be performed
 	 */
 	boolean canConvert(@Nullable TypeDescriptor sourceType, TypeDescriptor targetType);
 
 	/**
-	 * 将一个值从一种类型转换为另一种类型，例如从{@code boolean}到{@code String}。
-	 * <p> {@link TypeDescriptor} 参数支持类型化集合：
-	 * 例如，调用者可能更喜欢{@code List<Integer>}，而不是简单的{@code List}。
-	 * @param value 要转换的值
-	 * @param sourceType 提供有关源对象的额外信息的类型描述符
-	 * @param targetType 提供有关所请求结果类型的额外信息的类型描述符
-	 * @return 转换后的值
-	 * @throws EvaluationException 如果转换失败或根本无法进行转换
+	 * Convert (or coerce) a value from one type to another, for example from a
+	 * {@code boolean} to a {@code String}.
+	 * <p>The {@link TypeDescriptor} parameters enable support for typed collections:
+	 * A caller may prefer a {@code List<Integer>}, for example, rather than simply
+	 * any {@code List}.
+	 * @param value the value to be converted
+	 * @param sourceType a type descriptor that supplies extra information about the source object
+	 * @param targetType a type descriptor that supplies extra information about the requested result type
+	 * @return the converted value
+	 * @throws EvaluationException if conversion failed or is not possible to begin with
 	 */
 	@Nullable
 	Object convertValue(@Nullable Object value, @Nullable TypeDescriptor sourceType, TypeDescriptor targetType);
@@ -98,11 +103,12 @@ public interface TypeConverter {
 }
 ```
 
-`StandardTypeConverter`是`TypeConverter`接口的默认实现，它委托给核心的Spring `ConversionService`来执行类型转换。该实现提供了两个构造方法，一个使用默认的`ConversionService`，另一个接受用户指定的`ConversionService`。它实现了`canConvert`方法来判断是否可以进行类型转换，并实现了`convertValue`方法来执行实际的类型转换操作。
+`StandardTypeConverter` is the default implementation of the `TypeConverter` interface. It delegates to the core Spring `ConversionService` to do the conversion. It has two constructors. One uses the default `ConversionService`. The other takes a `ConversionService` that you give it. It implements `canConvert` to check whether a conversion is possible, and `convertValue` to do the real conversion.
 
 ```java
 /**
- * {@link TypeConverter}接口的默认实现，委托给核心的Spring {@link ConversionService}。
+ * Default implementation of the {@link TypeConverter} interface,
+ * delegating to a core Spring {@link ConversionService}.
  * 
  * @author Juergen Hoeller
  * @author Andy Clement
@@ -115,7 +121,7 @@ public class StandardTypeConverter implements TypeConverter {
 
 
 	/**
-	 * 创建一个使用默认ConversionService的StandardTypeConverter。
+	 * Create a StandardTypeConverter for the default ConversionService.
 	 * @see DefaultConversionService#getSharedInstance()
 	 */
 	public StandardTypeConverter() {
@@ -123,8 +129,8 @@ public class StandardTypeConverter implements TypeConverter {
 	}
 
 	/**
-	 * 创建一个使用给定ConversionService的StandardTypeConverter。
-	 * @param conversionService 要委托的ConversionService
+	 * Create a StandardTypeConverter for the given ConversionService.
+	 * @param conversionService the ConversionService to delegate to
 	 */
 	public StandardTypeConverter(ConversionService conversionService) {
 		Assert.notNull(conversionService, "ConversionService must not be null");
@@ -153,70 +159,70 @@ public class StandardTypeConverter implements TypeConverter {
 }
 ```
 
-### 六、主要实现
+### 6. Main Implementations
 
 1. **StandardTypeConverter**
-   + `StandardTypeConverter`是`TypeConverter`接口的默认实现，它利用核心的Spring `ConversionService`来实现类型转换。
+   + `StandardTypeConverter` is the default implementation of the `TypeConverter` interface. It uses the core Spring `ConversionService` to convert types.
 
-### 七、最佳实践
+### 7. Best Practices
 
-使用SpEL表达式以及`TypeConverter`进行类型转换。首先，通过SpEL表达式解析器创建解析器对象，并创建一个EvaluationContext作为表达式的运行环境。然后，定义一个需要转换的字符串值，通过解析表达式获取表达式对象，再通过`expression.getValue(context, Integer.class)`将字符串值转换为整数类型。最后，打印转换后的整数值。
+This example uses a SpEL expression and a `TypeConverter` to convert a type. First, it creates a parser with the SpEL expression parser. It also creates an EvaluationContext as the environment for the expression. Then it defines a string value to convert and parses it to get an expression object. Next, `expression.getValue(context, Integer.class)` converts the string value to an integer. Finally, it prints the converted integer value.
 
 ```java
 public class TypeConverterDemo {
 
     public static void main(String[] args) {
-        // 创建SpEL表达式解析器
+        // Create a SpEL expression parser
         SpelExpressionParser parser = new SpelExpressionParser();
 
-        // 创建一个EvaluationContext
+        // Create an EvaluationContext
         StandardEvaluationContext context = new StandardEvaluationContext();
 
-        // 定义一个需要转换的值
+        // Define a value to convert
         String stringValue = "'123'";
 
-        // 解析表达式
+        // Parse the expression
         Expression expression = parser.parseExpression(stringValue);
 
-        // 使用TypeConverter进行转换
+        // Convert with the TypeConverter
         Integer intValue = expression.getValue(context, Integer.class);
 
-        // 打印转换后的值
+        // Print the converted value
         System.out.println("Converted Integer value: " + intValue);
     }
 }
 ```
 
-运行结果，成功将字符串 `'123'` 转换为整数类型，并输出转换后的整数值 `123`。
+Output: the string `'123'` is converted to an integer, and the integer value `123` is printed.
 
 ```properties
 Converted Integer value: 123
 ```
 
-### 八、与其他组件的关系
+### 8. Relationship with Other Components
 
-1. **ConversionService接口**
+1. **ConversionService interface**
 
-   +  `TypeConverter`接口是`ConversionService`接口的一部分，它是ConversionService的SPI（Service Provider Interface）。`ConversionService`提供了一种通用的类型转换机制，它定义了一组用于在不同类型之间进行转换的方法。`TypeConverter`接口是`ConversionService`中用于执行具体类型转换的一部分，通过`ConversionService`接口，可以更方便地管理和使用`TypeConverter`。
+   +  The `TypeConverter` interface is related to the `ConversionService` interface. It is the SPI (Service Provider Interface) for `ConversionService`. `ConversionService` gives a general way to convert types. It defines methods to convert between different types. `TypeConverter` does the actual type conversion inside `ConversionService`. With the `ConversionService` interface, it is easier to manage and use `TypeConverter`.
 
-2. **SpEL表达式语言（Spring Expression Language）**
+2. **SpEL (Spring Expression Language)**
 
-   +  `TypeConverter`接口通常与SpEL表达式语言一起使用，以支持在表达式中进行类型转换的功能。在SpEL表达式中，可以直接调用`TypeConverter`接口的方法来进行类型转换，从而实现更复杂的表达式计算和处理。
+   +  The `TypeConverter` interface is usually used with SpEL to support type conversion in expressions. In a SpEL expression, the methods of `TypeConverter` can be called directly to convert types. This allows more complex expression evaluation.
 
-3. **StandardEvaluationContext类**
+3. **StandardEvaluationContext class**
 
-   + `TypeConverter`接口通常与`StandardEvaluationContext`类一起使用，`StandardEvaluationContext`提供了表达式的运行环境，包括变量、函数、类型转换器等。在`StandardEvaluationContext`中可以配置`TypeConverter`，以便在SpEL表达式中使用。
+   + The `TypeConverter` interface is usually used with the `StandardEvaluationContext` class. `StandardEvaluationContext` provides the environment for an expression, including variables, functions and type converters. You can configure a `TypeConverter` in `StandardEvaluationContext` and use it in SpEL expressions.
 
-### 九、常见问题
+### 9. FAQ
 
-1. **类型转换失败**
+1. **Type conversion fails**
 
-   + 在进行类型转换时，可能会出现转换失败的情况，例如源对象的类型无法转换为目标类型，或者转换过程中发生异常。这可能会导致应用程序逻辑错误或异常。
+   + A type conversion can fail. For example, the source type cannot be converted to the target type, or an exception happens during conversion. This can cause logic errors or exceptions in the application.
 
-2. **类型不兼容**
+2. **Incompatible types**
 
-   + 在某些情况下，源对象的类型和目标类型之间可能存在不兼容的情况，无法进行转换。例如，将一个对象转换为不兼容的目标类型，或者将一个字符串转换为无法表示的目标类型。
+   + Sometimes the source type and the target type are not compatible, so the conversion is not possible. For example, converting an object to an incompatible target type, or converting a string to a type that cannot hold it.
 
-3. **缺少类型转换器**
+3. **Missing type converter**
 
-   + 如果没有合适的类型转换器可用，可能无法执行某些类型转换操作。在这种情况下，需要自定义类型转换器来满足特定的转换需求。
+   + If no suitable type converter is available, some conversions cannot be done. In that case, write a custom type converter for the conversion you need.

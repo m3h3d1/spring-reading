@@ -1,65 +1,65 @@
 ## ConstructorResolver
 
-- [ConstructorResolver](#ConstructorResolver)
-  - [一、基本信息](#一基本信息)
-  - [二、知识储备](#二知识储备)
-  - [三、基本描述](#三基本描述)
-  - [四、主要功能](#四主要功能)
-  - [五、接口源码](#五接口源码)
-  - [六、主要实现](#六主要实现)
-  - [七、最佳实践](#七最佳实践)
-  - [八、与其他组件的关系](#八与其他组件的关系)
-  - [九、常见问题](#九常见问题)
+- [ConstructorResolver](#constructorresolver)
+  - [1. Overview](#1-overview)
+  - [2. Background Knowledge](#2-background-knowledge)
+  - [3. Description](#3-description)
+  - [4. Main Features](#4-main-features)
+  - [5. Interface Source](#5-interface-source)
+  - [6. Main Implementations](#6-main-implementations)
+  - [7. Best Practices](#7-best-practices)
+  - [8. Relationship with Other Components](#8-relationship-with-other-components)
+  - [9. FAQ](#9-faq)
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、知识储备
+### 2. Background Knowledge
 
-1. **理解构造函数（Constructor）**
+1. **Constructors**
 
-   + 构造函数是用于创建类的实例的特殊方法。了解构造函数的概念、使用方式以及与普通方法的区别是很重要的。
+   + A constructor is a special method that creates an instance of a class. It is important to know what a constructor is, how to use it, and how it differs from a normal method.
 
-2. **反射（Reflection）**
+2. **Reflection**
 
-   + 反射是Java语言的一个特性，允许程序在运行时检查和操作类、对象、方法和属性。学习如何使用`java.lang.reflect`包中的类来获取和操作构造函数是必要的。
+   + Reflection is a Java feature. It lets a program inspect and work with classes, objects, methods and fields at runtime. You need to know how to use the classes in the `java.lang.reflect` package to get and use constructors.
 
-3. **Spring表达式语言（SpEL）**
+3. **Spring Expression Language (SpEL)**
 
-   + `ConstructorResolver`通常与Spring表达式语言（SpEL）一起使用。因此，了解SpEL的基本语法和用法是很有帮助的。
+   + `ConstructorResolver` is usually used with the Spring Expression Language (SpEL). So it helps to know the basic syntax and usage of SpEL.
 
-4. **设计模式**
+4. **Design patterns**
 
-   + 了解一些设计模式，特别是创建型模式（如工厂模式、建造者模式等），可以帮助理解对象创建的不同方法和策略。
+   + Knowing some design patterns, especially creational patterns such as the factory pattern and the builder pattern, helps you understand different ways to create objects.
 
-### 三、基本描述
+### 3. Description
 
-`ConstructorResolver`接口是Spring框架中用于解析和执行构造函数的核心接口之一，它允许在运行时动态地确定和调用对象的构造函数。该接口定义了一个`resolve(ConstructorExecutor, TypedValue[])`方法，该方法用于根据给定的构造函数执行器和参数来解析构造函数。通过实现`ConstructorResolver`接口，Spring能够以灵活和动态的方式实现对象的实例化，从而使得依赖注入和对象创建更加灵活和可定制化。在Spring框架中的实现类中，通常会利用反射机制来动态地实例化对象，并根据对象的类型和参数列表来选择合适的构造函数进行调用。
+The `ConstructorResolver` interface is one of the core interfaces in the Spring Framework to find and run constructors. It lets you choose and call the constructor of an object at runtime. The interface defines a `resolve(ConstructorExecutor, TypedValue[])` method. It finds a constructor from the given constructor executor and arguments. By implementing `ConstructorResolver`, Spring can create objects in a flexible and dynamic way. This makes dependency injection and object creation more flexible and customizable. The implementations in Spring usually use reflection to create objects. They pick a suitable constructor from the object type and the argument list.
 
-### 四、主要功能
+### 4. Main Features
 
-1. **解析构造函数**
+1. **Resolve constructors**
 
-   + 接口定义了一个方法`resolve(ConstructorExecutor, TypedValue[])`，用于解析给定的构造函数。这意味着可以根据传入的参数和构造函数的签名来确定要调用的构造函数。
+   + The interface defines the method `resolve(ConstructorExecutor, TypedValue[])` to find a constructor. This means the constructor to call is chosen from the given arguments and the constructor signatures.
 
-2. **执行构造函数**
+2. **Execute constructors**
 
-   + 一旦构造函数被解析，接口负责调用相应的构造函数以创建对象实例。这涉及到创建实例、传递参数以及处理构造函数的执行。
+   + Once a constructor is resolved, the interface calls it to create the object instance. This includes creating the instance, passing the arguments, and running the constructor.
 
-3. **支持动态对象实例化**
+3. **Dynamic object creation**
 
-   + `ConstructorResolver`接口使得在运行时能够动态地选择合适的构造函数实例化对象，从而提供了灵活性和可定制性。
+   + The `ConstructorResolver` interface lets you choose a suitable constructor at runtime to create an object. This gives flexibility and customization.
 
-### 五、接口源码
+### 5. Interface Source
 
-`ConstructorResolver`接口定义了一个方法`resolve`，用于在给定的上下文中确定特定类型的合适构造函数，该构造函数能够处理指定的参数类型列表。接口返回一个`ConstructorExecutor`，可以用于调用找到的构造函数。
+The `ConstructorResolver` interface defines one method, `resolve`. In the given context, it finds a suitable constructor on a type that can handle the given argument types. The interface returns a `ConstructorExecutor`, which can be used to call the constructor it found.
 
 ```java
 /**
- * 构造函数解析器尝试定位一个构造函数，并返回一个ConstructorExecutor，
- * 该Executor可以用于调用该构造函数。ConstructorExecutor将被缓存，
- * 但如果它“过时”，则会重新调用解析器。
+ * A constructor resolver attempts to locate a constructor and returns a ConstructorExecutor
+ * that can be used to invoke that constructor. The ConstructorExecutor will be cached, but
+ * if it 'goes stale' the resolvers will be called again.
  *
  * @author Andy Clement
  * @since 3.0
@@ -68,14 +68,16 @@
 public interface ConstructorResolver {
 
     /**
-     * 在提供的上下文中确定指定类型上可以处理指定参数的合适构造函数。
-     * 返回一个ConstructorExecutor，可以用于调用该构造函数（如果找不到构造函数，则返回null）。
+     * Within the supplied context, determine a suitable constructor on the
+     * supplied type that can handle the specified arguments. Return a
+     * ConstructorExecutor that can be used to invoke that constructor
+     * (or {@code null} if no constructor could be found).
      *
-     * @param context       当前的评估上下文
-     * @param typeName      要查找构造函数的类型
-     * @param argumentTypes 构造函数必须能够处理的参数
-     * @return 一个ConstructorExecutor，可以调用该构造函数，如果找不到则返回null
-     * @throws AccessException 访问异常
+     * @param context       the current evaluation context
+     * @param typeName      the type upon which to look for the constructor
+     * @param argumentTypes the arguments that the constructor must be able to handle
+     * @return a ConstructorExecutor that can invoke the constructor, or null if non-found
+     * @throws AccessException an access exception
      */
     @Nullable
     ConstructorExecutor resolve(EvaluationContext context, String typeName, List<TypeDescriptor> argumentTypes)
@@ -84,11 +86,11 @@ public interface ConstructorResolver {
 }
 ```
 
-`ReflectiveConstructorResolver`是Spring框架中的一个实现类，用于通过反射机制来定位应该被调用的构造函数。它能够根据提供的参数类型列表，对目标类的构造函数进行匹配，并选择合适的构造函数进行实例化。在匹配过程中，可能会发生三种类型的匹配：完全匹配、不完全匹配和需要类型转换的匹配。根据匹配结果，`ReflectiveConstructorResolver`将返回一个`ConstructorExecutor`对象，用于执行选定的构造函数。
+`ReflectiveConstructorResolver` is an implementation in the Spring Framework. It uses reflection to find the constructor to call. It matches the constructors of the target class against the given argument types, and picks a suitable one to create the object. Three kinds of match can happen: an exact match, a close match, and a match that needs type conversion. Based on the result, `ReflectiveConstructorResolver` returns a `ConstructorExecutor` to run the chosen constructor.
 
 ```java
 /**
- * 使用反射来定位应该被调用的构造函数的构造函数解析器。
+ * A constructor resolver that uses reflection to locate the constructor that should be invoked.
  * @author Andy Clement
  * @author Juergen Hoeller
  * @since 3.0
@@ -96,11 +98,12 @@ public interface ConstructorResolver {
 public class ReflectiveConstructorResolver implements ConstructorResolver {
 
     /**
-     * 在类型上定位一个构造函数。可能会出现三种类型的匹配:
+     * Locate a constructor on the type. There are three kinds of match that might occur:
      * <ol>
-     * <li>完全匹配，其中参数的类型与构造函数的类型相匹配
-     * <li>不完全匹配，其中我们要查找的类型是构造函数上定义的类型的子类型
-     * <li>匹配，其中我们能够将参数转换成构造函数预期的类型，根据已注册的类型转换器。
+     * <li>An exact match where the types of the arguments match the types of the constructor
+     * <li>An inexact match where the types we are looking for are subtypes of those defined on the constructor
+     * <li>A match where we are able to convert the arguments into those expected by the constructor,
+     * according to the registered type converter.
      * </ol>
      */
     @Override
@@ -109,19 +112,19 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
             throws AccessException {
 
         try {
-            // 获取类型转换器和类类型
+            // Get the type converter and the class type
             TypeConverter typeConverter = context.getTypeConverter();
             Class<?> type = context.getTypeLocator().findType(typeName);
             Constructor<?>[] ctors = type.getConstructors();
 
-            // 按参数数量排序构造函数
+            // Sort the constructors by parameter count
             Arrays.sort(ctors, Comparator.comparingInt(Constructor::getParameterCount));
 
-            // 初始化匹配变量
+            // Initialize the match variables
             Constructor<?> closeMatch = null;
             Constructor<?> matchRequiringConversion = null;
 
-            // 遍历构造函数
+            // Loop over the constructors
             for (Constructor<?> ctor : ctors) {
                 int paramCount = ctor.getParameterCount();
                 List<TypeDescriptor> paramDescriptors = new ArrayList<>(paramCount);
@@ -130,10 +133,10 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
                 }
                 ReflectionHelper.ArgumentsMatchInfo matchInfo = null;
                 if (ctor.isVarArgs() && argumentTypes.size() >= paramCount - 1) {
-                    // 处理可变参数的匹配
+                    // Match varargs parameters
                     matchInfo = ReflectionHelper.compareArgumentsVarargs(paramDescriptors, argumentTypes, typeConverter);
                 } else if (paramCount == argumentTypes.size()) {
-                    // 处理普通参数的匹配
+                    // Match normal parameters
                     matchInfo = ReflectionHelper.compareArguments(paramDescriptors, argumentTypes, typeConverter);
                 }
                 if (matchInfo != null) {
@@ -147,7 +150,7 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
                 }
             }
 
-            // 返回匹配的构造函数执行器
+            // Return the executor of the matching constructor
             if (closeMatch != null) {
                 return new ReflectiveConstructorExecutor(closeMatch);
             } else if (matchRequiringConversion != null) {
@@ -162,15 +165,15 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 }
 ```
 
-### 六、主要实现
+### 6. Main Implementations
 
 + **ReflectiveConstructorResolver**
 
-  + 用于解析和执行构造函数的主要实现类。通过利用Java的反射机制，它能够动态地确定并调用类的构造函数，从而实现对象的实例化。
+  + The main implementation to find and run constructors. It uses Java reflection to choose and call the constructor of a class at runtime, and so creates the object.
 
-### 七、最佳实践
+### 7. Best Practices
 
-创建了一个`SpelExpressionParser`对象，它是Spring表达式语言的解析器。然后，我们使用SpEL表达式`"new com.xcs.spring.MyBean('spring-reading')"`来创建一个`MyBean`对象，参数为`"spring-reading"`。接着，我们通过调用`getValue(MyBean.class)`方法来获取实例化后的`MyBean`对象。最后，我们打印输出了这个实例化的`MyBean`对象。
+First, we create a `SpelExpressionParser` object. It is the parser of the Spring Expression Language. Then we use the SpEL expression `"new com.xcs.spring.MyBean('spring-reading')"` to create a `MyBean` object with the argument `"spring-reading"`. Next, we call `getValue(MyBean.class)` to get the created `MyBean` object. Finally, we print this `MyBean` object.
 
 ```java
 public class ConstructorResolverDemo {
@@ -182,7 +185,7 @@ public class ConstructorResolverDemo {
 }
 ```
 
-定义了一个简单的Java Bean，名为`MyBean`，具有一个私有属性`name`和一个带参构造函数、以及相应的getter和setter方法。此外，还重写了`toString()`方法，以便在打印对象时输出其属性值。
+`MyBean` is a simple Java bean. It has a private property `name`, a constructor with one argument, and a getter and a setter. It also overrides `toString()`, so the property value is printed when the object is printed.
 
 ```java
 public class MyBean {
@@ -210,48 +213,48 @@ public class MyBean {
 }
 ```
 
-运行结果，成功地创建了一个`MyBean`对象，并将其属性`name`设置为`"spring-reading"`。
+Output: a `MyBean` object is created, and its property `name` is set to `"spring-reading"`.
 
 ```properties
 MyBean{name='spring-reading'}
 ```
 
-### 八、与其他组件的关系
+### 8. Relationship with Other Components
 
 1. **EvaluationContext**
 
-   + `ConstructorResolver`接口通常用于解析构造函数的过程中需要一个评估上下文，用于提供解析过程中所需的信息和环境，例如变量、函数、类型等。在Spring框架中，通常使用`EvaluationContext`接口或其实现类来表示评估上下文。
+   + When the `ConstructorResolver` interface resolves a constructor, it needs an evaluation context. The context gives the information and environment needed, such as variables, functions and types. In Spring, the `EvaluationContext` interface or one of its implementations represents the evaluation context.
 
 2. **TypedValue**
 
-   + `ConstructorResolver`接口中的方法可能需要用到`TypedValue`对象，该对象用于表示表达式中的值，并提供了对值的类型信息的访问。在SpEL中，`TypedValue`通常用于表示表达式中的字面值、变量值等。
+   + The methods of the `ConstructorResolver` interface may use `TypedValue` objects. A `TypedValue` represents a value in an expression and gives access to the type of the value. In SpEL, `TypedValue` usually represents literal values and variable values in expressions.
 
 3. **ConstructorExecutor**
 
-   + `ConstructorResolver`接口的实现类通常会返回一个`ConstructorExecutor`对象，该对象用于执行已解析的构造函数。`ConstructorExecutor`接口定义了一个`execute`方法，用于执行构造函数并返回结果对象。
+   + An implementation of `ConstructorResolver` usually returns a `ConstructorExecutor`. It runs the resolved constructor. The `ConstructorExecutor` interface defines an `execute` method that runs the constructor and returns the result object.
 
 4. **SpelExpressionParser**
 
-   + `SpelExpressionParser`是Spring框架中用于解析SpEL表达式的核心类之一。在上下文中使用`SpelExpressionParser`来解析表达式时，可能会涉及到`ConstructorResolver`接口的实现类，用于处理表达式中的构造函数引用。
+   + `SpelExpressionParser` is one of the core classes in Spring that parse SpEL expressions. When it parses an expression, an implementation of `ConstructorResolver` may be used to handle constructor references in the expression.
 
 5. **ReflectiveConstructorResolver**
 
-   + `ReflectiveConstructorResolver`是Spring框架中`ConstructorResolver`接口的主要实现类之一。它使用Java的反射机制来动态地解析和执行构造函数。
+   + `ReflectiveConstructorResolver` is one of the main implementations of the `ConstructorResolver` interface in Spring. It uses Java reflection to find and run constructors at runtime.
 
-### 九、常见问题
+### 9. FAQ
 
-1. **如何处理构造函数参数的类型匹配问题？**
+1. **How do I handle type matching of constructor arguments?**
 
-   - `ConstructorResolver`接口的实现类通常会根据提供的参数类型列表来选择合适的构造函数。如果参数类型与构造函数参数类型不匹配，可能会导致解析失败或选择错误的构造函数。因此，需要确保传递正确类型的参数。
+   - An implementation of `ConstructorResolver` usually picks a constructor based on the given argument types. If the argument types do not match the constructor parameter types, resolving may fail or the wrong constructor may be chosen. So make sure you pass arguments of the right types.
 
-2. **如何处理构造函数重载的情况？**
+2. **How do I handle overloaded constructors?**
 
-   - 当类中存在多个构造函数时，`ConstructorResolver`接口的实现类可能需要选择最适合的构造函数。通常情况下，会根据提供的参数类型列表和构造函数参数列表的匹配程度来进行选择。如果存在多个匹配的构造函数，可能会导致解析失败或选择不确定的构造函数。
+   - When a class has several constructors, the `ConstructorResolver` implementation needs to choose the best one. Usually it compares the given argument types with the constructor parameter lists. If several constructors match, resolving may fail or the chosen constructor may be unclear.
 
-3. **ConstructorResolver接口与Java反射机制的关系是什么？**
+3. **How is the ConstructorResolver interface related to Java reflection?**
 
-   - `ConstructorResolver`接口的实现类通常会利用Java的反射机制来动态地解析和执行构造函数。通过反射，可以在运行时检查类的结构，并调用特定的构造函数来实例化对象。因此，`ConstructorResolver`接口与Java反射机制密切相关。
+   - An implementation of `ConstructorResolver` usually uses Java reflection to find and run constructors. With reflection, you can inspect the structure of a class at runtime and call a specific constructor to create an object. So the `ConstructorResolver` interface is closely related to Java reflection.
 
-4. **如何处理构造函数中可能抛出的异常？**
+4. **How do I handle exceptions thrown by a constructor?**
 
-   - 在调用构造函数时，可能会出现各种异常，如参数类型不匹配、访问权限问题等。`ConstructorResolver`接口的实现类可能会处理这些异常，具体取决于实现。通常情况下，需要在调用构造函数之前进行适当的异常处理。
+   - Many exceptions can happen when a constructor is called, such as argument type mismatch or access problems. An implementation of `ConstructorResolver` may handle them, depending on the implementation. Usually you should handle exceptions properly before you call the constructor.

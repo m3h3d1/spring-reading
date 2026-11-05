@@ -6,19 +6,19 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 public class TypeComparatorDemo {
     public static void main(String[] args) {
-        // 创建一个EvaluationContext
+        // Create an EvaluationContext
         StandardEvaluationContext context = new StandardEvaluationContext();
 
-        // 创建SpEL表达式解析器
+        // Create a SpEL expression parser
         SpelExpressionParser parser = new SpelExpressionParser();
 
-        // 解析表达式
+        // Parse the expression
         Expression expression = parser.parseExpression("'2' < '-5.0'");
 
-        // 使用TypeComparator进行比较
+        // Compare with the TypeComparator
         boolean result = expression.getValue(context,Boolean.class);
 
-        // 打印比较后的值
+        // Print the comparison result
         System.out.println("result : " + result);
     }
 }

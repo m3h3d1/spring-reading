@@ -1,68 +1,68 @@
 ## TypeComparator
 
-- [TypeComparator](#TypeComparator)
-    - [一、基本信息](#一基本信息)
-    - [二、知识储备](#二知识储备)
-    - [三、基本描述](#三基本描述)
-    - [四、主要功能](#四主要功能)
-    - [五、接口源码](#五接口源码)
-    - [六、主要实现](#六主要实现)
-    - [七、最佳实践](#七最佳实践)
-    - [八、与其他组件的关系](#八与其他组件的关系)
-    - [九、常见问题](#九常见问题)
+- [TypeComparator](#typecomparator)
+    - [1. Overview](#1-overview)
+    - [2. Background Knowledge](#2-background-knowledge)
+    - [3. Description](#3-description)
+    - [4. Main Features](#4-main-features)
+    - [5. Interface Source](#5-interface-source)
+    - [6. Main Implementations](#6-main-implementations)
+    - [7. Best Practices](#7-best-practices)
+    - [8. Relationship with Other Components](#8-relationship-with-other-components)
+    - [9. FAQ](#9-faq)
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、知识储备
+### 2. Background Knowledge
 
-1. **类型系统**
+1. **Type system**
 
-   + 了解编程语言中的类型系统是很重要的。这包括静态类型和动态类型语言的区别，以及强类型和弱类型语言的区别。理解类型的继承、实现和转换规则对于理解类型比较是很有帮助的。
+   + It is important to know the type system of a programming language. This includes the difference between static and dynamic typing, and between strong and weak typing. Knowing the rules of type inheritance, implementation and conversion helps you understand type comparison.
 
-2. **泛型**
+2. **Generics**
 
-   + 泛型是 Java 编程语言中的一个重要特性，它允许类、接口和方法在定义时使用参数类型。理解泛型如何在编译时和运行时被处理，以及泛型擦除的概念对于理解 `TypeComparator` 接口的实现可能是有帮助的。
+   + Generics are an important feature of Java. They let classes, interfaces and methods use type parameters when they are defined. It may help to know how generics are handled at compile time and at runtime, and what type erasure is, to understand how `TypeComparator` is implemented.
 
-3. **反射**
+3. **Reflection**
 
-   + 反射是 Java 编程语言中的一个强大特性，它允许程序在运行时检查和操作类、对象、方法和属性。了解如何使用反射来获取类的信息、调用方法以及操作字段对于实现 `TypeComparator` 接口可能是有帮助的。
+   + Reflection is a powerful Java feature. It lets a program inspect and work with classes, objects, methods and fields at runtime. Knowing how to use reflection to get class information, call methods and use fields may help when you implement `TypeComparator`.
 
-4. **设计模式**
+4. **Design patterns**
 
-   + 了解一些常见的设计模式，如策略模式和适配器模式，可能有助于理解 `TypeComparator` 接口的设计和用法。
+   + Knowing some common design patterns, such as the strategy pattern and the adapter pattern, may help you understand the design and use of `TypeComparator`.
 
-### 三、基本描述
+### 3. Description
 
-`TypeComparator` 接口是 Spring Framework 中的一个重要组件，用于定义对象类型的比较器。通过实现该接口，您可以自定义对象的类型比较逻辑，以满足特定应用场景下的需求，例如在 Spring 表达式语言（SpEL）中确定两个对象的类型是否相同或是否可以进行比较。
+The `TypeComparator` interface is an important component in the Spring Framework. It defines a comparator for object types. By implementing it, you can customize how objects are compared to fit your needs. For example, in the Spring Expression Language (SpEL), it decides whether two objects have the same type or can be compared.
 
-### 四、主要功能
+### 4. Main Features
 
-1. **类型比较**
+1. **Type comparison**
 
-   + `TypeComparator` 接口定义了 `compare(T o1, T o2)` 方法，用于比较两个对象的类型。我们可以根据自己的需求实现该方法，以确定两个对象的类型是否相同或是否在继承层次结构中相互关联。
+   + The `TypeComparator` interface defines the `compare(T o1, T o2)` method to compare two objects. You can implement it as you need, for example to decide whether two objects have the same type or are related in the inheritance hierarchy.
 
-2. **可比较性判断**
+2. **Check whether objects can be compared**
 
-   + `TypeComparator` 接口定义了 `canCompare(Object o1, Object o2)` 方法，用于确定两个对象是否可以进行比较。这在某些情况下是必要的，例如在进行对象类型比较之前，需要先检查对象是否为特定类型或是否具有特定的属性。
+   + The `TypeComparator` interface defines the `canCompare(Object o1, Object o2)` method to decide whether two objects can be compared. This is needed in some cases. For example, before comparing objects, you may need to check that they are of a given type or have a given property.
 
-3. **自定义比较逻辑**
+3. **Custom comparison logic**
 
-   + 通过实现 `TypeComparator` 接口，我们可以定义自己的比较逻辑，以满足特定应用场景下的需求。例如，可以根据对象的某些属性或特征来确定对象的类型，而不仅仅是基于 Java 类型系统的默认行为。
+   + By implementing the `TypeComparator` interface, you can define your own comparison logic for your needs. For example, you can decide the type of an object by some of its properties or features, and not only by the default behavior of the Java type system.
 
-4. **扩展性**
+4. **Extensibility**
 
-   + `TypeComparator` 接口为 Spring Framework 提供了一种灵活和可扩展的机制，用于处理对象类型比较相关的任务。通过实现自定义的 `TypeComparator`，可以轻松地扩展 Spring 应用程序的功能，以满足不同的业务需求。
+   + The `TypeComparator` interface gives the Spring Framework a flexible and extensible way to handle object type comparison. With a custom `TypeComparator`, you can extend a Spring application for different business needs.
 
-### 五、接口源码
+### 5. Interface Source
 
-`TypeComparator` 接口定义了对象类型比较器的标准，要求实现类能够比较两个对象是否相等，并且提供了确定对象是否可比较的方法。该接口的主要目的是为了支持 Spring 表达式语言（SpEL）中的对象类型比较操作，提供了灵活的机制来定制对象类型的比较逻辑。
+The `TypeComparator` interface sets the standard for object type comparators. An implementation must be able to compare two objects, and must tell whether two objects can be compared. The main goal of this interface is to support object comparison in the Spring Expression Language (SpEL). It gives a flexible way to customize the comparison logic.
 
 ```java
 /**
- * 实现类型比较器的实例应该能够比较一对对象是否相等。
- * 返回值的规范与 {@link java.lang.Comparable} 相同。
+ * Instances of a type comparator should be able to compare pairs of objects for equality.
+ * The specification of the return value is the same as for {@link java.lang.Comparable}.
  *
  * @author Andy Clement
  * @since 3.0
@@ -71,49 +71,52 @@
 public interface TypeComparator {
 
     /**
-     * 如果比较器能够比较这两个对象，则返回 {@code true}。
-     * @param firstObject 第一个对象
-     * @param secondObject 第二个对象
-     * @return 如果比较器能够比较这两个对象，则返回 {@code true}
+     * Return {@code true} if the comparator can compare these two objects.
+     * @param firstObject the first object
+     * @param secondObject the second object
+     * @return {@code true} if the comparator can compare these objects
      */
     boolean canCompare(@Nullable Object firstObject, @Nullable Object secondObject);
 
     /**
-     * 比较给定的两个对象。
-     * @param firstObject 第一个对象
-     * @param secondObject 第二个对象
-     * @return 如果它们相等，则返回 0；如果第一个对象小于第二个对象，则返回 <0；如果第一个对象大于第二个对象，则返回 >0
-     * @throws EvaluationException 如果在比较过程中出现问题（或者它们本来就无法比较）
+     * Compare two given objects.
+     * @param firstObject the first object
+     * @param secondObject the second object
+     * @return 0 if they are equal, <0 if the first is smaller than the second,
+     * or >0 if the first is larger than the second
+     * @throws EvaluationException if a problem occurs during comparison
+     * (or if they are not comparable in the first place)
      */
     int compare(@Nullable Object firstObject, @Nullable Object secondObject) throws EvaluationException;
 
 }
 ```
 
-`StandardTypeComparator` 是 `TypeComparator` 接口的标准实现，支持对 `Number` 类型以及实现了 `Comparable` 接口的类型进行比较。它提供了针对不同类型的对象进行比较的逻辑，包括基本数值类型、BigDecimal、BigInteger 等，并提供了一个灵活而可靠的机制来执行对象类型的比较操作。
+`StandardTypeComparator` is the standard implementation of the `TypeComparator` interface. It supports comparing `Number` types and types that implement the `Comparable` interface. It has comparison logic for different types of objects, including primitive numbers, BigDecimal and BigInteger. It gives a flexible and reliable way to compare object types.
 
 ```java
 /**
- * {@link TypeComparator} 接口的基本实现：支持对 {@link Number} 类型以及实现了 {@link Comparable} 接口的类型进行比较。
+ * Basic implementation of {@link TypeComparator}: supports comparison of
+ * {@link Number} types as well as types implementing {@link Comparable}.
  * 
- * 作者：Andy Clement
- * 作者：Juergen Hoeller
- * 作者：Giovanni Dall'Oglio Risso
- * 自版本 3.0 起
+ * Authors: Andy Clement
+ * Authors: Juergen Hoeller
+ * Authors: Giovanni Dall'Oglio Risso
+ * Since version 3.0
  */
 public class StandardTypeComparator implements TypeComparator {
 
 	@Override
 	public boolean canCompare(@Nullable Object left, @Nullable Object right) {
-		// 如果其中一个对象为 null，则认为可以进行比较
+		// If one of the objects is null, they can be compared
 		if (left == null || right == null) {
 			return true;
 		}
-		// 如果两个对象都是 Number 类型，则可以进行比较
+		// If both objects are Number types, they can be compared
 		if (left instanceof Number && right instanceof Number) {
 			return true;
 		}
-		// 如果左侧对象实现了 Comparable 接口，则可以进行比较
+		// If the left object implements Comparable, they can be compared
 		if (left instanceof Comparable) {
 			return true;
 		}
@@ -123,31 +126,31 @@ public class StandardTypeComparator implements TypeComparator {
 	@Override
 	@SuppressWarnings("unchecked")
 	public int compare(@Nullable Object left, @Nullable Object right) throws SpelEvaluationException {
-		// 如果其中一个对象为 null，则根据情况返回相应值
+		// If one of the objects is null, return the matching value
 		if (left == null) {
 			return (right == null ? 0 : -1);
 		}
 		else if (right == null) {
-			return 1;  // 此时左侧对象不可能为 null
+			return 1;  // The left object cannot be null here
 		}
 
-		// 基本的数值比较
+		// Basic number comparison
 		if (left instanceof Number && right instanceof Number) {
 			Number leftNumber = (Number) left;
 			Number rightNumber = (Number) right;
 
 			if (leftNumber instanceof BigDecimal || rightNumber instanceof BigDecimal) {
-				// 处理 BigDecimal 类型的比较
+				// Compare BigDecimal values
 				BigDecimal leftBigDecimal = NumberUtils.convertNumberToTargetClass(leftNumber, BigDecimal.class);
 				BigDecimal rightBigDecimal = NumberUtils.convertNumberToTargetClass(rightNumber, BigDecimal.class);
 				return leftBigDecimal.compareTo(rightBigDecimal);
 			}
-            // 其他数值类型的比较，包括 Double、Float、BigInteger、Long、Integer、Short、Byte
-            // 如果不属于以上类型，采用 double 类型的乘法来比较
+            // Compare other number types, including Double, Float, BigInteger, Long, Integer, Short, Byte
+            // If it is none of these, compare as double
 			else if (leftNumber instanceof Double || rightNumber instanceof Double) {
 				return Double.compare(leftNumber.doubleValue(), rightNumber.doubleValue());
 			}
-            // 其他数值类型的比较
+            // Compare other number types
 			else if (leftNumber instanceof Float || rightNumber instanceof Float) {
 				return Float.compare(leftNumber.floatValue(), rightNumber.floatValue());
 			}
@@ -169,89 +172,89 @@ public class StandardTypeComparator implements TypeComparator {
 				return Byte.compare(leftNumber.byteValue(), rightNumber.byteValue());
 			}
 			else {
-				// 未知的 Number 子类型 -> 最佳猜测是 double 类型的乘法
+				// Unknown Number subtype -> best guess is to compare as double
 				return Double.compare(leftNumber.doubleValue(), rightNumber.doubleValue());
 			}
 		}
 
 		try {
-			// 如果左侧对象实现了 Comparable 接口，则使用 compareTo 方法进行比较
+			// If the left object implements Comparable, compare with compareTo
 			if (left instanceof Comparable) {
 				return ((Comparable<Object>) left).compareTo(right);
 			}
 		}
 		catch (ClassCastException ex) {
-			// 抛出异常，表示两个对象不可比较
+			// Throw an exception: the two objects are not comparable
 			throw new SpelEvaluationException(ex, SpelMessage.NOT_COMPARABLE, left.getClass(), right.getClass());
 		}
 
-		// 抛出异常，表示两个对象不可比较
+		// Throw an exception: the two objects are not comparable
 		throw new SpelEvaluationException(SpelMessage.NOT_COMPARABLE, left.getClass(), right.getClass());
 	}
 
 }
 ```
 
-### 六、主要实现
+### 6. Main Implementations
 
 1. **StandardTypeComparator**
-   + `StandardTypeComparator` 实现类是 `TypeComparator` 接口的标准实现，提供了对 `Number` 类型和实现了 `Comparable` 接口的类型进行比较的功能。
+   + `StandardTypeComparator` is the standard implementation of the `TypeComparator` interface. It can compare `Number` types and types that implement the `Comparable` interface.
 
-### 七、最佳实践
+### 7. Best Practices
 
-使用 Spring 表达式语言（SpEL）中的 `TypeComparator` 接口进行对象类型的比较操作。首先，创建了一个 `StandardEvaluationContext` 对象作为评估上下文，并创建了一个 `SpelExpressionParser` 对象用于解析 SpEL 表达式。然后，使用解析器解析了一个包含比较运算符的表达式，将其表示为 `Expression` 对象。接下来，通过调用 `getValue` 方法并传入评估上下文，利用 SpEL 引擎执行了表达式，并使用 `TypeComparator` 进行比较，最后打印了比较结果。
+This example uses the `TypeComparator` interface of the Spring Expression Language (SpEL) to compare objects. First, it creates a `StandardEvaluationContext` as the evaluation context, and a `SpelExpressionParser` to parse SpEL expressions. Then it parses an expression with a comparison operator into an `Expression` object. Next, it calls `getValue` with the evaluation context. The SpEL engine runs the expression and compares with a `TypeComparator`. Finally, it prints the result.
 
 ```java
 public class TypeComparatorDemo {
     public static void main(String[] args) {
-        // 创建一个EvaluationContext
+        // Create an EvaluationContext
         StandardEvaluationContext context = new StandardEvaluationContext();
         
-        // 创建SpEL表达式解析器
+        // Create a SpEL expression parser
         SpelExpressionParser parser = new SpelExpressionParser();
         
-        // 解析表达式
+        // Parse the expression
         Expression expression = parser.parseExpression("'2' < '-5.0'");
         
-        // 使用TypeComparator进行比较
+        // Compare with the TypeComparator
         boolean result = expression.getValue(context,Boolean.class);
         
-        // 打印比较后的值
+        // Print the comparison result
         System.out.println("result : " + result);
     }
 }
 ```
 
-运行结果，表达式 `'2' < '-5.0'` 返回了 `false`。这意味着在 SpEL 中，字符串 `'2'` 被视为不小于字符串 `'-5.0'`，因此比较结果为 `false`。
+Output: the expression `'2' < '-5.0'` returns `false`. In SpEL, the string `'2'` is not smaller than the string `'-5.0'`, so the result is `false`.
 
 ```java
 result : false
 ```
 
-### 八、与其他组件的关系
+### 8. Relationship with Other Components
 
 1. **java.lang.Comparable**
 
-   + `TypeComparator` 接口与 `Comparable` 接口有一定的关系。`Comparable` 接口定义了对象自身的自然顺序，而 `TypeComparator` 接口提供了比较任意两个对象的类型的机制。在 `StandardTypeComparator` 实现类中，会利用 `Comparable` 接口的实现来进行对象的比较。
+   + The `TypeComparator` interface is related to the `Comparable` interface. `Comparable` defines the natural order of an object itself. `TypeComparator` gives a way to compare any two objects. The `StandardTypeComparator` class uses the `Comparable` implementation of objects to compare them.
 
 2. **StandardTypeComparator**
 
-   + `StandardTypeComparator` 是 `TypeComparator` 接口的默认实现类，它提供了一组用于比较对象类型的标准逻辑。这个类在 Spring Framework 中被广泛使用，特别是在 SpEL 中用于处理类型比较的场景。
+   + `StandardTypeComparator` is the default implementation of the `TypeComparator` interface. It provides standard logic to compare object types. It is widely used in the Spring Framework, especially in SpEL, where types are compared.
 
 3. **StandardEvaluationContext**
 
-   + 在 SpEL 中，用于存储表达式求值所需的上下文信息。在 `TypeComparatorDemo` 类中，就使用了 `StandardEvaluationContext` 类来创建一个上下文对象，以便进行 SpEL 表达式的求值。
+   + In SpEL, it holds the context information needed to evaluate an expression. The `TypeComparatorDemo` class uses `StandardEvaluationContext` to create a context object, so it can evaluate a SpEL expression.
 
-4. **`SpelExpressionParser` 类**
+4. **`SpelExpressionParser` class**
 
-   + 用于解析 SpEL 表达式的类。在 `TypeComparatorDemo` 类中，就使用了 `SpelExpressionParser` 类来创建一个表达式解析器对象，以便解析 SpEL 表达式。
+   + The class that parses SpEL expressions. The `TypeComparatorDemo` class uses `SpelExpressionParser` to create an expression parser, so it can parse a SpEL expression.
 
-### 九、常见问题
+### 9. FAQ
 
-1. **自定义比较逻辑**
+1. **Custom comparison logic**
 
-   + 我们可能会遇到需要定义自己的比较逻辑以满足特定需求的情况。这可能涉及到对特定类型的对象进行特殊处理或考虑继承关系。
+   + Sometimes you need your own comparison logic for special needs. This may mean special handling for objects of a given type, or taking the inheritance relationship into account.
 
-2. **类型转换问题**
+2. **Type conversion problems**
 
-   + 在比较对象时，可能会遇到类型转换问题，特别是当涉及到不同类型的对象时。我们需要确保在比较之前将对象转换为正确的类型。
+   + When you compare objects, you may run into type conversion problems, especially with objects of different types. Make sure to convert the objects to the right type before you compare them.

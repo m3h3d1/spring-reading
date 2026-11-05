@@ -13,13 +13,13 @@ import java.util.List;
 
 public class PropertyAccessorDemo {
     public static void main(String[] args)  {
-        // 创建一个SpEL表达式解析器
+        // Create a SpEL expression parser
         ExpressionParser parser = new SpelExpressionParser();
 
         StandardEvaluationContext context = new StandardEvaluationContext();
         context.setVariable("myBean",new MyBean("spring-reading"));
 
-        // 解析SpEL表达式，并使用构造函数实例化对象
+        // Parse the SpEL expression and create the object with the constructor
         String name = parser.parseExpression("#myBean.name").getValue(context, String.class);
 
         System.out.println("name = " + name);

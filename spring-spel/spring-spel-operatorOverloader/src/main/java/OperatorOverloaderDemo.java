@@ -6,20 +6,20 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 public class OperatorOverloaderDemo {
 
     public static void main(String[] args) {
-        // 创建表达式解析器
+        // Create the expression parser
         ExpressionParser parser = new SpelExpressionParser();
 
-        // 创建表达式上下文
+        // Create the evaluation context
         StandardEvaluationContext context = new StandardEvaluationContext();
-        // 创建自定义的OperatorOverloader实例并注册到表达式上下文中
+        // Create a custom OperatorOverloader and register it in the context
         context.setOperatorOverloader(new CustomOperatorOverloader());
         context.setVariable("myBean1", new MyBean(18));
         context.setVariable("myBean2", new MyBean(20));
 
-        // 定义一个SpEL表达式，使用自定义的运算符
+        // Define a SpEL expression that uses the custom operator
         Expression expression = parser.parseExpression("#myBean1 + #myBean2");
 
-        // 解析并评估表达式
+        // Parse and evaluate the expression
         MyBean myBean = expression.getValue(context, MyBean.class);
 
         System.out.println("myBean1+myBean2 = " + myBean);

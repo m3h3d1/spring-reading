@@ -9,22 +9,22 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 public class BeanResolverDemo {
     public static void main(String[] args) {
-        // 创建 BeanFactory
-        // 这里使用注解配置的方式创建 BeanFactory
+        // Create a BeanFactory
+        // Here the BeanFactory is created from annotation configuration
         BeanFactory beanFactory = new AnnotationConfigApplicationContext(MyBean.class).getBeanFactory();
 
-        // 创建一个SpEL表达式解析器
+        // Create a SpEL expression parser
         ExpressionParser parser = new SpelExpressionParser();
 
-        // 创建一个标准的评估上下文
+        // Create a standard evaluation context
         StandardEvaluationContext context = new StandardEvaluationContext();
-        // 将 BeanFactoryResolver 设置为上下文的 BeanResolver
+        // Set BeanFactoryResolver as the BeanResolver of the context
         context.setBeanResolver(new BeanFactoryResolver(beanFactory));
 
-        // 解析 SpEL 表达式，获取 Bean 实例
+        // Parse the SpEL expression to get the bean instance
         Object myBean = parser.parseExpression("@myBean").getValue(context);
 
-        // 打印 Bean 实例
+        // Print the bean instance
         System.out.println("myBean = " + myBean);
     }
 }

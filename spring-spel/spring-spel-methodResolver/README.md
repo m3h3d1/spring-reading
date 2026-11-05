@@ -1,60 +1,61 @@
 ## MethodResolver
 
-- [MethodResolver](#MethodResolver)
-    - [一、基本信息](#一基本信息)
-    - [二、知识储备](#二知识储备)
-    - [三、基本描述](#三基本描述)
-    - [四、主要功能](#四主要功能)
-    - [五、接口源码](#五接口源码)
-    - [六、主要实现](#六主要实现)
-    - [七、最佳实践](#七最佳实践)
-    - [八、与其他组件的关系](#八与其他组件的关系)
-    - [九、常见问题](#九常见问题)
+- [MethodResolver](#methodresolver)
+    - [1. Overview](#1-overview)
+    - [2. Background Knowledge](#2-background-knowledge)
+    - [3. Description](#3-description)
+    - [4. Main Features](#4-main-features)
+    - [5. Interface Source](#5-interface-source)
+    - [6. Main Implementations](#6-main-implementations)
+    - [7. Best Practices](#7-best-practices)
+    - [8. Relationship with Other Components](#8-relationship-with-other-components)
+    - [9. FAQ](#9-faq)
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、知识储备
+### 2. Background Knowledge
 
-1. **Spring 表达式语言（SpEL）**
+1. **Spring Expression Language (SpEL)**
 
-   + `MethodResolver` 接口通常用于 SpEL 中，因此需要了解 SpEL 的语法和基本用法。这包括在 XML 或注解配置中如何使用 SpEL 表达式，以及如何在代码中动态解析 SpEL 表达式。
+   + The `MethodResolver` interface is usually used in SpEL, so you need to know the syntax and basic usage of SpEL. This includes how to use SpEL expressions in XML or annotation configuration, and how to parse SpEL expressions dynamically in code.
 
-2. **反射（Reflection）**
+2. **Reflection**
 
-   + `MethodResolver` 通常需要使用反射来动态地查找和调用对象的方法。因此，需要了解 Java 中的反射机制，包括 `Class`、`Method`、`Field` 等类的使用方法，以及如何通过反射调用对象的方法。
+   + `MethodResolver` often uses reflection to find and call the methods of an object at runtime. So you need to know Java reflection. This includes how to use classes such as `Class`, `Method` and `Field`, and how to call methods of an object through reflection.
 
-### 三、基本描述
+### 3. Description
 
-`MethodResolver` 接口是 Spring Framework 表达式语言（SpEL）模块的关键组成部分之一，用于在运行时解析并执行对象的方法。它定义了一个方法 `resolve`，接受方法名和参数类型列表作为参数，并返回一个 `MethodExecutor` 对象，代表解析到的方法。`MethodResolver` 的实现负责根据给定的方法名和参数类型，确定要调用的方法，并创建一个对应的 `MethodExecutor` 实例，以便在表达式求值期间执行该方法。
+The `MethodResolver` interface is one of the key parts of the Spring Framework expression language (SpEL) module. It finds and runs methods of objects at runtime. It defines a method `resolve`. The method takes a method name and a list of argument types, and returns a `MethodExecutor` object for the method it found. An implementation of `MethodResolver` decides which method to call from the given method name and argument types. It creates a matching `MethodExecutor` instance to run the method while the expression is evaluated.
 
-### 四、主要功能
+### 4. Main Features
 
-1. **方法解析**
+1. **Method resolving**
 
-   + `MethodResolver` 接口负责解析表达式中的方法调用。它根据方法名和参数类型列表，确定要调用的方法。
+   + The `MethodResolver` interface resolves method calls in expressions. It decides which method to call from the method name and the list of argument types.
 
-2. **动态方法调用**
+2. **Dynamic method calls**
 
-   + `MethodResolver` 允许在运行时动态地调用对象的方法。这使得 SpEL 可以根据表达式的需求，灵活地调用对象的不同方法。
+   + `MethodResolver` lets SpEL call the methods of an object at runtime. SpEL can call different methods of an object flexibly, as the expression needs.
 
-3. **方法执行器创建**
+3. **Creating method executors**
 
-   + `MethodResolver` 返回一个 `MethodExecutor` 对象，该对象代表解析到的方法。`MethodExecutor` 负责实际执行方法，并返回执行结果。
+   + `MethodResolver` returns a `MethodExecutor` object for the method it found. `MethodExecutor` runs the method and returns the result.
 
-4. **扩展性**
+4. **Extensibility**
 
-   + `MethodResolver` 接口是可扩展的，用户可以根据自己的需求实现自定义的 `MethodResolver`，以实现特定的方法解析逻辑。这使得 SpEL 在处理不同类型的对象和方法调用时更加灵活和可定制。
+   + The `MethodResolver` interface is extensible. You can write your own `MethodResolver` for specific method resolving logic. This makes SpEL more flexible and customizable when it handles different types of objects and method calls.
 
-### 五、接口源码
+### 5. Interface Source
 
-`MethodResolver` 接口定义了一个方法解析器的规范，其主要功能是在给定的上下文中，根据对象和方法名，确定可以处理指定参数的合适方法，并返回一个执行器以供调用。这个接口允许在运行时动态地解析和调用对象的方法，为表达式语言提供了灵活性和扩展性。
+The `MethodResolver` interface defines a method resolver. In a given context, it uses the object and the method name to find a suitable method that can handle the given arguments. It returns an executor that can call the method. The interface lets you find and call methods of objects at runtime. This gives flexibility and extensibility to the expression language.
 
 ```java
 /**
- * 方法解析器尝试定位一个方法，并返回一个命令执行器，该执行器可用于调用该方法。命令执行器将被缓存，
- * 但如果它过期了，则会再次调用解析器。
+ * A method resolver attempts to locate a method and returns a command executor that can be
+ * used to invoke that method. The command executor will be cached, but if it 'goes stale'
+ * the resolvers will be called again.
  *
  * @author Andy Clement
  * @since 3.0
@@ -62,14 +63,15 @@
 public interface MethodResolver {
 
     /**
-     * 在提供的上下文中，确定目标对象上可以处理指定参数的合适方法。返回一个 {@link MethodExecutor}，
-     * 该执行器可用于调用该方法，如果找不到方法，则返回 {@code null}。
-     * @param context 当前的评估上下文
-     * @param targetObject 调用方法的对象
-     * @param name 方法名
-     * @param argumentTypes 方法的参数类型列表
-     * @return 可以调用方法的 MethodExecutor，如果找不到方法，则返回 null
-     * @throws AccessException 如果访问方法时发生错误
+     * Within the supplied context, determine a suitable method on the supplied object that
+     * can handle the specified arguments. Return a {@link MethodExecutor} that can be used
+     * to invoke that method, or {@code null} if no method could be found.
+     * @param context the current evaluation context
+     * @param targetObject the object upon which the method is being called
+     * @param name the name of the method
+     * @param argumentTypes the arguments that the constructor must be able to handle
+     * @return a MethodExecutor that can invoke the method, or null if the method cannot be found
+     * @throws AccessException if there is a problem accessing the method
      */
     @Nullable
     MethodExecutor resolve(EvaluationContext context, Object targetObject, String name,
@@ -77,21 +79,21 @@ public interface MethodResolver {
 }
 ```
 
-`ReflectiveMethodResolver` 是一个基于反射的方法解析器，用于在给定的上下文中尝试定位目标对象上的适当方法，并返回一个方法执行器以供调用。它通过反射机制检查目标对象的方法，根据方法名和参数类型进行匹配。在匹配过程中，它考虑了方法的参数类型以及是否需要类型转换。此外，它还支持注册方法过滤器来过滤特定类型上的方法。在解析方法时，它会对方法进行排序，处理桥接方法，并且可以选择是否使用距离计算来查找更准确的匹配。如果找到匹配的方法，它将返回一个方法执行器；否则，返回 null。
+`ReflectiveMethodResolver` is a method resolver based on reflection. In a given context, it tries to find a suitable method on the target object and returns a method executor to call it. It uses reflection to check the methods of the target object and matches them by method name and argument types. While matching, it looks at the argument types of the method and whether type conversion is needed. It also supports registering method filters to filter the methods of a given type. When it resolves a method, it sorts the methods, handles bridge methods, and can use distance calculation to find a more exact match. If it finds a matching method, it returns a method executor. Otherwise, it returns null.
 
 ```java
 /**
- * 基于反射的 {@link MethodResolver}，在 {@link StandardEvaluationContext} 中默认使用，
- * 除非已经指定了显式的方法解析器。
+ * Reflection-based {@link MethodResolver} used by default in
+ * {@link StandardEvaluationContext} unless explicit method resolvers have been specified.
  * 
- * 作者：Andy Clement, Juergen Hoeller, Chris Beams
- * 自从：3.0版本
+ * Authors: Andy Clement, Juergen Hoeller, Chris Beams
+ * Since version 3.0
  * @see StandardEvaluationContext#addMethodResolver(MethodResolver)
  */
 public class ReflectiveMethodResolver implements MethodResolver {
 
-	// 使用距离将确保发现更准确的匹配，
-	// 更接近遵循Java规则。
+	// Using distance will ensure a more accurate match is discovered,
+	// more closely following the Java rules.
 	private final boolean useDistance;
 
 	@Nullable
@@ -102,22 +104,24 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	}
 
 	/**
-	 * 此构造函数允许配置 ReflectiveMethodResolver，
-	 * 使其使用距离计算来检查两个接近匹配中的更好的匹配
-	 * （当存在多个匹配时）。使用距离计算旨在确保匹配更接近
-	 * Java 编译器在考虑装箱/拆箱和方法候选人是否声明为
-	 * 处理传入参数类型的类型（参数的类型）时会发生什么。
-	 * @param useDistance 如果计算匹配时应使用距离计算，则为 {@code true}；否则为 {@code false}
+	 * This constructor allows the ReflectiveMethodResolver to be configured such that it
+	 * will use a distance computation to check which is the better of two close matches
+	 * (when there are multiple matches). Using the distance computation is intended to
+	 * ensure matches are more closely representative of what a Java compiler would do
+	 * when taking into account boxing/unboxing and whether the method candidates are
+	 * declared to handle a supertype of the type (of the argument) being passed in.
+	 * @param useDistance {@code true} if distance computation should be used when
+	 * calculating matches; {@code false} otherwise
 	 */
 	public ReflectiveMethodResolver(boolean useDistance) {
 		this.useDistance = useDistance;
 	}
 
 	/**
-	 * 注册给定类型的方法过滤器。
-	 * @param type 要过滤的类型
-	 * @param filter 相应的方法过滤器，
-	 *               如果要清除给定类型的任何过滤器，则为 {@code null}
+	 * Register a filter for methods on the given type.
+	 * @param type the type to filter on
+	 * @param filter a corresponding {@code MethodFilter},
+	 *               or {@code null} to clear any filter for the given type
 	 */
 	public void registerMethodFilter(Class<?> type, @Nullable MethodFilter filter) {
 		if (this.filters == null) {
@@ -132,43 +136,45 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	}
 
 	/**
-     * 在给定的上下文中，尝试定位目标对象上的适当方法，并返回一个方法执行器以供调用。
-     * 方法执行器将被缓存，但如果其状态过期，解析器将被再次调用。
+     * In the given context, try to find a suitable method on the target object and return
+     * a method executor to call it. The method executor will be cached, but if its state
+     * goes stale, the resolver will be called again.
      * <p>
-     * 在给定的上下文中，该方法确定可以处理指定参数的适当方法，并返回一个 {@link MethodExecutor} 对象，
-     * 该对象代表解析到的方法。如果找不到方法，则返回 {@code null}。
-     * @param context 当前的评估上下文
-     * @param targetObject 调用方法的对象
-     * @param name 方法名
-     * @param argumentTypes 方法的参数类型列表
-     * @return 可以调用方法的 MethodExecutor，如果找不到方法，则返回 null
-     * @throws AccessException 如果访问方法时发生错误
+     * In the given context, this method determines the suitable method that can handle the
+     * specified arguments, and returns a {@link MethodExecutor} object for the method it
+     * found. It returns {@code null} if no method can be found.
+     * @param context the current evaluation context
+     * @param targetObject the object upon which the method is being called
+     * @param name the name of the method
+     * @param argumentTypes the list of argument types of the method
+     * @return a MethodExecutor that can invoke the method, or null if the method cannot be found
+     * @throws AccessException if there is a problem accessing the method
      */
     @Override
     @Nullable
     public MethodExecutor resolve(EvaluationContext context, Object targetObject, String name,
                                   List<TypeDescriptor> argumentTypes) throws AccessException {
         try {
-            // 获取类型转换器
+            // Get the type converter
             TypeConverter typeConverter = context.getTypeConverter();
-            // 获取目标对象的类
+            // Get the class of the target object
             Class<?> type = (targetObject instanceof Class ? (Class<?>) targetObject : targetObject.getClass());
-            // 获取目标对象上的所有方法
+            // Get all methods of the target object
             ArrayList<Method> methods = new ArrayList<>(getMethods(type, targetObject));
 
-            // 如果为该类型注册了过滤器，请调用它
+            // If a filter is registered for this type, call it
             MethodFilter filter = (this.filters != null ? this.filters.get(type) : null);
             if (filter != null) {
                 List<Method> filtered = filter.filter(methods);
                 methods = (filtered instanceof ArrayList ? (ArrayList<Method>) filtered : new ArrayList<>(filtered));
             }
 
-            // 将方法排序为合理的顺序
+            // Sort the methods into a sensible order
             if (methods.size() > 1) {
                 methods.sort((m1, m2) -> {
                     int m1pl = m1.getParameterCount();
                     int m2pl = m2.getParameterCount();
-                    // 变长参数方法放在最后
+                    // Put varargs methods last
                     if (m1pl == m2pl) {
                         if (!m1.isVarArgs() && m2.isVarArgs()) {
                             return -1;
@@ -182,12 +188,12 @@ public class ReflectiveMethodResolver implements MethodResolver {
                 });
             }
 
-            // 解析任何桥接方法
+            // Resolve any bridge methods
             for (int i = 0; i < methods.size(); i++) {
                 methods.set(i, BridgeMethodResolver.findBridgedMethod(methods.get(i)));
             }
 
-            // 删除重复的方法（由于解析的桥接方法可能导致）
+            // Remove duplicate methods (possible due to resolved bridge methods)
             Set<Method> methodsToIterate = new LinkedHashSet<>(methods);
 
             Method closeMatch = null;
@@ -195,21 +201,21 @@ public class ReflectiveMethodResolver implements MethodResolver {
             Method matchRequiringConversion = null;
             boolean multipleOptions = false;
 
-            // 遍历方法，查找适合的方法
+            // Loop over the methods to find a suitable one
             for (Method method : methodsToIterate) {
                 if (method.getName().equals(name)) {
                     int paramCount = method.getParameterCount();
                     List<TypeDescriptor> paramDescriptors = new ArrayList<>(paramCount);
-                    // 构造方法参数类型描述符列表
+                    // Build the list of parameter type descriptors
                     for (int i = 0; i < paramCount; i++) {
                         paramDescriptors.add(new TypeDescriptor(new MethodParameter(method, i)));
                     }
                     ReflectionHelper.ArgumentsMatchInfo matchInfo = null;
                     if (method.isVarArgs() && argumentTypes.size() >= (paramCount - 1)) {
-                        // 处理变长参数
+                        // Handle varargs
                         matchInfo = ReflectionHelper.compareArgumentsVarargs(paramDescriptors, argumentTypes, typeConverter);
                     } else if (paramCount == argumentTypes.size()) {
-                        // 检查参数是否匹配
+                        // Check whether the arguments match
                         matchInfo = ReflectionHelper.compareArguments(paramDescriptors, argumentTypes, typeConverter);
                     }
                     if (matchInfo != null) {
@@ -217,15 +223,15 @@ public class ReflectiveMethodResolver implements MethodResolver {
                             return new ReflectiveMethodExecutor(method);
                         } else if (matchInfo.isCloseMatch()) {
                             if (this.useDistance) {
-                                // 计算匹配的距离
+                                // Compute the distance of the match
                                 int matchDistance = ReflectionHelper.getTypeDifferenceWeight(paramDescriptors, argumentTypes);
                                 if (closeMatch == null || matchDistance < closeMatchDistance) {
-                                    // 保存更好的匹配
+                                    // Keep the better match
                                     closeMatch = method;
                                     closeMatchDistance = matchDistance;
                                 }
                             } else {
-                                // 如果没有更好的匹配，将其视为接近匹配
+                                // If there is no better match, treat it as a close match
                                 if (closeMatch == null) {
                                     closeMatch = method;
                                 }
@@ -239,12 +245,12 @@ public class ReflectiveMethodResolver implements MethodResolver {
                     }
                 }
             }
-            // 返回找到的方法执行器
+            // Return the method executor that was found
             if (closeMatch != null) {
                 return new ReflectiveMethodExecutor(closeMatch);
             } else if (matchRequiringConversion != null) {
                 if (multipleOptions) {
-                    // 如果有多个匹配，则抛出异常
+                    // If there are several matches, throw an exception
                     throw new SpelEvaluationException(SpelMessage.MULTIPLE_POSSIBLE_METHODS, name);
                 }
                 return new ReflectiveMethodExecutor(matchRequiringConversion);
@@ -252,7 +258,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
                 return null;
             }
         } catch (EvaluationException ex) {
-            // 解析方法时出现异常
+            // An exception happened while resolving the method
             throw new AccessException("Failed to resolve method", ex);
         }
     }
@@ -261,20 +267,20 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	private Set<Method> getMethods(Class<?> type, Object targetObject) {
 		if (targetObject instanceof Class) {
 			Set<Method> result = new LinkedHashSet<>();
-			// 添加这些方法，以便在类型上可调用静态方法：例如 Float.valueOf（..）
+			// Add these so that static methods are invocable on the type: e.g. Float.valueOf(..)
 			Method[] methods = getMethods(type);
 			for (Method method : methods) {
 				if (Modifier.isStatic(method.getModifiers())) {
 					result.add(method);
 				}
 			}
-			// 还从 java.lang.Class 本身公开方法
+			// Also expose methods from java.lang.Class itself
 			Collections.addAll(result, getMethods(Class.class));
 			return result;
 		}
 		else if (Proxy.isProxyClass(type)) {
 			Set<Method> result = new LinkedHashSet<>();
-			// 公开接口方法（不是代理声明的重写）以便适当的变长参数内省
+			// Expose interface methods (not proxy-declared overrides) for proper vararg introspection
 			for (Class<?> ifc : type.getInterfaces()) {
 				Method[] methods = getMethods(ifc);
 				for (Method method : methods) {
@@ -298,9 +304,10 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	}
 
 	/**
-	 * 返回此类型的方法集。默认实现返回给定类型的 {@link Class#getMethods()} 的结果，
-	 * 但子类可以重写以更改结果，例如指定在其他地方声明的静态方法。
-	 * @param type 要返回方法的类
+	 * Return the set of methods for this type. The default implementation returns the
+	 * result of {@link Class#getMethods()} for the given type, but subclasses may override
+	 * in order to alter the results, e.g. specifying static methods declared elsewhere.
+	 * @param type the class for which to return the methods
 	 * @since 3.1.1
 	 */
 	protected Method[] getMethods(Class<?> type) {
@@ -308,11 +315,12 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	}
 
 	/**
-	 * 确定给定的 {@code Method} 是否是在给定目标类的实例上进行方法解析的候选方法。
-	 * <p>默认实现将任何方法都视为候选方法，即使对于 {@link Object} 基类的静态方法
-	 * 和非用户声明的方法也是如此。
-	 * @param method 要评估的方法
-	 * @param targetClass 正在内省的具体目标类
+	 * Determine whether the given {@code Method} is a candidate for method resolution
+	 * on an instance of the given target class.
+	 * <p>The default implementation considers any method as a candidate, even for
+	 * static methods and non-user-declared methods on the {@link Object} base class.
+	 * @param method the Method to evaluate
+	 * @param targetClass the concrete target class that is being introspected
 	 * @since 4.3.15
 	 */
 	protected boolean isCandidateForInvocation(Method method, Class<?> targetClass) {
@@ -322,46 +330,46 @@ public class ReflectiveMethodResolver implements MethodResolver {
 }
 ```
 
-### 六、主要实现
+### 6. Main Implementations
 
 1. **DataBindingMethodResolver** 
 
-   + 是用于数据绑定环境的方法解析器，支持根据数据绑定的规则解析方法，例如 Spring 数据绑定框架中的规则，并可能使用更高级的技术如 Spring DataBinding，根据数据绑定的配置和元数据来查找适当的方法。
+   + A method resolver for data binding. It resolves methods by data binding rules, such as the rules of the Spring data binding framework. It may use more advanced techniques such as Spring DataBinding, and find the suitable method from the data binding configuration and metadata.
 
 2. **ReflectiveMethodResolver** 
 
-   + 是基于反射机制的通用方法解析器，通过反射检查目标对象的方法，根据方法名和参数类型进行匹配，适用于大多数的 Java 对象和方法的解析，不需要特殊的配置或规则，只需要基于 Java 反射来解析方法即可。
+   + A general method resolver based on reflection. It uses reflection to check the methods of the target object and matches them by method name and argument types. It fits most Java objects and methods. It needs no special configuration or rules. It only resolves methods with Java reflection.
 
-### 七、最佳实践
+### 7. Best Practices
 
-使用Spring Expression Language（SpEL）来调用自定义对象（`MyBean`）中的方法。首先，通过SpEL表达式解析器创建一个解析器和一个上下文对象，然后实例化一个`MyBean`对象并将其设置为上下文中的变量。接着，创建一个SpEL表达式，调用`MyBean`对象的`add`方法，并传入两个参数。最后，将表达式与上下文关联，并计算表达式的值，即调用`MyBean`对象的方法并获取结果。
+This example uses the Spring Expression Language (SpEL) to call a method of a custom object (`MyBean`). First, it creates a SpEL expression parser and a context object. Then it creates a `MyBean` object and sets it as a variable in the context. Next, it creates a SpEL expression that calls the `add` method of the `MyBean` object with two arguments. Finally, it evaluates the expression with the context. This calls the method of the `MyBean` object and gets the result.
 
 ```java
 public class MethodResolverDemo {
 
     public static void main(String[] args) {
-        // 创建一个SpEL表达式解析器
+        // Create a SpEL expression parser
         ExpressionParser parser = new SpelExpressionParser();
 
         StandardEvaluationContext context = new StandardEvaluationContext();
 
-        // 在 MyBean 中定义的方法将被 SpEL 表达式调用
+        // The methods defined in MyBean are called by the SpEL expression
         MyBean myBean = new MyBean();
         context.setVariable("myBean", myBean);
 
-        // 创建一个 SpEL 表达式，调用 MyBean 中的方法
+        // Create a SpEL expression that calls a method of MyBean
         SpelExpression expression = (SpelExpression) parser.parseExpression("#myBean.add(10, 5)");
 
-        // 为表达式设置上下文，并计算结果
+        // Set the context for the expression and compute the result
         int result = (int) expression.getValue(context);
 
-        // 打印输出实例化的MyBean对象
+        // Print the result
         System.out.println("result = " + result);
     }
 }
 ```
 
- `MyBean` 类定义了一个简单的方法 `add`，它接受两个整数参数，并返回它们的和。
+ The `MyBean` class defines a simple method `add`. It takes two integer arguments and returns their sum.
 
 ```java
 public class MyBean {
@@ -371,56 +379,56 @@ public class MyBean {
 }
 ```
 
-运行结果，在 `MethodResolverDemo` 中调用了 `MyBean` 对象的 `add` 方法，并传入了两个参数（10 和 5），所以计算结果为 10 + 5 = 15。
+Output: `MethodResolverDemo` calls the `add` method of the `MyBean` object with two arguments (10 and 5). So the result is 10 + 5 = 15.
 
 ```java
 result = 15
 ```
 
-### 八、与其他组件的关系
+### 8. Relationship with Other Components
 
 1. **StandardEvaluationContext**
 
-   + `MethodResolver` 接口通常与 `StandardEvaluationContext` 类一起使用。`StandardEvaluationContext` 提供了 SpEL 表达式的运行时上下文，其中可以存储变量、函数等信息，并且可以设置自定义的方法解析器，其中就包括了 `MethodResolver` 接口的实现类。
+   + The `MethodResolver` interface is usually used with the `StandardEvaluationContext` class. `StandardEvaluationContext` gives the runtime context of a SpEL expression. It can store variables, functions and other information. You can also set custom method resolvers on it, including implementations of the `MethodResolver` interface.
 
 2. **ExpressionParser**
 
-   + `ExpressionParser` 接口用于解析 SpEL 表达式。在 SpEL 中，可以使用 `ExpressionParser` 实现类来解析表达式，例如 `SpelExpressionParser`。在解析 SpEL 表达式时，通常需要提供一个 `EvaluationContext`，这个上下文中可能会包含一个或多个 `MethodResolver`，用于解析表达式中的方法调用。
+   + The `ExpressionParser` interface parses SpEL expressions. In SpEL, you can use an implementation of `ExpressionParser`, such as `SpelExpressionParser`, to parse expressions. When you evaluate a SpEL expression, you usually give an `EvaluationContext`. It may contain one or more `MethodResolver` objects to resolve method calls in the expression.
 
 3. **MethodExecutor**
 
-   + `MethodResolver` 接口的 `resolve` 方法返回一个 `MethodExecutor` 对象，它用于执行解析到的方法。`MethodExecutor` 是一个接口，它定义了执行方法的方法 `execute`，具体的执行逻辑由其实现类提供。
+   + The `resolve` method of the `MethodResolver` interface returns a `MethodExecutor` object, which runs the method it found. `MethodExecutor` is an interface. It defines the `execute` method to run the method. The implementation class provides the real logic.
 
 4. **ReflectiveMethodResolver** & **DataBindingMethodResolver**
 
-   + 这两个类是 `MethodResolver` 接口的实现类，分别用于基于反射和数据绑定环境下的方法解析。它们与 `MethodResolver` 接口的关系在于，它们实现了 `MethodResolver` 接口，并提供了具体的方法解析逻辑。在使用 SpEL 表达式时，可以选择性地使用这两个类中的一个或者自定义其他的方法解析器来解析方法调用。
+   + These two classes implement the `MethodResolver` interface. They resolve methods based on reflection and in a data binding environment. They implement `MethodResolver` and give the real method resolving logic. When you use SpEL expressions, you can use one of these two classes, or write your own method resolver to resolve method calls.
 
-### 九、常见问题
+### 9. FAQ
 
-1. **如何自定义方法解析器？**
+1. **How do I write a custom method resolver?**
 
-   - 可以实现 `MethodResolver` 接口，并覆写其中的 `resolve` 方法来定义自定义的方法解析逻辑。然后将这个自定义的方法解析器注册到 `StandardEvaluationContext` 中。
+   - Implement the `MethodResolver` interface and override its `resolve` method with your own method resolving logic. Then register the custom method resolver in `StandardEvaluationContext`.
 
-2. **方法解析器的优先级如何确定？**
+2. **How is the priority of method resolvers decided?**
 
-   - 在 `StandardEvaluationContext` 中，可以注册多个方法解析器，它们的解析顺序由注册的顺序决定。解析时会按照注册的顺序逐个调用方法解析器，直到找到匹配的方法。
+   - In `StandardEvaluationContext`, you can register several method resolvers. They are called in the order they were registered. The resolvers are called one by one until a matching method is found.
 
-3. **如何处理方法重载？**
+3. **How are overloaded methods handled?**
 
-   - 当方法重载时，`MethodResolver` 需要根据传入的参数类型列表来确定最适合的方法。在解析方法调用时，会尝试匹配所有可能的方法，并根据参数类型的匹配程度来选择最佳的匹配。
+   - When a method is overloaded, `MethodResolver` uses the list of argument types to find the best method. When it resolves a method call, it tries to match all possible methods and picks the best match by how well the argument types match.
 
-4. **如何处理变长参数方法？**
+4. **How are varargs methods handled?**
 
-   - 变长参数方法（例如使用 `...` 定义的参数）在方法解析中需要特殊处理。方法解析器需要检查传入的参数数量和类型是否与方法定义匹配，并正确处理变长参数的情况。
+   - Varargs methods (for example parameters defined with `...`) need special handling when methods are resolved. The method resolver must check that the number and types of arguments match the method definition, and handle the varargs case correctly.
 
-5. **如何处理方法参数的类型转换？**
+5. **How is type conversion of method arguments handled?**
 
-   - 当方法参数的类型与传入参数的类型不完全匹配时，可能需要进行类型转换。方法解析器可以使用注册的类型转换器来进行必要的参数类型转换。
+   - When the type of a method parameter does not exactly match the type of the given argument, type conversion may be needed. The method resolver can use the registered type converter to convert the argument types.
 
-6. **如何处理桥接方法？**
+6. **How are bridge methods handled?**
 
-   - 桥接方法是 Java 泛型中的一个特殊情况，可能会导致方法重载或者匹配错误。方法解析器需要正确处理桥接方法，以确保找到正确的方法进行调用。
+   - Bridge methods are a special case of Java generics. They can cause overloading or matching errors. The method resolver must handle bridge methods correctly to find the right method to call.
 
-7. **如何处理方法的静态调用？**
+7. **How are static method calls handled?**
 
-   - 当调用静态方法时，需要在方法解析器中考虑到静态方法的情况。方法解析器需要正确处理静态方法的调用，以确保可以找到并调用正确的静态方法。
+   - When a static method is called, the method resolver must take static methods into account. It must handle static method calls correctly to find and call the right static method.

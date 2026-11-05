@@ -7,55 +7,55 @@ import java.util.List;
 
 /**
  * @author xcs
- * @date 2024年3月12日11:28:47
+ * @date 2024-03-12 11:28
  **/
 public class EvaluationContextDemo {
     public static void main(String[] args) {
-        // 创建评估上下文
+        // Create the evaluation context
         EvaluationContext context = new StandardEvaluationContext(new MyRootObject("Root Data"));
 
-        // 获取根对象
+        // Get the root object
         TypedValue root = context.getRootObject();
-        System.out.println("根对象: " + root.getValue());
+        System.out.println("Root object: " + root.getValue());
 
-        // 设置变量
+        // Set a variable
         context.setVariable("name", "John");
-        System.out.println("变量'name'的值: " + context.lookupVariable("name"));
+        System.out.println("Value of variable 'name': " + context.lookupVariable("name"));
 
-        // 获取属性访问器
+        // Get the property accessors
         List<PropertyAccessor> propertyAccessors = context.getPropertyAccessors();
-        System.out.println("属性访问器: " + propertyAccessors);
+        System.out.println("Property accessors: " + propertyAccessors);
 
-        // 获取构造函数解析器
+        // Get the constructor resolvers
         List<ConstructorResolver> constructorResolvers = context.getConstructorResolvers();
-        System.out.println("构造函数解析器: " + constructorResolvers);
+        System.out.println("Constructor resolvers: " + constructorResolvers);
 
-        // 获取方法解析器
+        // Get the method resolvers
         List<MethodResolver> methodResolvers = context.getMethodResolvers();
-        System.out.println("方法解析器: " + methodResolvers);
+        System.out.println("Method resolvers: " + methodResolvers);
 
-        // 获取 bean 解析器
+        // Get the bean resolver
         BeanResolver beanResolver = context.getBeanResolver();
-        System.out.println("bean 解析器: " + beanResolver);
+        System.out.println("Bean resolver: " + beanResolver);
 
-        // 获取类型定位器
+        // Get the type locator
         TypeLocator typeLocator = context.getTypeLocator();
-        System.out.println("类型定位器: " + typeLocator);
+        System.out.println("Type locator: " + typeLocator);
 
-        // 获取类型转换器
+        // Get the type converter
         TypeConverter typeConverter = context.getTypeConverter();
-        System.out.println("类型转换器: " + typeConverter);
+        System.out.println("Type converter: " + typeConverter);
 
-        // 获取类型比较器
+        // Get the type comparator
         TypeComparator typeComparator = context.getTypeComparator();
-        System.out.println("类型比较器: " + typeComparator);
+        System.out.println("Type comparator: " + typeComparator);
 
-        // 获取运算符重载器
+        // Get the operator overloader
         OperatorOverloader operatorOverloader = context.getOperatorOverloader();
-        System.out.println("运算符重载器: " + operatorOverloader);
+        System.out.println("Operator overloader: " + operatorOverloader);
     }
 
-    // 定义根对象的类
+    // Class of the root object
     static class MyRootObject {
         private String data;
 

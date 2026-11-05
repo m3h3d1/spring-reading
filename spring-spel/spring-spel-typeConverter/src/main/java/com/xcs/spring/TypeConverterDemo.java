@@ -7,22 +7,22 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 public class TypeConverterDemo {
 
     public static void main(String[] args) {
-        // 创建SpEL表达式解析器
+        // Create a SpEL expression parser
         SpelExpressionParser parser = new SpelExpressionParser();
 
-        // 创建一个EvaluationContext
+        // Create an EvaluationContext
         StandardEvaluationContext context = new StandardEvaluationContext();
 
-        // 定义一个需要转换的值
+        // Define a value to convert
         String stringValue = "'123'";
 
-        // 解析表达式
+        // Parse the expression
         Expression expression = parser.parseExpression(stringValue);
 
-        // 使用TypeConverter进行转换
+        // Convert with the TypeConverter
         Integer intValue = expression.getValue(context, Integer.class);
 
-        // 打印转换后的值
+        // Print the converted value
         System.out.println("Converted Integer value: " + intValue);
     }
 }

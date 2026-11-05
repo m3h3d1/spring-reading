@@ -2,82 +2,82 @@
 
 
 - [ExpressionParser](#expressionparser)
-  - [一、基本信息](#一基本信息)
-  - [二、知识储备](#二知识储备)
-  - [三、基本描述](#三基本描述)
-  - [四、主要功能](#四主要功能)
-  - [五、接口源码](#五接口源码)
-  - [六、主要实现](#六主要实现)
-  - [七、最佳实践](#七最佳实践)
-  - [八、时序图](#八时序图)
-  - [九、源码分析](#九源码分析)
-  - [十、与其他组件的关系](#十与其他组件的关系)
-  - [十一、常见问题](#十一常见问题)
+  - [1. Overview](#1-overview)
+  - [2. Background Knowledge](#2-background-knowledge)
+  - [3. Description](#3-description)
+  - [4. Main Features](#4-main-features)
+  - [5. Interface Source](#5-interface-source)
+  - [6. Main Implementations](#6-main-implementations)
+  - [7. Best Practices](#7-best-practices)
+  - [8. Sequence Diagram](#8-sequence-diagram)
+  - [9. Source Code Analysis](#9-source-code-analysis)
+  - [10. Relationship with Other Components](#10-relationship-with-other-components)
+  - [11. FAQ](#11-faq)
 
-### 一、基本信息
+### 1. Overview
 
-✒ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [My CSDN]() 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、知识储备
+### 2. Background Knowledge
 
-1. **XML 和/或注解配置**
+1. **XML and/or annotation configuration**
 
-   + 熟悉使用 XML 或注解来配置 Spring 应用程序，因为 SpEL 常用于这些配置文件中。
+   + You should know how to configure Spring applications with XML or annotations, because SpEL is often used in these configurations.
 
-2. **理解 SpEL 语法**
+2. **SpEL syntax**
 
-   + SpEL 有自己的语法规则。了解这些规则对于编写有效的 SpEL 表达式至关重要。
+   + SpEL has its own syntax rules. You need to know them to write valid SpEL expressions.
 
-3. **了解 AOP 和事件处理**
+3. **AOP and event handling**
 
-   + 虽然不是必需的，但了解 Spring 中的 AOP 和事件处理机制对于理解 SpEL 在复杂场景下的应用是有益的。
+   + They are not required. But knowing AOP and event handling in Spring helps you understand how SpEL is used in complex cases.
 
-### 三、基本描述
+### 3. Description
 
-`ExpressionParser` 接口是 Spring 框架中的一个关键组件，它专门用于解析和执行 Spring 表达式语言（SpEL）的表达式。SpEL 是一种功能丰富的表达式语言，允许在运行时动态地操作和查询对象图。通过 `ExpressionParser` 接口，我们可以将字符串形式的表达式转换为 `Expression` 对象，并对这些对象执行各种操作，例如获取值、设置值或执行复杂的表达式。
+The `ExpressionParser` interface is a key component in the Spring Framework. It parses and runs expressions of the Spring Expression Language (SpEL). SpEL is a rich expression language. It lets you work with and query the object graph at runtime. With the `ExpressionParser` interface, we can turn an expression string into an `Expression` object. Then we can do many things with it, such as getting a value, setting a value, or running a complex expression.
 
-### 四、主要功能
+### 4. Main Features
 
-1. **解析表达式**
+1. **Parse expressions**
 
-   + 它可以解析基于文本的表达式字符串，将其转换为 `Expression` 对象。这是它的核心功能，允许将动态表达式嵌入到应用程序中。
+   + It parses a text expression string and turns it into an `Expression` object. This is its core feature. It lets you embed dynamic expressions in an application.
 
-2. **表达式求值**
+2. **Evaluate expressions**
 
-   + 通过解析得到的 `Expression` 对象，可以对表达式进行求值，以获取其运行时值。这可能涉及访问对象属性、调用方法、使用逻辑运算符等。
+   + With the parsed `Expression` object, you can evaluate the expression to get its runtime value. This can mean accessing object properties, calling methods, using logical operators and more.
 
-3. **设置表达式值**
+3. **Set expression values**
 
-   + 除了获取表达式的值，`ExpressionParser` 还可以用来修改目标对象的属性。通过表达式，可以直接设置对象的某个属性值。
+   + Besides getting the value of an expression, `ExpressionParser` can also change properties of a target object. With an expression, you can set the value of a property of an object directly.
 
-4. **类型转换**
+4. **Type conversion**
 
-   + 它还支持类型转换功能，能夠在表达式求值过程中自动将值从一种类型转换为另一种类型。
+   + It also supports type conversion. During evaluation, a value is converted from one type to another automatically.
 
-5. **函数和运算符处理**
+5. **Functions and operators**
 
-   + `ExpressionParser` 支持使用各种函数和运算符，例如数学运算、字符串操作、逻辑运算等。
+   + `ExpressionParser` supports many functions and operators, such as math operations, string operations and logical operations.
 
-6. **集合操作**
+6. **Collection operations**
 
-   + 支持对集合和数组的操作，包括选择（selection）、投影（projection）和聚合（aggregation）等。
+   + It supports operations on collections and arrays, including selection, projection and aggregation.
 
-7. **条件表达式**
+7. **Conditional expressions**
 
-   + 能够处理条件表达式，例如 if-then-else 结构，提供了增强的决策能力。
+   + It can handle conditional expressions, such as an if-then-else structure. This gives stronger decision making.
 
-8. **模板解析**
+8. **Template parsing**
 
-   + 可以处理带有模板文本的表达式，例如拼接字符串与动态表达式的结合。
+   + It can handle expressions with template text, for example joining a string with a dynamic expression.
 
-### 五、接口源码
+### 5. Interface Source
 
-`ExpressionParser` 接口主要负责将表达式字符串转换为可评估的 `Expression` 对象。它支持解析标准表达式和模板，提供了两种方法来解析表达式：一种是基本解析，另一种允许通过上下文进行更灵活的解析。
+The `ExpressionParser` interface turns an expression string into an `Expression` object that can be evaluated. It supports parsing standard expressions and templates. It has two methods to parse expressions. One is basic parsing. The other allows more flexible parsing through a context.
 
 ```java
 /**
- * 解析表达式字符串，编译成可评估的表达式。
- * 支持解析标准表达式字符串以及模板。
+ * Parses expression strings into compiled expressions that can be evaluated.
+ * Supports parsing templates as well as standard expression strings.
  *
  * @author Keith Donald
  * @author Andy Clement
@@ -86,52 +86,52 @@
 public interface ExpressionParser {
 
 	/**
-	 * 解析表达式字符串并返回一个可用于重复评估的 Expression 对象。
-	 * <p>一些例子:
+	 * Parse the expression string and return an Expression object you can use for repeated evaluation.
+	 * <p>Some examples:
 	 * <pre class="code">
 	 *     3 + 4
 	 *     name.firstName
 	 * </pre>
-	 * @param expressionString 需要解析的原始表达式字符串
-	 * @return 已解析表达式的评估器
-	 * @throws ParseException 解析过程中发生的异常
+	 * @param expressionString the raw expression string to parse
+	 * @return an evaluator for the parsed expression
+	 * @throws ParseException an exception occurred during parsing
 	 */
 	Expression parseExpression(String expressionString) throws ParseException;
 
 	/**
-	 * 解析表达式字符串并返回一个可用于重复评估的 Expression 对象。
-	 * <p>一些例子:
+	 * Parse the expression string and return an Expression object you can use for repeated evaluation.
+	 * <p>Some examples:
 	 * <pre class="code">
 	 *     3 + 4
 	 *     name.firstName
 	 * </pre>
-	 * @param expressionString 需要解析的原始表达式字符串
-	 * @param context 影响此表达式解析过程的上下文（可选）
-	 * @return 已解析表达式的评估器
-	 * @throws ParseException 解析过程中发生的异常
+	 * @param expressionString the raw expression string to parse
+	 * @param context a context for influencing this expression parsing routine (optional)
+	 * @return an evaluator for the parsed expression
+	 * @throws ParseException an exception occurred during parsing
 	 */
 	Expression parseExpression(String expressionString, ParserContext context) throws ParseException;
 
 }
 ```
 
-### 六、主要实现
+### 6. Main Implementations
 
 1. **SpelExpressionParser**
 
-   + 这是最常用的实现，提供了对 Spring 表达式语言（SpEL）的完整支持。它能够处理各种复杂的表达式，如方法调用、属性访问、关系运算符等。
+   + This is the most used implementation. It fully supports the Spring Expression Language (SpEL). It can handle many complex expressions, such as method calls, property access and relational operators.
 
-### 七、最佳实践
+### 7. Best Practices
 
-首先创建了一个 SpEL 表达式解析器实例 `SpelExpressionParser`，然后使用该解析器解析了一个简单的数学表达式 `"100 * 2 + 10"`，最后将`Expression` 打印输出。
+First, this example creates a SpEL expression parser instance, `SpelExpressionParser`. Then it uses the parser to parse a simple math expression `"100 * 2 + 10"`. Finally, it prints the `Expression`.
 
 ```java
 public class ExpressionParserDemo {
 
     public static void main(String[] args) {
-        // 创建解析器实例
+        // Create the parser instance
         ExpressionParser parser = new SpelExpressionParser();
-        // 解析基本表达式
+        // Parse a basic expression
         Expression expression = parser.parseExpression("100 * 2 + 10");
 
         System.out.println("expression = " + expression);
@@ -139,81 +139,81 @@ public class ExpressionParserDemo {
 }
 ```
 
-运行结果，`SpelExpressionParser` 解析给定表达式后返回的 `SpelExpression` 对象。这个对象包含了对表达式的内部表示，可以用于后续的表达式计算。
+Output: `SpelExpressionParser` parses the given expression and returns a `SpelExpression` object. This object holds the internal form of the expression. It can be used later to evaluate the expression.
 
 ```java
 expression = org.springframework.expression.spel.standard.SpelExpression@754ba872
 ```
 
-### 八、时序图
+### 8. Sequence Diagram
 
 ~~~mermaid
 sequenceDiagram
     autonumber
-    title: ExpressionParser时序图
+    title: ExpressionParser Sequence Diagram
 
     ExpressionParserDemo->>TemplateAwareExpressionParser: parseExpression(expressionString)
     TemplateAwareExpressionParser->>TemplateAwareExpressionParser: parseExpression(expressionString, context)
     TemplateAwareExpressionParser->>SpelExpressionParser: doParseExpression(expressionString, context)
     SpelExpressionParser->>InternalSpelExpressionParser: new InternalSpelExpressionParser(this.configuration)
-    InternalSpelExpressionParser->>SpelExpressionParser: 返回parser
+    InternalSpelExpressionParser->>SpelExpressionParser: Return parser
     SpelExpressionParser->>InternalSpelExpressionParser: doParseExpression(expressionString, context)
     InternalSpelExpressionParser->>Tokenizer: new Tokenizer(expressionString)
-    Note over InternalSpelExpressionParser,Tokenizer: 字符串流分析为记号流
-    Tokenizer->>InternalSpelExpressionParser: 返回tokenizer
+    Note over InternalSpelExpressionParser,Tokenizer: Turn the character stream into a token stream
+    Tokenizer->>InternalSpelExpressionParser: Return tokenizer
     InternalSpelExpressionParser->>Tokenizer: process()
-    Note over InternalSpelExpressionParser,Tokenizer: 词法分析
+    Note over InternalSpelExpressionParser,Tokenizer: Lexical analysis
     InternalSpelExpressionParser->>InternalSpelExpressionParser: eatExpression()
-    Note over InternalSpelExpressionParser: 生成抽象语法树
+    Note over InternalSpelExpressionParser: Build the abstract syntax tree
     InternalSpelExpressionParser->>InternalSpelExpressionParser: eatLogicalOrExpression
-    Note over InternalSpelExpressionParser: 解析逻辑或表达式
+    Note over InternalSpelExpressionParser: Parse the logical OR expression
     InternalSpelExpressionParser->>InternalSpelExpressionParser: eatLogicalAndExpression
-    Note over InternalSpelExpressionParser: 解析逻辑与表达式
+    Note over InternalSpelExpressionParser: Parse the logical AND expression
     InternalSpelExpressionParser->>InternalSpelExpressionParser: eatRelationalExpression
-    Note over InternalSpelExpressionParser: 解析关系表达式
+    Note over InternalSpelExpressionParser: Parse the relational expression
     InternalSpelExpressionParser->>InternalSpelExpressionParser: eatSumExpression
-    Note over InternalSpelExpressionParser: 解析加减表达式
+    Note over InternalSpelExpressionParser: Parse the addition and subtraction expression
     InternalSpelExpressionParser->>InternalSpelExpressionParser: eatProductExpression
-    Note over InternalSpelExpressionParser: 解析乘除表达式
+    Note over InternalSpelExpressionParser: Parse the multiplication and division expression
     InternalSpelExpressionParser->>InternalSpelExpressionParser: eatPowerIncDecExpression
-    Note over InternalSpelExpressionParser: 解析幂运算和自增自减表达式
+    Note over InternalSpelExpressionParser: Parse the power, increment and decrement expression
     InternalSpelExpressionParser->>InternalSpelExpressionParser: eatUnaryExpression
-    Note over InternalSpelExpressionParser: 解析一元表达式
+    Note over InternalSpelExpressionParser: Parse the unary expression
     InternalSpelExpressionParser->>InternalSpelExpressionParser: eatPrimaryExpression
-    Note over InternalSpelExpressionParser: 解析主表达式
+    Note over InternalSpelExpressionParser: Parse the primary expression
     InternalSpelExpressionParser->>InternalSpelExpressionParser: eatStartNode
-    Note over InternalSpelExpressionParser: 解析起始节点
+    Note over InternalSpelExpressionParser: Parse the start node
     InternalSpelExpressionParser->>InternalSpelExpressionParser: maybeEatLiteral
-    Note over InternalSpelExpressionParser: 尝试解析字面量
+    Note over InternalSpelExpressionParser: Try to parse a literal
     InternalSpelExpressionParser->>InternalSpelExpressionParser: maybeEatParenExpression
-    Note over InternalSpelExpressionParser: 尝试解析括号表达式
+    Note over InternalSpelExpressionParser: Try to parse a parenthesized expression
     InternalSpelExpressionParser->>InternalSpelExpressionParser: maybeEatTypeReference
-    Note over InternalSpelExpressionParser: 尝试解析类型引用
+    Note over InternalSpelExpressionParser: Try to parse a type reference
     InternalSpelExpressionParser->>InternalSpelExpressionParser: maybeEatNullReference
-    Note over InternalSpelExpressionParser: 尝试解析null引用
+    Note over InternalSpelExpressionParser: Try to parse a null reference
     InternalSpelExpressionParser->>InternalSpelExpressionParser: maybeEatConstructorReference
-    Note over InternalSpelExpressionParser: 尝试解析构造函数引用
+    Note over InternalSpelExpressionParser: Try to parse a constructor reference
     InternalSpelExpressionParser->>InternalSpelExpressionParser: maybeEatBeanReference
-    Note over InternalSpelExpressionParser: 尝试解析Bean引用
+    Note over InternalSpelExpressionParser: Try to parse a bean reference
     InternalSpelExpressionParser->>InternalSpelExpressionParser: maybeEatProjection
-    Note over InternalSpelExpressionParser: 尝试解析投影
+    Note over InternalSpelExpressionParser: Try to parse a projection
     InternalSpelExpressionParser->>InternalSpelExpressionParser: maybeEatSelection
-    Note over InternalSpelExpressionParser: 尝试解析选择
+    Note over InternalSpelExpressionParser: Try to parse a selection
     InternalSpelExpressionParser->>InternalSpelExpressionParser: maybeEatIndexer
-    Note over InternalSpelExpressionParser: 尝试解析索引器
+    Note over InternalSpelExpressionParser: Try to parse an indexer
     InternalSpelExpressionParser->>InternalSpelExpressionParser: maybeEatInlineListOrMap
-    Note over InternalSpelExpressionParser: 尝试解析内联列表或映射
-    InternalSpelExpressionParser->>SpelExpressionParser: 返回表达式对象
-    SpelExpressionParser->>TemplateAwareExpressionParser: 返回表达式对象
-    TemplateAwareExpressionParser->>ExpressionParserDemo: 返回表达式对象
+    Note over InternalSpelExpressionParser: Try to parse an inline list or map
+    InternalSpelExpressionParser->>SpelExpressionParser: Return the expression object
+    SpelExpressionParser->>TemplateAwareExpressionParser: Return the expression object
+    TemplateAwareExpressionParser->>ExpressionParserDemo: Return the expression object
 
 ~~~
 
 
 
-### 九、源码分析
+### 9. Source Code Analysis
 
-在`org.springframework.expression.common.TemplateAwareExpressionParser#parseExpression(expressionString)`方法中，接受一个字符串类型的表达式作为输入，并调用了重载的 `parseExpression` 方法来执行实际的解析操作。
+The `org.springframework.expression.common.TemplateAwareExpressionParser#parseExpression(expressionString)` method takes an expression string as input. It calls the overloaded `parseExpression` method to do the real parsing.
 
 ```java
 @Override
@@ -222,7 +222,7 @@ public Expression parseExpression(String expressionString) throws ParseException
 }
 ```
 
-在`org.springframework.expression.common.TemplateAwareExpressionParser#parseExpression(expressionString, context)`方法中，首先检查传入的 `ParserContext` 对象是否为模板模式，如果是，则调用 `parseTemplate` 方法来解析模板表达式；否则，调用 `doParseExpression` 方法来解析普通的表达式。
+In the `org.springframework.expression.common.TemplateAwareExpressionParser#parseExpression(expressionString, context)` method, it first checks whether the given `ParserContext` is in template mode. If it is, it calls `parseTemplate` to parse the template expression. Otherwise, it calls `doParseExpression` to parse a normal expression.
 
 ```java
 @Override
@@ -236,7 +236,7 @@ public Expression parseExpression(String expressionString, @Nullable ParserConte
 }
 ```
 
-在`org.springframework.expression.spel.standard.SpelExpressionParser#doParseExpression`方法中，重写了 `doParseExpression` 方法。在这个方法中，它创建了一个 `InternalSpelExpressionParser` 对象，并调用了其 `doParseExpression` 方法来执行实际的 SpEL 表达式解析操作，然后返回解析得到的 `SpelExpression` 对象。
+The `org.springframework.expression.spel.standard.SpelExpressionParser#doParseExpression` method overrides `doParseExpression`. It creates an `InternalSpelExpressionParser` object and calls its `doParseExpression` method to do the real SpEL expression parsing. Then it returns the `SpelExpression` object.
 
 ```java
 @Override
@@ -245,7 +245,7 @@ protected SpelExpression doParseExpression(String expressionString, @Nullable Pa
 }
 ```
 
-在`org.springframework.expression.spel.standard.InternalSpelExpressionParser#doParseExpression`方法中，首先对给定的表达式字符串进行分词处理，并通过构建抽象语法树（AST）来解析表达式。在解析过程中，它确保 AST 不为空，并且所有的令牌都已经处理。最后，基于解析得到的 AST 创建一个新的 `SpelExpression` 对象，并将其返回。
+In the `org.springframework.expression.spel.standard.InternalSpelExpressionParser#doParseExpression` method, it first splits the given expression string into tokens. Then it parses the expression by building an abstract syntax tree (AST). During parsing, it makes sure the AST is not null and all tokens are processed. Finally, it creates a new `SpelExpression` object from the AST and returns it.
 
 ```java
 @Override
@@ -253,43 +253,43 @@ protected SpelExpression doParseExpression(String expressionString, @Nullable Pa
         throws ParseException {
 
     try {
-        // 设置当前表达式字符串
+        // Set the current expression string
         this.expressionString = expressionString;
 
-        // 对表达式字符串进行分词处理
+        // Split the expression string into tokens
         Tokenizer tokenizer = new Tokenizer(expressionString);
         this.tokenStream = tokenizer.process();
         this.tokenStreamLength = this.tokenStream.size();
         this.tokenStreamPointer = 0;
 
-        // 清空已构建节点的集合
+        // Clear the collection of constructed nodes
         this.constructedNodes.clear();
 
-        // 构建抽象语法树（AST）
+        // Build the abstract syntax tree (AST)
         SpelNodeImpl ast = eatExpression();
 
-        // 确保 AST 不为空
+        // Make sure the AST is not null
         Assert.state(ast != null, "No node");
 
-        // 检查是否还有未处理的令牌，如果有则抛出异常
+        // Check whether there are unprocessed tokens. If so, throw an exception
         Token t = peekToken();
         if (t != null) {
             throw new SpelParseException(t.startPos, SpelMessage.MORE_INPUT, toString(nextToken()));
         }
 
-        // 确保已构建节点的集合为空
+        // Make sure the collection of constructed nodes is empty
         Assert.isTrue(this.constructedNodes.isEmpty(), "At least one node expected");
 
-        // 创建并返回 SpEL 表达式对象
+        // Create and return the SpEL expression object
         return new SpelExpression(expressionString, ast, this.configuration);
     } catch (InternalParseException ex) {
-        // 抛出内部解析异常的原因
+        // Throw the cause of the internal parse exception
         throw ex.getCause();
     }
 }
 ```
 
-在`org.springframework.expression.spel.standard.Tokenizer#Tokenizer`方法中，接受一个字符串类型的输入数据，并将其初始化为 `Tokenizer` 类的实例。在构造函数中，输入数据被设置为类的成员变量 `expressionString`，并且将输入数据加上一个空字符以确保在处理过程中能够正确识别输入的末尾。然后，输入数据被转换为字符数组并赋值给 `charsToProcess`，同时确定了数组的长度，并将初始位置指针 `pos` 设置为0，表示在输入数据的开头位置。
+The `org.springframework.expression.spel.standard.Tokenizer#Tokenizer` constructor takes a string as input data and creates a `Tokenizer` instance. The input data is stored in the field `expressionString`. A null character is added to the end of the input, so the end of the input can be recognized correctly during processing. Then the input is turned into a character array and assigned to `charsToProcess`. The length of the array is stored, and the position pointer `pos` is set to 0, the start of the input.
 
 ```java
 public Tokenizer(String inputData) {
@@ -300,29 +300,29 @@ public Tokenizer(String inputData) {
 }
 ```
 
-在`org.springframework.expression.spel.standard.Tokenizer#process`方法中，处理输入的字符串并生成对应的令牌列表。在处理过程中，它遍历输入字符串的每个字符，根据字符的类型执行相应的操作：对字母进行标识符解析，处理运算符和分隔符生成对应的令牌，解析数字字面量，忽略空白字符，处理引号括起的字符串字面量，以及处理到达字符串末尾的情况。最终，生成的令牌列表作为处理结果返回。
+The `org.springframework.expression.spel.standard.Tokenizer#process` method processes the input string and produces a list of tokens. It loops over each character of the input and acts by the kind of character. It reads identifiers from letters. It makes tokens from operators and separators. It parses number literals. It skips whitespace. It handles string literals in quotes. And it handles reaching the end of the string. At the end, it returns the list of tokens.
 
 ```java
 public List<Token> process() {
-    // 循环处理输入字符，直到到达输入字符串的末尾
+    // Loop over the input characters until the end of the input string
     while (this.pos < this.max) {
-        // 获取当前位置的字符
+        // Get the character at the current position
         char ch = this.charsToProcess[this.pos];
-        // 如果是字母，则解析标识符
+        // If it is a letter, parse an identifier
         if (isAlphabetic(ch)) {
             lexIdentifier();
         } else {
-            // 处理运算符和分隔符
+            // Handle operators and separators
             switch (ch) {
                 case '+':
-                    // 处理 "+" 号
+                    // Handle the "+" sign
                     if (isTwoCharToken(TokenKind.INC)) {
                         pushPairToken(TokenKind.INC);
                     } else {
                         pushCharToken(TokenKind.PLUS);
                     }
                     break;
-                // 省略其他情况的处理...
+                // Other cases are omitted...
                 case '0':
                 case '1':
                 case '2':
@@ -333,172 +333,172 @@ public List<Token> process() {
                 case '7':
                 case '8':
                 case '9':
-                    // 解析数值字面量
+                    // Parse a number literal
                     lexNumericLiteral(ch == '0');
                     break;
-                // 处理空格、制表符、回车和换行符
+                // Handle space, tab, carriage return and line feed
                 case ' ':
                 case '\t':
                 case '\r':
                 case '\n':
-                    // 忽略这些字符
+                    // Ignore these characters
                     this.pos++;
                     break;
                 case '\'':
-                    // 解析单引号括起的字符串字面量
+                    // Parse a string literal in single quotes
                     lexQuotedStringLiteral();
                     break;
                 case '"':
-                    // 解析双引号括起的字符串字面量
+                    // Parse a string literal in double quotes
                     lexDoubleQuotedStringLiteral();
                     break;
                 case 0:
-                    // 到达输入字符串的末尾
-                    this.pos++; // 移动指针到字符串末尾
+                    // Reached the end of the input string
+                    this.pos++; // Move the pointer to the end of the string
                     break;
                 case '\\':
-                    // 抛出异常，不支持的转义字符
+                    // Throw an exception: unsupported escape character
                     raiseParseException(this.pos, SpelMessage.UNEXPECTED_ESCAPE_CHAR);
                     break;
                 default:
-                    // 抛出异常，无法处理的字符
+                    // Throw an exception: a character that cannot be handled
                     throw new IllegalStateException("Cannot handle (" + (int) ch + ") '" + ch + "'");
             }
         }
     }
-    // 返回处理后的令牌列表
+    // Return the list of tokens
     return this.tokens;
 }
 ```
 
-在`org.springframework.expression.spel.standard.InternalSpelExpressionParser#eatExpression`方法中，首先调用 `eatLogicalOrExpression` 方法解析逻辑或表达式，然后检查下一个令牌的类型。如果下一个令牌是赋值操作符 `=`，则构造一个赋值节点 `Assign`；如果是 Elvis 操作符 `?:`，则构造一个 Elvis 节点；如果是条件运算符 `?`，则构造一个三元表达式节点 `Ternary`。
+In the `org.springframework.expression.spel.standard.InternalSpelExpressionParser#eatExpression` method, it first calls `eatLogicalOrExpression` to parse the logical OR expression. Then it checks the type of the next token. If the next token is the assignment operator `=`, it builds an assignment node `Assign`. If it is the Elvis operator `?:`, it builds an Elvis node. If it is the conditional operator `?`, it builds a ternary expression node `Ternary`.
 
 ```java
 @Nullable
 private SpelNodeImpl eatExpression() {
-    // 解析逻辑或表达式
+    // Parse the logical OR expression
     SpelNodeImpl expr = eatLogicalOrExpression();
-    // 获取下一个令牌
+    // Get the next token
     Token t = peekToken();
     if (t != null) {
-        // 如果下一个令牌是赋值操作符 "="
+        // If the next token is the assignment operator "="
         if (t.kind == TokenKind.ASSIGN) {  // a=b
-            // 如果逻辑或表达式为空，则构造一个空字面量节点
+            // If the logical OR expression is null, build a null literal node
             if (expr == null) {
                 expr = new NullLiteral(t.startPos - 1, t.endPos - 1);
             }
-            // 消耗赋值操作符
+            // Consume the assignment operator
             nextToken();
-            // 解析赋值操作符右侧的逻辑或表达式
+            // Parse the logical OR expression on the right of the assignment operator
             SpelNodeImpl assignedValue = eatLogicalOrExpression();
-            // 构造赋值节点
+            // Build the assignment node
             return new Assign(t.startPos, t.endPos, expr, assignedValue);
         }
-        // 如果下一个令牌是 Elvis 操作符 "?:"
+        // If the next token is the Elvis operator "?:"
         if (t.kind == TokenKind.ELVIS) {  // a?:b (a if it isn't null, otherwise b)
-            // 如果逻辑或表达式为空，则构造一个空字面量节点
+            // If the logical OR expression is null, build a null literal node
             if (expr == null) {
                 expr = new NullLiteral(t.startPos - 1, t.endPos - 2);
             }
-            // 消耗 Elvis 操作符
+            // Consume the Elvis operator
             nextToken();  // elvis has left the building
-            // 解析 Elvis 操作符右侧的表达式
+            // Parse the expression on the right of the Elvis operator
             SpelNodeImpl valueIfNull = eatExpression();
-            // 如果右侧表达式为空，则构造一个空字面量节点
+            // If the right expression is null, build a null literal node
             if (valueIfNull == null) {
                 valueIfNull = new NullLiteral(t.startPos + 1, t.endPos + 1);
             }
-            // 构造 Elvis 节点
+            // Build the Elvis node
             return new Elvis(t.startPos, t.endPos, expr, valueIfNull);
         }
-        // 如果下一个令牌是条件运算符 "?"
+        // If the next token is the conditional operator "?"
         if (t.kind == TokenKind.QMARK) {  // a?b:c
-            // 如果逻辑或表达式为空，则构造一个空字面量节点
+            // If the logical OR expression is null, build a null literal node
             if (expr == null) {
                 expr = new NullLiteral(t.startPos - 1, t.endPos - 1);
             }
-            // 消耗条件运算符
+            // Consume the conditional operator
             nextToken();
-            // 解析条件运算符右侧的表达式
+            // Parse the expression on the right of the conditional operator
             SpelNodeImpl ifTrueExprValue = eatExpression();
-            // 消耗冒号分隔符
+            // Consume the colon separator
             eatToken(TokenKind.COLON);
-            // 解析条件运算符的第三个操作数
+            // Parse the third operand of the conditional operator
             SpelNodeImpl ifFalseExprValue = eatExpression();
-            // 构造三元表达式节点
+            // Build the ternary expression node
             return new Ternary(t.startPos, t.endPos, expr, ifTrueExprValue, ifFalseExprValue);
         }
     }
-    // 返回解析得到的表达式节点
+    // Return the parsed expression node
     return expr;
 }
 ```
 
-在`org.springframework.expression.spel.standard.InternalSpelExpressionParser#eatLogicalOrExpression`方法中，首先调用 `eatLogicalAndExpression` 方法解析逻辑与表达式，并在循环中检查下一个令牌是否为 "or" 关键字或者符号 "||"。如果是，则消耗该令牌，然后解析逻辑与表达式的右操作数，并构造一个逻辑或操作节点。
+In the `org.springframework.expression.spel.standard.InternalSpelExpressionParser#eatLogicalOrExpression` method, it first calls `eatLogicalAndExpression` to parse the logical AND expression. Then in a loop it checks whether the next token is the keyword "or" or the symbol "||". If so, it consumes the token, parses the right operand as a logical AND expression, and builds a logical OR node.
 
 ```java
 @Nullable
 private SpelNodeImpl eatLogicalOrExpression() {
-    // 解析逻辑与表达式
+    // Parse the logical AND expression
     SpelNodeImpl expr = eatLogicalAndExpression();
-    // 循环解析逻辑或操作
+    // Loop to parse the logical OR operations
     while (peekIdentifierToken("or") || peekToken(TokenKind.SYMBOLIC_OR)) {
-        // 获取当前操作符令牌并消耗
+        // Get the current operator token and consume it
         Token t = takeToken();  //consume OR
-        // 解析逻辑与表达式的右操作数
+        // Parse the right operand of the logical AND expression
         SpelNodeImpl rhExpr = eatLogicalAndExpression();
-        // 检查操作数有效性
+        // Check that the operands are valid
         checkOperands(t, expr, rhExpr);
-        // 构造逻辑或操作节点
+        // Build the logical OR node
         expr = new OpOr(t.startPos, t.endPos, expr, rhExpr);
     }
-    // 返回解析得到的逻辑或表达式节点
+    // Return the parsed logical OR expression node
     return expr;
 }
 ```
 
-在`org.springframework.expression.spel.standard.InternalSpelExpressionParser#eatLogicalAndExpression`方法中，首先调用 `eatRelationalExpression` 方法解析关系表达式，并在循环中检查下一个令牌是否为 "and" 关键字或者符号 "&&"。如果是，则消耗该令牌，然后解析关系表达式的右操作数，并构造一个逻辑与操作节点。
+In the `org.springframework.expression.spel.standard.InternalSpelExpressionParser#eatLogicalAndExpression` method, it first calls `eatRelationalExpression` to parse the relational expression. Then in a loop it checks whether the next token is the keyword "and" or the symbol "&&". If so, it consumes the token, parses the right operand as a relational expression, and builds a logical AND node.
 
 ```java
 @Nullable
 private SpelNodeImpl eatLogicalAndExpression() {
-    // 解析关系表达式
+    // Parse the relational expression
     SpelNodeImpl expr = eatRelationalExpression();
-    // 循环解析逻辑与操作
+    // Loop to parse the logical AND operations
     while (peekIdentifierToken("and") || peekToken(TokenKind.SYMBOLIC_AND)) {
-        // 获取当前操作符令牌并消耗
+        // Get the current operator token and consume it
         Token t = takeToken();  // consume 'AND'
-        // 解析关系表达式的右操作数
+        // Parse the right operand of the relational expression
         SpelNodeImpl rhExpr = eatRelationalExpression();
-        // 检查操作数有效性
+        // Check that the operands are valid
         checkOperands(t, expr, rhExpr);
-        // 构造逻辑与操作节点
+        // Build the logical AND node
         expr = new OpAnd(t.startPos, t.endPos, expr, rhExpr);
     }
-    // 返回解析得到的逻辑与表达式节点
+    // Return the parsed logical AND expression node
     return expr;
 }
 ```
 
-在`org.springframework.expression.spel.standard.InternalSpelExpressionParser#eatRelationalExpression`方法中，首先调用 `eatSumExpression` 方法解析加法表达式，然后尝试消耗可能存在的关系运算符。如果存在关系运算符，则解析右操作数，并根据不同的运算符类型构造相应的节点，包括大于、小于、大于等于、小于等于、等于、不等于、instanceof、matches 和 between 运算符。
+In the `org.springframework.expression.spel.standard.InternalSpelExpressionParser#eatRelationalExpression` method, it first calls `eatSumExpression` to parse the sum expression. Then it tries to consume a relational operator. If there is one, it parses the right operand and builds the matching node for the operator type. The operators are greater than, less than, greater than or equal, less than or equal, equal, not equal, instanceof, matches and between.
 
 ```java
 @Nullable
 private SpelNodeImpl eatRelationalExpression() {
-    // 解析加法表达式
+    // Parse the sum expression
     SpelNodeImpl expr = eatSumExpression();
-    // 尝试消耗可能存在的关系运算符
+    // Try to consume a relational operator if there is one
     Token relationalOperatorToken = maybeEatRelationalOperator();
     if (relationalOperatorToken != null) {
-       // 消耗关系运算符
-       Token t = takeToken();  // 消耗关系运算符令牌
-       // 解析右操作数
+       // Consume the relational operator
+       Token t = takeToken();  // Consume the relational operator token
+       // Parse the right operand
        SpelNodeImpl rhExpr = eatSumExpression();
-       // 检查操作数有效性
+       // Check that the operands are valid
        checkOperands(t, expr, rhExpr);
        TokenKind tk = relationalOperatorToken.kind;
 
-       // 根据不同的运算符类型构造相应的节点
+       // Build the matching node for the operator type
        if (relationalOperatorToken.isNumericRelationalOperator()) {
           if (tk == TokenKind.GT) {
              return new OpGT(t.startPos, t.endPos, expr, rhExpr);
@@ -518,527 +518,526 @@ private SpelNodeImpl eatRelationalExpression() {
           Assert.isTrue(tk == TokenKind.NE, "Not-equals token expected");
           return new OpNE(t.startPos, t.endPos, expr, rhExpr);
        }
-
-       // 处理instanceof运算符
+       // Handle the instanceof operator
        if (tk == TokenKind.INSTANCEOF) {
           return new OperatorInstanceof(t.startPos, t.endPos, expr, rhExpr);
        }
 
-       // 处理matches运算符
+       // Handle the matches operator
        if (tk == TokenKind.MATCHES) {
           return new OperatorMatches(t.startPos, t.endPos, expr, rhExpr);
        }
 
-       // 处理between运算符
+       // Handle the between operator
        Assert.isTrue(tk == TokenKind.BETWEEN, "Between token expected");
        return new OperatorBetween(t.startPos, t.endPos, expr, rhExpr);
     }
-    // 返回解析得到的关系表达式节点
+    // Return the parsed relational expression node
     return expr;
 }
 ```
 
-在`org.springframework.expression.spel.standard.InternalSpelExpressionParser#eatSumExpression`方法中，首先调用 `eatProductExpression` 方法解析乘法表达式，并在循环中检查下一个令牌是否为加法、减法或自增运算符。如果是，则消耗该令牌，然后解析乘法表达式的右操作数，并根据不同的运算符类型构造相应的节点（加法或减法节点）。
+In the `org.springframework.expression.spel.standard.InternalSpelExpressionParser#eatSumExpression` method, it first calls `eatProductExpression` to parse the product expression. Then in a loop it checks whether the next token is an addition, subtraction or increment operator. If so, it consumes the token, parses the right operand as a product expression, and builds the matching node for the operator type (an addition or subtraction node).
 
 ```java
 @Nullable
 private SpelNodeImpl eatSumExpression() {
-    // 解析乘法表达式
+    // Parse the product expression
     SpelNodeImpl expr = eatProductExpression();
-    // 循环解析加法表达式
+    // Loop to parse the sum expressions
     while (peekToken(TokenKind.PLUS, TokenKind.MINUS, TokenKind.INC)) {
-       // 获取当前操作符令牌并消耗
-       Token t = takeToken();  // 消耗 PLUS、MINUS 或 INC 令牌
-       // 解析乘法表达式的右操作数
+       // Get the current operator token and consume it
+       Token t = takeToken();  // Consume the PLUS, MINUS or INC token
+       // Parse the right operand of the product expression
        SpelNodeImpl rhExpr = eatProductExpression();
-       // 检查右操作数的有效性
+       // Check that the right operand is valid
        checkRightOperand(t, rhExpr);
-       // 根据不同的运算符类型构造相应的节点
+       // Build the matching node for the operator type
        if (t.kind == TokenKind.PLUS) {
-          // 构造加法节点
+          // Build the addition node
           expr = new OpPlus(t.startPos, t.endPos, expr, rhExpr);
        }
        else if (t.kind == TokenKind.MINUS) {
-          // 构造减法节点
+          // Build the subtraction node
           expr = new OpMinus(t.startPos, t.endPos, expr, rhExpr);
        }
     }
-    // 返回解析得到的加法表达式节点
+    // Return the parsed sum expression node
     return expr;
 }
 ```
 
-在`org.springframework.expression.spel.standard.InternalSpelExpressionParser#eatProductExpression`方法中，首先调用 `eatPowerIncDecExpression` 方法解析幂运算或自增自减表达式，并在循环中检查下一个令牌是否为乘法、除法或取模运算符。如果是，则消耗该令牌，然后解析幂运算或自增自减表达式的右操作数，并根据不同的运算符类型构造相应的节点（乘法、除法或取模节点）。
+In the `org.springframework.expression.spel.standard.InternalSpelExpressionParser#eatProductExpression` method, it first calls `eatPowerIncDecExpression` to parse the power or increment/decrement expression. Then in a loop it checks whether the next token is a multiplication, division or modulus operator. If so, it consumes the token, parses the right operand as a power or increment/decrement expression, and builds the matching node for the operator type (a multiplication, division or modulus node).
 
 ```java
 @Nullable
 private SpelNodeImpl eatProductExpression() {
-    // 解析幂运算或自增自减表达式
+    // Parse the power or increment/decrement expression
     SpelNodeImpl expr = eatPowerIncDecExpression();
-    // 循环解析乘法表达式
+    // Loop to parse the product expressions
     while (peekToken(TokenKind.STAR, TokenKind.DIV, TokenKind.MOD)) {
-       // 获取当前操作符令牌并消耗
-       Token t = takeToken();  // 消耗 STAR、DIV 或 MOD 令牌
-       // 解析幂运算或自增自减表达式的右操作数
+       // Get the current operator token and consume it
+       Token t = takeToken();  // Consume the STAR, DIV or MOD token
+       // Parse the right operand of the power or increment/decrement expression
        SpelNodeImpl rhExpr = eatPowerIncDecExpression();
-       // 检查操作数有效性
+       // Check that the operands are valid
        checkOperands(t, expr, rhExpr);
-       // 根据不同的运算符类型构造相应的节点
+       // Build the matching node for the operator type
        if (t.kind == TokenKind.STAR) {
-          // 构造乘法节点
+          // Build the multiplication node
           expr = new OpMultiply(t.startPos, t.endPos, expr, rhExpr);
        }
        else if (t.kind == TokenKind.DIV) {
-          // 构造除法节点
+          // Build the division node
           expr = new OpDivide(t.startPos, t.endPos, expr, rhExpr);
        }
        else {
           Assert.isTrue(t.kind == TokenKind.MOD, "Mod token expected");
-          // 构造取模节点
+          // Build the modulus node
           expr = new OpModulus(t.startPos, t.endPos, expr, rhExpr);
        }
     }
-    // 返回解析得到的乘法表达式节点
+    // Return the parsed product expression node
     return expr;
 }
 ```
 
-在`org.springframework.expression.spel.standard.InternalSpelExpressionParser#eatPowerIncDecExpression`方法中，首先调用 `eatUnaryExpression` 方法解析一元表达式，并在条件语句中检查是否存在幂运算符或自增自减运算符。如果存在幂运算符，则解析幂运算符右侧的一元表达式，并构造幂运算节点；如果存在自增自减运算符，则根据运算符类型构造相应的自增自减节点。
+In the `org.springframework.expression.spel.standard.InternalSpelExpressionParser#eatPowerIncDecExpression` method, it first calls `eatUnaryExpression` to parse the unary expression. Then it checks whether there is a power operator or an increment/decrement operator. If there is a power operator, it parses the unary expression on its right and builds a power node. If there is an increment/decrement operator, it builds the matching increment or decrement node by the operator type.
 
 ```java
 @Nullable
 private SpelNodeImpl eatPowerIncDecExpression() {
-    // 解析一元表达式
+    // Parse the unary expression
     SpelNodeImpl expr = eatUnaryExpression();
-    // 检查是否存在幂运算符
+    // Check whether there is a power operator
     if (peekToken(TokenKind.POWER)) {
-       // 获取并消耗幂运算符令牌
-       Token t = takeToken();  // 消耗 POWER
-       // 解析幂运算符右侧的一元表达式
+       // Get and consume the power operator token
+       Token t = takeToken();  // Consume POWER
+       // Parse the unary expression on the right of the power operator
        SpelNodeImpl rhExpr = eatUnaryExpression();
-       // 检查右操作数的有效性
+       // Check that the right operand is valid
        checkRightOperand(t, rhExpr);
-       // 构造幂运算节点
+       // Build the power node
        return new OperatorPower(t.startPos, t.endPos, expr, rhExpr);
     }
-    // 如果不存在幂运算符，但存在自增自减运算符
+    // If there is no power operator, but there is an increment/decrement operator
     if (expr != null && peekToken(TokenKind.INC, TokenKind.DEC)) {
-       // 获取并消耗自增自减运算符令牌
-       Token t = takeToken();  // 消耗 INC/DEC
-       // 根据运算符类型构造相应的自增自减节点
+       // Get and consume the increment/decrement operator token
+       Token t = takeToken();  // Consume INC/DEC
+       // Build the matching increment/decrement node by the operator type
        if (t.getKind() == TokenKind.INC) {
           return new OpInc(t.startPos, t.endPos, true, expr);
        }
        return new OpDec(t.startPos, t.endPos, true, expr);
     }
-    // 如果既不存在幂运算符也不存在自增自减运算符，则直接返回解析得到的一元表达式节点
+    // If there is neither a power operator nor an increment/decrement operator, return the parsed unary expression node
     return expr;
 }
 ```
 
-在`org.springframework.expression.spel.standard.InternalSpelExpressionParser#eatUnaryExpression`方法中，首先检查下一个令牌是否为正号、负号或逻辑非运算符。如果是，则消耗该令牌，并递归调用 `eatUnaryExpression` 方法解析表达式的主体部分，并根据不同的运算符类型构造相应的节点（正号、负号或逻辑非节点）。如果下一个令牌是自增或自减运算符，则也消耗该令牌，并递归调用 `eatUnaryExpression` 方法解析表达式的主体部分，并根据运算符类型构造相应的自增或自减节点。如果以上条件都不满足，则调用 `eatPrimaryExpression` 方法解析主表达式。
+In the `org.springframework.expression.spel.standard.InternalSpelExpressionParser#eatUnaryExpression` method, it first checks whether the next token is a plus, minus or logical NOT operator. If so, it consumes the token, calls `eatUnaryExpression` recursively to parse the body of the expression, and builds the matching node for the operator type (plus, minus or logical NOT node). If the next token is an increment or decrement operator, it also consumes the token, calls `eatUnaryExpression` recursively to parse the body, and builds the matching increment or decrement node. If none of these apply, it calls `eatPrimaryExpression` to parse the primary expression.
 
 ```java
 @Nullable
 private SpelNodeImpl eatUnaryExpression() {
-    // 检查下一个令牌是否为正号、负号或逻辑非运算符
+    // Check whether the next token is a plus, minus or logical NOT operator
     if (peekToken(TokenKind.PLUS, TokenKind.MINUS, TokenKind.NOT)) {
-        // 获取并消耗运算符令牌
+        // Get and consume the operator token
         Token t = takeToken();
-        // 解析表达式的主体部分
+        // Parse the body of the expression
         SpelNodeImpl expr = eatUnaryExpression();
-        // 断言表达式不为空
+        // Assert that the expression is not null
         Assert.state(expr != null, "No node");
-        // 根据运算符类型构造相应的节点
+        // Build the matching node for the operator type
         if (t.kind == TokenKind.NOT) {
-            // 构造逻辑非节点
+            // Build the logical NOT node
             return new OperatorNot(t.startPos, t.endPos, expr);
         }
         if (t.kind == TokenKind.PLUS) {
-            // 构造正号节点
+            // Build the plus node
             return new OpPlus(t.startPos, t.endPos, expr);
         }
-        // 如果不是正号，则是负号
+        // If it is not a plus, it is a minus
         Assert.isTrue(t.kind == TokenKind.MINUS, "Minus token expected");
-        // 构造负号节点
+        // Build the minus node
         return new OpMinus(t.startPos, t.endPos, expr);
     }
-    // 如果下一个令牌是自增或自减运算符
+    // If the next token is an increment or decrement operator
     if (peekToken(TokenKind.INC, TokenKind.DEC)) {
-        // 获取并消耗运算符令牌
+        // Get and consume the operator token
         Token t = takeToken();
-        // 解析表达式的主体部分
+        // Parse the body of the expression
         SpelNodeImpl expr = eatUnaryExpression();
-        // 根据运算符类型构造相应的自增或自减节点
+        // Build the matching increment or decrement node by the operator type
         if (t.getKind() == TokenKind.INC) {
-            // 构造自增节点
+            // Build the increment node
             return new OpInc(t.startPos, t.endPos, false, expr);
         }
-        // 否则为自减节点
+        // Otherwise it is a decrement node
         return new OpDec(t.startPos, t.endPos, false, expr);
     }
-    // 解析主表达式
+    // Parse the primary expression
     return eatPrimaryExpression();
 }
 ```
 
-在`org.springframework.expression.spel.standard.InternalSpelExpressionParser#eatPrimaryExpression`方法中，首先调用 `eatStartNode` 方法解析起始节点，并初始化一个列表来存储后续的节点。然后进入循环，持续调用 `eatNode` 方法来解析后续节点，直到无法解析出新的节点为止。在循环中，如果节点列表为空，则将起始节点添加到列表中；否则，将解析得到的节点添加到列表中。最后，如果起始节点或节点列表为空，则直接返回起始节点；否则，构造一个复合表达式节点，其范围从起始节点的起始位置到最后一个节点的结束位置，包含所有解析得到的节点，并返回该复合表达式节点。
+In the `org.springframework.expression.spel.standard.InternalSpelExpressionParser#eatPrimaryExpression` method, it first calls `eatStartNode` to parse the start node, and creates a list to store the nodes that follow. Then it loops and keeps calling `eatNode` to parse the following nodes, until no new node can be parsed. In the loop, if the node list is still empty, the start node is added to the list first. Then the parsed node is added to the list. At the end, if the start node or the node list is null, it returns the start node. Otherwise, it builds a compound expression node. Its range goes from the start position of the start node to the end position of the last node. It holds all the parsed nodes, and is returned.
 
 ```java
 @Nullable
 private SpelNodeImpl eatPrimaryExpression() {
-    // 解析起始节点，通常为一个节点
+    // Parse the start node, usually a single node
     SpelNodeImpl start = eatStartNode();  
-    // 节点列表，用于存储后续的节点
+    // The node list, used to store the following nodes
     List<SpelNodeImpl> nodes = null;
-    // 解析节点
+    // Parse a node
     SpelNodeImpl node = eatNode();
-    // 循环解析后续节点，直到无法解析出新的节点为止
+    // Loop to parse the following nodes until no new node can be parsed
     while (node != null) {
-        // 如果节点列表为空，则将起始节点添加到列表中
+        // If the node list is empty, add the start node to the list
         if (nodes == null) {
             nodes = new ArrayList<>(4);
             nodes.add(start);
         }
-        // 将解析得到的节点添加到列表中
+        // Add the parsed node to the list
         nodes.add(node);
-        // 继续解析下一个节点
+        // Keep parsing the next node
         node = eatNode();
     }
-    // 如果起始节点或节点列表为空，则直接返回起始节点
+    // If the start node or the node list is null, return the start node
     if (start == null || nodes == null) {
         return start;
     }
-    // 构造一个复合表达式节点，包含所有解析得到的节点
+    // Build a compound expression node that holds all the parsed nodes
     return new CompoundExpression(start.getStartPosition(), nodes.get(nodes.size() - 1).getEndPosition(),
           nodes.toArray(new SpelNodeImpl[0]));
 }
 ```
 
-在`org.springframework.expression.spel.standard.InternalSpelExpressionParser#eatStartNode`方法中，首先尝试解析字面量、括号表达式、类型引用、空引用、构造器引用、方法或属性、函数或变量、Bean引用、PROJECT、选择、索引器、内联列表或映射等不同类型的节点。
+In the `org.springframework.expression.spel.standard.InternalSpelExpressionParser#eatStartNode` method, it tries to parse different kinds of nodes: a literal, a parenthesized expression, a type reference, a null reference, a constructor reference, a method or property, a function or variable, a bean reference, a projection, a selection, an indexer, and an inline list or map.
 
 ```java
 @Nullable
 private SpelNodeImpl eatStartNode() {
-    // 尝试解析字面量
+    // Try to parse a literal
     if (maybeEatLiteral()) {
-       // 返回解析的字面量节点
+       // Return the parsed literal node
        return pop();
     }
-    // 尝试解析括号表达式
+    // Try to parse a parenthesized expression
     else if (maybeEatParenExpression()) {
-       // 返回解析的括号表达式节点
+       // Return the parsed parenthesized expression node
        return pop();
     }
-    // 尝试解析类型引用、空引用、构造器引用、方法或属性、函数或变量等节点
+    // Try to parse a type reference, null reference, constructor reference, method or property, function or variable
     else if (maybeEatTypeReference() || maybeEatNullReference() || maybeEatConstructorReference() ||
           maybeEatMethodOrProperty(false) || maybeEatFunctionOrVar()) {
-       // 返回解析得到的节点
+       // Return the parsed node
        return pop();
     }
-    // 尝试解析Bean引用
+    // Try to parse a bean reference
     else if (maybeEatBeanReference()) {
-       // 返回解析的Bean引用节点
+       // Return the parsed bean reference node
        return pop();
     }
-    // 尝试解析投影、选择、索引器节点
+    // Try to parse a projection, selection or indexer node
     else if (maybeEatProjection(false) || maybeEatSelection(false) || maybeEatIndexer()) {
-       // 返回解析得到的节点
+       // Return the parsed node
        return pop();
     }
-    // 尝试解析内联列表或映射节点
+    // Try to parse an inline list or map node
     else if (maybeEatInlineListOrMap()) {
-       // 返回解析得到的节点
+       // Return the parsed node
        return pop();
     }
-    // 如果无法解析出任何节点，则返回空
+    // If no node can be parsed, return null
     else {
        return null;
     }
 }
 ```
 
-在`org.springframework.expression.spel.standard.InternalSpelExpressionParser#maybeEatLiteral`方法中，首先检查下一个令牌是否存在，如果不存在，则返回 false；然后根据令牌的类型进行相应的处理：如果是整型字面量，则将其转换为整数字面量节点并入栈；如果是长整型字面量，则将其转换为长整数字面量节点并入栈；如果是十六进制整型字面量，则将其转换为对应的整数或长整数字面量节点并入栈；如果是实数或浮点数字面量，则将其转换为实数或浮点数字面量节点并入栈；如果是布尔值字面量 true，则入栈一个布尔值节点表示 true；如果是布尔值字面量 false，则入栈一个布尔值节点表示 false；如果是字符串字面量，则入栈一个字符串字面量节点；如果以上条件都不满足，则返回 false。最后，消耗当前令牌，并返回 true，表示成功解析字面量。
+In the `org.springframework.expression.spel.standard.InternalSpelExpressionParser#maybeEatLiteral` method, it first checks whether the next token exists. If not, it returns false. Then it acts by the token type. An integer literal becomes an integer literal node and is pushed on the stack. A long literal becomes a long literal node and is pushed. A hexadecimal integer literal becomes an integer or long literal node and is pushed. A real or float literal becomes a real or float literal node and is pushed. The boolean literal true pushes a boolean node for true. The boolean literal false pushes a boolean node for false. A string literal pushes a string literal node. If none of these apply, it returns false. At the end, it consumes the current token and returns true. This means the literal was parsed.
 
 ```java
 private boolean maybeEatLiteral() {
-    // 获取下一个令牌
+    // Get the next token
     Token t = peekToken();
-    // 如果令牌为空，则返回解析失败
+    // If the token is null, return that parsing failed
     if (t == null) {
         return false;
     }
-    // 根据令牌类型进行相应处理
+    // Act by the token type
     if (t.kind == TokenKind.LITERAL_INT) {
-        // 将整型字面量转换为整数字面量节点并入栈
+        // Turn the integer literal into an integer literal node and push it
         push(Literal.getIntLiteral(t.stringValue(), t.startPos, t.endPos, 10));
     }
     else if (t.kind == TokenKind.LITERAL_LONG) {
-        // 将长整型字面量转换为长整数字面量节点并入栈
+        // Turn the long literal into a long literal node and push it
         push(Literal.getLongLiteral(t.stringValue(), t.startPos, t.endPos, 10));
     }
     else if (t.kind == TokenKind.LITERAL_HEXINT) {
-        // 将十六进制整型字面量转换为整数字面量节点并入栈
+        // Turn the hexadecimal integer literal into an integer literal node and push it
         push(Literal.getIntLiteral(t.stringValue(), t.startPos, t.endPos, 16));
     }
     else if (t.kind == TokenKind.LITERAL_HEXLONG) {
-        // 将十六进制长整型字面量转换为长整数字面量节点并入栈
+        // Turn the hexadecimal long literal into a long literal node and push it
         push(Literal.getLongLiteral(t.stringValue(), t.startPos, t.endPos, 16));
     }
     else if (t.kind == TokenKind.LITERAL_REAL) {
-        // 将实数字面量转换为实数数字面量节点并入栈
+        // Turn the real literal into a real literal node and push it
         push(Literal.getRealLiteral(t.stringValue(), t.startPos, t.endPos, false));
     }
     else if (t.kind == TokenKind.LITERAL_REAL_FLOAT) {
-        // 将浮点数字面量转换为浮点数数字面量节点并入栈
+        // Turn the float literal into a float literal node and push it
         push(Literal.getRealLiteral(t.stringValue(), t.startPos, t.endPos, true));
     }
     else if (peekIdentifierToken("true")) {
-        // 入栈一个布尔值节点表示 true
+        // Push a boolean node for true
         push(new BooleanLiteral(t.stringValue(), t.startPos, t.endPos, true));
     }
     else if (peekIdentifierToken("false")) {
-        // 入栈一个布尔值节点表示 false
+        // Push a boolean node for false
         push(new BooleanLiteral(t.stringValue(), t.startPos, t.endPos, false));
     }
     else if (t.kind == TokenKind.LITERAL_STRING) {
-        // 入栈一个字符串字面量节点
+        // Push a string literal node
         push(new StringLiteral(t.stringValue(), t.startPos, t.endPos, t.stringValue()));
     }
     else {
-        // 如果令牌类型不是字面量，则返回解析失败
+        // If the token type is not a literal, return that parsing failed
         return false;
     }
-    // 消耗当前令牌，并返回解析成功
+    // Consume the current token and return that parsing succeeded
     nextToken();
     return true;
 }
 ```
 
-在`org.springframework.expression.spel.standard.InternalSpelExpressionParser#maybeEatParenExpression`方法中，首先检查下一个令牌是否为左括号，如果是，则消耗该令牌，并解析括号内的表达式；然后检查是否成功解析出表达式节点，如果成功，则消耗右括号并将表达式节点入栈，最后返回解析成功；如果下一个令牌不是左括号，则直接返回解析失败。
+In the `org.springframework.expression.spel.standard.InternalSpelExpressionParser#maybeEatParenExpression` method, it first checks whether the next token is a left parenthesis. If so, it consumes the token and parses the expression inside the parentheses. Then it checks that an expression node was parsed. If so, it consumes the right parenthesis, pushes the expression node on the stack, and returns true. If the next token is not a left parenthesis, it returns false directly.
 
 ```java
 private boolean maybeEatParenExpression() {
-    // 如果下一个令牌是左括号
+    // If the next token is a left parenthesis
     if (peekToken(TokenKind.LPAREN)) {
-        // 消耗左括号令牌
+        // Consume the left parenthesis token
         nextToken();
-        // 解析括号内的表达式
+        // Parse the expression inside the parentheses
         SpelNodeImpl expr = eatExpression();
-        // 断言确保表达式节点非空
+        // Assert that the expression node is not null
         Assert.state(expr != null, "No node");
-        // 消耗右括号令牌
+        // Consume the right parenthesis token
         eatToken(TokenKind.RPAREN);
-        // 将表达式节点入栈
+        // Push the expression node on the stack
         push(expr);
-        // 返回解析成功
+        // Return that parsing succeeded
         return true;
     }
     else {
-        // 如果下一个令牌不是左括号，则返回解析失败
+        // If the next token is not a left parenthesis, return that parsing failed
         return false;
     }
 }
 ```
 
-在`org.springframework.expression.spel.standard.InternalSpelExpressionParser#maybeEatTypeReference`方法中，首先检查下一个令牌是否为标识符，如果是，则进一步检查该标识符是否为 "T"，如果不是，则返回解析失败；如果标识符为 "T"，则继续检查下一个令牌是否为右方括号，如果是，则将 "T" 视为映射的键，创建一个属性或字段引用节点，并入栈，最后返回解析成功；如果下一个令牌不是右方括号，则进一步解析括号内的内容，包括可能的限定标识符和数组维度，并构造一个类型引用节点，入栈，并返回解析成功；如果下一个令牌不是标识符，则直接返回解析失败。
+In the `org.springframework.expression.spel.standard.InternalSpelExpressionParser#maybeEatTypeReference` method, it first checks whether the next token is an identifier. If so, it checks whether the identifier is "T". If not, it returns false. If the identifier is "T", it checks whether the next token is a right square bracket. If so, "T" is treated as a map key: it creates a property or field reference node, pushes it, and returns true. If the next token is not a right square bracket, it parses the content inside the parentheses, including a possibly qualified identifier and array dimensions. It builds a type reference node, pushes it, and returns true. If the next token is not an identifier, it returns false directly.
 
 ```java
 private boolean maybeEatTypeReference() {
-    // 如果下一个令牌是标识符
+    // If the next token is an identifier
     if (peekToken(TokenKind.IDENTIFIER)) {
-        // 获取下一个令牌
+        // Get the next token
         Token typeName = peekToken();
-        // 断言确保令牌不为空
+        // Assert that the token is not null
         Assert.state(typeName != null, "Expected token");
-        // 如果标识符不是 "T"，则返回解析失败
+        // If the identifier is not "T", return that parsing failed
         if (!"T".equals(typeName.stringValue())) {
             return false;
         }
-        // 获取下一个令牌，用于进一步判断是否是映射的键
+        // Take the next token, to check further whether it is a map key
         Token t = takeToken();
-        // 如果下一个令牌是右方括号，则将 "T" 视为映射的键，创建属性或字段引用节点，并入栈，最后返回解析成功
+        // If the next token is a right square bracket, treat "T" as a map key, create a property or field reference node, push it, and return that parsing succeeded
         if (peekToken(TokenKind.RSQUARE)) {
-            // 创建属性或字段引用节点，表示 "T" 作为映射的键
+            // Create a property or field reference node for "T" as a map key
             push(new PropertyOrFieldReference(false, t.stringValue(), t.startPos, t.endPos));
             return true;
         }
-        // 否则，继续解析括号内的内容
-        // 消耗左括号令牌
+        // Otherwise, keep parsing the content inside the parentheses
+        // Consume the left parenthesis token
         eatToken(TokenKind.LPAREN);
-        // 解析可能的限定标识符
+        // Parse a possibly qualified identifier
         SpelNodeImpl node = eatPossiblyQualifiedId();
-        // 检查是否存在数组维度
+        // Check whether there are array dimensions
         int dims = 0;
         while (peekToken(TokenKind.LSQUARE, true)) {
-            // 消耗左方括号和右方括号令牌，统计数组维度
+            // Consume the left and right square bracket tokens, and count the array dimensions
             eatToken(TokenKind.RSQUARE);
             dims++;
         }
-        // 消耗右括号令牌
+        // Consume the right parenthesis token
         eatToken(TokenKind.RPAREN);
-        // 创建类型引用节点，并入栈，最后返回解析成功
+        // Create the type reference node, push it, and return that parsing succeeded
         this.constructedNodes.push(new TypeReference(typeName.startPos, typeName.endPos, node, dims));
         return true;
     }
-    // 如果下一个令牌不是标识符，则返回解析失败
+    // If the next token is not an identifier, return that parsing failed
     return false;
 }
 ```
 
-在`org.springframework.expression.spel.standard.InternalSpelExpressionParser#maybeEatNullReference`方法中，首先检查下一个令牌是否为标识符，如果是，则进一步检查该标识符是否为 "null"，如果不是，则返回解析失败；如果标识符为 "null"，则将其解析为一个空字面量节点，并将其入栈，最后返回解析成功；如果下一个令牌不是标识符，则直接返回解析失败。
+In the `org.springframework.expression.spel.standard.InternalSpelExpressionParser#maybeEatNullReference` method, it first checks whether the next token is an identifier. If so, it checks whether the identifier is "null". If not, it returns false. If the identifier is "null", it parses it as a null literal node, pushes it on the stack, and returns true. If the next token is not an identifier, it returns false directly.
 
 ```java
 private boolean maybeEatNullReference() {
-    // 如果下一个令牌是标识符
+    // If the next token is an identifier
     if (peekToken(TokenKind.IDENTIFIER)) {
-        // 获取下一个令牌
+        // Get the next token
         Token nullToken = peekToken();
-        // 断言确保令牌不为空
+        // Assert that the token is not null
         Assert.state(nullToken != null, "Expected token");
-        // 如果标识符不是 "null"，则返回解析失败
+        // If the identifier is not "null", return that parsing failed
         if (!"null".equalsIgnoreCase(nullToken.stringValue())) {
             return false;
         }
-        // 消耗 "null" 标识符令牌
+        // Consume the "null" identifier token
         nextToken();
-        // 创建空字面量节点，并入栈，最后返回解析成功
+        // Create the null literal node, push it, and return that parsing succeeded
         this.constructedNodes.push(new NullLiteral(nullToken.startPos, nullToken.endPos));
         return true;
     }
-    // 如果下一个令牌不是标识符，则返回解析失败
+    // If the next token is not an identifier, return that parsing failed
     return false;
 }
 ```
 
-在`org.springframework.expression.spel.standard.InternalSpelExpressionParser#maybeEatConstructorReference`方法中，首先检查下一个令牌是否为 "new" 关键字，如果是，则继续解析构造函数引用的可能形式。如果 "new" 后面紧跟着右方括号，则将 "new" 视为映射的键，创建一个属性或字段引用节点，并入栈，最后返回解析成功；如果 "new" 后面是其他令牌，则继续解析构造函数引用的形式，包括可能的限定构造函数名和构造函数参数列表。如果构造函数参数列表中包含数组初始化器，则解析数组维度和内联列表或映射，最后创建构造函数引用节点，并入栈，最后返回解析成功；如果构造函数参数列表中不包含数组初始化器，则继续解析构造函数参数列表，最后创建构造函数引用节点，并入栈，最后返回解析成功；如果下一个令牌不是 "new" 关键字，则直接返回解析失败。
+In the `org.springframework.expression.spel.standard.InternalSpelExpressionParser#maybeEatConstructorReference` method, it first checks whether the next token is the keyword "new". If so, it keeps parsing the possible forms of a constructor reference. If "new" is followed by a right square bracket, "new" is treated as a map key: it creates a property or field reference node, pushes it, and returns true. If "new" is followed by other tokens, it parses the constructor reference, including a possibly qualified constructor name and the constructor argument list. If the arguments contain an array initializer, it parses the array dimensions and the inline list or map, creates a constructor reference node, pushes it, and returns true. If they do not contain an array initializer, it parses the constructor argument list, creates a constructor reference node, pushes it, and returns true. If the next token is not the keyword "new", it returns false directly.
 
 ```java
 private boolean maybeEatConstructorReference() {
-    // 如果下一个令牌是 "new" 关键字
+    // If the next token is the keyword "new"
     if (peekIdentifierToken("new")) {
-        // 获取 "new" 令牌
+        // Get the "new" token
         Token newToken = takeToken();
-        // 如果 "new" 后面是右方括号，则将 "new" 视为映射的键
+        // If "new" is followed by a right square bracket, treat "new" as a map key
         if (peekToken(TokenKind.RSQUARE)) {
-            // 创建一个属性或字段引用节点，并入栈，最后返回解析成功
+            // Create a property or field reference node, push it, and return that parsing succeeded
             push(new PropertyOrFieldReference(false, newToken.stringValue(), newToken.startPos, newToken.endPos));
             return true;
         }
-        // 继续解析构造函数引用的可能形式
+        // Keep parsing the possible forms of a constructor reference
         SpelNodeImpl possiblyQualifiedConstructorName = eatPossiblyQualifiedId();
         List<SpelNodeImpl> nodes = new ArrayList<>();
         nodes.add(possiblyQualifiedConstructorName);
-        // 如果构造函数参数列表中包含数组初始化器
+        // If the constructor arguments contain an array initializer
         if (peekToken(TokenKind.LSQUARE)) {
-            // 解析数组维度和内联列表或映射，创建构造函数引用节点，并入栈，最后返回解析成功
+            // Parse the array dimensions and the inline list or map, create a constructor reference node, push it, and return that parsing succeeded
             eatConstructorArgs(nodes);
             push(new ConstructorReference(newToken.startPos, newToken.endPos, nodes.toArray(new SpelNodeImpl[0])));
         } else {
-            // 继续解析构造函数参数列表，创建构造函数引用节点，并入栈，最后返回解析成功
+            // Keep parsing the constructor argument list, create a constructor reference node, push it, and return that parsing succeeded
             eatConstructorArgs(nodes);
-            // 创建构造函数引用节点，并入栈，最后返回解析成功
+            // Create the constructor reference node, push it, and return that parsing succeeded
             push(new ConstructorReference(newToken.startPos, newToken.endPos, nodes.toArray(new SpelNodeImpl[0])));
         }
         return true;
     }
-    // 如果下一个令牌不是 "new" 关键字，则直接返回解析失败
+    // If the next token is not the keyword "new", return that parsing failed
     return false;
 }
 ```
 
-在`org.springframework.expression.spel.standard.InternalSpelExpressionParser#maybeEatBeanReference`方法中，用于尝试解析Bean引用。如果下一个令牌是 `TokenKind.BEAN_REF` 或 `TokenKind.FACTORY_BEAN_REF`，则将其视为Bean引用。然后尝试获取Bean名称，可以是标识符或字面字符串。解析完成后，根据Bean引用类型创建相应的 `BeanReference` 实例，并将其入栈。最后返回解析结果。
+The `org.springframework.expression.spel.standard.InternalSpelExpressionParser#maybeEatBeanReference` method tries to parse a bean reference. If the next token is `TokenKind.BEAN_REF` or `TokenKind.FACTORY_BEAN_REF`, it is treated as a bean reference. Then it tries to get the bean name, which can be an identifier or a string literal. After parsing, it creates a `BeanReference` instance by the bean reference type and pushes it on the stack. Finally, it returns the parse result.
 
 ```java
 private boolean maybeEatBeanReference() {
-    // 如果下一个令牌是 BEAN_REF 或 FACTORY_BEAN_REF
+    // If the next token is BEAN_REF or FACTORY_BEAN_REF
     if (peekToken(TokenKind.BEAN_REF) || peekToken(TokenKind.FACTORY_BEAN_REF)) {
-        // 获取 BEAN_REF 或 FACTORY_BEAN_REF 令牌
+        // Get the BEAN_REF or FACTORY_BEAN_REF token
         Token beanRefToken = takeToken();
         Token beanNameToken = null;
         String beanName = null;
-        // 如果下一个令牌是标识符，则表示 Bean 名称
+        // If the next token is an identifier, it is the bean name
         if (peekToken(TokenKind.IDENTIFIER)) {
-            // 获取标识符令牌作为 Bean 名称
+            // Take the identifier token as the bean name
             beanNameToken = eatToken(TokenKind.IDENTIFIER);
             beanName = beanNameToken.stringValue();
         }
-        // 如果下一个令牌是字符串字面量，则表示 Bean 名称
+        // If the next token is a string literal, it is the bean name
         else if (peekToken(TokenKind.LITERAL_STRING)) {
-            // 获取字符串字面量令牌作为 Bean 名称
+            // Take the string literal token as the bean name
             beanNameToken = eatToken(TokenKind.LITERAL_STRING);
             beanName = beanNameToken.stringValue();
-            // 去除字符串两侧的引号，获取真实的 Bean 名称
+            // Remove the quotes on both sides of the string to get the real bean name
             beanName = beanName.substring(1, beanName.length() - 1);
         }
-        // 如果 Bean 名称不是标识符或字符串字面量，则抛出异常
+        // If the bean name is neither an identifier nor a string literal, throw an exception
         else {
             throw internalException(beanRefToken.startPos, SpelMessage.INVALID_BEAN_REFERENCE);
         }
         BeanReference beanReference;
-        // 根据 Bean 引用类型创建相应的 BeanReference 实例
+        // Create the BeanReference instance by the bean reference type
         if (beanRefToken.getKind() == TokenKind.FACTORY_BEAN_REF) {
-            // 如果是 FACTORY_BEAN_REF，则在 Bean 名称前添加前缀字符串
+            // For FACTORY_BEAN_REF, add the prefix string before the bean name
             String beanNameString = String.valueOf(TokenKind.FACTORY_BEAN_REF.tokenChars) + beanName;
             beanReference = new BeanReference(beanRefToken.startPos, beanNameToken.endPos, beanNameString);
         } else {
-            // 如果是 BEAN_REF，则直接使用 Bean 名称
+            // For BEAN_REF, use the bean name directly
             beanReference = new BeanReference(beanNameToken.startPos, beanNameToken.endPos, beanName);
         }
-        // 将 BeanReference 实例入栈，表示解析成功
+        // Push the BeanReference instance on the stack: parsing succeeded
         this.constructedNodes.push(beanReference);
         return true;
     }
-    // 如果下一个令牌不是 BEAN_REF 或 FACTORY_BEAN_REF，则直接返回解析失败
+    // If the next token is not BEAN_REF or FACTORY_BEAN_REF, return that parsing failed
     return false;
 }
 ```
 
-在`org.springframework.expression.spel.standard.InternalSpelExpressionParser#maybeEatProjection`方法中，用于尝试解析投影操作符（Projection），该操作符表示对集合进行投影操作，返回一个新的集合，其中每个元素都是对原集合元素的转换。若当前令牌为 PROJECT，则尝试解析表达式并创建 Projection 节点，表示成功解析。
+The `org.springframework.expression.spel.standard.InternalSpelExpressionParser#maybeEatProjection` method tries to parse the projection operator. The projection operator projects a collection and returns a new collection. Each element of the new collection is a transformation of an element of the original collection. If the current token is PROJECT, it parses the expression and creates a Projection node. This means parsing succeeded.
 
 ```java
 private boolean maybeEatProjection(boolean nullSafeNavigation) {
-    Token t = peekToken(); // 获取当前令牌
-    // 检查当前令牌是否为投影操作符，如果不是则返回 false
+    Token t = peekToken(); // Get the current token
+    // Check whether the current token is the projection operator. If not, return false
     if (!peekToken(TokenKind.PROJECT, true)) {
         return false;
     }
-    // 断言当前令牌非空
+    // Assert that the current token is not null
     Assert.state(t != null, "No token"); 
-    // 解析投影操作符后的表达式
+    // Parse the expression after the projection operator
     SpelNodeImpl expr = eatExpression(); 
-    // 断言表达式节点非空
+    // Assert that the expression node is not null
     Assert.state(expr != null, "No node"); 
-    // 解析右方括号
+    // Parse the right square bracket
     eatToken(TokenKind.RSQUARE); 
-    // 创建 Projection 节点并将其压入节点栈中
+    // Create the Projection node and push it on the node stack
     this.constructedNodes.push(new Projection(nullSafeNavigation, t.startPos, t.endPos, expr));
-    return true; // 成功解析投影操作符，返回 true
+    return true; // The projection operator was parsed, return true
 }
 
 ```
 
-在`org.springframework.expression.spel.standard.InternalSpelExpressionParser#maybeEatSelection`方法中，解析选择操作符（"![...]"）是否存在，如果存在则解析选择操作符的表达式。然后根据选择操作符的类型（FIRST、LAST 或 ALL）创建相应的 Selection 节点，并将其压入节点栈中，最后返回 true 表示成功解析选择操作符，否则返回 false。
+The `org.springframework.expression.spel.standard.InternalSpelExpressionParser#maybeEatSelection` method checks whether a selection operator (such as "![...]") is present. If it is, it parses the expression of the selection operator. Then it creates the matching Selection node by the type of the selection operator (FIRST, LAST or ALL) and pushes it on the node stack. It returns true if the selection operator was parsed, and false otherwise.
 
 ```java
 private boolean maybeEatSelection(boolean nullSafeNavigation) {
     Token t = peekToken();
-    // 如果当前标记不是选择操作符，则返回false
+    // If the current token is not a selection operator, return false
     if (!peekSelectToken()) {
         return false;
     }
     Assert.state(t != null, "No token");
-    // 消耗选择操作符标记
+    // Consume the selection operator token
     nextToken();
-    // 解析选择表达式
+    // Parse the selection expression
     SpelNodeImpl expr = eatExpression();
-    // 如果表达式为空，则抛出异常
+    // If the expression is null, throw an exception
     if (expr == null) {
         throw internalException(t.startPos, SpelMessage.MISSING_SELECTION_EXPRESSION);
     }
-    // 消耗右方括号标记
+    // Consume the right square bracket token
     eatToken(TokenKind.RSQUARE);
-    // 根据不同的选择操作符创建相应的选择节点并压入解析节点栈中
+    // Create the matching selection node by the selection operator and push it on the node stack
     if (t.kind == TokenKind.SELECT_FIRST) {
         this.constructedNodes.push(new Selection(nullSafeNavigation, Selection.FIRST, t.startPos, t.endPos, expr));
     }
@@ -1052,75 +1051,75 @@ private boolean maybeEatSelection(boolean nullSafeNavigation) {
 }
 ```
 
-在`org.springframework.expression.spel.standard.InternalSpelExpressionParser#maybeEatIndexer`方法中，尝试解析索引器表达式。如果当前标记是左方括号，则解析相应的表达式作为索引器的索引，并将其压入解析节点栈中。
+The `org.springframework.expression.spel.standard.InternalSpelExpressionParser#maybeEatIndexer` method tries to parse an indexer expression. If the current token is a left square bracket, it parses the expression as the index of the indexer and pushes it on the node stack.
 
 ```java
 private boolean maybeEatIndexer() {
-    // 获取当前标记
-    Token t = peekToken(); 
-    // 如果当前标记不是 '['，则返回 false
+    // Get the current token
+    Token t = peekToken();
+    // If the current token is not '[', return false
     if (!peekToken(TokenKind.LSQUARE, true)) { 
         return false;
     }
-    // 断言当前标记不为空
+    // Assert that the current token is not null
     Assert.state(t != null, "No token"); 
-    // 解析索引表达式
+    // Parse the index expression
     SpelNodeImpl expr = eatExpression();
-    // 断言索引表达式不为空
+    // Assert that the index expression is not null
     Assert.state(expr != null, "No node"); 
-    // 解析 ']'
+    // Parse ']'
     eatToken(TokenKind.RSQUARE);
-    // 创建索引器节点并推入堆栈
+    // Create the indexer node and push it on the stack
     this.constructedNodes.push(new Indexer(t.startPos, t.endPos, expr));
     return true;
 }
 ```
 
-尝试解析内联列表或映射字面量。根据当前标记的不同情况，它可以解析空列表、空映射或包含一个或多个表达式的列表或映射。通过逐一解析表达式并检查后续标记，该方法构建相应的内联列表或映射节点，并将其推送到解析节点栈中。
+This method tries to parse an inline list or map literal. By the current token, it can parse an empty list, an empty map, or a list or map with one or more expressions. It parses the expressions one by one and checks the tokens that follow. Then it builds the matching inline list or map node and pushes it on the node stack.
 
 ```java
 private boolean maybeEatInlineListOrMap() {
-    // 获取当前标记
+    // Get the current token
     Token t = peekToken(); 
-    // 如果当前标记不是 '{'，则返回 false
+    // If the current token is not '{', return false
     if (!peekToken(TokenKind.LCURLY, true)) { 
        return false;
     }
-    // 断言当前标记不为空
+    // Assert that the current token is not null
     Assert.state(t != null, "No token"); 
-    // 初始化节点
+    // Initialize the node
     SpelNodeImpl expr = null; 
-    // 获取下一个标记
+    // Get the next token
     Token closingCurly = peekToken(); 
-    // 如果下一个标记是 '}'，表示是一个空列表 '{}'
+    // If the next token is '}', it is an empty list '{}'
     if (peekToken(TokenKind.RCURLY, true)) { 
-       // 断言下一个标记不为空
+       // Assert that the next token is not null
        Assert.state(closingCurly != null, "No token"); 
-       // 创建一个空的内联列表
+       // Create an empty inline list
        expr = new InlineList(t.startPos, closingCurly.endPos);
     }
-    // 如果下一个标记是 ':'，表示是一个空映射 '{:}'
+    // If the next token is ':', it is an empty map '{:}'
     else if (peekToken(TokenKind.COLON, true)) { 
-       // 获取 '}'
+       // Get '}'
        closingCurly = eatToken(TokenKind.RCURLY);
-       // 创建一个空的内联映射
+       // Create an empty inline map
        expr = new InlineMap(t.startPos, closingCurly.endPos);
     }
-    // 如果不是空列表或空映射，继续解析表达式
+    // If it is not an empty list or an empty map, keep parsing the expressions
     else { 
-       // 解析第一个表达式
+       // Parse the first expression
        SpelNodeImpl firstExpression = eatExpression();
-       // 下一个标记可能是 '}'
+       // The next token may be '}'
        if (peekToken(TokenKind.RCURLY)) {  
-          // 创建只有一个元素的列表
+          // Create a list with only one element
           List<SpelNodeImpl> elements = new ArrayList<>();
           elements.add(firstExpression);
           closingCurly = eatToken(TokenKind.RCURLY);
           expr = new InlineList(t.startPos, closingCurly.endPos, elements.toArray(new SpelNodeImpl[0]));
        }
-       // 下一个标记可能是逗号 ','，表示是多项列表
+       // The next token may be a comma ',', which means a list with several elements
        else if (peekToken(TokenKind.COMMA, true)) {  
-          // 创建多项列表
+          // Create a list with several elements
           List<SpelNodeImpl> elements = new ArrayList<>();
           elements.add(firstExpression);
           do {
@@ -1130,9 +1129,9 @@ private boolean maybeEatInlineListOrMap() {
           closingCurly = eatToken(TokenKind.RCURLY);
           expr = new InlineList(t.startPos, closingCurly.endPos, elements.toArray(new SpelNodeImpl[0]));
        }
-       // 下一个标记可能是冒号 ':'，表示是映射
+       // The next token may be a colon ':', which means a map
        else if (peekToken(TokenKind.COLON, true)) { 
-          // 创建映射
+          // Create a map
           List<SpelNodeImpl> elements = new ArrayList<>();
           elements.add(firstExpression);
           elements.add(eatExpression());
@@ -1144,56 +1143,56 @@ private boolean maybeEatInlineListOrMap() {
           closingCurly = eatToken(TokenKind.RCURLY);
           expr = new InlineMap(t.startPos, closingCurly.endPos, elements.toArray(new SpelNodeImpl[0]));
        }
-       // 若以上情况均不满足，则抛出异常
+       // If none of the above applies, throw an exception
        else {
           throw internalException(t.startPos, SpelMessage.OOD);
        }
     }
-    // 将解析的节点推入堆栈
+    // Push the parsed node on the stack
     this.constructedNodes.push(expr);
     return true;
 }
 ```
 
-### 十、与其他组件的关系
+### 10. Relationship with Other Components
 
 1. **Expression**
-   + 解析表达式字符串时，`SpelExpressionParser` 返回实现了 `Expression` 接口的对象。这些对象代表解析后的表达式，可以用于获取表达式的值、设置值或执行表达式。
+   + When an expression string is parsed, `SpelExpressionParser` returns an object that implements the `Expression` interface. These objects represent the parsed expression. You can use them to get the value of the expression, set a value, or run the expression.
    
 2. **EvaluationContext**
 
-   + 在评估表达式时，可以使用实现 `EvaluationContext` 接口的对象，如 `StandardEvaluationContext`，来提供表达式运行时的上下文信息（例如变量定义）。这有助于增强表达式的动态性和灵活性。
+   + When an expression is evaluated, you can use an object that implements the `EvaluationContext` interface, such as `StandardEvaluationContext`, to give the runtime context information of the expression (for example variable definitions). This makes the expression more dynamic and flexible.
 
 3. **ParseException&EvaluationException**
 
-   + 这些是处理表达式解析和评估时可能出现的异常的类。如果在解析或评估表达式时出现错误，将抛出这些异常。
+   + These classes handle the exceptions that may happen when an expression is parsed and evaluated. If an error happens while parsing or evaluating an expression, these exceptions are thrown.
 
 4. **PropertyAccessor&MethodResolver**
 
-   + 这些类和接口用于在评估表达式时解析对象属性和方法调用。它们允许 `SpelExpressionParser` 与 Java 对象的属性和方法交互，实现复杂的逻辑。
+   + These classes and interfaces resolve object properties and method calls when an expression is evaluated. They let `SpelExpressionParser` work with the properties and methods of Java objects, to build complex logic.
 
 5. **TypeConverter**
 
-   + 用于在表达式计算过程中进行类型转换，使得可以在不同类型之间自由转换值。
+   + It converts types while an expression is evaluated, so values can be converted freely between different types.
 
-### 十一、常见问题
+### 11. FAQ
 
-1. **表达式语法错误**
+1. **Expression syntax errors**
 
-   + 编写 SpEL 表达式时，常见的错误包括拼写错误、错误的符号或操作符使用。这些错误通常会在解析表达式时抛出 `ParseException`。
+   + Common errors when you write a SpEL expression are typos, and wrong use of symbols or operators. These errors usually throw a `ParseException` when the expression is parsed.
 
-2. **性能问题**
+2. **Performance problems**
 
-   + 频繁解析和评估复杂的 SpEL 表达式可能会影响应用性能。合理缓存解析后的表达式对象可以帮助缓解这一问题。
+   + Parsing and evaluating complex SpEL expressions often can hurt application performance. Caching the parsed expression objects helps with this problem.
 
-3. **上下文变量未找到**
+3. **Context variable not found**
 
-   + 如果在表达式中使用了上下文（Context）中未定义的变量，将会抛出异常。确保所有在表达式中使用的变量都已在上下文中定义。
+   + If an expression uses a variable that is not defined in the context, an exception is thrown. Make sure all variables used in the expression are defined in the context.
 
-4. **类型转换问题**
+4. **Type conversion problems**
 
-   + 在表达式求值过程中，可能会出现类型不匹配或不能正确转换的情况，导致 `EvaluationException`。
+   + During evaluation, types may not match or may not convert correctly. This causes an `EvaluationException`.
 
-5. **属性或方法访问问题**
+5. **Property or method access problems**
 
-   + 尝试访问不存在的属性或调用不存在的方法时，会抛出异常。这可能是由于拼写错误或对象类型不正确。
+   + Accessing a property that does not exist, or calling a method that does not exist, throws an exception. This may be because of a typo or a wrong object type.
