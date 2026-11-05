@@ -8,32 +8,32 @@ import java.sql.ResultSet;
 public class DriverManagerDemo {
 
     public static void main(String[] args) throws Exception {
-        // 数据库连接 URL，格式为 jdbc:数据库驱动名称://主机地址:端口号/数据库名称
+        // Database URL, format: jdbc:driver-name://host:port/database-name
         String url = "jdbc:mysql://localhost:3306/spring-reading";
-        // 数据库用户名
+        // Database username
         String username = "root";
-        // 数据库密码
+        // Database password
         String password = "123456";
 
-        // 建立数据库连接
+        // Open the database connection
         Connection connection = DriverManager.getConnection(url, username, password);
-        // SQL 查询语句
+        // SQL query
         String sql = "SELECT * FROM scores";
-        // 创建 PreparedStatement 对象，用于执行 SQL 查询
+        // Create a PreparedStatement to run the SQL query
         PreparedStatement statement = connection.prepareStatement(sql);
-        // 执行查询，获取结果集
+        // Run the query and get the result set
         ResultSet resultSet = statement.executeQuery();
 
-        // 遍历结果集
+        // Loop over the result set
         while (resultSet.next()) {
-            // 获取 id 列的值
+            // Get the value of the id column
             int id = resultSet.getInt("id");
-            // 获取 score 列的值
+            // Get the value of the score column
             String score = resultSet.getString("score");
-            // 输出结果
+            // Print the result
             System.out.println("id: " + id + ", score: " + score);
         }
-        // 关闭结果集、PreparedStatement 和数据库连接
+        // Close the result set, the PreparedStatement and the connection
         resultSet.close();
         statement.close();
         connection.close();

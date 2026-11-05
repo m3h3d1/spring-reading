@@ -18,65 +18,65 @@ public class PlatformTransactionManagerDemo {
     private static JdbcTemplate jdbcTemplate;
 
     public static void main(String[] args) throws SQLException {
-        // 数据库连接 URL，格式为 jdbc:数据库驱动名称://主机地址:端口号/数据库名称
+        // Database URL, format: jdbc:driver-name://host:port/database-name
         String url = "jdbc:mysql://localhost:3306/spring-reading";
-        // 数据库用户名
+        // Database username
         String username = "root";
-        // 数据库密码
+        // Database password
         String password = "123456";
 
-        // 创建 SimpleDriverDataSource 对象，用于管理数据源
+        // Create a SimpleDriverDataSource to manage the data source
         SimpleDriverDataSource dataSource = new SimpleDriverDataSource(new Driver(), url, username, password);
-        // 创建 DataSourceTransactionManager 对象，用于管理事务
+        // Create a DataSourceTransactionManager to manage transactions
         transactionManager = new DataSourceTransactionManager(dataSource);
-        // 创建 JdbcTemplate 对象，用于执行 SQL 语句
+        // Create a JdbcTemplate to run SQL statements
         jdbcTemplate = new JdbcTemplate(dataSource);
 
         insertScore();
     }
 
     private static void insertScore() {
-        // 事务定义
+        // Transaction definition
         DefaultTransactionDefinition definition = new DefaultTransactionDefinition(DefaultTransactionDefinition.PROPAGATION_REQUIRED);
-        // 开启一个新的事务，返回事务状态对象
+        // Start a new transaction and return its status object
         TransactionStatus transactionStatus = transactionManager.getTransaction(definition);
         try {
             long id = System.currentTimeMillis();
             int score = new Random().nextInt(100);
-            // 向数据库中插入随机生成的分数
+            // Insert a random score into the database
             int row = jdbcTemplate.update("insert into scores(id,score) values(?,?)", id, score);
             insertScoreLog(id);
-            // 模拟异常，用于测试事务回滚
+            // Simulate an exception to test transaction rollback
             // int i = 1 / 0;
-            // 提交事务
+            // Commit the transaction
             transactionManager.commit(transactionStatus);
-            // 打印影响行数
+            // Print the number of affected rows
             System.out.println("scores row = " + row);
         } catch (Exception e) {
-            // 出现异常时回滚事务
+            // Roll back the transaction on error
             transactionManager.rollback(transactionStatus);
             e.printStackTrace();
         }
     }
 
     private static void insertScoreLog(long scoreId) {
-        // 事务定义
+        // Transaction definition
         DefaultTransactionDefinition definition = new DefaultTransactionDefinition(DefaultTransactionDefinition.PROPAGATION_REQUIRED);
-        // 开启一个新的事务，返回事务状态对象
+        // Start a new transaction and return its status object
         TransactionStatus transactionStatus = transactionManager.getTransaction(definition);
         try {
             long id = System.currentTimeMillis();
             LocalDateTime createTime = LocalDateTime.now();
-            // 向数据库中插入随机生成的分数
+            // Insert a random score into the database
             int row = jdbcTemplate.update("insert into scores_log(id,score_id,create_time) values(?,?,?)", id, scoreId, createTime);
-            // 模拟异常，用于测试事务回滚
+            // Simulate an exception to test transaction rollback
             // int i = 1 / 0;
-            // 提交事务
+            // Commit the transaction
             transactionManager.commit(transactionStatus);
-            // 打印影响行数
+            // Print the number of affected rows
             System.out.println("scores_log row = " + row);
         } catch (Exception e) {
-            // 出现异常时回滚事务
+            // Roll back the transaction on error
             transactionManager.rollback(transactionStatus);
             e.printStackTrace();
         }

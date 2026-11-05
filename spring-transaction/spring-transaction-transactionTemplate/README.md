@@ -1,162 +1,161 @@
 ## TransactionTemplate
 
 - [TransactionTemplate](#transactiontemplate)
-    - [一、基本信息](#一基本信息)
-    - [二、基本描述](#二基本描述)
-    - [三、主要功能](#三主要功能)
-    - [四、最佳实践](#四最佳实践)
-    - [五、源码分析](#五源码分析)
+    - [1. Overview](#1-overview)
+    - [2. Description](#2-description)
+    - [3. Main Features](#3-main-features)
+    - [4. Best Practices](#4-best-practices)
+    - [5. Source Code Analysis](#5-source-code-analysis)
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址
-** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [Juejin](https://juejin.cn/user/4251135018533068/posts) 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、基本描述
+### 2. Description
 
-`TransactionTemplate` 是 Spring Framework 提供的工具类，用于在代码中以编程方式管理事务。它简化了事务的启动、提交/回滚以及异常处理，同时允许灵活配置事务属性，并提供了回调机制以执行特定操作。
+`TransactionTemplate` is a utility class in the Spring Framework that manages transactions programmatically. It simplifies starting a transaction, commit/rollback, and exception handling. It also lets you configure transaction properties flexibly, and it provides callbacks to run specific operations.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **事务的启动和提交/回滚**
+1. **Start and commit/roll back transactions**
 
-    + 允许我们以编程方式启动事务，并在需要时提交或回滚事务。这种方式使得我们可以在代码的特定部分明确定义事务的边界，而不必依赖于容器管理。
+    + It lets us start a transaction in code, and commit or roll it back when needed. This way we can define the boundary of a transaction clearly in a specific part of the code, without relying on the container to manage it.
 
-2. **异常处理**
+2. **Exception handling**
 
-    + 提供了对异常的处理机制，我们可以通过配置指定在发生异常时应该执行的操作，比如回滚事务。
+    + It provides a way to handle exceptions. We can configure what should happen when an exception occurs, for example rolling back the transaction.
 
-3. **事务属性的灵活配置**
+3. **Flexible transaction properties**
 
-    + 我们可以使用 `TransactionTemplate` 配置各种事务属性，如隔离级别、传播行为等。这使得我们可以针对不同的场景灵活地配置事务行为。
+    + We can use `TransactionTemplate` to configure transaction properties such as the isolation level and the propagation behavior. This lets us set up the transaction behavior flexibly for different cases.
 
-4. **回调机制**
+4. **Callbacks**
 
-    + 允许我们定义回调接口，通过这些回调接口，我们可以在事务的不同阶段执行特定的操作。这为更复杂的事务场景提供了更大的灵活性。
+    + It lets us define callback interfaces. With these callbacks we can run specific operations at different stages of the transaction. This gives more flexibility for more complex transaction cases.
 
-### 四、最佳实践
+### 4. Best Practices
 
-使用 `TransactionTemplate` 来管理事务。它首先创建了一个数据库连接，并通过 `DataSourceTransactionManager`
-实例化了 `TransactionTemplate`。在 `TransactionTemplate` 的 `execute`
-方法中，定义了一个事务回调接口，在该接口的 `doInTransaction` 方法中执行了数据库操作。通过这种方式，可以确保操作要么全部成功提交，要么全部回滚，从而保证数据的一致性和完整性。
+This example uses `TransactionTemplate` to manage a transaction. It first creates a database connection and creates the `TransactionTemplate` with a `DataSourceTransactionManager`
+. In the `execute`
+method of `TransactionTemplate`, it defines a transaction callback. The database operation runs in the `doInTransaction` method of that callback. This way, either all operations are committed successfully, or all are rolled back. This keeps the data consistent and complete.
 
 ```java
 public class TransactionTemplateDemo {
 
     public static void main(String[] args) throws SQLException {
-        // 数据库连接 URL，格式为 jdbc:数据库驱动名称://主机地址:端口号/数据库名称
+        // Database URL, format: jdbc:driver-name://host:port/database-name
         String url = "jdbc:mysql://localhost:3306/spring-reading";
-        // 数据库用户名
+        // Database username
         String username = "root";
-        // 数据库密码
+        // Database password
         String password = "123456";
 
-        // 创建 SimpleDriverDataSource 对象，用于管理数据源
+        // Create a SimpleDriverDataSource to manage the data source
         SimpleDriverDataSource dataSource = new SimpleDriverDataSource(new Driver(), url, username, password);
-        // 创建 DataSourceTransactionManager 对象，用于管理事务
+        // Create a DataSourceTransactionManager to manage transactions
         DataSourceTransactionManager transactionManager = new DataSourceTransactionManager(dataSource);
-        // 创建 JdbcTemplate 对象，用于执行 SQL 语句
+        // Create a JdbcTemplate to run SQL statements
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-        // 创建事务模板
+        // Create the transaction template
         TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
 
         Boolean insertSuccess = transactionTemplate.execute(new TransactionCallback<Boolean>() {
             @Override
             public Boolean doInTransaction(TransactionStatus status) {
-                // 主键Id
+                // Primary key id
                 long id = System.currentTimeMillis();
-                // 分数
+                // Score
                 int score = new Random().nextInt(100);
-                // 保存数据
+                // Save the data
                 int row = jdbcTemplate.update("insert into scores(id,score) values(?,?)", id, score);
-                // 模拟异常，用于测试事务回滚
+                // Simulate an exception to test transaction rollback
                 // int i = 1 / 0;
-                // 我们也可以使用setRollbackOnly来回滚
+                // We can also roll back with setRollbackOnly
                 // status.setRollbackOnly();
-                // 返回是否新增成功
+                // Return whether the insert succeeded
                 return row >= 1;
             }
         });
-        System.out.println("新增scores表数据：" + insertSuccess);
+        System.out.println("Inserted into scores table: " + insertSuccess);
     }
 }
 ```
 
-运行结果，数据库操作成功完成并成功提交了事务。
+In the result, the database operation finished successfully and the transaction was committed.
 
 ```java
-新增scores表数据：true
+Inserted into scores table: true
 ```
 
-### 五、源码分析
+### 5. Source Code Analysis
 
-在`org.springframework.transaction.support.TransactionTemplate#execute`方法中，首先确保了 `PlatformTransactionManager`
-已经设置，然后根据事务管理器的类型选择合适的执行方式。如果事务管理器是 `CallbackPreferringPlatformTransactionManager`
-的实例，就会调用其 `execute` 方法来执行事务。否则，它将获取事务状态，执行事务回调操作，并在操作过程中处理可能的异常。最后，无论成功还是失败，都会提交事务。
+The method `org.springframework.transaction.support.TransactionTemplate#execute` first makes sure the `PlatformTransactionManager`
+is set. Then it picks how to run depending on the type of the transaction manager. If the transaction manager is an instance of `CallbackPreferringPlatformTransactionManager`
+, it calls its `execute` method to run the transaction. Otherwise, it gets the transaction status, runs the transaction callback, and handles any exception during the operation. At the end, it commits the transaction if there is no failure.
 
 ```java
 
 @Override
 @Nullable
 public <T> T execute(TransactionCallback<T> action) throws TransactionException {
-    // 断言确保已设置PlatformTransactionManager
+    // Assert that the PlatformTransactionManager is set
     Assert.state(this.transactionManager != null, "No PlatformTransactionManager set");
 
-    // 如果事务管理器是CallbackPreferringPlatformTransactionManager的实例
+    // If the transaction manager is an instance of CallbackPreferringPlatformTransactionManager
     if (this.transactionManager instanceof CallbackPreferringPlatformTransactionManager) {
-        // 使用CallbackPreferringPlatformTransactionManager执行事务
+        // Run the transaction with CallbackPreferringPlatformTransactionManager
         return ((CallbackPreferringPlatformTransactionManager) this.transactionManager).execute(this, action);
     } else {
-        // 获取事务状态
+        // Get the transaction status
         TransactionStatus status = this.transactionManager.getTransaction(this);
         T result;
         try {
-            // 执行事务回调操作
+            // Run the transaction callback
             result = action.doInTransaction(status);
         } catch (RuntimeException | Error ex) {
-            // 事务中的代码抛出应用程序异常 -> 回滚事务
+            // Transactional code threw application exception -> rollback
             rollbackOnException(status, ex);
             throw ex;
         } catch (Throwable ex) {
-            // 事务中的代码抛出意外异常 -> 回滚事务
+            // Transactional code threw unexpected exception -> rollback
             rollbackOnException(status, ex);
             throw new UndeclaredThrowableException(ex, "TransactionCallback threw undeclared checked exception");
         }
-        // 提交事务
+        // Commit the transaction
         this.transactionManager.commit(status);
         return result;
     }
 }
 ```
 
-在`org.springframework.transaction.support.TransactionTemplate#rollbackOnException`
-方法中，首先确保已设置了 `PlatformTransactionManager`
-，然后记录调试日志以表示在应用异常时启动事务回滚。接着尝试执行事务回滚操作，如果发生回滚异常，则记录错误日志，并将原始异常初始化为回滚异常的应用程序异常。最后，如果发生运行时异常或错误，则将其重新抛出。
+The method `org.springframework.transaction.support.TransactionTemplate#rollbackOnException`
+first makes sure the `PlatformTransactionManager` is set
+. Then it logs a debug message that a rollback is starting because of the application exception. Next it tries to roll back. If the rollback throws an exception, it logs an error and sets the original exception as the application exception of the rollback exception. Finally, if a runtime exception or error happens, it rethrows it.
 
 ```java
 /**
- * 在应用异常时执行回滚，正确处理回滚异常。
- * @param status 表示事务的对象
- * @param ex 抛出的应用程序异常或错误
- * @throws TransactionException 如果发生回滚错误
+ * Perform a rollback, handling rollback exceptions properly.
+ * @param status the object that represents the transaction
+ * @param ex the thrown application exception or error
+ * @throws TransactionException in case of a rollback error
  */
 private void rollbackOnException(TransactionStatus status, Throwable ex) throws TransactionException {
-    // 断言确保已设置PlatformTransactionManager
+    // Assert that the PlatformTransactionManager is set
     Assert.state(this.transactionManager != null, "No PlatformTransactionManager set");
 
-    // 打印调试日志，表示在应用异常时启动事务回滚
+    // Log a debug message that a rollback is starting because of the application exception
     logger.debug("Initiating transaction rollback on application exception", ex);
     try {
-        // 执行事务回滚
+        // Run the rollback
         this.transactionManager.rollback(status);
     } catch (TransactionSystemException ex2) {
-        // 打印错误日志，表示应用异常被回滚异常覆盖
+        // Log an error that the application exception is overridden by the rollback exception
         logger.error("Application exception overridden by rollback exception", ex);
-        // 初始化应用程序异常
+        // Initialize the application exception
         ex2.initApplicationException(ex);
         throw ex2;
     } catch (RuntimeException | Error ex2) {
-        // 打印错误日志，表示应用异常被回滚异常覆盖
+        // Log an error that the application exception is overridden by the rollback exception
         logger.error("Application exception overridden by rollback exception", ex);
         throw ex2;
     }

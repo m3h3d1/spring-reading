@@ -8,22 +8,22 @@ import org.xml.sax.InputSource;
 
 /**
  * @author xcs
- * @date 2023年11月04日 14时27分
+ * @date 2023-11-04 14:27
  **/
 public class DocumentLoaderDemo {
 
     public static void main(String[] args) {
         try {
-            // 创建要加载的资源对象
+            // Create the resource to load
             Resource resource = new ClassPathResource("sample.xml");
 
-            // 创建 DocumentLoader 实例
+            // Create a DocumentLoader instance
             DefaultDocumentLoader documentLoader = new DefaultDocumentLoader();
 
-            // 加载和解析 XML 文档
+            // Load and parse the XML document
             Document document = documentLoader.loadDocument(new InputSource(resource.getInputStream()), null, null, 0, true);
 
-            // 打印 XML 文档的内容
+            // Print the content of the XML document
             printDetailedDocumentInfo(document);
         } catch (Exception e) {
             e.printStackTrace();
@@ -31,9 +31,9 @@ public class DocumentLoaderDemo {
     }
 
     /**
-     * 打印详细的XML文档信息，包括元素、属性和文本内容。
+     * Prints detailed XML document information, including elements, attributes and text.
      *
-     * @param document 要打印的XML文档对象
+     * @param document the XML document to print
      */
     private static void printDetailedDocumentInfo(Document document) {
         Element rootElement = document.getDocumentElement();
@@ -41,31 +41,31 @@ public class DocumentLoaderDemo {
     }
 
     /**
-     * 递归打印XML元素的详细信息，包括元素名称、属性和子节点。
+     * Prints XML element details recursively, including name, attributes and child nodes.
      *
-     * @param element 要打印的XML元素
-     * @param indent  当前打印的缩进
+     * @param element the XML element to print
+     * @param indent  the current indentation
      */
     private static void printElementInfo(Element element, String indent) {
-        // 打印元素名称
+        // Print the element name
         System.out.println(indent + "Element: " + element.getNodeName());
 
-        // 打印元素的属性
+        // Print the element attributes
         NamedNodeMap attributes = element.getAttributes();
         for (int i = 0; i < attributes.getLength(); i++) {
             Node attribute = attributes.item(i);
             System.out.println(indent + "  Attribute: " + attribute.getNodeName() + " = " + attribute.getNodeValue());
         }
 
-        // 打印元素的子节点（可能是元素或文本）
+        // Print the child nodes (elements or text)
         NodeList childNodes = element.getChildNodes();
         for (int i = 0; i < childNodes.getLength(); i++) {
             Node childNode = childNodes.item(i);
             if (childNode.getNodeType() == Node.ELEMENT_NODE) {
-                // 如果子节点是元素，递归打印它
+                // If the child is an element, print it recursively
                 printElementInfo((Element) childNode, indent + "  ");
             } else if (childNode.getNodeType() == Node.TEXT_NODE) {
-                // 如果子节点是文本，打印文本内容
+                // If the child is text, print its content
                 System.out.println(indent + "  Text: " + childNode.getNodeValue().trim());
             }
         }

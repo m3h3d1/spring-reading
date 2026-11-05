@@ -1,69 +1,68 @@
 ## JdbcTemplate
 
 - [JdbcTemplate](#jdbctemplate)
-    - [一、基本信息](#一基本信息)
-    - [二、基本描述](#二基本描述)
-    - [三、主要功能](#三主要功能)
-    - [四、最佳实践](#四最佳实践)
-    - [四、源码分析](#四源码分析)
+    - [1. Overview](#1-overview)
+    - [2. Description](#2-description)
+    - [3. Main Features](#3-main-features)
+    - [4. Best Practices](#4-best-practices)
+    - [4. Source Code Analysis](#4-source-code-analysis)
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址
-** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [Juejin](https://juejin.cn/user/4251135018533068/posts) 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、基本描述
+### 2. Description
 
-JdbcTemplate是Spring Framework中的一个关键类，用于简化JDBC编程，提供了简洁的方法执行SQL查询、更新和批处理操作，同时处理了JDBC资源的获取、释放和异常处理，使得数据库操作更加简单、高效和安全。
+JdbcTemplate is a key class in the Spring Framework that simplifies JDBC programming. It has simple methods to run SQL queries, updates, and batch operations. It also handles getting and releasing JDBC resources and handling exceptions. This makes database operations simpler, more efficient, and safer.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **简化的JDBC操作**
+1. **Simpler JDBC operations**
 
-    + JdbcTemplate封装了JDBC的复杂性，提供了简洁的方法来执行SQL查询、更新等操作，无需手动管理连接、语句和结果集。
+    + JdbcTemplate hides the complexity of JDBC. It has simple methods to run SQL queries, updates, and so on. You do not need to manage connections, statements, and result sets by hand.
 
-2. **异常处理**
+2. **Exception handling**
 
-    + JdbcTemplate自动捕获并转换JDBC异常为Spring的DataAccessException，使异常处理更加便捷，无需编写繁琐的异常处理代码。
+    + JdbcTemplate catches JDBC exceptions and converts them to Spring's DataAccessException. This makes exception handling easier. You do not need to write long exception handling code.
 
-3. **参数化查询**
+3. **Parameterized queries**
 
-    + 支持使用占位符进行参数化查询，防止SQL注入攻击，并且可以简化SQL语句的构建和维护。
+    + It supports parameterized queries with placeholders. This helps prevent SQL injection and makes SQL statements easier to build and maintain.
 
-4. **批处理操作**
+4. **Batch operations**
 
-    + 支持批处理操作，可以一次性执行多个SQL语句，提高数据库操作的效率。
+    + It supports batch operations. You can run many SQL statements at once, which makes database operations more efficient.
 
-5. **回调机制**
+5. **Callbacks**
 
-    + 提供了回调机制，可以在执行数据库操作前后插入自定义逻辑，如日志记录、性能监控等。
+    + It provides callbacks, so you can add custom logic before and after database operations, such as logging and performance monitoring.
 
-6. **支持ORM框架**
+6. **ORM framework support**
 
-    + 可以与Spring的ORM框架（如Spring Data JPA、Spring Data JDBC）结合使用，提供更高层次的数据库访问抽象。
+    + It can be used together with Spring's ORM frameworks (such as Spring Data JPA and Spring Data JDBC) to give a higher level of database access abstraction.
 
-### 四、最佳实践
+### 4. Best Practices
 
-使用JdbcTemplate执行SQL查询操作。首先，通过配置数据库连接信息创建了一个`SimpleDriverDataSource`
-对象来管理数据源，并创建了一个`DataSourceTransactionManager`对象用于事务管理。然后，通过这些对象创建了一个`JdbcTemplate`
-实例。接着，使用`query`方法执行了一个查询操作，将查询结果映射为`Scores`对象的列表，最后打印输出了查询结果。
+This example uses JdbcTemplate to run an SQL query. First, it creates a `SimpleDriverDataSource`
+object to manage the data source from the database connection settings, and a `DataSourceTransactionManager` object for transaction management. Then it creates a `JdbcTemplate`
+instance. Next, it runs a query with the `query` method and maps the result to a list of `Scores` objects. Finally, it prints the result.
 
 ```java
 public class JdbcTemplateDemo {
 
     public static void main(String[] args) throws Exception {
-        // 数据库连接 URL，格式为 jdbc:数据库驱动名称://主机地址:端口号/数据库名称
+        // Database URL, format: jdbc:driver-name://host:port/database-name
         String url = "jdbc:mysql://localhost:3306/spring-reading";
-        // 数据库用户名
+        // Database username
         String username = "root";
-        // 数据库密码
+        // Database password
         String password = "123456";
 
-        // 创建 SimpleDriverDataSource 对象，用于管理数据源
+        // Create a SimpleDriverDataSource to manage the data source
         SimpleDriverDataSource dataSource = new SimpleDriverDataSource(new Driver(), url, username, password);
-        // 创建 DataSourceTransactionManager 对象，用于管理事务
+        // Create a DataSourceTransactionManager to manage transactions
         DataSourceTransactionManager transactionManager = new DataSourceTransactionManager(dataSource);
-        // 创建 JdbcTemplate 对象，用于执行 SQL 语句
+        // Create a JdbcTemplate to run SQL statements
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 
         List<Scores> scoresList = jdbcTemplate.query("select * from scores ", new RowMapper<Scores>() {
@@ -81,7 +80,7 @@ public class JdbcTemplateDemo {
 }
 ```
 
-`Scores`类是一个简单的Java Bean。
+The `Scores` class is a simple Java bean.
 
 ```java
 public class Scores {
@@ -116,7 +115,7 @@ public class Scores {
 }
 ```
 
-运行结果，从数据库查询出的分数记录。
+This is the score records queried from the database.
 
 ```java
 Scores {
@@ -136,77 +135,77 @@ Scores {
 }
 ```
 
-### 四、源码分析
+### 4. Source Code Analysis
 
-在`org.springframework.jdbc.core.JdbcTemplate#query(java.lang.String, org.springframework.jdbc.core.RowMapper<T>)`
-方法中，用于执行SQL查询并将结果映射为对象列表。它接受SQL查询语句和一个RowMapper接口实现作为参数，并将查询结果通过RowMapperResultSetExtractor转换为对象列表后返回。
+The method `org.springframework.jdbc.core.JdbcTemplate#query(java.lang.String, org.springframework.jdbc.core.RowMapper<T>)`
+runs an SQL query and maps the result to a list of objects. It takes an SQL query and a RowMapper implementation as arguments. It converts the query result to a list of objects with RowMapperResultSetExtractor and returns it.
 
 ```java
 /**
- * 执行给定的 SQL 查询，并将结果映射为对象列表。
+ * Execute a query for the given SQL, mapping the result to a list of objects.
  *
- * @param sql SQL查询语句
- * @param rowMapper 用于将每行结果映射为对象的 RowMapper 接口实现
- * @param <T> 返回结果的类型
- * @return 查询结果的对象列表
- * @throws DataAccessException 如果查询失败或转换结果时发生异常
+ * @param sql the SQL query
+ * @param rowMapper a RowMapper implementation that maps each row to an object
+ * @param <T> the type of the result
+ * @return the list of result objects
+ * @throws DataAccessException if the query fails or converting the result fails
  */
 @Override
 public <T> List<T> query(String sql, RowMapper<T> rowMapper) throws DataAccessException {
-    // 调用重载的 query 方法，将结果通过 RowMapperResultSetExtractor 转换为对象列表
+    // Call the overloaded query method and convert the result to a list of objects with RowMapperResultSetExtractor
     return result(query(sql, new RowMapperResultSetExtractor<>(rowMapper)));
 }
 ```
 
-在`org.springframework.jdbc.core.JdbcTemplate#query(java.lang.String, org.springframework.jdbc.core.ResultSetExtractor<T>)`
-方法中，执行SQL查询并使用ResultSetExtractor提取结果。它接受SQL查询语句和一个ResultSetExtractor接口实现作为参数，通过Statement对象执行SQL查询并将结果集交给ResultSetExtractor进行处理，最终返回ResultSetExtractor提取的结果。
+The method `org.springframework.jdbc.core.JdbcTemplate#query(java.lang.String, org.springframework.jdbc.core.ResultSetExtractor<T>)`
+runs an SQL query and extracts the result with a ResultSetExtractor. It takes an SQL query and a ResultSetExtractor implementation as arguments. It runs the query with a Statement object, hands the result set to the ResultSetExtractor, and returns what the ResultSetExtractor extracts.
 
 ```java
 /**
- * 执行给定的 SQL 查询，并使用指定的 ResultSetExtractor 提取结果。
+ * Execute a query for the given SQL and extract the result with the given ResultSetExtractor.
  *
- * @param sql SQL查询语句
- * @param rse 用于提取结果的 ResultSetExtractor 接口实现
- * @param <T> 返回结果的类型
- * @return 查询结果，如果没有结果则返回 null
- * @throws DataAccessException 如果查询失败或提取结果时发生异常	
+ * @param sql the SQL query
+ * @param rse a ResultSetExtractor implementation that extracts the result
+ * @param <T> the type of the result
+ * @return the result, or null if there is no result
+ * @throws DataAccessException if the query fails or extracting the result fails
  */
 @Nullable
 @Override
 public <T> T query(final String sql, final ResultSetExtractor<T> rse) throws DataAccessException {
-    // 确保 SQL 查询语句和 ResultSetExtractor 不为空
+    // Make sure the SQL query and the ResultSetExtractor are not null
     Assert.notNull(sql, "SQL must not be null");
     Assert.notNull(rse, "ResultSetExtractor must not be null");
 
-    // 如果开启了调试模式，则记录SQL查询语句
+    // If debug logging is on, log the SQL query
     if (logger.isDebugEnabled()) {
         logger.debug("Executing SQL query [" + sql + "]");
     }
 
     /**
-     * 内部类，用于执行查询操作的回调。
+     * Inner class for the callback that runs the query.
      */
     class QueryStatementCallback implements StatementCallback<T>, SqlProvider {
         /**
-         * 在 Statement 中执行查询并提取结果。
+         * Runs the query in a Statement and extracts the result.
          */
         @Override
         @Nullable
         public T doInStatement(Statement stmt) throws SQLException {
             ResultSet rs = null;
             try {
-                // 执行查询语句，并获取结果集
+                // Run the query and get the result set
                 rs = stmt.executeQuery(sql);
-                // 使用 ResultSetExtractor 提取结果
+                // Extract the result with the ResultSetExtractor
                 return rse.extractData(rs);
             } finally {
-                // 关闭结果集
+                // Close the result set
                 JdbcUtils.closeResultSet(rs);
             }
         }
 
         /**
-         * 获取查询的 SQL 语句。
+         * Get the SQL of the query.
          */
         @Override
         public String getSql() {
@@ -214,53 +213,53 @@ public <T> T query(final String sql, final ResultSetExtractor<T> rse) throws Dat
         }
     }
 
-    // 执行查询，并返回结果
+    // Run the query and return the result
     return execute(new QueryStatementCallback(), true);
 }
 ```
 
-在`org.springframework.jdbc.core.JdbcTemplate#execute(org.springframework.jdbc.core.StatementCallback<T>, boolean)`
-方法中，执行数据库操作回调，并根据需要关闭资源。它接受一个数据库操作回调对象和一个布尔值参数，布尔值参数指示是否在执行完操作后关闭资源。在方法内部，首先获取数据库连接，然后创建Statement对象并应用设置。接着执行数据库操作回调，并处理操作过程中的警告信息。如果操作过程中发生了SQLException，会及时释放连接并抛出DataAccessException。最后，在finally块中根据需要关闭Statement和连接资源。
+The method `org.springframework.jdbc.core.JdbcTemplate#execute(org.springframework.jdbc.core.StatementCallback<T>, boolean)`
+runs a database operation callback and closes resources if needed. It takes a database operation callback and a boolean that says whether to close resources after the operation. Inside the method, it first gets a database connection, then creates a Statement object and applies its settings. Next it runs the callback and handles warnings from the operation. If a SQLException happens, it releases the connection early and throws a DataAccessException. Finally, in the finally block, it closes the Statement and the connection if needed.
 
 ```java
 /**
- * 执行给定的数据库操作回调，并根据需要关闭资源。
+ * Execute the given database operation callback and close resources if needed.
  *
- * @param action 数据库操作回调对象
- * @param closeResources 是否关闭资源的标志，如果为 true，则在执行完操作后关闭资源，否则不关闭
- * @param <T> 返回结果的类型
- * @return 执行操作的结果
- * @throws DataAccessException 如果执行操作失败
+ * @param action the database operation callback
+ * @param closeResources whether to close resources. If true, resources are closed after the operation; otherwise they are not
+ * @param <T> the type of the result
+ * @return the result of the operation
+ * @throws DataAccessException if the operation fails
  */
 @Nullable
 private <T> T execute(StatementCallback<T> action, boolean closeResources) throws DataAccessException {
-    // 确保回调对象不为空
+    // Make sure the callback is not null
     Assert.notNull(action, "Callback object must not be null");
 
-    // 获取连接
+    // Get the connection
     Connection con = DataSourceUtils.getConnection(obtainDataSource());
     Statement stmt = null;
     try {
-        // 创建 Statement
+        // Create the Statement
         stmt = con.createStatement();
-        // 应用 Statement 的设置
+        // Apply the settings of the Statement
         applyStatementSettings(stmt);
-        // 执行数据库操作
+        // Run the database operation
         T result = action.doInStatement(stmt);
-        // 处理警告信息
+        // Handle warnings
         handleWarnings(stmt);
         return result;
     } catch (SQLException ex) {
-        // 在可能发生连接池死锁的情况下，尽早释放连接以避免死锁
+        // Release the connection early to avoid a possible connection pool deadlock
         String sql = getSql(action);
         JdbcUtils.closeStatement(stmt);
         stmt = null;
         DataSourceUtils.releaseConnection(con, getDataSource());
         con = null;
-        // 转换异常并抛出
+        // Translate the exception and throw it
         throw translateException("StatementCallback", sql, ex);
     } finally {
-        // 如果需要关闭资源，则在 finally 中关闭 Statement 和连接
+        // If resources need to be closed, close the Statement and the connection in finally
         if (closeResources) {
             JdbcUtils.closeStatement(stmt);
             DataSourceUtils.releaseConnection(con, getDataSource());

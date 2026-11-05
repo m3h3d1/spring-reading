@@ -12,38 +12,38 @@ import org.springframework.transaction.interceptor.TransactionInterceptor;
 public class TransactionInterceptorDemo {
 
     public static void main(String[] args) throws Exception {
-        // 数据库连接 URL，格式为 jdbc:数据库驱动名称://主机地址:端口号/数据库名称
+        // Database URL, format: jdbc:driver-name://host:port/database-name
         String url = "jdbc:mysql://localhost:3306/spring-reading";
-        // 数据库用户名
+        // Database username
         String username = "root";
-        // 数据库密码
+        // Database password
         String password = "123456";
 
-        // 创建 SimpleDriverDataSource 对象，用于管理数据源
+        // Create a SimpleDriverDataSource to manage the data source
         SimpleDriverDataSource dataSource = new SimpleDriverDataSource(new Driver(), url, username, password);
-        // 创建 DataSourceTransactionManager 对象，用于管理事务
+        // Create a DataSourceTransactionManager to manage transactions
         DataSourceTransactionManager transactionManager = new DataSourceTransactionManager(dataSource);
-        // 创建 JdbcTemplate 对象，用于执行 SQL 语句
+        // Create a JdbcTemplate to run SQL statements
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-        // 创建 AnnotationTransactionAttributeSource 对象，用于获取事务属性
+        // Create an AnnotationTransactionAttributeSource to get transaction attributes
         AnnotationTransactionAttributeSource transactionAttributeSource = new AnnotationTransactionAttributeSource();
 
-        // 创建 TransactionInterceptor 对象，用于拦截方法调用并管理事务
+        // Create a TransactionInterceptor to intercept method calls and manage transactions
         TransactionInterceptor transactionInterceptor = new TransactionInterceptor();
         transactionInterceptor.setTransactionAttributeSource(transactionAttributeSource);
         transactionInterceptor.setTransactionManager(transactionManager);
 
-        // 创建 BeanFactoryTransactionAttributeSourceAdvisor 对象，用于配置事务拦截器
+        // Create a BeanFactoryTransactionAttributeSourceAdvisor to set up the transaction interceptor
         BeanFactoryTransactionAttributeSourceAdvisor advisor = new BeanFactoryTransactionAttributeSourceAdvisor();
         advisor.setTransactionAttributeSource(transactionAttributeSource);
         advisor.setAdvice(transactionInterceptor);
 
-        // 创建 ProxyFactory 对象，用于创建代理对象
+        // Create a ProxyFactory to create the proxy
         ProxyFactory proxyFactory = new ProxyFactory();
         proxyFactory.addAdvisor(advisor);
         proxyFactory.setTarget(new ScoresServiceImpl(jdbcTemplate));
 
-        // 获取代理对象，并调用其方法
+        // Get the proxy and call its method
         ScoresService scoresService = (ScoresService) proxyFactory.getProxy();
         scoresService.insertScore();
     }

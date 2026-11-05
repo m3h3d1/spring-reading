@@ -8,13 +8,13 @@ import java.lang.reflect.Method;
 public class SpringTransactionAnnotationParserDemo {
 
     public static void main(String[] args) throws NoSuchMethodException {
-        // 获取 ScoresServiceImpl 类中的 insertScore 方法
+        // Get the insertScore method of ScoresServiceImpl
         Method insertScoreMethod = ScoresServiceImpl.class.getMethod("insertScore");
-        // 创建 SpringTransactionAnnotationParser 实例
+        // Create a SpringTransactionAnnotationParser instance
         SpringTransactionAnnotationParser parser = new SpringTransactionAnnotationParser();
-        // 解析 insertScore 方法上的事务注解，并转换为事务属性对象
+        // Parse the transaction annotation on insertScore into a transaction attribute
         TransactionAttribute transactionAttribute = parser.parseTransactionAnnotation(insertScoreMethod);
-        // 输出事务属性对象
+        // Print the transaction attribute
         System.out.println(transactionAttribute);
     }
 }

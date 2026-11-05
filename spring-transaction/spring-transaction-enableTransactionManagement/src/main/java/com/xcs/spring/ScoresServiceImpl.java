@@ -18,11 +18,11 @@ public class ScoresServiceImpl implements ScoresService {
     public void insertScore() {
         long id = System.currentTimeMillis();
         int score = new Random().nextInt(100);
-        // 向数据库中插入随机生成的分数
+        // Insert a random score into the database
         int row = jdbcTemplate.update("insert into scores(id,score) values(?,?)", id, score);
-        // 模拟异常，用于测试事务回滚
+        // Simulate an exception to test transaction rollback
         // int i = 1 / 0;
-        // 打印影响行数
+        // Print the number of affected rows
         System.out.println("scores row = " + row);
     }
 }

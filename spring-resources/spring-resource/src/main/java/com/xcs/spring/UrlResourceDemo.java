@@ -7,13 +7,13 @@ import java.io.InputStream;
 
 /**
  * @author xcs
- * @date 2023年10月30日 11时17分
+ * @date 2023-10-30 11:17
  **/
 public class UrlResourceDemo {
     public static void main(String[] args) throws Exception {
         Resource resource = new UrlResource("https://dist.apache.org/repos/dist/test/test.txt");
         try (InputStream is = resource.getInputStream()) {
-            // 读取和处理资源内容
+            // Read and process the resource content
             System.out.println(new String(is.readAllBytes()));
         }
     }

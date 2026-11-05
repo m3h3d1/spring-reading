@@ -9,16 +9,16 @@ import java.util.List;
 public class JdbcTemplateDemo {
 
     public static void main(String[] args) throws Exception {
-        // 数据库连接 URL，格式为 jdbc:数据库驱动名称://主机地址:端口号/数据库名称
+        // Database URL, format: jdbc:driver-name://host:port/database-name
         String url = "jdbc:mysql://localhost:3306/spring-reading";
-        // 数据库用户名
+        // Database username
         String username = "root";
-        // 数据库密码
+        // Database password
         String password = "123456";
 
-        // 创建 SimpleDriverDataSource 对象，用于管理数据源
+        // Create a SimpleDriverDataSource to manage the data source
         SimpleDriverDataSource dataSource = new SimpleDriverDataSource(new Driver(), url, username, password);
-        // 创建 JdbcTemplate 对象，用于执行 SQL 语句
+        // Create a JdbcTemplate to run SQL statements
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 
         List<Scores> scoresList = jdbcTemplate.query("select * from scores ", (rs, rowNum) -> {

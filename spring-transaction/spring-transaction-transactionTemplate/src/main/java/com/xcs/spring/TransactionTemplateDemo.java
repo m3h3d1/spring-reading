@@ -14,39 +14,39 @@ import java.util.Random;
 public class TransactionTemplateDemo {
 
     public static void main(String[] args) throws SQLException {
-        // 数据库连接 URL，格式为 jdbc:数据库驱动名称://主机地址:端口号/数据库名称
+        // Database URL, format: jdbc:driver-name://host:port/database-name
         String url = "jdbc:mysql://localhost:3306/spring-reading";
-        // 数据库用户名
+        // Database username
         String username = "root";
-        // 数据库密码
+        // Database password
         String password = "123456";
 
-        // 创建 SimpleDriverDataSource 对象，用于管理数据源
+        // Create a SimpleDriverDataSource to manage the data source
         SimpleDriverDataSource dataSource = new SimpleDriverDataSource(new Driver(), url, username, password);
-        // 创建 DataSourceTransactionManager 对象，用于管理事务
+        // Create a DataSourceTransactionManager to manage transactions
         DataSourceTransactionManager transactionManager = new DataSourceTransactionManager(dataSource);
-        // 创建 JdbcTemplate 对象，用于执行 SQL 语句
+        // Create a JdbcTemplate to run SQL statements
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-        // 创建事务模板
+        // Create the transaction template
         TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
 
         Boolean insertSuccess = transactionTemplate.execute(new TransactionCallback<Boolean>() {
             @Override
             public Boolean doInTransaction(TransactionStatus status) {
-                // 主键Id
+                // Primary key id
                 long id = System.currentTimeMillis();
-                // 分数
+                // Score
                 int score = new Random().nextInt(100);
-                // 保存数据
+                // Save the data
                 int row = jdbcTemplate.update("insert into scores(id,score) values(?,?)", id, score);
-                // 模拟异常，用于测试事务回滚
+                // Simulate an exception to test transaction rollback
                 // int i = 1 / 0;
-                // 我们也可以使用setRollbackOnly来回滚
+                // We can also roll back with setRollbackOnly
                 // status.setRollbackOnly();
-                // 返回是否新增成功
+                // Return whether the insert succeeded
                 return row >= 1;
             }
         });
-        System.out.println("新增scores表数据：" + insertSuccess);
+        System.out.println("Inserted into scores table: " + insertSuccess);
     }
 }

@@ -16,15 +16,15 @@ public class ScoresServiceImpl implements ScoresService {
     @Override
     @Transactional
     public void insertScore() throws Exception {
-        // 主键Id
+        // Primary key id
         long id = System.currentTimeMillis();
-        // 分数
+        // Score
         int score = new Random().nextInt(100);
-        // 保存数据
+        // Save the data
         int row = jdbcTemplate.update("insert into scores(id,score) values(?,?)", id, score);
-        // 打印影响行数
+        // Print the number of affected rows
         System.out.println("scores row = " + row);
-        // 模拟异常
-        // throw new Exception("测试异常");
+        // Simulate an exception
+        // throw new Exception("Test exception");
     }
 }

@@ -1,63 +1,62 @@
 ## PlatformTransactionManager
 
 - [PlatformTransactionManager](#platformtransactionmanager)
-    - [一、基本信息](#一基本信息)
-    - [二、基本描述](#二基本描述)
-    - [三、主要功能](#三主要功能)
-    - [四、接口源码](#四接口源码)
-    - [五、主要实现](#五主要实现)
-    - [六、类关系图](#六类关系图)
-    - [七、最佳实践](#七最佳实践)
-    - [八、源码分析](#八源码分析)
+    - [1. Overview](#1-overview)
+    - [2. Description](#2-description)
+    - [3. Main Features](#3-main-features)
+    - [4. Interface Source](#4-interface-source)
+    - [5. Main Implementations](#5-main-implementations)
+    - [6. Class Diagram](#6-class-diagram)
+    - [7. Best Practices](#7-best-practices)
+    - [8. Source Code Analysis](#8-source-code-analysis)
 
-### 一、基本信息
+### 1. Overview
 
-✒️ **作者** - Lex 📝 **博客** - [掘金](https://juejin.cn/user/4251135018533068/posts) 📚 **源码地址
-** - [github](https://github.com/xuchengsheng/spring-reading)
+✒️ **Author** - Lex 📝 **Blog** - [Juejin](https://juejin.cn/user/4251135018533068/posts) 📚 **Contents** - [Source code](https://github.com/xuchengsheng/spring-reading)
 
-### 二、基本描述
+### 2. Description
 
-`PlatformTransactionManager` 接口是 Spring
-框架中负责管理事务的核心接口，定义了统一的事务管理方法，包括事务的启动、提交、回滚和获取当前事务状态等，为不同的数据访问技术提供了统一的事务管理接口，便于在不同技术之间无缝切换。
+The `PlatformTransactionManager` interface is the core Spring
+interface for managing transactions. It defines unified transaction methods: start, commit, roll back, and get the current transaction status. It gives one transaction management interface to different data access technologies, so you can switch between them smoothly.
 
-### 三、主要功能
+### 3. Main Features
 
-1. **开始事务**
+1. **Start a transaction**
 
-    + `PlatformTransactionManager` 允许我们通过 `getTransaction(TransactionDefinition definition)`
-      方法开始一个新的事务或获取一个已存在的事务。`TransactionDefinition` 对象定义了事务的属性，如传播行为、隔离级别、超时设置和只读标志等。
+    + `PlatformTransactionManager` lets you start a new transaction or get an existing one with `getTransaction(TransactionDefinition definition)`
+      . The `TransactionDefinition` object defines transaction properties such as the propagation behavior, isolation level, timeout, and read-only flag.
 
-2. **提交事务**
+2. **Commit a transaction**
 
-    + 如果事务中的所有操作都成功完成，我们可以通过 `commit(TransactionStatus status)` 方法来提交事务。这将使事务中的所有更改永久化。
+    + If all operations in the transaction finish successfully, you can commit it with `commit(TransactionStatus status)`. This makes all changes in the transaction permanent.
 
-3. **回滚事务**
+3. **Roll back a transaction**
 
-    + 如果在事务中发生任何异常或错误，我们可以通过 `rollback(TransactionStatus status)`
-      方法来回滚事务。这将撤销事务中的所有更改，使数据库回到事务开始前的状态。
+    + If any exception or error happens in the transaction, you can roll it back with `rollback(TransactionStatus status)`
+      . This undoes all changes in the transaction and returns the database to the state before the transaction started.
 
-4. **获取事务状态**
+4. **Get the transaction status**
 
-    + `TransactionStatus` 对象提供了关于当前事务状态的信息，如是否是新事务、是否已完成、是否已回滚等。这些信息可以用于在事务处理过程中进行条件逻辑判断。
+    + The `TransactionStatus` object gives information about the current transaction, such as whether it is new, completed, or rolled back. You can use this information for conditional logic during transaction handling.
 
-### 四、接口源码
+### 4. Interface Source
 
-`PlatformTransactionManager` 接口是 Spring 命令式事务基础架构的核心接口。它提供了三个主要功能`getTransaction()`
-用于获取当前活动事务或创建新事务，`commit()` 用于提交给定的事务，而 `rollback()`
-用于回滚给定的事务。这些功能使得应用程序能够有效地管理事务，确保数据的一致性和完整性。
+The `PlatformTransactionManager` interface is the core interface of Spring's imperative transaction infrastructure. It has three main functions: `getTransaction()`
+gets the current active transaction or creates a new one, `commit()` commits the given transaction, and `rollback()`
+rolls back the given transaction. With these, an application can manage transactions effectively and keep data consistent and complete.
 
 ```java
 /**
- * 这是 Spring 命令式事务基础架构中的中心接口。
- * 应用程序可以直接使用它，但主要用途不是作为一个 API
- * 通常，应用程序将使用 TransactionTemplate 或通过 AOP 实现的声明式事务界定。
+ * This is the central interface in Spring's imperative transaction infrastructure.
+ * Applications can use it directly, but it is not primarily meant as an API:
+ * Typically, applications will work with either TransactionTemplate or declarative transaction demarcation through AOP.
  *
- * <p>对于实现者来说，建议从提供的 AbstractPlatformTransactionManager 类派生，
- * 该类预先实现了定义的传播行为并处理了事务同步处理。子类必须实现底层事务的特定状态的模板方法，
- * 例如begin、suspend、resume、commit。
+ * <p>For implementors, it is recommended to derive from the provided AbstractPlatformTransactionManager class,
+ * which pre-implements the defined propagation behavior and takes care of transaction synchronization handling. Subclasses have to implement template methods for specific states of the underlying transaction,
+ * for example: begin, suspend, resume, commit.
  *
- * <p>这个策略接口的默认实现是 JtaTransactionManager 和 DataSourceTransactionManager，
- * 它们可以作为其他事务策略的实现指南。
+ * <p>The default implementations of this strategy interface are JtaTransactionManager and DataSourceTransactionManager,
+ * which can serve as an implementation guide for other transaction strategies.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -69,20 +68,20 @@
 public interface PlatformTransactionManager extends TransactionManager {
 
     /**
-     * 根据指定的传播行为返回当前活动事务或创建一个新事务。
-     * <p>请注意，诸如隔离级别或超时之类的参数仅在创建新事务时应用，
-     * 因此在参与活动事务时会被忽略。
-     * <p>此外，并非所有的事务定义设置都会被所有的事务管理器支持
-     * 当遇到不支持的设置时，适当的事务管理器实现应该抛出异常。
-     * <p>以上规则的一个例外是只读标志，
-     * 如果不支持显式的只读模式，则应该忽略它。从本质上讲，
-     * 只读标志只是对潜在优化的一个提示。
-     * @param definition TransactionDefinition 实例（对于默认值可以为 null），
-     * 描述传播行为、隔离级别、超时等。
-     * @return 表示新事务或当前事务的事务状态对象
-     * @throws TransactionException 如果出现查找、创建或系统错误
-     * @throws IllegalTransactionStateException 如果给定的事务定义无法执行
-     * （例如，如果当前活动事务与指定的传播行为冲突）
+     * Return a currently active transaction or create a new one, according to the specified propagation behavior.
+     * <p>Note that parameters like isolation level or timeout will only be applied to new transactions,
+     * and thus be ignored when participating in an active transaction.
+     * <p>Furthermore, not all transaction definition settings will be supported by every transaction manager:
+     * A proper transaction manager implementation should throw an exception when unsupported settings are encountered.
+     * <p>An exception to the above rule is the read-only flag,
+     * which should be ignored if no explicit read-only mode is supported. Essentially, the read-only flag
+     * is just a hint for potential optimization.
+     * @param definition the TransactionDefinition instance (can be null for defaults),
+     * describing propagation behavior, isolation level, timeout etc.
+     * @return transaction status object representing the new or current transaction
+     * @throws TransactionException in case of lookup, creation, or system errors
+     * @throws IllegalTransactionStateException if the given transaction definition cannot be executed
+     * (for example, if a currently active transaction is in conflict with the specified propagation behavior)
      * @see TransactionDefinition#getPropagationBehavior
      * @see TransactionDefinition#getIsolationLevel
      * @see TransactionDefinition#getTimeout
@@ -92,47 +91,47 @@ public interface PlatformTransactionManager extends TransactionManager {
             throws TransactionException;
 
     /**
-     * 根据其状态提交给定的事务。如果事务已被程序标记为仅回滚，请执行回滚。
-     * <p>如果事务不是新的，则省略提交以正确参与周围的事务。
-     * 如果先前的事务已被暂停以创建一个新事务，则在提交新事务后恢复先前的事务。
-     * <p>请注意，当提交调用完成时，无论是正常还是抛出异常，事务都必须完全完成和清理。
-     * 在这种情况下，不应该期望回滚调用。
-     * <p>如果此方法引发除 TransactionException 之外的异常，
-     * 则一些提交之前的错误导致提交尝试失败。例如，
-     * 在提交之前可能会尝试将更改刷新到数据库中，
-     * 由于 resulting DataAccessException 导致事务失败。在这种情况下，原始异常将传播到此 commit 方法的调用者。
-     * @param status 由 getTransaction 方法返回的对象
-     * @throws UnexpectedRollbackException 如果事务协调器启动了意外的回滚
-     * @throws HeuristicCompletionException 如果事务协调器在事务协调器的一侧做出了启发式决策导致的事务失败
-     * @throws TransactionSystemException 在提交或系统错误时（通常是由于基本资源故障引起）
-     * @throws IllegalTransactionStateException 如果给定的事务已经完成（已提交或已回滚）
+     * Commit the given transaction, with regard to its status. If the transaction has been marked rollback-only programmatically, perform a rollback.
+     * <p>If the transaction wasn't a new one, omit the commit for proper participation in the surrounding transaction.
+     * If a previous transaction has been suspended to be able to create a new one, resume the previous transaction after committing the new one.
+     * <p>Note that when the commit call completes, no matter if normally or throwing an exception, the transaction must be fully completed and cleaned up.
+     * No rollback call should be expected in such a case.
+     * <p>If this method throws an exception other than a TransactionException,
+     * then some before-commit error caused the commit attempt to fail. For example,
+     * an attempt to flush changes to the database may be made before commit,
+     * and the transaction fails because of the resulting DataAccessException. In that case, the original exception is propagated to the caller of this commit method.
+     * @param status object returned by the getTransaction method
+     * @throws UnexpectedRollbackException in case of an unexpected rollback that the transaction coordinator initiated
+     * @throws HeuristicCompletionException in case of a transaction failure caused by a heuristic decision on the side of the transaction coordinator
+     * @throws TransactionSystemException in case of commit or system errors (typically caused by fundamental resource failures)
+     * @throws IllegalTransactionStateException if the given transaction is already completed (that is, committed or rolled back)
      * @see TransactionStatus#setRollbackOnly
      */
     void commit(TransactionStatus status) throws TransactionException;
 
     /**
-     * 执行给定事务的回滚。
-     * <p>如果事务不是新的，则仅将其标记为回滚，以便正确参与周围的事务。
-     * 如果先前的事务已被暂停以创建一个新事务，则在回滚新事务后恢复先前的事务。
-     * <p><b>如果提交引发异常，则不要调用事务回滚。</b>
-     * 当提交返回时，事务已经完成和清理，即使在提交异常的情况下也是如此。
-     * 因此，在提交失败后调用回滚将导致 IllegalTransactionStateException。
-     * @param status 由 getTransaction 方法返回的对象
-     * @throws TransactionSystemException 在回滚或系统错误时（通常是由于基本资源故障引起）
-     * @throws IllegalTransactionStateException 如果给定的事务已经完成（已提交或已回滚）
+     * Perform a rollback of the given transaction.
+     * <p>If the transaction wasn't a new one, just set it rollback-only for proper participation in the surrounding transaction.
+     * If a previous transaction has been suspended to be able to create a new one, resume the previous transaction after rolling back the new one.
+     * <p><b>Do not call rollback on a transaction if commit threw an exception.</b>
+     * The transaction will already have been completed and cleaned up when commit returns, even in case of a commit exception.
+     * Consequently, a rollback call after commit failure will lead to an IllegalTransactionStateException.
+     * @param status object returned by the getTransaction method
+     * @throws TransactionSystemException in case of rollback or system errors (typically caused by fundamental resource failures)
+     * @throws IllegalTransactionStateException if the given transaction is already completed (that is, committed or rolled back)
      */
     void rollback(TransactionStatus status) throws TransactionException;
 
 }
 ```
 
-### 五、主要实现
+### 5. Main Implementations
 
 1. **DataSourceTransactionManager**
 
-    + 用于基于 JDBC 的事务管理。
+    + For JDBC-based transaction management.
 
-### 六、类关系图
+### 6. Class Diagram
 
 ~~~mermaid
 classDiagram
@@ -164,11 +163,11 @@ PlatformTransactionManager  -->  TransactionManager
 ResourceTransactionManager  -->  PlatformTransactionManager 
 ~~~
 
-### 七、最佳实践
+### 7. Best Practices
 
-使用Spring的事务管理器（`PlatformTransactionManager`）和JDBC模板（`JdbcTemplate`
-）在Java应用中进行数据库操作。代码首先设置数据库连接信息，并创建数据源和事务管理器。然后，通过`JdbcTemplate`
-执行SQL插入操作，将随机生成的分数插入数据库。在执行插入操作时，事务被启动，并在操作成功时提交。如果出现异常，则回滚事务，确保数据一致性。最后，打印操作影响的行数。
+This example uses Spring's transaction manager (`PlatformTransactionManager`) and the JDBC template (`JdbcTemplate`
+) to work with a database in a Java application. The code first sets the database connection settings and creates the data source and the transaction manager. Then it uses `JdbcTemplate`
+to run an SQL insert and puts a randomly generated score into the database. When the insert runs, a transaction is started, and it is committed if the operation succeeds. If an exception happens, the transaction is rolled back to keep the data consistent. At the end, it prints the number of affected rows.
 
 ```java
 public class PlatformTransactionManagerDemo {
@@ -177,39 +176,39 @@ public class PlatformTransactionManagerDemo {
     private static JdbcTemplate jdbcTemplate;
 
     public static void main(String[] args) throws SQLException {
-        // 数据库连接 URL，格式为 jdbc:数据库驱动名称://主机地址:端口号/数据库名称
+        // Database URL, format: jdbc:driver-name://host:port/database-name
         String url = "jdbc:mysql://localhost:3306/spring-reading";
-        // 数据库用户名
+        // Database username
         String username = "root";
-        // 数据库密码
+        // Database password
         String password = "123456";
 
-        // 创建 SimpleDriverDataSource 对象，用于管理数据源
+        // Create a SimpleDriverDataSource to manage the data source
         SimpleDriverDataSource dataSource = new SimpleDriverDataSource(new Driver(), url, username, password);
-        // 创建 DataSourceTransactionManager 对象，用于管理事务
+        // Create a DataSourceTransactionManager to manage transactions
         transactionManager = new DataSourceTransactionManager(dataSource);
-        // 创建 JdbcTemplate 对象，用于执行 SQL 语句
+        // Create a JdbcTemplate to run SQL statements
         jdbcTemplate = new JdbcTemplate(dataSource);
 
         insertScore();
     }
 
     private static void insertScore() {
-        // 开启一个新的事务，返回事务状态对象
+        // Start a new transaction and return its status object
         TransactionStatus transactionStatus = transactionManager.getTransaction(new DefaultTransactionDefinition());
         try {
             long id = System.currentTimeMillis();
             int score = new Random().nextInt(100);
-            // 向数据库中插入随机生成的分数
+            // Insert a random score into the database
             int row = jdbcTemplate.update("insert into scores(id,score) values(?,?)", id, score);
-            // 模拟异常，用于测试事务回滚
+            // Simulate an exception to test transaction rollback
             // int i = 1 / 0;
-            // 提交事务
+            // Commit the transaction
             transactionManager.commit(transactionStatus);
-            // 打印影响行数
+            // Print the number of affected rows
             System.out.println("scores row = " + row);
         } catch (Exception e) {
-            // 出现异常时回滚事务
+            // Roll back the transaction on error
             transactionManager.rollback(transactionStatus);
             e.printStackTrace();
         }
@@ -217,21 +216,21 @@ public class PlatformTransactionManagerDemo {
 }
 ```
 
-### 八、源码分析
+### 8. Source Code Analysis
 
-**开启事务**
+**Start a transaction**
 
-在`org.springframework.transaction.support.AbstractPlatformTransactionManager#getTransaction`
-方法中，实现了 `PlatformTransactionManager` 接口的 `getTransaction()`
-方法，处理了事务的传播行为。根据传播行为的不同，通过调用 `doGetTransaction()`、`isExistingTransaction()` 和 `doBegin()`
-等方法来获取、检查现有事务，并开始新的事务。如果存在现有事务，则根据传播行为确定如何处理；如果不存在现有事务，则根据传播行为决定如何继续。在创建新事务时，可能会挂起已存在的事务，并在出现异常时恢复挂起的资源。如果传播行为指定了 "
+The method `org.springframework.transaction.support.AbstractPlatformTransactionManager#getTransaction`
+implements `getTransaction()`
+of the `PlatformTransactionManager` interface. It handles the propagation behavior of the transaction. Depending on the propagation behavior, it calls methods such as `doGetTransaction()`, `isExistingTransaction()`, and `doBegin()`
+to get and check the existing transaction and to start a new one. If there is an existing transaction, the propagation behavior decides how to handle it. If there is none, the propagation behavior decides how to go on. When it creates a new transaction, it may suspend an existing one, and it restores the suspended resources if an exception happens. If the propagation behavior is "
 mandatory"
-，但未找到现有事务，则抛出异常。若指定的超时时间无效，则抛出超时异常。最后，根据传播行为返回相应的事务状态对象，可能是一个 "
-empty" 事务，没有实际的事务，但可能存在同步。
+mandatory" but no existing transaction is found, it throws an exception. If the given timeout is not valid, it throws a timeout exception. Finally, depending on the propagation behavior, it returns the matching transaction status object. This may be an "
+empty" transaction: there is no real transaction, but there may be synchronization.
 
 ```java
 /**
- * 此实现处理传播行为。委托给 doGetTransaction、isExistingTransaction 和 doBegin。
+ * This implementation handles propagation behavior. It delegates to doGetTransaction, isExistingTransaction, and doBegin.
  * @see #doGetTransaction
  * @see #isExistingTransaction
  * @see #doBegin
@@ -240,153 +239,153 @@ empty" 事务，没有实际的事务，但可能存在同步。
 public final TransactionStatus getTransaction(@Nullable TransactionDefinition definition)
         throws TransactionException {
 
-    // 如果没有给定事务定义，则使用默认值。
+    // Use defaults if no transaction definition was given.
     TransactionDefinition def = (definition != null ? definition : TransactionDefinition.withDefaults());
 
-    // 获取事务对象
+    // Get the transaction object
     Object transaction = doGetTransaction();
-    // 是否启用调试日志
+    // Whether debug logging is enabled
     boolean debugEnabled = logger.isDebugEnabled();
 
     if (isExistingTransaction(transaction)) {
-        // 找到现有事务 -> 检查传播行为以确定如何操作。
+        // Existing transaction found -> check the propagation behavior to decide what to do.
         return handleExistingTransaction(def, transaction, debugEnabled);
     }
 
-    // 检查新事务的定义设置。
+    // Check the definition settings for the new transaction.
     if (def.getTimeout() < TransactionDefinition.TIMEOUT_DEFAULT) {
         throw new InvalidTimeoutException("Invalid transaction timeout", def.getTimeout());
     }
 
-    // 未找到现有事务 -> 检查传播行为以确定如何继续。
+    // No existing transaction found -> check the propagation behavior to decide how to go on.
     if (def.getPropagationBehavior() == TransactionDefinition.PROPAGATION_MANDATORY) {
         throw new IllegalTransactionStateException(
                 "No existing transaction found for transaction marked with propagation 'mandatory'");
     } else if (def.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRED ||
             def.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW ||
             def.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) {
-        // 挂起已存在的事务（如果有），然后创建新事务。
+        // Suspend the existing transaction (if any), then create the new one.
         SuspendedResourcesHolder suspendedResources = suspend(null);
         if (debugEnabled) {
             logger.debug("Creating new transaction with name [" + def.getName() + "]: " + def);
         }
         try {
-            // 开始新事务
+            // Start the new transaction
             return startTransaction(def, transaction, debugEnabled, suspendedResources);
         } catch (RuntimeException | Error ex) {
-            // 如果在开始新事务时出现异常，则恢复挂起的资源并抛出异常。
+            // If starting the new transaction fails, restore the suspended resources and throw the exception.
             resume(null, suspendedResources);
             throw ex;
         }
     } else {
-        // 创建“空”事务：没有实际的事务，但可能存在同步。
+        // Create an "empty" transaction: no real transaction, but possibly synchronization.
         if (def.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT && logger.isWarnEnabled()) {
             logger.warn("Custom isolation level specified but no actual transaction initiated; " +
                     "isolation level will effectively be ignored: " + def);
         }
-        // 返回准备好的事务状态，没有实际事务，但可能存在同步。
+        // Return the prepared transaction status: no real transaction, but possibly synchronization.
         boolean newSynchronization = (getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
         return prepareTransactionStatus(def, null, true, newSynchronization, debugEnabled, null);
     }
 }
 ```
 
-在`org.springframework.jdbc.datasource.DataSourceTransactionManager#doGetTransaction`
-方法中，首先创建了一个 `DataSourceTransactionObject`
-对象，用于管理数据源事务。然后根据是否允许嵌套事务设置了保存点的允许状态。接着通过 `TransactionSynchronizationManager.getResource()`
-方法获取当前线程绑定的数据源连接持有者对象，并将其设置到事务对象中。最后返回该事务对象。
+The method `org.springframework.jdbc.datasource.DataSourceTransactionManager#doGetTransaction`
+first creates a `DataSourceTransactionObject`
+object to manage the data source transaction. Then it sets whether savepoints are allowed, depending on whether nested transactions are allowed. Next it gets the connection holder bound to the current thread with `TransactionSynchronizationManager.getResource()`
+and sets it on the transaction object. Finally, it returns the transaction object.
 
 ```java
 
 @Override
 protected Object doGetTransaction() {
-    // 创建 DataSourceTransactionObject 对象，用于管理数据源事务
+    // Create a DataSourceTransactionObject to manage the data source transaction
     DataSourceTransactionObject txObject = new DataSourceTransactionObject();
-    // 设置是否允许设置保存点
+    // Set whether savepoints are allowed
     txObject.setSavepointAllowed(isNestedTransactionAllowed());
-    // 获取当前线程绑定的数据源的连接持有者
+    // Get the connection holder bound to the current thread for the data source
     ConnectionHolder conHolder =
             (ConnectionHolder) TransactionSynchronizationManager.getResource(obtainDataSource());
-    // 将连接持有者设置到事务对象中
+    // Set the connection holder on the transaction object
     txObject.setConnectionHolder(conHolder, false);
     return txObject;
 }
 ```
 
-在`org.springframework.jdbc.datasource.DataSourceTransactionManager#isExistingTransaction`
-方法中，用于检查给定的事务对象是否表示一个已存在的活动事务。它首先将传入的事务对象强制转换为 `DataSourceTransactionObject`
-类型，然后检查该事务对象是否具有连接持有者，并且该连接持有者中的事务是否处于活动状态。最后返回一个布尔值，表示是否存在活动事务。
+The method `org.springframework.jdbc.datasource.DataSourceTransactionManager#isExistingTransaction`
+checks whether the given transaction object stands for an existing active transaction. It first casts the given transaction object to `DataSourceTransactionObject`
+. Then it checks whether the object has a connection holder and whether the transaction in that holder is active. Finally, it returns a boolean that says whether an active transaction exists.
 
 ```java
 
 @Override
 protected boolean isExistingTransaction(Object transaction) {
-    // 将事务对象强制转换为 DataSourceTransactionObject 类型
+    // Cast the transaction object to DataSourceTransactionObject
     DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
-    // 检查事务对象是否具有连接持有者，并且连接持有者中的事务是否处于活动状态
+    // Check whether the transaction object has a connection holder and whether the transaction in the holder is active
     return (txObject.hasConnectionHolder() && txObject.getConnectionHolder().isTransactionActive());
 }
 ```
 
-在`org.springframework.transaction.support.AbstractPlatformTransactionManager#handleExistingTransaction`
-方法中，根据事务定义中的传播行为不同，它可能会挂起当前事务并创建一个新的事务，也可能会创建一个嵌套事务，或者参与已存在的事务。最终，根据处理结果创建并返回一个新的
-TransactionStatus 对象，用于表示已存在的事务。
+The method `org.springframework.transaction.support.AbstractPlatformTransactionManager#handleExistingTransaction`
+depends on the propagation behavior in the transaction definition. It may suspend the current transaction and create a new one, create a nested transaction, or join the existing transaction. In the end, it creates and returns a new
+TransactionStatus object that stands for the existing transaction.
 
 ```java
 /**
- * 处理已存在的事务，为其创建一个 TransactionStatus 对象。
+ * Create a TransactionStatus for an existing transaction.
  *
- * @param definition     事务定义对象
- * @param transaction    事务对象
- * @param debugEnabled   是否启用调试日志
- * @return 一个包含有关现有事务的 TransactionStatus 对象
- * @throws TransactionException 如果在处理现有事务时发生错误
+ * @param definition     the transaction definition
+ * @param transaction    the transaction object
+ * @param debugEnabled   whether debug logging is enabled
+ * @return a TransactionStatus object with information about the existing transaction
+ * @throws TransactionException if an error occurs while handling the existing transaction
  */
 private TransactionStatus handleExistingTransaction(
         TransactionDefinition definition, Object transaction, boolean debugEnabled)
         throws TransactionException {
 
-    // 如果传播行为是 PROPAGATION_NEVER，则不允许存在现有事务
+    // If the propagation behavior is PROPAGATION_NEVER, an existing transaction is not allowed
     if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NEVER) {
         throw new IllegalTransactionStateException(
                 "Existing transaction found for transaction marked with propagation 'never'");
     }
 
-    // 如果传播行为是 PROPAGATION_NOT_SUPPORTED，则挂起当前事务
+    // If the propagation behavior is PROPAGATION_NOT_SUPPORTED, suspend the current transaction
     if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NOT_SUPPORTED) {
         if (debugEnabled) {
             logger.debug("Suspending current transaction");
         }
-        // 挂起当前事务并获取挂起的资源
+        // Suspend the current transaction and get the suspended resources
         Object suspendedResources = suspend(transaction);
-        // 判断是否需要新的事务同步
+        // Decide whether a new transaction synchronization is needed
         boolean newSynchronization = (getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
-        // 准备事务状态并返回
+        // Prepare the transaction status and return it
         return prepareTransactionStatus(
                 definition, null, false, newSynchronization, debugEnabled, suspendedResources);
     }
 
-    // 如果传播行为是 PROPAGATION_REQUIRES_NEW，则挂起当前事务并创建一个新事务
+    // If the propagation behavior is PROPAGATION_REQUIRES_NEW, suspend the current transaction and create a new one
     if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRES_NEW) {
         if (debugEnabled) {
             logger.debug("Suspending current transaction, creating new transaction with name [" +
                     definition.getName() + "]");
         }
-        // 挂起当前事务并获取挂起的资源
+        // Suspend the current transaction and get the suspended resources
         SuspendedResourcesHolder suspendedResources = suspend(transaction);
         try {
-            // 启动新的事务
+            // Start the new transaction
             return startTransaction(definition, transaction, debugEnabled, suspendedResources);
         } catch (RuntimeException | Error beginEx) {
-            // 开始事务时发生异常，恢复挂起的资源，并将异常抛出
+            // If starting the transaction fails, restore the suspended resources and throw the exception
             resumeAfterBeginException(transaction, suspendedResources, beginEx);
             throw beginEx;
         }
     }
 
-    // 如果传播行为是 PROPAGATION_NESTED，则创建一个嵌套事务
+    // If the propagation behavior is PROPAGATION_NESTED, create a nested transaction
     if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NESTED) {
-        // 检查是否允许嵌套事务
+        // Check whether nested transactions are allowed
         if (!isNestedTransactionAllowed()) {
             throw new NestedTransactionNotSupportedException(
                     "Transaction manager does not allow nested transactions by default - " +
@@ -395,30 +394,30 @@ private TransactionStatus handleExistingTransaction(
         if (debugEnabled) {
             logger.debug("Creating nested transaction with name [" + definition.getName() + "]");
         }
-        // 如果使用保存点进行嵌套事务，则在现有 Spring 管理的事务中创建保存点
+        // If savepoints are used for nested transactions, create a savepoint in the existing Spring-managed transaction
         if (useSavepointForNestedTransaction()) {
-            // 通过 TransactionStatus 实现的 SavepointManager API 在现有的 Spring 管理的事务中创建保存点
-            // 通常使用 JDBC 3.0 保存点，永远不会激活 Spring 同步。
+            // Create a savepoint within the existing Spring-managed transaction through the SavepointManager API implemented by TransactionStatus
+            // Usually uses a JDBC 3.0 savepoint. Never activates Spring synchronization.
             DefaultTransactionStatus status =
                     prepareTransactionStatus(definition, transaction, false, false, debugEnabled, null);
             status.createAndHoldSavepoint();
             return status;
         } else {
-            // 通过嵌套的 begin 和 commit/rollback 调用创建嵌套事务
-            // 通常仅用于 JTA：如果存在预先存在的 JTA 事务，则此处可能会激活 Spring 同步。
+            // Create a nested transaction through nested begin and commit/rollback calls
+            // Usually only for JTA: Spring synchronization might get activated here in case of a pre-existing JTA transaction.
             return startTransaction(definition, transaction, debugEnabled, null);
         }
     }
 
     // Assumably PROPAGATION_SUPPORTS or PROPAGATION_REQUIRED.
-    // 如果传播行为是 PROPAGATION_SUPPORTS 或 PROPAGATION_REQUIRED，则参与现有事务
+    // If the propagation behavior is PROPAGATION_SUPPORTS or PROPAGATION_REQUIRED, join the existing transaction
     if (debugEnabled) {
         logger.debug("Participating in existing transaction");
     }
-    // 如果启用了验证现有事务，则检查定义是否与现有事务兼容
+    // If validation of existing transactions is on, check that the definition is compatible with the existing transaction
     if (isValidateExistingTransaction()) {
         if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
-            // 检查隔离级别是否与现有事务兼容
+            // Check that the isolation level is compatible with the existing transaction
             Integer currentIsolationLevel = TransactionSynchronizationManager.getCurrentTransactionIsolationLevel();
             if (currentIsolationLevel == null || currentIsolationLevel != definition.getIsolationLevel()) {
                 Constants isoConstants = DefaultTransactionDefinition.constants;
@@ -429,7 +428,7 @@ private TransactionStatus handleExistingTransaction(
                                 "(unknown)"));
             }
         }
-        // 检查只读属性是否与现有事务兼容
+        // Check that the read-only attribute is compatible with the existing transaction
         if (!definition.isReadOnly()) {
             if (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
                 throw new IllegalTransactionStateException("Participating transaction with definition [" +
@@ -437,122 +436,122 @@ private TransactionStatus handleExistingTransaction(
             }
         }
     }
-    // 根据情况创建新的事务同步
+    // Create a new transaction synchronization if needed
     boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
     return prepareTransactionStatus(definition, transaction, false, newSynchronization, debugEnabled, null);
 }
 ```
 
-在`org.springframework.transaction.support.AbstractPlatformTransactionManager#startTransaction`
-方法中，首先检查是否应该启用事务同步，然后创建一个新的事务状态对象。接着调用 `doBegin` 方法执行事务的开始操作，并准备同步操作。最后返回创建的事务状态对象。
+The method `org.springframework.transaction.support.AbstractPlatformTransactionManager#startTransaction`
+first checks whether transaction synchronization should be enabled, then creates a new transaction status object. Next it calls the `doBegin` method to begin the transaction and prepares the synchronization. Finally, it returns the created transaction status object.
 
 ```java
 /**
- * 开始一个新的事务。
+ * Start a new transaction.
  */
 private TransactionStatus startTransaction(TransactionDefinition definition, Object transaction,
                                            boolean debugEnabled, @Nullable SuspendedResourcesHolder suspendedResources) {
 
-    // 判断是否要启用事务同步
+    // Decide whether to enable transaction synchronization
     boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
-    // 创建一个新的事务状态对象
+    // Create a new transaction status object
     DefaultTransactionStatus status = newTransactionStatus(
             definition, transaction, true, newSynchronization, debugEnabled, suspendedResources);
-    // 执行事务开始操作
+    // Begin the transaction
     doBegin(transaction, definition);
-    // 准备同步操作
+    // Prepare the synchronization
     prepareSynchronization(status, definition);
     return status;
 }
 ```
 
-在`org.springframework.jdbc.datasource.DataSourceTransactionManager#doBegin`
-方法中，首先尝试从数据源获取一个数据库连接，并在获取连接后将其存储在事务对象中。然后，它根据事务定义中的属性对连接进行一系列配置，例如设置隔离级别和只读属性。如果连接是自动提交的，则将其切换为手动提交以确保事务的一致性。接着，它准备事务连接，并将连接标记为活跃的事务。最后，如果是新的连接持有者，则将连接持有者绑定到当前线程，以便在事务期间管理连接的生命周期。如果在这个过程中发生任何错误，它将释放连接资源，并抛出一个表示无法创建事务的异常。
+The method `org.springframework.jdbc.datasource.DataSourceTransactionManager#doBegin`
+first tries to get a database connection from the data source and stores it in the transaction object. Then it configures the connection with the properties in the transaction definition, such as the isolation level and the read-only flag. If the connection is in auto-commit mode, it switches it to manual commit to keep the transaction consistent. Next it prepares the transaction connection and marks the connection holder as having an active transaction. Finally, if the connection holder is new, it binds it to the current thread, so the lifecycle of the connection can be managed during the transaction. If anything goes wrong, it releases the connection and throws an exception that says the transaction could not be created.
 
 ```java
 
 @Override
 protected void doBegin(Object transaction, TransactionDefinition definition) {
-    // 将事务对象转换为 DataSourceTransactionObject
+    // Cast the transaction object to DataSourceTransactionObject
     DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
     Connection con = null;
 
     try {
-        // 如果当前事务对象没有连接持有者，或者连接持有者已与事务同步，则获取新的连接
+        // If the transaction object has no connection holder, or the holder is already synchronized with a transaction, get a new connection
         if (!txObject.hasConnectionHolder() ||
                 txObject.getConnectionHolder().isSynchronizedWithTransaction()) {
-            // 获取数据源并从中获取连接
+            // Get the data source and get a connection from it
             Connection newCon = obtainDataSource().getConnection();
-            // 如果日志记录级别为DEBUG，则打印获取到的连接信息
+            // If the log level is DEBUG, print the connection that was obtained
             if (logger.isDebugEnabled()) {
                 logger.debug("Acquired Connection [" + newCon + "] for JDBC transaction");
             }
-            // 设置连接持有者为新获取的连接，并指示需要与事务同步
+            // Set the connection holder to the new connection, and mark it as synchronized with the transaction
             txObject.setConnectionHolder(new ConnectionHolder(newCon), true);
         }
 
-        // 将连接的同步标志设置为true
+        // Set the synchronization flag of the connection to true
         txObject.getConnectionHolder().setSynchronizedWithTransaction(true);
-        // 获取当前连接
+        // Get the current connection
         con = txObject.getConnectionHolder().getConnection();
 
-        // 准备连接的事务属性，并记录之前的隔离级别
+        // Prepare the transaction settings of the connection and record the previous isolation level
         Integer previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(con, definition);
         txObject.setPreviousIsolationLevel(previousIsolationLevel);
-        // 设置只读属性
+        // Set the read-only flag
         txObject.setReadOnly(definition.isReadOnly());
 
-        // 如果连接是自动提交的，则切换为手动提交
+        // If the connection is in auto-commit mode, switch to manual commit
         if (con.getAutoCommit()) {
-            // 标记需要恢复原来的自动提交状态
+            // Mark that the original auto-commit state must be restored
             txObject.setMustRestoreAutoCommit(true);
-            // 如果日志记录级别为DEBUG，则打印切换自动提交到手动提交的信息
+            // If the log level is DEBUG, print that auto-commit is switched to manual commit
             if (logger.isDebugEnabled()) {
                 logger.debug("Switching JDBC Connection [" + con + "] to manual commit");
             }
-            // 设置为手动提交
+            // Set manual commit
             con.setAutoCommit(false);
         }
 
-        // 准备事务连接，并将连接标记为活跃的事务
+        // Prepare the transaction connection and mark the holder as having an active transaction
         prepareTransactionalConnection(con, definition);
         txObject.getConnectionHolder().setTransactionActive(true);
 
-        // 确定事务的超时时间，并设置给连接持有者
+        // Determine the transaction timeout and set it on the connection holder
         int timeout = determineTimeout(definition);
         if (timeout != TransactionDefinition.TIMEOUT_DEFAULT) {
             txObject.getConnectionHolder().setTimeoutInSeconds(timeout);
         }
 
-        // 如果是新的连接持有者，则将连接持有者绑定到线程
+        // If the connection holder is new, bind it to the thread
         if (txObject.isNewConnectionHolder()) {
             TransactionSynchronizationManager.bindResource(obtainDataSource(), txObject.getConnectionHolder());
         }
     } catch (Throwable ex) {
-        // 如果是新的连接持有者，则释放连接，并将连接持有者设置为null
+        // If the connection holder is new, release the connection and set the holder to null
         if (txObject.isNewConnectionHolder()) {
             DataSourceUtils.releaseConnection(con, obtainDataSource());
             txObject.setConnectionHolder(null, false);
         }
-        // 抛出无法创建事务异常
+        // Throw the exception that the transaction could not be created
         throw new CannotCreateTransactionException("Could not open JDBC Connection for transaction", ex);
     }
 }
 ```
 
-在`org.springframework.jdbc.datasource.DataSourceTransactionManager#prepareTransactionalConnection`
-方法中，如果设置了“enforceReadOnly”标志为true，并且事务定义指示为只读事务，则会执行一个“SET TRANSACTION READ ONLY”语句。
+The method `org.springframework.jdbc.datasource.DataSourceTransactionManager#prepareTransactionalConnection`
+runs a "SET TRANSACTION READ ONLY" statement if the "enforceReadOnly" flag is true and the transaction definition says the transaction is read-only.
 
 ```java
 /**
- * 在事务开始后准备事务性 {@code Connection}。
- * <p>如果 {@link #setEnforceReadOnly "enforceReadOnly"} 标志设置为 {@code true}，
- * 并且事务定义指示为只读事务，那么默认实现将执行一个 "SET TRANSACTION READ ONLY" 语句。
- * <p>"SET TRANSACTION READ ONLY" 语句可被 Oracle、MySQL 和 Postgres 理解，并且可能适用于其他数据库。
- * 如果您希望调整此处理方式，请相应地重写此方法。
- * @param con 事务性 JDBC 连接
- * @param definition 当前事务定义
- * @throws SQLException 如果 JDBC API 抛出异常
+ * Prepare the transactional {@code Connection} right after transaction begin.
+ * <p>The default implementation executes a "SET TRANSACTION READ ONLY" statement if the {@link #setEnforceReadOnly "enforceReadOnly"} flag is set to {@code true}
+ * and the transaction definition indicates a read-only transaction.
+ * <p>The "SET TRANSACTION READ ONLY" statement is understood by Oracle, MySQL and Postgres, and may work with other databases as well.
+ * If you want to adapt this treatment, override this method accordingly.
+ * @param con the transactional JDBC Connection
+ * @param definition the current transaction definition
+ * @throws SQLException if thrown by JDBC API
  * @since 4.3.7
  * @see #setEnforceReadOnly
  */
@@ -567,34 +566,34 @@ protected void prepareTransactionalConnection(Connection con, TransactionDefinit
 }
 ```
 
-**提交事务**
+**Commit a transaction**
 
-在`org.springframework.transaction.support.AbstractPlatformTransactionManager#commit`
-方法中，检查事务状态是否已完成，如果已完成则抛出非法事务状态异常。然后，检查事务状态是否为本地回滚，如果是，则执行回滚操作。接着，如果全局事务标记为回滚，但事务代码请求提交，则执行回滚操作。最后，如果以上情况都不满足，则执行事务的提交操作。
+The method `org.springframework.transaction.support.AbstractPlatformTransactionManager#commit`
+first checks whether the transaction status is already completed. If it is, it throws an illegal transaction state exception. Then it checks whether the transaction status is local rollback-only. If it is, it rolls back. Next, if the global transaction is marked rollback-only but the transaction code asks for a commit, it also rolls back. Finally, if none of these cases applies, it commits the transaction.
 
 ```java
 /**
- * 此提交的实现处理参与现有事务和编程回滚请求。委托给{@code isRollbackOnly}、{@code doCommit}和{@code rollback}。
- * 如果事务已经完成，则抛出异常。
- * 如果事务状态为本地回滚，则根据情况执行回滚操作。
- * 如果不应仅在全局回滚的情况下提交事务，并且事务状态为全局回滚，则根据情况执行回滚操作。
- * 否则，执行提交操作。
- * @param status 事务状态对象
- * @throws TransactionException 如果提交过程中发生事务异常
+ * This implementation of commit handles participating in existing transactions and programmatic rollback requests. It delegates to {@code isRollbackOnly}, {@code doCommit} and {@code rollback}.
+ * If the transaction is already completed, throw an exception.
+ * If the transaction status is local rollback-only, roll back as needed.
+ * If the commit should not happen on global rollback-only, and the transaction status is global rollback-only, roll back as needed.
+ * Otherwise, perform the commit.
+ * @param status the transaction status object
+ * @throws TransactionException if a transaction exception occurs during commit
  * @see org.springframework.transaction.TransactionStatus#isRollbackOnly()
  * @see #doCommit
  * @see #rollback
  */
 @Override
 public final void commit(TransactionStatus status) throws TransactionException {
-    // 如果事务已经完成，则抛出异常
+    // If the transaction is already completed, throw an exception
     if (status.isCompleted()) {
         throw new IllegalTransactionStateException(
                 "Transaction is already completed - do not call commit or rollback more than once per transaction");
     }
 
     DefaultTransactionStatus defStatus = (DefaultTransactionStatus) status;
-    // 如果事务状态为本地回滚，则根据情况执行回滚操作
+    // If the transaction status is local rollback-only, roll back as needed
     if (defStatus.isLocalRollbackOnly()) {
         if (defStatus.isDebug()) {
             logger.debug("Transactional code has requested rollback");
@@ -603,7 +602,7 @@ public final void commit(TransactionStatus status) throws TransactionException {
         return;
     }
 
-    // 如果不应仅在全局回滚的情况下提交事务，并且事务状态为全局回滚，则根据情况执行回滚操作
+    // If the commit should not happen on global rollback-only, and the transaction status is global rollback-only, roll back as needed
     if (!shouldCommitOnGlobalRollbackOnly() && defStatus.isGlobalRollbackOnly()) {
         if (defStatus.isDebug()) {
             logger.debug("Global transaction is marked as rollback-only but transactional code requested commit");
@@ -612,21 +611,21 @@ public final void commit(TransactionStatus status) throws TransactionException {
         return;
     }
 
-    // 否则，执行提交操作
+    // Otherwise, perform the commit
     processCommit(defStatus);
 }
 ```
 
-在`org.springframework.transaction.support.AbstractPlatformTransactionManager#processCommit`
-方法中，检查并应用了回滚标志，然后执行相应的提交逻辑。在提交的过程中，会触发各种回调方法，如提交前、提交后等，以便在事务提交的不同阶段执行特定的逻辑。如果发生了意外回滚或提交失败，它会相应地处理异常情况，并执行相应的回滚操作。最终，无论提交是否成功，都会执行清理操作以确保事务状态正确。
+The method `org.springframework.transaction.support.AbstractPlatformTransactionManager#processCommit`
+checks and applies the rollback flag, then runs the commit logic. During the commit, it fires several callbacks, such as before-commit and after-commit, so specific logic can run at different stages of the commit. If an unexpected rollback or a commit failure happens, it handles the error and runs the matching rollback. In the end, whether the commit succeeded or not, it cleans up so the transaction state is correct.
 
 ```java
 /**
- * 处理实际的提交操作。
- * 已经检查并应用了回滚标志。
+ * Process an actual commit.
+ * The rollback-only flag has already been checked and applied.
  *
- * @param status 表示事务的对象
- * @throws TransactionException 如果提交失败
+ * @param status the object that represents the transaction
+ * @throws TransactionException if commit fails
  */
 private void processCommit(DefaultTransactionStatus status) throws TransactionException {
     try {
@@ -634,51 +633,51 @@ private void processCommit(DefaultTransactionStatus status) throws TransactionEx
 
         try {
             boolean unexpectedRollback = false;
-            // 为提交做准备
+            // Prepare for the commit
             prepareForCommit(status);
-            // 触发提交前的回调
+            // Fire the before-commit callbacks
             triggerBeforeCommit(status);
-            // 触发事务完成前的回调
+            // Fire the before-completion callbacks
             triggerBeforeCompletion(status);
             beforeCompletionInvoked = true;
 
-            // 如果存在保存点
+            // If there is a savepoint
             if (status.hasSavepoint()) {
                 if (status.isDebug()) {
-                    // 释放事务保存点
+                    // Release the transaction savepoint
                     logger.debug("Releasing transaction savepoint");
                 }
-                // 判断是否全局回滚
+                // Check whether it is a global rollback
                 unexpectedRollback = status.isGlobalRollbackOnly();
-                // 释放持有的保存点
+                // Release the held savepoint
                 status.releaseHeldSavepoint();
             } else if (status.isNewTransaction()) {
-                // 如果是新事务
+                // If it is a new transaction
                 if (status.isDebug()) {
-                    // 开始事务提交
+                    // Start committing the transaction
                     logger.debug("Initiating transaction commit");
                 }
-                // 判断是否全局回滚
+                // Check whether it is a global rollback
                 unexpectedRollback = status.isGlobalRollbackOnly();
-                // 执行提交
+                // Run the commit
                 doCommit(status);
             } else if (isFailEarlyOnGlobalRollbackOnly()) {
-                // 如果全局回滚
-                // 判断是否全局回滚
+                // If it is a global rollback
+                // Check whether it is a global rollback
                 unexpectedRollback = status.isGlobalRollbackOnly();
             }
 
-            // 如果存在意外回滚，但仍未从提交中获得相应的异常，则抛出 UnexpectedRollbackException 异常
+            // If there is an unexpected rollback but we still did not get the matching exception from the commit, throw UnexpectedRollbackException
             if (unexpectedRollback) {
                 throw new UnexpectedRollbackException(
                         "Transaction silently rolled back because it has been marked as rollback-only");
             }
         } catch (UnexpectedRollbackException ex) {
-            // 只能由 doCommit 导致
+            // Can only be caused by doCommit
             triggerAfterCompletion(status, TransactionSynchronization.STATUS_ROLLED_BACK);
             throw ex;
         } catch (TransactionException ex) {
-            // 只能由 doCommit 导致
+            // Can only be caused by doCommit
             if (isRollbackOnCommitFailure()) {
                 doRollbackOnCommitException(status, ex);
             } else {
@@ -693,7 +692,7 @@ private void processCommit(DefaultTransactionStatus status) throws TransactionEx
             throw ex;
         }
 
-        // 触发 afterCommit 回调，在那里抛出的异常被传播给调用者，但事务仍被视为已提交。
+        // Fire the afterCommit callbacks. Exceptions thrown there are propagated to the caller, but the transaction is still considered as committed.
         try {
             triggerAfterCommit(status);
         } finally {
@@ -701,106 +700,106 @@ private void processCommit(DefaultTransactionStatus status) throws TransactionEx
         }
 
     } finally {
-        // 完成后的清理
+        // Clean up after completion
         cleanupAfterCompletion(status);
     }
 }
 ```
 
-在`org.springframework.jdbc.datasource.DataSourceTransactionManager#doCommit`
-方法中，通过事务状态对象获取数据源事务对象，然后从事务对象中获取数据库连接，接着尝试提交数据库事务，如果提交过程中发生 SQL
-异常，则将其转换为 Spring 事务异常并抛出。
+The method `org.springframework.jdbc.datasource.DataSourceTransactionManager#doCommit`
+gets the data source transaction object from the transaction status, then gets the database connection from it. Next it tries to commit the database transaction. If an SQL
+exception happens during the commit, it converts it to a Spring transaction exception and throws it.
 
 ```java
 
 @Override
 protected void doCommit(DefaultTransactionStatus status) {
-    // 强制转换为 DataSourceTransactionObject 对象，获取事务相关信息
+    // Cast to DataSourceTransactionObject to get the transaction information
     DataSourceTransactionObject txObject = (DataSourceTransactionObject) status.getTransaction();
-    // 从事务对象中获取数据库连接
+    // Get the database connection from the transaction object
     Connection con = txObject.getConnectionHolder().getConnection();
-    // 如果是调试模式，则记录调试信息
+    // In debug mode, log debug information
     if (status.isDebug()) {
         logger.debug("Committing JDBC transaction on Connection [" + con + "]");
     }
     try {
-        // 提交数据库事务
+        // Commit the database transaction
         con.commit();
     } catch (SQLException ex) {
-        // 发生 SQL 异常，将其转换为 Spring 事务异常并抛出
+        // On an SQL exception, convert it to a Spring transaction exception and throw it
         throw translateException("JDBC commit", ex);
     }
 }
 ```
 
-**回滚事务**
+**Roll back a transaction**
 
-在`org.springframework.transaction.support.AbstractPlatformTransactionManager#rollback`
-方法中，，用于处理现有事务的回滚操作。它委托给 `processRollback` 方法来执行回滚，并通过检查事务状态来确保不会多次调用提交或回滚操作。
+The method `org.springframework.transaction.support.AbstractPlatformTransactionManager#rollback`
+handles the rollback of an existing transaction. It delegates to the `processRollback` method to do the rollback. It checks the transaction status to make sure commit or rollback is not called more than once.
 
 ```java
 /**
- * 该回滚操作的实现处理参与现有事务。委托给 {@code doRollback} 和 {@code doSetRollbackOnly}。
+ * This implementation of rollback handles participating in existing transactions. It delegates to {@code doRollback} and {@code doSetRollbackOnly}.
  *
  * @see #doRollback
  * @see #doSetRollbackOnly
  */
 @Override
 public final void rollback(TransactionStatus status) throws TransactionException {
-    // 如果事务已经完成，则抛出异常
+    // If the transaction is already completed, throw an exception
     if (status.isCompleted()) {
         throw new IllegalTransactionStateException(
                 "Transaction is already completed - do not call commit or rollback more than once per transaction");
     }
 
-    // 将事务状态转换为默认事务状态
+    // Cast the transaction status to the default transaction status
     DefaultTransactionStatus defStatus = (DefaultTransactionStatus) status;
-    // 执行回滚操作
+    // Run the rollback
     processRollback(defStatus, false);
 }
 ```
 
-在`org.springframework.transaction.support.AbstractPlatformTransactionManager#processRollback`
-方法中，检查事务的完成标志，然后根据事务的状态执行相应的回滚操作。如果存在保存点，则回滚到该保存点；如果是新事务，则执行初始化的事务回滚操作；如果参与了较大的事务，则根据条件进行相应的处理。在执行过程中，会根据情况触发相应的事务同步操作，并根据全局回滚标记判断是否引发意外回滚异常。最后，无论是否发生异常，都会执行完成后的清理操作。
+The method `org.springframework.transaction.support.AbstractPlatformTransactionManager#processRollback`
+checks the completion flag of the transaction, then runs the matching rollback depending on the transaction status. If there is a savepoint, it rolls back to the savepoint. If it is a new transaction, it runs the rollback of the initialized transaction. If it takes part in a larger transaction, it handles it by conditions. During the process, it fires the matching transaction synchronization callbacks, and it uses the global rollback-only flag to decide whether to throw an unexpected rollback exception. Finally, whether an exception happened or not, it cleans up after completion.
 
 ```java
 /**
- * 处理实际的回滚操作。
- * 已经检查过事务完成标志。
- * @param status 表示事务的对象
- * @param unexpected 是否意外回滚
- * @throws TransactionException 如果回滚失败
+ * Process an actual rollback.
+ * The completed flag has already been checked.
+ * @param status the object that represents the transaction
+ * @param unexpected whether the rollback is unexpected
+ * @throws TransactionException if rollback fails
  */
 private void processRollback(DefaultTransactionStatus status, boolean unexpected) {
     try {
         boolean unexpectedRollback = unexpected;
 
         try {
-            // 触发完成前操作
+            // Fire the before-completion callbacks
             triggerBeforeCompletion(status);
 
-            // 回滚到保存点
+            // Roll back to the savepoint
             if (status.hasSavepoint()) {
                 if (status.isDebug()) {
                     logger.debug("Rolling back transaction to savepoint");
                 }
                 status.rollbackToHeldSavepoint();
             }
-            // 初始化事务回滚
+            // Roll back the initialized transaction
             else if (status.isNewTransaction()) {
                 if (status.isDebug()) {
                     logger.debug("Initiating transaction rollback");
                 }
                 doRollback(status);
             } else {
-                // 参与较大的事务
+                // Take part in a larger transaction
                 if (status.hasTransaction()) {
-                    // 如果是本地回滚，或者全局回滚失败
+                    // If it is a local rollback, or the global rollback fails
                     if (status.isLocalRollbackOnly() || isGlobalRollbackOnParticipationFailure()) {
                         if (status.isDebug()) {
                             logger.debug("Participating transaction failed - marking existing transaction as rollback-only");
                         }
-                        // 设置事务为仅回滚
+                        // Mark the transaction as rollback-only
                         doSetRollbackOnly(status);
                     } else {
                         if (status.isDebug()) {
@@ -810,55 +809,55 @@ private void processRollback(DefaultTransactionStatus status, boolean unexpected
                 } else {
                     logger.debug("Should roll back transaction but cannot - no transaction available");
                 }
-                // 如果不是全局仅回滚，则不会在此处考虑意外回滚
+                // If it is not global rollback-only, an unexpected rollback is not considered here
                 if (!isFailEarlyOnGlobalRollbackOnly()) {
                     unexpectedRollback = false;
                 }
             }
         } catch (RuntimeException | Error ex) {
-            // 触发完成后操作，状态为未知
+            // Fire the after-completion callbacks with status unknown
             triggerAfterCompletion(status, TransactionSynchronization.STATUS_UNKNOWN);
             throw ex;
         }
 
-        // 触发完成后操作，状态为已回滚
+        // Fire the after-completion callbacks with status rolled back
         triggerAfterCompletion(status, TransactionSynchronization.STATUS_ROLLED_BACK);
 
-        // 如果存在全局回滚标记，则引发UnexpectedRollbackException
+        // If there is a global rollback marker, throw UnexpectedRollbackException
         if (unexpectedRollback) {
             throw new UnexpectedRollbackException(
                     "Transaction rolled back because it has been marked as rollback-only");
         }
     } finally {
-        // 完成后清理
+        // Clean up after completion
         cleanupAfterCompletion(status);
     }
 }
 ```
 
-在`org.springframework.jdbc.datasource.DataSourceTransactionManager#doRollback`
-方法中，从事务状态中获取数据源事务对象，然后从该对象中获取连接对象。接着，它尝试执行连接对象的回滚操作。
+The method `org.springframework.jdbc.datasource.DataSourceTransactionManager#doRollback`
+gets the data source transaction object from the transaction status, then gets the connection from it. Next, it tries to roll back the connection.
 
 ```java
 /**
- * 执行回滚操作。
- * @param status 表示事务的对象
+ * Run the rollback.
+ * @param status the object that represents the transaction
  */
 @Override
 protected void doRollback(DefaultTransactionStatus status) {
-    // 获取事务数据源对象
+    // Get the data source transaction object
     DataSourceTransactionObject txObject = (DataSourceTransactionObject) status.getTransaction();
-    // 获取连接对象
+    // Get the connection
     Connection con = txObject.getConnectionHolder().getConnection();
-    // 如果启用了调试模式，则记录回滚日志
+    // If debug mode is on, log the rollback
     if (status.isDebug()) {
         logger.debug("Rolling back JDBC transaction on Connection [" + con + "]");
     }
     try {
-        // 执行回滚操作
+        // Run the rollback
         con.rollback();
     } catch (SQLException ex) {
-        // 抛出数据库异常
+        // Throw the database exception
         throw translateException("JDBC rollback", ex);
     }
 }

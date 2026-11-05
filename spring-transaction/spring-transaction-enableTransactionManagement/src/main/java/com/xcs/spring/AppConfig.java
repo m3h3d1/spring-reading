@@ -30,13 +30,13 @@ public class AppConfig {
 
     @Bean
     public SimpleDriverDataSource dataSource() throws SQLException {
-        // 数据库连接 URL，格式为 jdbc:数据库驱动名称://主机地址:端口号/数据库名称
+        // Database URL, format: jdbc:driver-name://host:port/database-name
         String url = "jdbc:mysql://localhost:3306/spring-reading";
-        // 数据库用户名
+        // Database username
         String username = "root";
-        // 数据库密码
+        // Database password
         String password = "123456";
-        // 初始化数据源
+        // Initialize the data source
         return new SimpleDriverDataSource(new Driver(), url, username, password);
     }
 }

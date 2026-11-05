@@ -10,40 +10,40 @@ import java.util.Random;
 public class ConnectionDemo {
 
     public static void main(String[] args) {
-        // 使用 DataSource 体现了高内聚，有利于后面更改数据库
+        // Using a DataSource makes it easy to change the database later
         MysqlDataSource dataSource = new MysqlDataSource();
-        // 数据库连接 URL，格式为 jdbc:数据库驱动名称://主机地址:端口号/数据库名称
+        // Database URL, format: jdbc:driver-name://host:port/database-name
         dataSource.setUrl("jdbc:mysql://localhost:3306/spring-reading");
-        // 数据库用户名
+        // Database username
         dataSource.setUser("root");
-        // 数据库密码
+        // Database password
         dataSource.setPassword("123456");
 
         try (Connection connection = dataSource.getConnection()) {
-            // 设置不自动提交，开启事务
+            // Turn off auto-commit to start a transaction
             connection.setAutoCommit(false);
-            // SQL 插入语句
+            // SQL insert statement
             String sql = "insert into scores(score) values(?)";
-            // 创建 PreparedStatement 对象，用于执行 SQL 插入操作
+            // Create a PreparedStatement to run the SQL insert
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
-                // 设置参数
+                // Set the parameter
                 statement.setInt(1, new Random().nextInt(100));
-                // 执行插入操作
+                // Run the insert
                 int row = statement.executeUpdate();
-                // 模拟异常，用于测试事务回滚
+                // Simulate an exception to test transaction rollback
                 // int i = 1 / 0;
-                // 提交事务
+                // Commit the transaction
                 connection.commit();
-                // 打印影响行数
+                // Print the number of affected rows
                 System.out.println("row = " + row);
             } catch (Exception e) {
-                // 发生异常时回滚事务
+                // Roll back the transaction on error
                 connection.rollback();
-                // 打印异常信息
+                // Print the exception
                 e.printStackTrace();
             }
         } catch (SQLException e) {
-            // 处理关闭连接异常
+            // Handle the exception from closing the connection
             e.printStackTrace();
         }
     }
