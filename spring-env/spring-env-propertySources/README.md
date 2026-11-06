@@ -19,7 +19,7 @@
 
 1. **PropertySource**
 
-   + The [PropertySource](spring-env/spring-env-propertySource/README.md) class is a key abstract class in Spring. It wraps configuration data from different sources, such as files, environment variables, and system properties. It gives one unified interface to these sources, so you can access different kinds of configuration data in the same way. Its core is the `getProperty(String name)` method, which returns the property value for a given name. In Spring's environment abstraction, `PropertySource` instances can be added to an `Environment` object. This lets you access and manage these properties easily in your application.
+   + The [PropertySource](../spring-env-propertySource/README.md) class is a key abstract class in Spring. It wraps configuration data from different sources, such as files, environment variables, and system properties. It gives one unified interface to these sources, so you can access different kinds of configuration data in the same way. Its core is the `getProperty(String name)` method, which returns the property value for a given name. In Spring's environment abstraction, `PropertySource` instances can be added to an `Environment` object. This lets you access and manage these properties easily in your application.
 
 ### 3. Description
 

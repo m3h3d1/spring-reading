@@ -1,0 +1,50 @@
+site_name: Spring Reading
+site_description: Spring Framework source code reading series, in English
+site_url: https://m3h3d1.github.io/spring-reading/
+repo_url: https://github.com/m3h3d1/spring-reading
+edit_uri: ""
+docs_dir: .docs-build
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+  palette:
+    - scheme: default
+      primary: green
+      toggle:
+        icon: material/weather-night
+        name: Dark mode
+    - scheme: slate
+      primary: green
+      toggle:
+        icon: material/weather-sunny
+        name: Light mode
+
+plugins:
+  - search
+  - awesome-nav
+
+markdown_extensions:
+  - tables
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.highlight
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+validation:
+  links:
+    not_found: warn
+    anchors: info

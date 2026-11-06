@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Docs site ###
+.docs-build/
+site/
+.venv-docs/

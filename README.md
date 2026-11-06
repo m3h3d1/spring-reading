@@ -131,7 +131,7 @@ Dear friends👥, I put a lot of thought💭 into researching and organizing thi
     - DeferredImportSelector: Imports configuration dynamically at runtime. Supports conditional selection and delayed loading by group.<img src="https://img.shields.io/badge/Coming%20Soon-339933"></img>
 
   + Bean Lifecycle
-    - [Bean Definition Registration Process](spring-core/spring-core-registerBeanDefinition): Loads and parses configuration files, then registers the parsed bean definitions: class name, scope, properties, and more.<img src="https://img.shields.io/badge/Level-Medium-%23FF8C69"></img>
+    - [Bean Definition Registration Process](spring-core/spring-core-registerBeanDefinition/README.md): Loads and parses configuration files, then registers the parsed bean definitions: class name, scope, properties, and more.<img src="https://img.shields.io/badge/Level-Medium-%23FF8C69"></img>
     - [Bean Initialization Process](spring-core/spring-core-getBean/README.md): Instantiation, property injection, Aware callbacks, post-processors, and init method calls.<img src="https://img.shields.io/badge/Level-Hard-%23FF3030"></img>
     - [Bean Dependency Resolution Process](spring-core/spring-core-resolveDependency/README.md): Declares, finds, and injects dependencies. Handles circular dependencies and lazy dependency resolution.<img src="https://img.shields.io/badge/Level-Hard-%23FF3030"></img>
     - [Bean Destruction Process](spring-core/spring-core-destroyBean/README.md): Destroy method calls, interface callbacks, post-processing cleanup, notifications, and GC reclaiming resources.<img src="https://img.shields.io/badge/Level-Hard-%23FF3030"></img>
@@ -247,7 +247,7 @@ Dear friends👥, I put a lot of thought💭 into researching and organizing thi
 
 ## 💬Contact Me
 
-✉️ [Email](xuchengshengsuper@163.com) | 💬 [Issue](https://github.com/xuchengsheng/spring-reading/issues) | 🌐 [CSDN](https://blog.csdn.net/duzhuang2399?type=blog)  Me about everything!
+✉️ [Email](mailto:xuchengshengsuper@163.com) | 💬 [Issue](https://github.com/xuchengsheng/spring-reading/issues) | 🌐 [CSDN](https://blog.csdn.net/duzhuang2399?type=blog)  Me about everything!
 
 ## ⛵Contributing
 
